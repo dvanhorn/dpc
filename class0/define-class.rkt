@@ -5,7 +5,7 @@
 
 (require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
 
-(provide r:define)
+(provide (rename-out [define define/value]))
 
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list

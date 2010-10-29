@@ -131,15 +131,16 @@
   (define/public (+scene scn)
     (send this +img+scene FOOD-IMG scn)))
 
-;;; (cons Seg [Listof Seg]) -> [Listof Seg]
-;;; Drop the last segment from the list of segs.
-(define (drop-last segs)
-  (cond [(empty? (rest segs)) empty]
-        [else (cons (first segs)
-                    (drop-last (rest segs)))]))
 
 (define-class snake%
   (fields dir segs)
+  
+  ;;; (cons Seg [Listof Seg]) -> [Listof Seg]
+  ;;; Drop the last segment from the list of segs.
+  (define/value (drop-last segs)
+    (cond [(empty? (rest segs)) empty]
+          [else (cons (first segs)
+                      (drop-last (rest segs)))]))
   
   (define/public (head) ;; -> Seg
     (first (field segs)))
@@ -198,6 +199,7 @@
                    (new seg% [x 3] [y 5])
                    (new seg% [x 2] [y 5]))]))
 
+#;
 (check-expect (send snake0 slither)
               (new snake%
                    [dir "right"]
@@ -218,6 +220,9 @@
 
 (define-class world%
   (fields snake food)
+  
+  (define/value x 10)
+  
   ;; -> World
   (define/public (eat&grow)
     (new world% ;; Potential this%. 
