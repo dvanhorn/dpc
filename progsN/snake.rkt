@@ -143,7 +143,7 @@
     
     ;;; drop-last : NESegs -> Segs
     ;;; Drop the last segment from the list of segs.
-    (r:define (drop-last nesegs)
+    (define/value (drop-last nesegs)
       (cond [(empty? (rest nesegs)) empty]
             [else (cons (first nesegs)
                         (drop-last (rest nesegs)))]))
@@ -201,6 +201,15 @@
     (define/public (+scene scn)
       (foldr (λ (s scn) (send s +scene scn)) scn the-segs))))
     
+(define snake0
+  (new snake%
+       [dir "right"]
+       [segs (list (new seg% [x 4] [y 5]))]))
+
+(check-expect snake0 
+              (new snake%
+                   [dir "right"]
+                   [segs (list (new seg% [x 4] [y 5]))]))
 
 (define origin-cell (new cell% [x 0] [y 0]))
 
@@ -211,6 +220,9 @@
                            EMPTY-BOARD))
 (check-expect (send (new seg%  [x 0] [y 0]) +scene EMPTY-BOARD)
               (send (new cell% [x 0] [y 0]) +img+scene SEG-IMG EMPTY-BOARD))
+
+
+(check-expect snake0 snake0)
 
 (define world%
   (class* object% ()
