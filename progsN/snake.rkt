@@ -137,69 +137,78 @@
       (send this +img+scene FOOD-IMG scn))))
 
 (define snake%
-  (class* object% ()
-    (super-new)
-    (init-field [(the-dir dir)] [(the-segs segs)])
-    
-    ;;; drop-last : NESegs -> Segs
-    ;;; Drop the last segment from the list of segs.
-    (define/value (drop-last nesegs)
-      (cond [(empty? (rest nesegs)) empty]
-            [else (cons (first nesegs)
-                        (drop-last (rest nesegs)))]))
- 
-    (define/public (dir)  ;; -> Dir
-      the-dir)  
-    (define/public (segs) ;; -> [Listof Seg]
-      the-segs) 
-    (define/public (head) ;; -> Seg
-      (first the-segs))
-    
-    ;; Dir -> Snake
-    ;; Change direction of this snake.
-    (define/public (change-dir dir)
-      (new snake% [dir dir] [segs the-segs]))
-    
-    ;; -> Seg
-    ;; Compute the next head segment.
-    (define/public (next-head) 
-      (send (head) move-dir the-dir))
-    
-    ;; Food -> Boolean
-    ;; Is this snake eating the given food?
-    (define/public (eating? food)
-      (send food =? (head)))
-    
-    ;; -> Boolean
-    ;; Is this snake colliding with itself?
-    (define/public (self-collide?)
-      (ormap (λ (s) (send s =? (head)))
-             (rest the-segs)))
-    
-    ;; -> Boolean
-    ;; Is this snake colliding with any of the walls?
-    (define/public (wall-collide?)
-      (not (and (< -1 (send (head) x) BOARD-WIDTH/CELLS)
-                (< -1 (send (head) y) BOARD-HEIGHT/CELLS))))
-    
-    ;; Slither this snake forward one segment.
-    ;; -> Snake
-    (define/public (slither)
-      (new snake%
-           [dir the-dir]
-           [segs (cons (next-head)
-                       (drop-last the-segs))]))
-    
-    ;; Grow this snake one segment.
-    ;; -> Snake
-    (define/public (grow)
-      (new snake%
-           [dir the-dir]
-           [segs (cons (next-head) the-segs)]))
-    
-    ;; Scene -> Scene
-    (define/public (+scene scn)
-      (foldr (λ (s scn) (send s +scene scn)) scn the-segs))))
+  (local [;;; This is copasetic with equality.
+          ;;; drop-last : NESegs -> Segs
+          ;;; Drop the last segment from the list of segs.
+          #;
+          (define (drop-last nesegs)
+            (cond [(empty? (rest nesegs)) empty]
+                  [else (cons (first nesegs)
+                              (drop-last (rest nesegs)))]))]
+    (class* object% ()
+      (super-new)
+      (init-field [(the-dir dir)] [(the-segs segs)])        
+      (inspect false)
+      
+      ;; This causes snake%s to be incomparable with equal?.
+      #;
+      (define/value (drop-last nesegs)
+        (cond [(empty? (rest nesegs)) empty]
+              [else (cons (first nesegs)
+                          (drop-last (rest nesegs)))]))
+                        
+      (define/public (dir)  ;; -> Dir
+        the-dir)  
+      (define/public (segs) ;; -> [Listof Seg]
+        the-segs) 
+      (define/public (head) ;; -> Seg
+        (first the-segs))
+      
+      ;; Dir -> Snake
+      ;; Change direction of this snake.
+      (define/public (change-dir dir)
+        (new snake% [dir dir] [segs the-segs]))
+      
+      ;; -> Seg
+      ;; Compute the next head segment.
+      (define/public (next-head) 
+        (send (head) move-dir the-dir))
+      
+      ;; Food -> Boolean
+      ;; Is this snake eating the given food?
+      (define/public (eating? food)
+        (send food =? (head)))
+      
+      ;; -> Boolean
+      ;; Is this snake colliding with itself?
+      (define/public (self-collide?)
+        (ormap (λ (s) (send s =? (head)))
+               (rest the-segs)))
+      
+      ;; -> Boolean
+      ;; Is this snake colliding with any of the walls?
+      (define/public (wall-collide?)
+        (not (and (< -1 (send (head) x) BOARD-WIDTH/CELLS)
+                  (< -1 (send (head) y) BOARD-HEIGHT/CELLS))))
+      
+      ;; Slither this snake forward one segment.
+      ;; -> Snake
+      (define/public (slither)
+        (new snake%
+             [dir the-dir]
+             [segs (cons (next-head)
+                         (drop-last the-segs))]))
+      
+      ;; Grow this snake one segment.
+      ;; -> Snake
+      (define/public (grow)
+        (new snake%
+             [dir the-dir]
+             [segs (cons (next-head) the-segs)]))
+      
+      ;; Scene -> Scene
+      (define/public (+scene scn)
+        (foldr (λ (s scn) (send s +scene scn)) scn the-segs)))))
     
 (define snake0
   (new snake%
