@@ -1,6 +1,7 @@
 #lang racket
 
 (provide (all-defined-out))
+(provide send define/public this)
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
                      "define-class-helper.rkt"))
@@ -49,12 +50,12 @@
        (begin
          (define-syntax class% (class-name #'-class%))
          (define -class%
-           (class/derived #,stx (class% super%.real-name (i%.real-name ...) #f)
-             (inspect #f)
+           (r:class/derived #,stx (class% super%.real-name (i%.real-name ...) #f)
+             (r:inspect #f)
              
-             (init-field [(the-fld fld)] ...)
-             (super-new)
-             (define/public (fld) the-fld)
+             (r:init-field [(the-fld fld)] ...)
+             (r:super-new)
+             (r:define/public (fld) the-fld)
              ...
              (splicing-let-syntax
               ([field (λ (stx)

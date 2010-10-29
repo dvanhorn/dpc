@@ -294,8 +294,8 @@
               (λ (w) (send w ->loser-scene)))))
 
 ; Play with bounding walls.
-;(play seg%)
+(play seg%)
 ; Play in modulo mode.
-(play modulo-seg%)
+;(play modulo-seg%)
 
 
