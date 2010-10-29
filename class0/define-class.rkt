@@ -2,6 +2,11 @@
 
 (provide (all-defined-out))
 (provide send define/public this)
+
+(require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
+
+(provide r:define)
+
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
                      "define-class-helper.rkt"))
@@ -49,7 +54,7 @@
       (quasisyntax
        (begin
          (define-syntax class% (class-name #'-class%))
-         (define -class%
+         (isl+:define -class%
            (r:class/derived #,stx (class% super%.real-name (i%.real-name ...) #f)
              (r:inspect #f)
              

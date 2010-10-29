@@ -5,6 +5,7 @@
 ;; Copyright (c) 2010 David Van Horn
 ;; Licensed under the Academic Free License version 3.0
 
+;; lang ISL+
 (require class0) ;; define-class
 (require 2htdp/universe)
 (require 2htdp/image)
@@ -25,15 +26,6 @@
 (define FOOD-IMG    (circle (/ CELL-SIZE 2) "solid" FOOD-COLOR))
 (define EMPTY-BOARD (empty-scene BOARD-WIDTH/PIXELS BOARD-HEIGHT/PIXELS))
 (define LOSER-IMG (text "You lose" 44 'purple))
-
-;;; drop-last : NESegs -> Segs
-;;; Drop the last segment from the list of segs.
-(define (drop-last nesegs)
-  (cond [(empty? (rest nesegs)) empty]
-        [else (cons (first nesegs)
-                    (drop-last (rest nesegs)))]))
-
-(check-expect (drop-last (list 1 2 3)) (list 1 2))
 
 ;; Seg  = (new seg% [x Nat] [y Nat])
 ;; Food = (new food% [x Nat] [y Nat])
@@ -99,7 +91,7 @@
 (define-class seg%
   (super cell%)
   
-  ;; Nat Nat -> Cell
+  ;; Nat Nat -> Seg
   (define/public (move dx dy)
     (new seg% 
          [x (+ (send this x) dx)] 
@@ -139,8 +131,16 @@
   (define/public (+scene scn)
     (send this +img+scene FOOD-IMG scn)))
 
+;;; (cons Seg [Listof Seg]) -> [Listof Seg]
+;;; Drop the last segment from the list of segs.
+(define (drop-last segs)
+  (cond [(empty? (rest segs)) empty]
+        [else (cons (first segs)
+                    (drop-last (rest segs)))]))
+
 (define-class snake%
   (fields dir segs)
+  
   (define/public (head) ;; -> Seg
     (first (field segs)))
     

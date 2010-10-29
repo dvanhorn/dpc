@@ -25,14 +25,7 @@
 (define FOOD-IMG    (circle (/ CELL-SIZE 2) "solid" FOOD-COLOR))
 (define EMPTY-BOARD (empty-scene BOARD-WIDTH/PIXELS BOARD-HEIGHT/PIXELS))
 
-;;; drop-last : NESegs -> Segs
-;;; Drop the last segment from the list of segs.
-(define (drop-last nesegs)
-  (cond [(empty? (rest nesegs)) empty]
-        [else (cons (first nesegs)
-                    (drop-last (rest nesegs)))]))
 
-(check-expect (drop-last (list 1 2 3)) (list 1 2))
 
 ;; Seg  = (new seg% [x Nat] [y Nat])
 ;; Food = (new food% [x Nat] [y Nat])
@@ -147,7 +140,14 @@
   (class* object% ()
     (super-new)
     (init-field [(the-dir dir)] [(the-segs segs)])
-        
+    
+    ;;; drop-last : NESegs -> Segs
+    ;;; Drop the last segment from the list of segs.
+    (r:define (drop-last nesegs)
+      (cond [(empty? (rest nesegs)) empty]
+            [else (cons (first nesegs)
+                        (drop-last (rest nesegs)))]))
+ 
     (define/public (dir)  ;; -> Dir
       the-dir)  
     (define/public (segs) ;; -> [Listof Seg]
