@@ -1,0 +1,650 @@
+Welcome to DrRacket, version 5.0.2.1--2010-10-25(-/f) [3m].
+Language: racket; memory limit: 512 MB.
+> (orc-battle!)
+You are a valiant knight with a health of 30, an agility of 30, and a strength of 30.
+Your foes:
+   0. (Health=8) A wicked orc with a level 6 club.
+   1. (Health=4) A malicious hydra with 4 heads.
+   2. (Health=9) A malicious hydra with 9 heads.
+   3. (Health=8) A slime mold with a sliminess of 5
+   4. (Health=1) A fierce brigand.
+   5. (Health=2) A malicious hydra with 2 heads.
+   6. (Health=2) A slime mold with a sliminess of 5
+   7. (Health=10) A malicious hydra with 10 heads.
+   8. (Health=2) A wicked orc with a level 1 club.
+   9. (Health=7) A fierce brigand.
+   10. (Health=10) A fierce brigand.
+   11. (Health=1) A malicious hydra with 1 heads.
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+The corpse of the fully decapitated and decapacitated hydra falls to the floor!
+You hit the cunning brigand, knocking off 1 health points!
+You lop off 1 of the hydra's heads!
+You hit the slime mold, knocking off 1 health points!
+
+Your foes:
+   0. (Health=8) A wicked orc with a level 6 club.
+   1. (Health=4) A malicious hydra with 4 heads.
+   2. (Health=9) A malicious hydra with 9 heads.
+   3. (Health=8) A slime mold with a sliminess of 5
+   4. (Health=1) A fierce brigand.
+   5. (Health=2) A malicious hydra with 2 heads.
+   6. (Health=1) A slime mold with a sliminess of 5
+   7. (Health=9) A malicious hydra with 9 heads.
+   8. (Health=2) A wicked orc with a level 1 club.
+   9. (Health=6) A fierce brigand.
+   10. (Health=10) A fierce brigand.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You lop off 1 of the hydra's heads!
+You hit the cunning brigand, knocking off 1 health points!
+You hit the cunning brigand, knocking off 1 health points!
+You lop off 1 of the hydra's heads!
+You hit the slime mold, knocking off 1 health points!
+
+Your foes:
+   0. (Health=8) A wicked orc with a level 6 club.
+   1. (Health=3) A malicious hydra with 3 heads.
+   2. (Health=9) A malicious hydra with 9 heads.
+   3. (Health=7) A slime mold with a sliminess of 5
+   4. (Health=1) A fierce brigand.
+   5. (Health=2) A malicious hydra with 2 heads.
+   6. (Health=1) A slime mold with a sliminess of 5
+   7. (Health=8) A malicious hydra with 8 heads.
+   8. (Health=2) A wicked orc with a level 1 club.
+   9. (Health=5) A fierce brigand.
+   10. (Health=9) A fierce brigand.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You killed the slime mold!
+You hit the cunning brigand, knocking off 1 health points!
+You lop off 1 of the hydra's heads!
+
+An orc swings his club at you and knocks off 1 of your health points.
+A hydra attacks you with 2 of its heads!  It also grows back one more head!
+A hydra attacks you with 2 of its heads!  It also grows back one more head!
+A slime mold wraps around your legs and decreases your agility by 3!
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A hydra attacks you with 1 of its heads!  It also grows back one more head!
+A hydra attacks you with 3 of its heads!  It also grows back one more head!
+An orc swings his club at you and knocks off 1 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A brigand catches your leg with his whip, taking off 2 agility points!
+You are a valiant knight with a health of 20, an agility of 25, and a strength of 26.
+Your foes:
+   0. (Health=8) A wicked orc with a level 6 club.
+   1. (Health=4) A malicious hydra with 4 heads.
+   2. (Health=10) A malicious hydra with 10 heads.
+   3. (Health=7) A slime mold with a sliminess of 5
+   4. (Health=1) A fierce brigand.
+   5. (Health=3) A malicious hydra with 3 heads.
+   6. **dead**
+   7. (Health=8) A malicious hydra with 8 heads.
+   8. (Health=2) A wicked orc with a level 1 club.
+   9. (Health=5) A fierce brigand.
+   10. (Health=8) A fierce brigand.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You lop off 1 of the hydra's heads!
+You lop off 1 of the hydra's heads!
+You lop off 1 of the hydra's heads!
+You hit the cunning brigand, knocking off 1 health points!
+
+Your foes:
+   0. (Health=8) A wicked orc with a level 6 club.
+   1. (Health=2) A malicious hydra with 2 heads.
+   2. (Health=10) A malicious hydra with 10 heads.
+   3. (Health=7) A slime mold with a sliminess of 5
+   4. (Health=1) A fierce brigand.
+   5. (Health=3) A malicious hydra with 3 heads.
+   6. **dead**
+   7. (Health=7) A malicious hydra with 7 heads.
+   8. (Health=2) A wicked orc with a level 1 club.
+   9. (Health=4) A fierce brigand.
+   10. (Health=8) A fierce brigand.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You killed the cunning brigand!
+You hit the orc, knocking off 1 health points!
+You lop off 1 of the hydra's heads!
+You hit the slime mold, knocking off 1 health points!
+You lop off 1 of the hydra's heads!
+You hit the cunning brigand, knocking off 1 health points!
+You hit the slime mold, knocking off 1 health points!
+You hit the cunning brigand, knocking off 1 health points!
+You hit the cunning brigand, knocking off 1 health points!
+
+An orc swings his club at you and knocks off 3 of your health points.
+A hydra attacks you with 1 of its heads!  It also grows back one more head!
+A hydra attacks you with 4 of its heads!  It also grows back one more head!
+A slime mold wraps around your legs and decreases your agility by 3!
+A hydra attacks you with 1 of its heads!  It also grows back one more head!
+A hydra attacks you with 1 of its heads!  It also grows back one more head!
+An orc swings his club at you and knocks off 1 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A brigand cuts your arm with his whip, taking off 2 strength points!
+You are a valiant knight with a health of 9, an agility of 22, and a strength of 22.
+Your foes:
+   0. (Health=7) A wicked orc with a level 6 club.
+   1. (Health=3) A malicious hydra with 3 heads.
+   2. (Health=10) A malicious hydra with 10 heads.
+   3. (Health=5) A slime mold with a sliminess of 5
+   4. **dead**
+   5. (Health=4) A malicious hydra with 4 heads.
+   6. **dead**
+   7. (Health=7) A malicious hydra with 7 heads.
+   8. (Health=2) A wicked orc with a level 1 club.
+   9. (Health=3) A fierce brigand.
+   10. (Health=6) A fierce brigand.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You lop off 1 of the hydra's heads!
+You hit the cunning brigand, knocking off 1 health points!
+You hit the cunning brigand, knocking off 1 health points!
+
+Your foes:
+   0. (Health=7) A wicked orc with a level 6 club.
+   1. (Health=2) A malicious hydra with 2 heads.
+   2. (Health=10) A malicious hydra with 10 heads.
+   3. (Health=5) A slime mold with a sliminess of 5
+   4. **dead**
+   5. (Health=4) A malicious hydra with 4 heads.
+   6. **dead**
+   7. (Health=7) A malicious hydra with 7 heads.
+   8. (Health=2) A wicked orc with a level 1 club.
+   9. (Health=2) A fierce brigand.
+   10. (Health=5) A fierce brigand.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You lop off 1 of the hydra's heads!
+You hit the cunning brigand, knocking off 1 health points!
+You hit the cunning brigand, knocking off 1 health points!
+
+An orc swings his club at you and knocks off 6 of your health points.
+A hydra attacks you with 1 of its heads!  It also grows back one more head!
+A hydra attacks you with 4 of its heads!  It also grows back one more head!
+A slime mold wraps around your legs and decreases your agility by 5!
+A hydra attacks you with 1 of its heads!  It also grows back one more head!
+A hydra attacks you with 2 of its heads!  It also grows back one more head!
+An orc swings his club at you and knocks off 1 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A brigand cuts your arm with his whip, taking off 2 strength points!
+You have been killed. Game Over.
+> (orc-battle!)
+You are a valiant knight with a health of 30, an agility of 30, and a strength of 30.
+Your foes:
+   0. (Health=6) A slime mold with a sliminess of 2
+   1. (Health=2) A fierce brigand.
+   2. (Health=8) A wicked orc with a level 5 club.
+   3. (Health=4) A slime mold with a sliminess of 3
+   4. (Health=6) A wicked orc with a level 8 club.
+   5. (Health=1) A fierce brigand.
+   6. (Health=1) A fierce brigand.
+   7. (Health=9) A wicked orc with a level 2 club.
+   8. (Health=10) A wicked orc with a level 3 club.
+   9. (Health=10) A wicked orc with a level 3 club.
+   10. (Health=9) A fierce brigand.
+   11. (Health=6) A slime mold with a sliminess of 3
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You hit the orc, knocking off 1 health points!
+You hit the slime mold, knocking off 1 health points!
+You hit the cunning brigand, knocking off 1 health points!
+You killed the cunning brigand!
+You hit the slime mold, knocking off 1 health points!
+
+Your foes:
+   0. (Health=4) A slime mold with a sliminess of 2
+   1. (Health=1) A fierce brigand.
+   2. (Health=8) A wicked orc with a level 5 club.
+   3. (Health=4) A slime mold with a sliminess of 3
+   4. (Health=5) A wicked orc with a level 8 club.
+   5. **dead**
+   6. (Health=1) A fierce brigand.
+   7. (Health=9) A wicked orc with a level 2 club.
+   8. (Health=10) A wicked orc with a level 3 club.
+   9. (Health=10) A wicked orc with a level 3 club.
+   10. (Health=9) A fierce brigand.
+   11. (Health=6) A slime mold with a sliminess of 3
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 2
+You hit the orc, knocking off 3 health points!
+
+Your foes:
+   0. (Health=4) A slime mold with a sliminess of 2
+   1. (Health=1) A fierce brigand.
+   2. (Health=5) A wicked orc with a level 5 club.
+   3. (Health=4) A slime mold with a sliminess of 3
+   4. (Health=5) A wicked orc with a level 8 club.
+   5. **dead**
+   6. (Health=1) A fierce brigand.
+   7. (Health=9) A wicked orc with a level 2 club.
+   8. (Health=10) A wicked orc with a level 3 club.
+   9. (Health=10) A wicked orc with a level 3 club.
+   10. (Health=9) A fierce brigand.
+   11. (Health=6) A slime mold with a sliminess of 3
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 2
+You killed the orc!
+
+A slime mold wraps around your legs and decreases your agility by 2! It also squirts in your face, taking away a health point!
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A slime mold wraps around your legs and decreases your agility by 1!
+An orc swings his club at you and knocks off 3 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+An orc swings his club at you and knocks off 2 of your health points.
+An orc swings his club at you and knocks off 3 of your health points.
+An orc swings his club at you and knocks off 3 of your health points.
+A brigand catches your leg with his whip, taking off 2 agility points!
+A slime mold wraps around your legs and decreases your agility by 3! It also squirts in your face, taking away a health point!
+You are a valiant knight with a health of 17, an agility of 22, and a strength of 26.
+Your foes:
+   0. (Health=4) A slime mold with a sliminess of 2
+   1. (Health=1) A fierce brigand.
+   2. **dead**
+   3. (Health=4) A slime mold with a sliminess of 3
+   4. (Health=5) A wicked orc with a level 8 club.
+   5. **dead**
+   6. (Health=1) A fierce brigand.
+   7. (Health=9) A wicked orc with a level 2 club.
+   8. (Health=10) A wicked orc with a level 3 club.
+   9. (Health=10) A wicked orc with a level 3 club.
+   10. (Health=9) A fierce brigand.
+   11. (Health=6) A slime mold with a sliminess of 3
+Attack style: [s]tab [d]ouble swing [r]oundhouse: d
+Your double swing has a strength of 1.
+
+Monster #: 1
+You killed the cunning brigand!
+
+Monster #: 6
+You killed the cunning brigand!
+
+Your foes:
+   0. (Health=4) A slime mold with a sliminess of 2
+   1. **dead**
+   2. **dead**
+   3. (Health=4) A slime mold with a sliminess of 3
+   4. (Health=5) A wicked orc with a level 8 club.
+   5. **dead**
+   6. **dead**
+   7. (Health=9) A wicked orc with a level 2 club.
+   8. (Health=10) A wicked orc with a level 3 club.
+   9. (Health=10) A wicked orc with a level 3 club.
+   10. (Health=9) A fierce brigand.
+   11. (Health=6) A slime mold with a sliminess of 3
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 4
+You killed the orc!
+
+A slime mold wraps around your legs and decreases your agility by 2! It also squirts in your face, taking away a health point!
+A slime mold wraps around your legs and decreases your agility by 3! It also squirts in your face, taking away a health point!
+An orc swings his club at you and knocks off 2 of your health points.
+An orc swings his club at you and knocks off 3 of your health points.
+An orc swings his club at you and knocks off 2 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A slime mold wraps around your legs and decreases your agility by 2! It also squirts in your face, taking away a health point!
+You are a valiant knight with a health of 7, an agility of 15, and a strength of 24.
+Your foes:
+   0. (Health=4) A slime mold with a sliminess of 2
+   1. **dead**
+   2. **dead**
+   3. (Health=4) A slime mold with a sliminess of 3
+   4. **dead**
+   5. **dead**
+   6. **dead**
+   7. (Health=9) A wicked orc with a level 2 club.
+   8. (Health=10) A wicked orc with a level 3 club.
+   9. (Health=10) A wicked orc with a level 3 club.
+   10. (Health=9) A fierce brigand.
+   11. (Health=6) A slime mold with a sliminess of 3
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You hit the cunning brigand, knocking off 1 health points!
+You hit the orc, knocking off 1 health points!
+You hit the slime mold, knocking off 1 health points!
+You hit the orc, knocking off 1 health points!
+You hit the cunning brigand, knocking off 1 health points!
+You hit the orc, knocking off 1 health points!
+You hit the orc, knocking off 1 health points!
+You hit the orc, knocking off 1 health points!
+You hit the slime mold, knocking off 1 health points!
+
+Your foes:
+   0. (Health=2) A slime mold with a sliminess of 2
+   1. **dead**
+   2. **dead**
+   3. (Health=4) A slime mold with a sliminess of 3
+   4. **dead**
+   5. **dead**
+   6. **dead**
+   7. (Health=7) A wicked orc with a level 2 club.
+   8. (Health=9) A wicked orc with a level 3 club.
+   9. (Health=8) A wicked orc with a level 3 club.
+   10. (Health=7) A fierce brigand.
+   11. (Health=6) A slime mold with a sliminess of 3
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 8
+You killed the orc!
+
+A slime mold wraps around your legs and decreases your agility by 2!
+A slime mold wraps around your legs and decreases your agility by 2! It also squirts in your face, taking away a health point!
+An orc swings his club at you and knocks off 1 of your health points.
+An orc swings his club at you and knocks off 3 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A slime mold wraps around your legs and decreases your agility by 3! It also squirts in your face, taking away a health point!
+You are a valiant knight with a health of 1, an agility of 8, and a strength of 22.
+Your foes:
+   0. (Health=2) A slime mold with a sliminess of 2
+   1. **dead**
+   2. **dead**
+   3. (Health=4) A slime mold with a sliminess of 3
+   4. **dead**
+   5. **dead**
+   6. **dead**
+   7. (Health=7) A wicked orc with a level 2 club.
+   8. **dead**
+   9. (Health=8) A wicked orc with a level 3 club.
+   10. (Health=7) A fierce brigand.
+   11. (Health=6) A slime mold with a sliminess of 3
+Attack style: [s]tab [d]ouble swing [r]oundhouse: d
+Your double swing has a strength of 1.
+
+Monster #: 3
+You hit the slime mold, knocking off 1 health points!
+
+Monster #: 3
+You hit the slime mold, knocking off 1 health points!
+
+A slime mold wraps around your legs and decreases your agility by 2!
+A slime mold wraps around your legs and decreases your agility by 1! It also squirts in your face, taking away a health point!
+An orc swings his club at you and knocks off 2 of your health points.
+An orc swings his club at you and knocks off 3 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A slime mold wraps around your legs and decreases your agility by 2! It also squirts in your face, taking away a health point!
+You have been killed. Game Over.
+> (orc-battle!)
+You are a valiant knight with a health of 30, an agility of 30, and a strength of 30.
+Your foes:
+   0. (Health=6) A wicked orc with a level 2 club.
+   1. (Health=1) A malicious hydra with 1 heads.
+   2. (Health=1) A fierce brigand.
+   3. (Health=10) A malicious hydra with 10 heads.
+   4. (Health=8) A malicious hydra with 8 heads.
+   5. (Health=2) A fierce brigand.
+   6. (Health=8) A slime mold with a sliminess of 1
+   7. (Health=4) A malicious hydra with 4 heads.
+   8. (Health=5) A fierce brigand.
+   9. (Health=2) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. (Health=9) A slime mold with a sliminess of 1
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 3
+The corpse of the fully decapitated and decapacitated hydra falls to the floor!
+
+Your foes:
+   0. (Health=6) A wicked orc with a level 2 club.
+   1. (Health=1) A malicious hydra with 1 heads.
+   2. (Health=1) A fierce brigand.
+   3. **dead**
+   4. (Health=8) A malicious hydra with 8 heads.
+   5. (Health=2) A fierce brigand.
+   6. (Health=8) A slime mold with a sliminess of 1
+   7. (Health=4) A malicious hydra with 4 heads.
+   8. (Health=5) A fierce brigand.
+   9. (Health=2) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. (Health=9) A slime mold with a sliminess of 1
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 4
+The corpse of the fully decapitated and decapacitated hydra falls to the floor!
+
+Your foes:
+   0. (Health=6) A wicked orc with a level 2 club.
+   1. (Health=1) A malicious hydra with 1 heads.
+   2. (Health=1) A fierce brigand.
+   3. **dead**
+   4. **dead**
+   5. (Health=2) A fierce brigand.
+   6. (Health=8) A slime mold with a sliminess of 1
+   7. (Health=4) A malicious hydra with 4 heads.
+   8. (Health=5) A fierce brigand.
+   9. (Health=2) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. (Health=9) A slime mold with a sliminess of 1
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 7
+The corpse of the fully decapitated and decapacitated hydra falls to the floor!
+
+An orc swings his club at you and knocks off 2 of your health points.
+A hydra attacks you with 1 of its heads!  It also grows back one more head!
+A brigand catches your leg with his whip, taking off 2 agility points!
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A slime mold wraps around your legs and decreases your agility by 1!
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A brigand hits you with his slingshot, taking off 2 health points!
+An orc swings his club at you and knocks off 3 of your health points.
+A slime mold wraps around your legs and decreases your agility by 1! It also squirts in your face, taking away a health point!
+You are a valiant knight with a health of 21, an agility of 26, and a strength of 26.
+Your foes:
+   0. (Health=6) A wicked orc with a level 2 club.
+   1. (Health=2) A malicious hydra with 2 heads.
+   2. (Health=1) A fierce brigand.
+   3. **dead**
+   4. **dead**
+   5. (Health=2) A fierce brigand.
+   6. (Health=8) A slime mold with a sliminess of 1
+   7. **dead**
+   8. (Health=5) A fierce brigand.
+   9. (Health=2) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. (Health=9) A slime mold with a sliminess of 1
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 6
+You killed the slime mold!
+
+Your foes:
+   0. (Health=6) A wicked orc with a level 2 club.
+   1. (Health=2) A malicious hydra with 2 heads.
+   2. (Health=1) A fierce brigand.
+   3. **dead**
+   4. **dead**
+   5. (Health=2) A fierce brigand.
+   6. **dead**
+   7. **dead**
+   8. (Health=5) A fierce brigand.
+   9. (Health=2) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. (Health=9) A slime mold with a sliminess of 1
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You hit the cunning brigand, knocking off 1 health points!
+You hit the orc, knocking off 1 health points!
+You hit the orc, knocking off 1 health points!
+
+An orc swings his club at you and knocks off 1 of your health points.
+A hydra attacks you with 1 of its heads!  It also grows back one more head!
+A brigand catches your leg with his whip, taking off 2 agility points!
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A brigand catches your leg with his whip, taking off 2 agility points!
+A brigand cuts your arm with his whip, taking off 2 strength points!
+An orc swings his club at you and knocks off 1 of your health points.
+A slime mold wraps around your legs and decreases your agility by 1!
+You are a valiant knight with a health of 18, an agility of 21, and a strength of 22.
+Your foes:
+   0. (Health=4) A wicked orc with a level 2 club.
+   1. (Health=3) A malicious hydra with 3 heads.
+   2. (Health=1) A fierce brigand.
+   3. **dead**
+   4. **dead**
+   5. (Health=2) A fierce brigand.
+   6. **dead**
+   7. **dead**
+   8. (Health=4) A fierce brigand.
+   9. (Health=2) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. (Health=9) A slime mold with a sliminess of 1
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 11
+You killed the slime mold!
+
+Your foes:
+   0. (Health=4) A wicked orc with a level 2 club.
+   1. (Health=3) A malicious hydra with 3 heads.
+   2. (Health=1) A fierce brigand.
+   3. **dead**
+   4. **dead**
+   5. (Health=2) A fierce brigand.
+   6. **dead**
+   7. **dead**
+   8. (Health=4) A fierce brigand.
+   9. (Health=2) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 1
+The corpse of the fully decapitated and decapacitated hydra falls to the floor!
+
+An orc swings his club at you and knocks off 1 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A brigand catches your leg with his whip, taking off 2 agility points!
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A brigand catches your leg with his whip, taking off 2 agility points!
+An orc swings his club at you and knocks off 3 of your health points.
+You are a valiant knight with a health of 14, an agility of 17, and a strength of 18.
+Your foes:
+   0. (Health=4) A wicked orc with a level 2 club.
+   1. **dead**
+   2. (Health=1) A fierce brigand.
+   3. **dead**
+   4. **dead**
+   5. (Health=2) A fierce brigand.
+   6. **dead**
+   7. **dead**
+   8. (Health=4) A fierce brigand.
+   9. (Health=2) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: d
+Your double swing has a strength of 1.
+
+Monster #: 2
+You killed the cunning brigand!
+
+Monster #: 5
+You hit the cunning brigand, knocking off 1 health points!
+
+Your foes:
+   0. (Health=4) A wicked orc with a level 2 club.
+   1. **dead**
+   2. **dead**
+   3. **dead**
+   4. **dead**
+   5. (Health=1) A fierce brigand.
+   6. **dead**
+   7. **dead**
+   8. (Health=4) A fierce brigand.
+   9. (Health=2) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: d
+Your double swing has a strength of 1.
+
+Monster #: 5
+You killed the cunning brigand!
+
+Monster #: 9
+You hit the cunning brigand, knocking off 1 health points!
+
+An orc swings his club at you and knocks off 1 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A brigand catches your leg with his whip, taking off 2 agility points!
+An orc swings his club at you and knocks off 3 of your health points.
+You are a valiant knight with a health of 10, an agility of 15, and a strength of 16.
+Your foes:
+   0. (Health=4) A wicked orc with a level 2 club.
+   1. **dead**
+   2. **dead**
+   3. **dead**
+   4. **dead**
+   5. **dead**
+   6. **dead**
+   7. **dead**
+   8. (Health=4) A fierce brigand.
+   9. (Health=1) A fierce brigand.
+   10. (Health=3) A wicked orc with a level 3 club.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You hit the orc, knocking off 1 health points!
+You hit the orc, knocking off 1 health points!
+You hit the orc, knocking off 1 health points!
+
+Your foes:
+   0. (Health=3) A wicked orc with a level 2 club.
+   1. **dead**
+   2. **dead**
+   3. **dead**
+   4. **dead**
+   5. **dead**
+   6. **dead**
+   7. **dead**
+   8. (Health=4) A fierce brigand.
+   9. (Health=1) A fierce brigand.
+   10. (Health=1) A wicked orc with a level 3 club.
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You killed the orc!
+You hit the orc, knocking off 1 health points!
+
+An orc swings his club at you and knocks off 1 of your health points.
+A brigand cuts your arm with his whip, taking off 2 strength points!
+A brigand catches your leg with his whip, taking off 2 agility points!
+You are a valiant knight with a health of 9, an agility of 13, and a strength of 14.
+Your foes:
+   0. (Health=2) A wicked orc with a level 2 club.
+   1. **dead**
+   2. **dead**
+   3. **dead**
+   4. **dead**
+   5. **dead**
+   6. **dead**
+   7. **dead**
+   8. (Health=4) A fierce brigand.
+   9. (Health=1) A fierce brigand.
+   10. **dead**
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: r
+You hit the orc, knocking off 1 health points!
+You killed the cunning brigand!
+You hit the cunning brigand, knocking off 1 health points!
+You killed the orc!
+You hit the cunning brigand, knocking off 1 health points!
+
+A brigand cuts your arm with his whip, taking off 2 strength points!
+You are a valiant knight with a health of 9, an agility of 13, and a strength of 12.
+Your foes:
+   0. **dead**
+   1. **dead**
+   2. **dead**
+   3. **dead**
+   4. **dead**
+   5. **dead**
+   6. **dead**
+   7. **dead**
+   8. (Health=2) A fierce brigand.
+   9. **dead**
+   10. **dead**
+   11. **dead**
+Attack style: [s]tab [d]ouble swing [r]oundhouse: s
+
+Monster #: 8
+You killed the cunning brigand!
+
+Congratulations!  You have vanquished all of your foes.
+> 
