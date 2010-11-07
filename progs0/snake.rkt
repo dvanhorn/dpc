@@ -1,13 +1,13 @@
-;; The first three lines of this file were inserted by DrRacket. They record metadata
-;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname snake) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+#lang racket ;s-exp "../class0/main.rkt"
+
 ;; The Snake Game in Object-Oriented Style
 ;; Copyright (c) 2010 David Van Horn
 ;; Licensed under the Academic Free License version 3.0
 
 ;; lang ISL+
-(require class0) ;; define-class
-(require 2htdp/universe)
+;(require class0) ;; define-class
+(require "../class0/define-class.rkt")
+(require 2htdp/universe test-engine/racket-tests)
 (require 2htdp/image)
 
 (define SNAKE-COLOR "red")
@@ -141,8 +141,8 @@
   
   ;;; (cons Seg [Listof Seg]) -> [Listof Seg]
   ;;; Drop the last segment from the list of segs.
-  #;
-  (define/value (drop-last segs)
+  
+  (define/private (drop-last segs)
     (cond [(empty? (rest segs)) empty]
           [else (cons (first segs)
                       (drop-last (rest segs)))]))
@@ -344,7 +344,7 @@
                    [snake (send (send world0 snake) change-dir "right")]
                    [food (send world0 food)]))
 
-
+#;#;
 (big-bang world0
  (on-tick (λ (w) (send w step)) 1/5)
  (to-draw (λ (w) (send w ->scene)))
@@ -352,9 +352,12 @@
  (stop-when (λ (w) (send w game-over?))
             (λ (w) (send w ->loser-scene))))
 
+(test)
+
 ; Play with bounding walls.
 ;(play seg%)
 ; Play in modulo mode.
 ;(play modulo-seg%)
 
 
+(equal? (new snake% [dir "right"] [segs null]) (new snake% [dir "right"] [segs null]))

@@ -33,8 +33,7 @@
              #:fail-when (memf (λ (id) (eq? (syntax-e id) (syntax-e #'name))) names) "duplicate class member name"))
   (define-syntax-class (member-def names)
     #:literals (define/public define)
-    (pattern (define/public ((~var f (member-name names)) x:id ...)  e:expr))
-    [pattern (define ((~var f (member-name names)) x:id ...)  e:expr)]
+    (pattern ((~or define/public define/private define) ((~var f (member-name names)) x:id ...)  e:expr))
     [pattern (define (~var f (member-name names)) e:expr)])
   
  (syntax-parse stx #:literals (super implements fields)
