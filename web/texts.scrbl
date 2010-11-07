@@ -1,5 +1,5 @@
 #lang scribble/manual
-@title[#:tag "texts"]{Texts}
+@title{Texts}
 
 @section{Required Reading}
 

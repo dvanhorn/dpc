@@ -1,6 +1,5 @@
-#lang scribble/doc
-@(require scribble/manual
-          scribble/eval
+#lang scribble/manual
+@(require scribble/eval
           racket/sandbox
           (for-label lang/htdp-intermediate-lambda)
           (for-label class0))
@@ -26,6 +25,9 @@
      @item{The @seclink["lab01"]{first lab} is @bold{tonight}.  (Partner assignments.)}]}
  @item{Course overview}
  @item{Basics of objects}]
+
+@bold{Objects} are an old programming concept that first appeared in the 1950s
+across the Charles river.
 
 As a first approximation, you can think of an @emph{object} as
 a structure coupled together with the functions that operate 

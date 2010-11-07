@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@title[#:tag "syllabus"]{Syllabus}
+@title{Syllabus}
 
 @(tabular (list (list "Week " "Topic " "Readings " "Lectures " "Assignment")
                 (list "1"    

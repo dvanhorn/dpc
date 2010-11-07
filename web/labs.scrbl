@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@title[#:tag "labs"]{Labs}
+@title{Labs}
 
 @section[#:tag "lab01"]{Lab 1}
 

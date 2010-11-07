@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@title[#:tag "general"]{General}
+@title{General}
 
 @section{People}
 

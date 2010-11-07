@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@title[#:tag "lectures"]{Lectures}
+@title{Lectures}
 
 In this section, you'll find notes and code from 
 each lecture.
