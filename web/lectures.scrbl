@@ -35,13 +35,14 @@ There is no lecture on 2/28 since it is during Spring break.
 
 There is no lecture on 3/3 since it is during Spring break.
 
-@section[#:tag "lec17"]{3/7: Stateful objects (1)}
-@section[#:tag "lec18"]{3/10: Stateful objects (2)}
-@section[#:tag "lec19"]{3/14: Abstracting with mixins}
-@section[#:tag "lec20"]{3/17: Functional objects}
-@section[#:tag "lec21"]{3/21}
-@section[#:tag "lec22"]{3/24}
-@section[#:tag "lec23"]{3/28}
+
+@section[#:tag "lec17"]{ 3/7: Circular data; Methods for circular data}
+@section[#:tag "lec18"]{3/10: Stateful objects (1)}
+@section[#:tag "lec19"]{3/14: Stateful objects (2)}
+@section[#:tag "lec20"]{3/17: Abstracting with mixins}
+@section[#:tag "lec21"]{3/21: Functional objects}
+@section[#:tag "lec22"]{3/24: Traversals}
+@section[#:tag "lec23"]{3/28: Visitors}
 @section[#:tag "lec24"]{3/31}
 @section[#:tag "lec25"]{4/4}
 @section[#:tag "lec26"]{4/7}
