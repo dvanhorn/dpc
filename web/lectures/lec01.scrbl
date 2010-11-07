@@ -24,7 +24,9 @@
            is due @bold{this} Wednesday.}
      @item{The @seclink["lab01"]{first lab} is @bold{tonight}.  (Partner assignments.)}]}
  @item{Course overview}
- @item{Basics of objects}]
+ @item{Basics of objects
+   @itemlist[
+     @item{New paradigm.  Open your mind and embrace it (or you will be miserable).}]}]
 
 @bold{Objects} are an old programming concept that first appeared in the 1950s
 across the Charles river.

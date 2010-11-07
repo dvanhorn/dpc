@@ -1,15 +1,4 @@
 #lang scribble/manual
-@(require scribble/eval)
-
-@(require (for-label lang/htdp-intermediate-lambda))
-
-@(define the-eval
-  (let ([the-eval (make-base-eval)])
-    (the-eval `(require (only-in lang/htdp-intermediate-lambda sqr)))
-    (the-eval `(require test-engine/racket-tests))
-    ;(the-eval `(require lang/htdp-intermediate-lambda))
-    the-eval))
-
 @title{@bold{Fundamentals of Computer Science II (Honors)}
        @linebreak[]
        Introduction to Class-based Program Design}
@@ -50,3 +39,17 @@ to practical hands-on programming.
 
 @subsection{Welcome to CS2510H.}
               
+@section{TODO}
+
+@itemlist[#:style 'ordered
+  @item{Syllabus}
+  @item{Outline assignments, lectures and labs}
+  @item{Reading list}
+  @item{Pick exam dates}
+  @item{Project?}
+  @item{Documentation for @racket[class0], ...}
+  @item{Academic honesty policy}
+  @item{Notes on using SVN}
+  @item{Staff coordinates, office hours, email addresses}
+  @item{History of objects}]
+
