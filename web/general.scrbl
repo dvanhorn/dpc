@@ -27,7 +27,7 @@ Lectures are held Monday & Thursday in 108 West Village H from 11:45am until 1:2
 
 @bold{Labs:}
 
-Labs are held Monday in TBD West Village H from TBDpm until TBDpm.
+Labs are held Monday in 210 West Village H from 6:00pm until 7:40pm.
 
 
 @section{Policies}

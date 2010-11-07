@@ -47,6 +47,7 @@ to practical hands-on programming.
   @item{Reading list}
   @item{Pick exam dates}
   @item{Project?}
+  @item{The Style}
   @item{Documentation for @racket[class0], ...}
   @item{Academic honesty policy}
   @item{Notes on using SVN}
