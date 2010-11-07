@@ -14,7 +14,7 @@
                  (dynamic-require 'htdp/isl/lang/reader 'options))))
     the-eval))
 
-@title[#:tag "lec01"]{1/10: Object = Structure + Functions}
+@title[#:tag "lec01"]{1/10: Object = structure + functions}
 
 @bold{Outline}
 @itemlist[
