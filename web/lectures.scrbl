@@ -100,8 +100,8 @@ There is no lecture on 3/3 since it is during Spring break.
 
 @section[#:tag "lec22"]{3/24: Traversals}
 @section[#:tag "lec23"]{3/28: Visitors}
-@section[#:tag "lec24"]{3/31}
-@section[#:tag "lec25"]{4/4}
+@section[#:tag "lec24"]{3/31: Object equality: principles}
+@section[#:tag "lec25"]{ 4/4: Object equality: practice}
 @section[#:tag "lec26"]{4/7}
 @section[#:tag "lec27"]{4/11}
 @section[#:tag "lec28"]{4/14}
