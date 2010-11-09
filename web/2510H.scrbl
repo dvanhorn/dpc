@@ -18,6 +18,8 @@ of program design and computation.
 
 @bold{Prerequisites}
 
+@centered{@emph{``Think first, expirement later.''}}
+
 The course assumes proficiency with the systematic design of 
 programs and some mathematical maturity. It demands curiosity 
 and self-driven exploration and requires a serious commitment 

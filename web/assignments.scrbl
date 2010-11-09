@@ -10,10 +10,10 @@ Assignment are due on a weekly basis, Wednesday at midnight.
 
 @include-section["assignments/assign01.scrbl"]
 
-@section[#:tag "assign02"]{1/19: Snake}
+@section[#:tag "assign02"]{1/19: Zombie}
 
 @itemlist[#:style 'ordered 
- @item{@bold{Snake.}
+ @item{@bold{Zombie.}
         
         Develop...}]
 
@@ -37,9 +37,9 @@ Assignment are due on a weekly basis, Wednesday at midnight.
 @section[#:tag "assign06"]{2/16}
 @section[#:tag "assign07"]{2/23}
 @section[#:tag "assign08"]{3/2 - Spring break}
-@section[#:tag "assign09"]{3/9}
+@section[#:tag "assign09"]{3/9: Connect Four}
 @section[#:tag "assign10"]{3/16: Stable Marriage}
-@section[#:tag "assign11"]{3/23}
+@section[#:tag "assign11"]{3/23: Proj Dev 1}
 @section[#:tag "assign12"]{3/30}
 @section[#:tag "assign13"]{4/6}
 @section[#:tag "assign14"]{4/13}
