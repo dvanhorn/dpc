@@ -45,6 +45,10 @@ Labs are held Monday in 210 West Village H from 6:00pm until 7:40pm.
 
 @section{Exams}
 
+Exam 1: 2/15 at 6-9 PM
+
+Exam 2: 3/22 at 6-9 PM
+
 @section{Projects}
 
 @section{Grades}

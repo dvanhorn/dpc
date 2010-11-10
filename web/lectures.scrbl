@@ -56,16 +56,16 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
 @section[#:tag "lec06"]{1/27: Universes}
 @section[#:tag "lec07"]{1/31: }
-@section[#:tag "lec08"]{ 2/3: Designing communicating programs}
-@section[#:tag "lec09"]{ 2/7: Designing generative recursive methods}                        
+@section[#:tag "lec08"]{ 2/3: }
+@section[#:tag "lec09"]{ 2/7: Abstracting with classes}                        
 @section[#:tag "lec10"]{2/10: Designing methods with accumulators}
-@section[#:tag "lec11"]{2/14: Abstracting with classes}
+@section[#:tag "lec11"]{2/14: Designing generative recursive methods}
 @section[#:tag "lec12"]{2/17: Intermezzo: Java}
 @section[#:tag "lec13"]{2/21 - Presidents}
 
 There is no lecture on 2/21 since it is Presidents Day.
 
-@section[#:tag "lec14"]{2/24: Intermezzo: Ruby}
+@section[#:tag "lec14"]{2/24: }
 @section[#:tag "lec15"]{2/28 - Spring break}
 
 There is no lecture on 2/28 since it is during Spring break.
@@ -102,7 +102,7 @@ There is no lecture on 3/3 since it is during Spring break.
 @section[#:tag "lec23"]{3/28: Visitors}
 @section[#:tag "lec24"]{3/31: Object equality: principles}
 @section[#:tag "lec25"]{ 4/4: Object equality: practice}
-@section[#:tag "lec26"]{4/7}
+@section[#:tag "lec26"]{4/7: Intermezzo: Ruby}
 @section[#:tag "lec27"]{4/11}
 @section[#:tag "lec28"]{4/14}
 @section[#:tag "lec29"]{4/18 - Patriots}
