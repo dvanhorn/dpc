@@ -1,4 +1,8 @@
 #lang racket
+;; Orc Battle
+;; You battle a bunch of monsters until you or they die.
+
+;; Based on The Orc Battle Game, p. 172 of Barski's Land of Lisp.
 (require racket/class)
 (require 2htdp/image)
 ;; Design notes:
@@ -88,7 +92,7 @@
     (super-new)
     (define/override (type) "orc")    
 
-    (define/public (show)
+    (define/override (show)
       (string-append "A wicked orc with a level "
                      (number->string club-level)
                      " club."))
@@ -111,7 +115,7 @@
     (field [attack-level (randval (half health))])
     (define/override (type) "hydra")
     
-    (define/public (show)
+    (define/override (show)
       (string-append "A malicious hydra with "
                      (number->string health)
                      " heads."))
@@ -143,7 +147,7 @@
     (field [squirt? (zero? (random 2))])
     (define/override (type) "slime mold")   
     
-    (define/public (show)
+    (define/override (show)
       (string-append "A slime mold with a sliminess of "
                      (number->string sliminess)))
     
@@ -236,7 +240,8 @@
 (define (orc-battle!)
   (define monsters 
     (init-monsters (map conflate-monster-<%>
-                        monster-classes)))
+                        monster-classes)
+                   12))
   (define p (new (conflate-<%> player%)))
   (game-loop! p monsters)
   (when (send p dead?)
