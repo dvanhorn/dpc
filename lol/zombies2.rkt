@@ -3,8 +3,9 @@
 ;; All zombies move towards the player.  Zombies collision cause flesh heaps
 ;; that are deadly to other zombies (and you!).  Teleport as a last resort!
 
-;; SECOND DESIGN: [Listof A] * [Listof B] =changedto=> [Listof (A + B)]
-;; We use negative real parts of numbers to tag the sum.
+;; SECOND DESIGN: 
+;; [Listof Posn_A] * [Listof Posn_B] =changedto=> [Listof (Posn_A + Posn_B)]
+;; We use negative real parts of complex numbers to tag the sum.
 
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
 (require 2htdp/universe)
@@ -20,9 +21,9 @@
 
 ;; A World is a (world Posn [Listof Undead]).
 ;; Undead is one of:
-;; - (- Nat) + (* +i Nat)
-;; - (+ Nat) + (* +i Nat)
-;; A Posn is a Nat + (* +i Nat).
+;; - (+ (- Nat) (* +i Nat))
+;; - (+ (+ Nat) (* +i Nat))
+;; A Posn is a (+ Nat (* +i Nat)).
 (struct world (player undead) #:transparent)
 
 (define dead -)
