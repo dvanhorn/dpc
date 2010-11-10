@@ -47,7 +47,6 @@ to practical hands-on programming.
   @item{Syllabus}
   @item{Outline assignments, lectures and labs}
   @item{Reading list}
-  @item{Pick exam dates}
   @item{Project?}
   @item{The Style}
   @item{Documentation for @racket[class0], ...}
