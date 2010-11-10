@@ -3,9 +3,8 @@
 ;; All zombies move towards the player.  Zombies collision cause flesh heaps
 ;; that are deadly to other zombies (and you!).  Teleport as a last resort!
 
-;; SECOND DESIGN: 
-;; [Listof Posn_A] * [Listof Posn_B] =changedto=> [Listof (Posn_A + Posn_B)]
-;; We use negative real parts of complex numbers to tag the sum.
+;; THIRD DESIGN: 
+;; [Listof (Posn_A + Posn_B)] =changedto=> [Setof (Posn_A + Posn_B)]
 
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
 (require 2htdp/universe)
@@ -19,16 +18,13 @@
             (on-mouse squeak)
             (stop-when game-over?)))
 
-;; A World is a (cons Posn [Listof Undead]).
+;; A World is a (world Posn [Setof Undead]).
 ;; Undead is one of:         ; interp:
 ;; - (+ (- Nat) (* +i Nat))  ; dead zombie
 ;; - (+ (+ Nat) (* +i Nat))  ; live zombie
 ;; A Posn is a (+ Nat (* +i Nat)).
 
-;; (struct world (player undead))
-(define world cons)
-(define world-player first)
-(define world-undead rest)
+(struct world (player undead))
 ;; (struct dead (posn))
 (define dead -)
 (define dead? (compose negative? real-part))
@@ -43,15 +39,15 @@
 
 ;; World -> Scene
 (define (draw w)
-  (foldr (λ (u scn)
-           ((posn+scn (if (dead? u) "gray" "red"))
-            (zombie-posn u)
-            scn))
-         ((posn+scn "green")
-          (world-player w)
-          (empty-scene (posn-x *dim*)
-                       (posn-y *dim*)))
-         (world-undead w)))
+  (set-fold (λ (u scn)
+              ((posn+scn (if (dead? u) "gray" "red"))
+               (zombie-posn u)
+               scn))
+            ((posn+scn "green")
+             (world-player w)
+             (empty-scene (posn-x *dim*)
+                          (posn-y *dim*)))
+            (world-undead w)))
 
 ;; World Int Int Mouse -> World
 (define (squeak w x y m)
@@ -67,31 +63,31 @@
 ;; World -> Boolean
 ;; Does the player touch zombies or junk?
 (define (game-over? w)
-  (ormap (compose (touching? (world-player w)) zombie-posn)
-         (world-undead w)))
+  (set-ormap (compose (touching? (world-player w)) zombie-posn)
+             (world-undead w)))
 
 ;; World -> World
 ;; Move all the zombies toward the player.
 (define (move w)
   (let ((p (world-player w)))
     (world p
-           (map (λ (u) (if (dead? u) u (+ u (min-taxi u p))))
-                (world-undead w)))))
+           (set-map (λ (u) (if (dead? u) u (+ u (min-taxi u p))))
+                    (world-undead w)))))
 
 ;; World -> World
 ;; Junk all zombies that touch other zombies or junk.
 (define (junk w)
   (world (world-player w)
-         (map (λ (u)
-                (cond [(dead? u) u]
-                      [(ormap (λ (v)
-                                (and ((touching? u) 
-                                      (zombie-posn v))
-                                     (not (eq? u v))))
-                              (world-undead w))
-                       (dead u)]
-                      [else u]))
-              (world-undead w))))
+         (set-map (λ (u)
+                    (cond [(dead? u) u]
+                          [(set-ormap (λ (v)
+                                        (and ((touching? u) 
+                                              (zombie-posn v))
+                                             (not (eq? u v))))
+                                      (world-undead w))
+                           (dead u)]
+                          [else u]))
+                  (world-undead w))))
   
 ;; Posn Posn -> Nat
 ;; Distance in taxicab geometry (domain knowledge).
@@ -146,8 +142,19 @@
     (posn (quotient r (posn-y p))
           (remainder r (posn-y p)))))
 
+;; Set library
+(define (set-map f s)
+  (for/set ([x (in-set s)]) (f x)))
+(define (set-ormap f s)
+  (for/or ([x (in-set s)]) (f x)))
+(define (set-fold f b s)
+  (for/fold ([r b])
+    ([x (in-set s)])
+    (f x r)))
+
 ;; Run program, run!
 (play (world 0 
-             (build-list (+ 20 (random 20))
-                         (λ (_)
-                           (random-posn *dim*)))))
+             (apply set
+                    (build-list (+ 20 (random 20))
+                                (λ (_)
+                                  (random-posn *dim*))))))
