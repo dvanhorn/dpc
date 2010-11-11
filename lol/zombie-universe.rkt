@@ -147,7 +147,7 @@
                           (not (dead? (second x))))
                      (list (first x) (dead (second x)))
                      x))
-        (move (junk (game-zombies g))
+        (move (junk (for/set ([p (in-set (game-worlds g))]) (second p)) (game-zombies g))
               (for/set ([x (in-set (game-worlds g))])
                        (second x)))))
 
@@ -172,9 +172,9 @@
                                           u))]))
            zs))
 
-;; [Setof Zombie] -> [Setof Zombie]
-;; Junk all zombies that touch other zombies or junk.
-(define (junk zs)
+;; [Setof Player] [Setof Zombie] -> [Setof Zombie]
+;; Junk all zombies that touch other zombies or junk or dead players.
+(define (junk ps zs)
   (set-map (λ (u)
              (cond [(dead? u) u]
                    [(set-ormap (λ (v)
@@ -182,6 +182,12 @@
                                        (posn-abs v))
                                       (not (= u v))))
                                zs)
+                    (dead u)]
+                   [(set-ormap (λ (v)
+                                 (and ((touching? u) 
+                                       (posn-abs v))
+                                      (dead? v)))
+                               ps)
                     (dead u)]
                    [else u]))
            zs))
