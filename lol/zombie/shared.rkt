@@ -43,6 +43,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set library
+(define (set-map-list f s)
+  (for/list ([x (in-set s)]) (f x)))
 (define (set-map f s)
   (for/set ([x (in-set s)]) (f x)))
 (define (set-ormap f s)

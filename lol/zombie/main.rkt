@@ -6,15 +6,14 @@
 (provide (all-defined-out))
 
 (define (play-solo n)
-  (launch-many-worlds (play LOCALHOST (world 0 (set) (set)))
-                      (serve n)))
+  (launch-many-worlds (serve n)
+                      (play LOCALHOST (list 0 empty empty))))
 
 (define (demo n)
-  ;; Run program, run!
-  (launch-many-worlds
-   (play LOCALHOST (world 0 (set) (set)))
-   (play LOCALHOST (world 0 (set) (set)))
-   (serve n)))
+  (launch-many-worlds (serve n)
+                      (play LOCALHOST (list 0 empty empty))
+                      (play LOCALHOST (list 0 empty empty))))
 
-;(play "129.10.117.100" (world 0 (set) (set)))
-;(play LOCALHOST (world 0 (set) (set)))
+;(play-solo 75)
+;(play "129.10.117.100" (list 0 (list) (list)))
+;(play LOCALHOST (list 0 (list) (list)))
