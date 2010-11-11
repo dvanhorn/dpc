@@ -1,6 +1,15 @@
-#lang racket
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname shared) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+;; ISL+λ
+(require class0)
 (provide (all-defined-out))
 (require test-engine/scheme-tests)
+;Doesn't look like we get the racket's require here.
+;(require (only-in racket for/list for/fold for/set))
+;Hack work-around:
+(require "set.rkt")
+(provide (all-from-out "set.rkt"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Shared data definitions
@@ -49,6 +58,13 @@
     (and (cons? x)
          (eq? s (first x)))))
 
+(check-expect (teleport 5+5i) (list 'teleport 5+5i))
+(check-expect (toward 5+5i) (list 'toward 5+5i))
+(check-expect (teleport? (teleport 5+5i)) true)
+(check-expect (teleport? (toward 5+5i)) false)
+(check-expect (toward? (toward 5+5i)) true)
+(check-expect (toward? (teleport 5+5i)) false)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Posn library
 
@@ -67,21 +83,16 @@
     (pos (quotient r (pos-y p))
           (remainder r (pos-y p)))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Set library
-(define (set-map-list f s)
-  (for/list ([x (in-set s)]) (f x)))
-(define (set-map f s)
-  (for/set ([x (in-set s)]) (f x)))
-(define (set-ormap f s)
-  (for/or ([x (in-set s)]) (f x)))
-(define (set-fold f b s)
-  (for/fold ([r b])
-    ([x (in-set s)])
-    (f x r)))
-(define (set-filter f s)
-  (for/set ([x (in-set s)]
-            #:when (f x))
-           x))
+(check-expect (pos 5 5) 5+5i)
+(check-expect (pos-x (pos 3 4)) 3)
+(check-expect (pos-y (pos 3 4)) 4)
+(check-expect (pos-abs (pos -3 -4)) (pos 3 4))
+(check-expect (pos-sum (pos 3 4)) 7)
+(check-expect (< -1 (pos-x (random-posn 500+200i)) 500)
+              true)
+(check-expect (< -1 (pos-y (random-posn 500+200i)) 200)
+              true)
 
-(test)
+
+
+

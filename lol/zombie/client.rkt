@@ -1,4 +1,7 @@
-#lang racket
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname client) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+;; ISL+λ
 ;; Zombie CLIENT
 
 ;; Play the classic game of Zombie Brains!
@@ -10,9 +13,11 @@
 ;; On receive events, the client installs the world state sent by the server.
 
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
+(require class0)
 (provide (all-defined-out))
 (require 2htdp/universe)
-(require 2htdp/image)
+(require 2htdp/image)    ; Duplicates 'image?'
+                         ; I think this is still a symptom of not having racket's require.
 (require test-engine/scheme-tests)
 (require "shared.rkt")
 
@@ -126,5 +131,5 @@
 (define opponents second)
 (define zombies third)
 
-(test)
+;(test)
 
