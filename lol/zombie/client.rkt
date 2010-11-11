@@ -1,32 +1,40 @@
 #lang racket
-(provide (all-defined-out))
+;; Zombie CLIENT
+
 ;; Play the classic game of Zombie Brains!
 ;; All zombies move towards the *closest* living player.  Zombies collision 
 ;; cause flesh heaps that are deadly to other zombies (and you!).  Teleport
 ;; as a last resort!
 
+;; On mouse events, the client sends requests to move to the server.
+;; On receive events, the client installs the world state sent by the server.
+
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
+(provide (all-defined-out))
 (require 2htdp/universe)
 (require 2htdp/image)
 (require "shared.rkt")
   
+;; A World is a (list Player [Listof Player] [Listof Zombie]).
+;; Interp: you, your opponents, & the zombies.
 ;; A Zombie is a Meat.
 ;; A Player is a Meat.
 ;; A Meat is one of:         ; interp:
 ;; - (+ (- Nat) (* +i Nat))  ; dead meat
 ;; - (+ (+ Nat) (* +i Nat))  ; live meat
 ;; A Posn is a (+ Nat (* +i Nat)).
-;; A World is a (list Player [Listof Player] [Listof Zombie]).
 
-;; Host World -> World
-(define (play host w)
-  (big-bang w
+;; Host -> World
+;; Join a game on the given host.
+(define (play host)
+  (big-bang (list 0 (list) (list))
             (register host)
             (on-draw draw)
             (on-mouse squeak)
             (on-receive (λ (w m) m))))
 
 ;; World -> Scene
+;; Render the world state.
 (define (draw w)
   (foldl (λ (o scn) ; Player Scene -> Scene
            ((posn+scn (if (dead? o) "black" "orange"))
@@ -44,6 +52,7 @@
          (opponents w)))
 
 ;; World Int Int Mouse -> World
+;; Send a request to move to the server.
 (define (squeak w x y m)
   (make-package w
                 ((cond [(mouse=? "button-down" m) teleport]

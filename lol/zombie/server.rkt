@@ -1,4 +1,12 @@
 #lang racket
+;; Zombie SERVER
+
+;; Play the classic game of Zombie Brains!
+;; All zombies move towards the *closest* living player.  Zombies collision 
+;; cause flesh heaps that are deadly to other zombies (and you!).  Teleport
+;; as a last resort!
+
+;; Based on Robot!, p. 234 of Barski's Land of Lisp.
 (provide (all-defined-out))
 (require 2htdp/universe)
 (require "shared.rkt")
