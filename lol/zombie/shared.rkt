@@ -26,6 +26,9 @@
   (cond [(dead? m) (dead-pos m)]
         [else m]))
 
+(check-expect (meat-pos 0) 0)
+(check-expect (meat-pos (dead 0)) 0)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Shared constants
 
@@ -81,3 +84,4 @@
             #:when (f x))
            x))
 
+(test)

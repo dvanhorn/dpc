@@ -13,8 +13,9 @@
 (provide (all-defined-out))
 (require 2htdp/universe)
 (require 2htdp/image)
+(require test-engine/scheme-tests)
 (require "shared.rkt")
-  
+
 ;; A World is a (list Player [Listof Player] [Listof Zombie]).
 ;; Interp: you, your opponents, & the zombies.
 
@@ -27,23 +28,86 @@
             (on-mouse squeak)
             (on-receive (λ (w m) m))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Rendering
+(define *mt-scene*
+  (empty-scene (pos-x *dim*)
+               (pos-y *dim*)))
+
 ;; World -> Scene
 ;; Render the world state.
 (define (draw w)
-  (foldl (λ (o scn) ; Player Scene -> Scene
-           ((posn+scn (if (dead? o) "black" "orange"))
-            (meat-pos o)
-            scn))
-         (foldl (λ (z scn) ; Zombie Scene -> Scene
-                  ((posn+scn (if (dead? z) "gray" "red"))
-                   (meat-pos z)
-                   scn))
-                ((posn+scn (if (dead? (player w)) "purple" "green"))
-                 (meat-pos (player w))
-                 (empty-scene (pos-x *dim*)
-                              (pos-y *dim*)))
-                (zombies w))
-         (opponents w)))
+  (opponents+scn (opponents w)
+                 (zombies+scn (zombies w)
+                              (player+scn (player w)
+                                          *mt-scene*))))
+
+(check-expect (draw (list 0 (list 5) (list 8)))
+              (opponents+scn (list 5)
+                             (zombies+scn (list 8)
+                                          (player+scn 0
+                                                      *mt-scene*))))
+
+;; [Listof Players] Scene -> Scene
+(define (opponents+scn os scn)
+  (foldl (color-meat "black" "orange")
+         scn
+         os))
+
+(check-expect (opponents+scn (list 30+30i) *mt-scene*)
+              ((posn+scn "orange") 30+30i *mt-scene*))
+(check-expect (opponents+scn (list (dead 30+30i)) *mt-scene*)
+              ((posn+scn "black") 30+30i *mt-scene*))
+
+;; [Listof Zombies] Scene -> Scene
+(define (zombies+scn zs scn)
+  (foldl (color-meat "gray" "red")
+         scn
+         zs))
+
+(check-expect (zombies+scn (list 30+30i) *mt-scene*)
+              ((posn+scn "red") 30+30i *mt-scene*))
+(check-expect (zombies+scn (list (dead 30+30i)) *mt-scene*)
+              ((posn+scn "gray") 30+30i *mt-scene*))
+
+;; Player Scene -> Scene
+(define (player+scn p scn)
+  ((color-meat "purple" "green") p scn))
+
+(check-expect (player+scn 30+30i *mt-scene*)
+              ((posn+scn "green") 30+30i *mt-scene*))
+(check-expect (player+scn (dead 30+30i) *mt-scene*)
+              ((posn+scn "purple") 30+30i *mt-scene*))
+
+;; Color Color -> [Meat Scene -> Scene]
+;; Constructs a "painter" for meat that uses the given colors.
+(define (color-meat dead-c live-c)
+  (λ (m scn)
+    ((posn+scn (if (dead? m) dead-c live-c))
+     (meat-pos m)
+     scn)))
+
+(check-expect ((color-meat "red" "blue") (dead 0) *mt-scene*)
+              ((posn+scn "red") 0 *mt-scene*))
+(check-expect ((color-meat "red" "blue") 0 *mt-scene*)
+              ((posn+scn "blue") 0 *mt-scene*))
+
+;; Color -> Posn Scene -> Scene
+;; Render the posn on the scene in the given color.
+(define ((posn+scn c) p s)
+  (place-image (circle (/ *cell-size* 2) "solid" c)
+               (pos-x p)
+               (pos-y p)
+               s))
+
+(check-expect ((posn+scn "red") 30+40i *mt-scene*)
+              (place-image (circle (/ *cell-size* 2) "solid" "red")
+                           30
+                           40
+                           *mt-scene*))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mouse handling
 
 ;; World Int Int Mouse -> World
 ;; Send a request to move to the server.
@@ -53,14 +117,14 @@
                        [else toward])
                  (pos x y))))
 
-;; Color -> Posn Scene -> Scene
-;; Render the posn on the scene in the given color.
-(define ((posn+scn c) p s)
-  (place-image (circle (/ *cell-size* 2) "solid" c)
-               (pos-x p)
-               (pos-y p)
-               s)) 
+(check-expect (squeak 5 3 4 "button-down")
+              (make-package 5 (teleport 3+4i)))
+(check-expect (squeak 5 3 4 "move")
+              (make-package 5 (toward 3+4i)))
 
 (define player first)
 (define opponents second)
 (define zombies third)
+
+(test)
+
