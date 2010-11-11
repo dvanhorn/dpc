@@ -21,10 +21,10 @@
 (define *dim* 400+400i)
 (define *cell-size* 20)
 
-;; World -> World
-(define (play w)
+;; Host World -> World
+(define (play host w)
   (big-bang w
-            (register LOCALHOST)
+            (register host)
             (on-draw draw)
             (on-mouse squeak)
             (on-receive 
@@ -283,6 +283,9 @@
 (define (demo n)
   ;; Run program, run!
   (launch-many-worlds
-   (play (world 0 (set) (set)))
-   (play (world 0 (set) (set)))
+   (play LOCALHOST (world 0 (set) (set)))
+   (play LOCALHOST (world 0 (set) (set)))
    (serve n)))
+
+(play "129.10.117.100" (world 0 (set) (set)))
+
