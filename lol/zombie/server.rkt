@@ -15,9 +15,6 @@
 (require test-engine/scheme-tests)
 (require "shared.rkt")
 
-;; BUG: (dead 0) = 0.
-(check-expect (dead? (dead 0)) true)
-
 (struct game (player-map zombies) #:transparent)
 ;; A Game is a (game PlayerMap [Setof Zombie])
 ;; A PlayerMap is a [Setof (List IWorld Player)]
@@ -92,14 +89,14 @@
              (cond [(dead? u) u]
                    [(set-ormap (λ (v)
                                  (and ((touching? u) 
-                                       (pos-abs v))
+                                       (meat-pos v))
                                       (not (= u v))))
                                zs)
                     (dead u)]
                    #;
                    [(set-ormap (λ (v)
                                  (and ((touching? u) 
-                                       (pos-abs v))
+                                       (meat-pos v))
                                       (dead? v)))
                                ps)
                     (dead u)]
@@ -209,13 +206,9 @@
 
 (check-expect ((minimize taxi-dist) 0 6+6i) 1+1i)
 
-;; (struct dead (posn))
-;; BUGGY on 0.
-(define dead -)
-
 ;; Posn [Listof Zombie] -> Boolean
 (define (touches? p zs)
-  (set-ormap (compose (touching? p) pos-abs)
+  (set-ormap (compose (touching? p) meat-pos)
              zs))
 
 (check-expect (touches? 0 (set)) false)

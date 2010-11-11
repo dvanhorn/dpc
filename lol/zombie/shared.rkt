@@ -1,7 +1,30 @@
 #lang racket
 (provide (all-defined-out))
+(require test-engine/scheme-tests)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Shared data definitions
+
+;; A Zombie is a Meat.
+;; A Player is a Meat.
+;; A Meat is one of:         ; interp:
+;; - (+ (- Nat) (* +i Nat))  ; dead meat
+;; - (+ (+ Nat) (* +i Nat))  ; live meat
+;; A Posn is a (+ Nat (* +i Nat)).
+
+;; (struct dead (posn))
 (define dead? (compose negative? real-part))
+(define dead (compose sub1 -))
+(define dead-pos (compose - add1))
+
+(check-expect (dead-pos (dead 0)) 0)
+(check-expect (dead? 0) false)
+(check-expect (dead? (dead 0)) true)
+
+;; Meat -> Posn
+(define (meat-pos m)
+  (cond [(dead? m) (dead-pos m)]
+        [else m]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Shared constants

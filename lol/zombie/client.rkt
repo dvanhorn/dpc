@@ -17,12 +17,6 @@
   
 ;; A World is a (list Player [Listof Player] [Listof Zombie]).
 ;; Interp: you, your opponents, & the zombies.
-;; A Zombie is a Meat.
-;; A Player is a Meat.
-;; A Meat is one of:         ; interp:
-;; - (+ (- Nat) (* +i Nat))  ; dead meat
-;; - (+ (+ Nat) (* +i Nat))  ; live meat
-;; A Posn is a (+ Nat (* +i Nat)).
 
 ;; Host -> World
 ;; Join a game on the given host.
@@ -38,14 +32,14 @@
 (define (draw w)
   (foldl (λ (o scn) ; Player Scene -> Scene
            ((posn+scn (if (dead? o) "black" "orange"))
-            (pos-abs o)
+            (meat-pos o)
             scn))
          (foldl (λ (z scn) ; Zombie Scene -> Scene
                   ((posn+scn (if (dead? z) "gray" "red"))
-                   (pos-abs z)
+                   (meat-pos z)
                    scn))
                 ((posn+scn (if (dead? (player w)) "purple" "green"))
-                 (pos-abs (player w))
+                 (meat-pos (player w))
                  (empty-scene (pos-x *dim*)
                               (pos-y *dim*)))
                 (zombies w))
