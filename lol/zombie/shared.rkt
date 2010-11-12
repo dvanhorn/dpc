@@ -5,11 +5,7 @@
 (require class0)
 (provide (all-defined-out))
 (require test-engine/scheme-tests)
-;Doesn't look like we get the racket's require here.
-;(require (only-in racket for/list for/fold for/set))
-;Hack work-around:
-(require "set.rkt")
-(provide (all-from-out "set.rkt"))
+(require (only-in racket for/list for/fold for/set for/or in-set))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Shared data definitions
@@ -93,6 +89,23 @@
 (check-expect (< -1 (pos-y (random-posn 500+200i)) 200)
               true)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Set library
+
+(define (set-map-list f s)
+  (for/list ([x (in-set s)]) (f x)))
+(define (set-map f s)
+  (for/set ([x (in-set s)]) (f x)))
+(define (set-ormap f s)
+  (for/or ([x (in-set s)]) (f x)))
+(define (set-fold f b s)
+  (for/fold ([r b])
+    ([x (in-set s)])
+    (f x r)))
+(define (set-filter f s)
+  (for/set ([x (in-set s)]
+            #:when (f x))
+           x))
 
 
 

@@ -1,4 +1,7 @@
-#lang racket
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname server) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+;; ISL+λ
 ;; Zombie SERVER
 
 ;; Play the classic game of Zombie Brains!
@@ -10,12 +13,13 @@
 ;; - Dead players come back to life as zombies after N ticks.
 
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
+(require class0)
 (provide (all-defined-out))
 (require 2htdp/universe)
-(require test-engine/scheme-tests)
+(require (only-in racket set set-add negate for*/fold in-range set-empty?))
 (require "shared.rkt")
 
-(struct game (player-map zombies) #:transparent)
+(define-struct game (player-map zombies))
 ;; A Game is a (game PlayerMap [Setof Zombie])
 ;; A PlayerMap is a [Setof (List IWorld Player)]
 ;; Interp: relates IWorld's to their player's position.
@@ -24,41 +28,41 @@
 ;; Serve a game with n zombies.
 (define (serve n)
   (universe
-   (game (set)
-         (apply set (build-list n 
-                                (λ (_)
-                                  (random-posn *dim*)))))
+   (make-game (set)
+              (apply set (build-list n 
+                                     (λ (_)
+                                       (random-posn *dim*)))))
    (on-tick
     (λ (us)
       (make-bundle (game-tick us)
                    (broadcast us)
                    empty))
-    1/5)
+    1/10)
    (on-new
     (λ (us iw)
-      (empty-bundle (game (set-add (game-player-map us)
-                                   (list iw 0))
-                          (game-zombies us)))))
+      (empty-bundle (make-game (set-add (game-player-map us)
+                                        (list iw 0))
+                               (game-zombies us)))))
    (on-msg 
     (λ (us iw m)
-      (empty-bundle (game (cond [(teleport? m)
-                                 (world-teleport iw 
-                                                 (teleport-posn m) 
-                                                 (game-player-map us))]                            
-                                [(toward? m)
-                                 (world-toward iw 
-                                               (toward-posn m) 
-                                               (game-player-map us))])
-                          (game-zombies us)))))))
+      (empty-bundle (make-game (cond [(teleport? m)
+                                      (world-teleport iw 
+                                                      (teleport-posn m) 
+                                                      (game-player-map us))]                            
+                                     [(toward? m)
+                                      (world-toward iw 
+                                                    (toward-posn m) 
+                                                    (game-player-map us))])
+                               (game-zombies us)))))))
 
 ;; Game -> Game
 ;; Advance the game one tick.
 (define (game-tick g)
   (let ((ps (players (game-player-map g))))
-    (game (chomp (game-zombies g) (game-player-map g))
-          (move (junk ps
-                      (game-zombies g))
-                ps))))
+    (make-game (chomp (game-zombies g) (game-player-map g))
+               (move (junk ps
+                           (game-zombies g))
+                     ps))))
 
 ;; Zombies PlayerMap -> PlayerMap
 ;; All Zombies chomp: if they eat a player, the player dies.
@@ -79,8 +83,9 @@
                      [else (move-toward u (closest live-ps u))]))
              zs)))
 
-(check-expect (move (set 0+0i) (set 5+0i)) (set 1+0i))
-(check-expect (move (set 0+0i) (set 5+0i)) (set 1+0i))
+(check-expect (move (set 0) (set 5)) (set 1))
+(check-expect (move (set 0) (set 5)) (set 1))
+(check-expect (move (set (dead 0)) (set 5)) (set (dead 0)))
 
 ;; [Setof Player] [Setof Zombie] -> [Setof Zombie]
 ;; Junk all zombies that touch other zombies or junk or dead players.
@@ -103,6 +108,8 @@
                    [else u]))
            zs))
 
+(check-expect (junk (set) (set 5+5i))
+              (set 5+5i))
 (check-expect (junk (set) (set 5+5i 6+6i))
               (set (dead 5+5i) (dead 6+6i)))
 (check-expect (junk (set) (set 5+5i (dead 6+6i)))
@@ -121,6 +128,18 @@
     (player-map-list notify
                      (game-player-map g))))
 
+
+(check-expect (broadcast (make-game (set) (set)))
+              empty)
+(check-expect (broadcast (make-game (set (list iworld1 0)) (set)))
+              (list (make-mail iworld1
+                               (list 0 empty empty))))
+(check-expect (broadcast (make-game (set (list iworld1 0)) (set 30+40i)))
+              (list (make-mail iworld1
+                               (list 0 empty (list 30+40i)))))
+                                     
+                               
+
 ;; IWorld PlayerMap -> [Listof Player]
 ;; Get positions for all opponents on map of given world's player.
 (define (opponent-posns iw pm)
@@ -130,13 +149,24 @@
                    empty
                    pm))
 
-;; IWorld Posn [Setof (List IWorld Player)] -> [Setof (List IWorld Player)]
+(check-expect (opponent-posns iworld1 (set (list iworld1 0)
+                                           (list iworld2 5)))
+              (list 5))
+
+;; IWorld Posn PlayerMap -> PlayerMap
 (define (world-teleport iw p ws)
   (update-world-posn iw 
                      (λ (q) 
                        (cond [(dead? q) q]
                              [else p]))
                      ws))
+
+(check-expect (world-teleport iworld1 7 (set (list iworld1 0)
+                                             (list iworld2 5)))
+              (set (list iworld1 7)
+                   (list iworld2 5)))
+(check-expect (world-teleport iworld1 7 (set (list iworld1 (dead 0))))
+              (set (list iworld1 (dead 0))))
 
 ;; IWorld Posn PlayerMap -> PlayerMap
 (define (world-toward iw p ws)
@@ -145,6 +175,13 @@
                        (cond [(dead? q) q]
                              [else (move-toward q p)]))
                      ws))
+
+(check-expect (world-toward iworld1 7 (set (list iworld1 0)
+                                           (list iworld2 5)))
+              (set (list iworld1 1)
+                   (list iworld2 5)))
+(check-expect (world-toward iworld1 7 (set (list iworld1 (dead 0))))
+              (set (list iworld1 (dead 0))))
 
 ;; PlayerMap -> [Setof Player]
 ;; Get positions of all players on map.
@@ -221,18 +258,18 @@
   (cond [(set-empty? ps) u]
         [else
          (set-fold (λ (p q)
-                     (if q
-                         (if (< (taxi-dist p u) 
-                                (taxi-dist q u))
-                             p
-                             q)
-                         p))
+                     (cond [(false? q) p]
+                           [(< (taxi-dist p u) 
+                               (taxi-dist q u))
+                            p]
+                           [else q]))
                    false
                    ps)]))
 
 (check-expect (closest (set) 0) 0)
 (check-expect (closest (set 5+5i) 0) 5+5i)
 (check-expect (closest (set 5+5i 6+6i) 0) 5+5i)
+(check-expect (closest (set 5+5i 3+3i) 0) 3+3i)
   
 ;; Posn -> Posn -> Boolean
 ;; Are the points "touching"?
@@ -252,8 +289,10 @@
                                 [else p])))
                   pm))
 
-(check-expect (update-world-posn iworld1 add1 (set (list iworld1 0)))
-              (set (list iworld1 1)))
+(check-expect (update-world-posn iworld1 add1 (set (list iworld1 0)
+                                                   (list iworld2 5)))
+              (set (list iworld1 1)
+                   (list iworld2 5)))
 
 ;; Posn Posn -> Posn
 ;; Move p1 toward p2
@@ -269,5 +308,3 @@
   (make-bundle g empty empty))
 
 (check-expect (empty-bundle 5) (make-bundle 5 empty empty))
-
-(test)

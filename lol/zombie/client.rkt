@@ -16,9 +16,7 @@
 (require class0)
 (provide (all-defined-out))
 (require 2htdp/universe)
-(require 2htdp/image)    ; Duplicates 'image?'
-                         ; I think this is still a symptom of not having racket's require.
-(require test-engine/scheme-tests)
+(require (except-in 2htdp/image image?)) ; This is unfortunate.
 (require "shared.rkt")
 
 ;; A World is a (list Player [Listof Player] [Listof Zombie]).
@@ -55,81 +53,82 @@
 
 ;; [Listof Players] Scene -> Scene
 (define (opponents+scn os scn)
-  (foldl (color-meat "black" "orange")
+  (foldl (meat+scn dead-opponent-img live-opponent-img) 
          scn
          os))
 
 (check-expect (opponents+scn (list 30+30i) *mt-scene*)
-              ((posn+scn "orange") 30+30i *mt-scene*))
+              (place-image live-opponent-img 30 30 *mt-scene*))
 (check-expect (opponents+scn (list (dead 30+30i)) *mt-scene*)
-              ((posn+scn "black") 30+30i *mt-scene*))
-
+              (place-image dead-opponent-img 30 30 *mt-scene*))
+       
 ;; [Listof Zombies] Scene -> Scene
 (define (zombies+scn zs scn)
-  (foldl (color-meat "gray" "red")
-         scn
+  (foldl (meat+scn dead-zombie-img live-zombie-img) 
+         scn 
          zs))
 
 (check-expect (zombies+scn (list 30+30i) *mt-scene*)
-              ((posn+scn "red") 30+30i *mt-scene*))
+              (place-image live-zombie-img 30 30 *mt-scene*))
 (check-expect (zombies+scn (list (dead 30+30i)) *mt-scene*)
-              ((posn+scn "gray") 30+30i *mt-scene*))
+              (place-image dead-zombie-img 30 30 *mt-scene*))
 
 ;; Player Scene -> Scene
 (define (player+scn p scn)
-  ((color-meat "purple" "green") p scn))
+  ((meat+scn dead-player-img live-player-img) p scn))
 
 (check-expect (player+scn 30+30i *mt-scene*)
-              ((posn+scn "green") 30+30i *mt-scene*))
+              (place-image live-player-img 30 30 *mt-scene*))
 (check-expect (player+scn (dead 30+30i) *mt-scene*)
-              ((posn+scn "purple") 30+30i *mt-scene*))
+              (place-image dead-player-img 30 30 *mt-scene*))
 
-;; Color Color -> [Meat Scene -> Scene]
-;; Constructs a "painter" for meat that uses the given colors.
-(define (color-meat dead-c live-c)
-  (λ (m scn)
-    ((posn+scn (if (dead? m) dead-c live-c))
-     (meat-pos m)
-     scn)))
+;; Image Image -> [Meat Scene -> Scene]
+(define ((meat+scn dead-img live-img) m scn)
+  (place-image (if (dead? m) dead-img live-img)
+               (pos-x (meat-pos m))
+               (pos-y (meat-pos m))
+               scn))
 
-(check-expect ((color-meat "red" "blue") (dead 0) *mt-scene*)
-              ((posn+scn "red") 0 *mt-scene*))
-(check-expect ((color-meat "red" "blue") 0 *mt-scene*)
-              ((posn+scn "blue") 0 *mt-scene*))
+(define (meat-img eye-color skin-color)
+  (local [(define face-width 30)
+          (define face-height 25)   
+          (define eye 
+            (overlay (ellipse 6 4 "solid" eye-color)
+                     (ellipse 12 8 "solid" "black")))]
+    (overlay (beside eye eye)
+             (ellipse face-width face-height "solid" skin-color)
+             (ellipse (+ face-width 4) (+ face-height 4) "solid" "black"))))
 
-;; Color -> Posn Scene -> Scene
-;; Render the posn on the scene in the given color.
-(define ((posn+scn c) p s)
-  (place-image (circle (/ *cell-size* 2) "solid" c)
-               (pos-x p)
-               (pos-y p)
-               s))
-
-(check-expect ((posn+scn "red") 30+40i *mt-scene*)
-              (place-image (circle (/ *cell-size* 2) "solid" "red")
-                           30
-                           40
-                           *mt-scene*))
+(define dead-player-img (meat-img 'white 'white))
+(define live-player-img (meat-img 'cornflowerblue 'pink))
+(define dead-zombie-img (meat-img 'darkgray 'darkgray))
+(define live-zombie-img (meat-img 'yellow 'yellowgreen))
+(define dead-opponent-img dead-player-img)
+(define live-opponent-img (meat-img 'navajowhite 'brown))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mouse handling
 
-;; World Int Int Mouse -> World
-;; Send a request to move to the server.
+;; World Int Int Mouse -> [U World Package]
+;; Maybe send a request to move to the server.
 (define (squeak w x y m)
-  (make-package w
-                ((cond [(mouse=? "button-down" m) teleport]
-                       [else toward])
-                 (pos x y))))
+  (cond [(mouse=? "button-down" m)
+         (make-package w
+                       (teleport (pos x y)))]
+        [else
+         (cond [(even? (+ x y)) ; coin flip
+                (make-package w 
+                              (toward (pos x y)))]
+               [else w])]))
 
 (check-expect (squeak 5 3 4 "button-down")
               (make-package 5 (teleport 3+4i)))
 (check-expect (squeak 5 3 4 "move")
-              (make-package 5 (toward 3+4i)))
+              5)
+(check-expect (squeak 5 3 7 "move")
+              (make-package 5 (toward 3+7i)))
 
 (define player first)
 (define opponents second)
 (define zombies third)
-
-;(test)
 
