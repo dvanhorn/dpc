@@ -1,4 +1,5 @@
 #lang scribble/manual
+
 @title{@bold{Fundamentals of Computer Science II (Honors)}
        @linebreak[]
        Introduction to Class-based Program Design}

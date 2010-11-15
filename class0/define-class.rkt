@@ -53,7 +53,7 @@
       (quasisyntax
        (begin
          (define-syntax class% (class-name #'-class%))
-         (isl+:define -class%
+         (r:define -class%
            (r:class/derived #,stx (class% super%.real-name (i%.real-name ...) #f)
              (r:inspect #f)
              
