@@ -1,5 +1,6 @@
 #lang racket
-(require 2htdp/image 2htdp/universe racket/pretty lang/posn)
+(require 2htdp/image 2htdp/universe racket/pretty lang/posn
+         test-engine/racket-tests)
 
 ;; A Player is one of 'red or 'black
 ;; A Cell is one of Player or #f
@@ -12,6 +13,11 @@
 
 (define COLS 7)
 (define ROWS 6)
+(define WIN 4)
+
+;; we ASSUME that there is only one column in which diagonals can win in *all* positions
+;; this is true for 4x4 with WIN>=3, and 7x6 with WIN>=4
+;; I don't have a general formula yet.
 
 (define RADIUS 20)
 
@@ -76,7 +82,7 @@
 (define (winner-col? c)
   (let loop ([c c] [cnt 0] [color #f])
     (cond 
-      [(= 4 cnt) #t]
+      [(= WIN cnt) #t]
       [(empty? c) #f]
       [(not (first c)) (loop (rest c) 0 #f)]
       [(and color (symbol=? color (first c))) (loop (rest c) (add1 cnt) color)]
@@ -85,31 +91,54 @@
 (define (transpose b)
   (apply map list b))
 
+(define (snoc v l) (append l (list v)))
+
+(define (adjust-column c i)  
+  (cond 
+    [(< i 0) (append (make-list (abs i) #f) (take c (+ ROWS i)))]
+    [(= i 0) c]
+    [else (append (drop c i) (make-list i #f))]))
+
+;; Board -> Board
 (define (diagonalize b)
-  (for/list ([n (in-range COLS)])
-    (append
-     (for/list ([k (in-range n ROWS)])
-      (list-ref (list-ref b n) k))
-     (make-list n #f))))
+  (define small (quotient COLS 2))
+  (for/list ([c (in-list b)]
+             [i (in-range (- small) (- COLS small))])
+    (adjust-column c i)))
+
 ;; winner? : Game -> Boolean
 ;; has someone won the game?
 (define (winner? g)
   (or (ormap winner-col? (game-board g))
       (ormap winner-col? (transpose (game-board g)))
       (ormap winner-col? (transpose (diagonalize (game-board g))))
-      (ormap winner-col? (transpose (diagonalize (map reverse (game-board g)))))))
+      (ormap winner-col? (transpose (diagonalize (reverse (game-board g)))))))
+
+(check-expect (winner? (game
+                        'black
+                        '((#f #f #f #f #f #f)
+                          (#f #f #f #f #f #f)
+                          (#f #f #f #f #f #f)
+                          (red black red red #f #f)
+                          (black red red #f #f #f)
+                          (black red #f #f #f #f)
+                          (red black black black #f #f))
+                        (make-posn 83 -7)))
+              #t)
 
 ;; Game -> Scene
 (define (render-game g)
   (define next (cond [(symbol=? (game-next g) 'black) (circle RADIUS "solid" "black")]
                      [(symbol=? (game-next g) 'red) (circle RADIUS "solid" "red")]))
-  (place-image
-   (render (game-board g))
-   (/ SIZE 2) 150
-   (place-image
-    next
-    (posn-x (game-pos g)) (posn-y (game-pos g))
-    (empty-scene SIZE SIZE))))
+  (define board-scene (place-image (render (game-board g))
+                                   (/ SIZE 2) 150
+                                   (empty-scene SIZE SIZE)))
+  (if (winner? g)
+      board-scene
+      (place-image
+       next
+       (posn-x (game-pos g)) (posn-y (game-pos g))
+       board-scene)))
 
 ;; Game KeyEvent -> Game
 ;; play in the column denoted by `k'
@@ -134,9 +163,12 @@
          (play-turn g (quotient (- x left-margin) (* 2 RADIUS)))]
         [else (game (game-next g) (game-board g) (make-posn x y))]))
 
-(big-bang
- initial-game
- (to-draw render-game)
- #;(on-key handle-key)
- (on-mouse handle-mouse)
- (stop-when winner? render-winner))
+(define (go)
+  (big-bang
+   initial-game
+   (to-draw render-game)
+   #;(on-key handle-key)
+   (on-mouse handle-mouse)
+   (stop-when winner? render-winner)))
+
+(test)
