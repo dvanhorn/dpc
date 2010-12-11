@@ -28,6 +28,7 @@
 (define empty-col (make-list ROWS #f))
 (define empty-board (make-list COLS empty-col))
 (define initial-game (game 'red empty-board (make-posn 0 0)))
+(define (make-new-game p) (game 'red empty-board p))
 
 ;; render : Board -> Image
 ;; create a picture representing the board state
@@ -79,6 +80,9 @@
       (game (flip-player (game-next g)) new-board (game-pos g))
       g))
 
+
+;; is there a winner in column c (of either color)
+;; Col -> Bool
 (define (winner-col? c)
   (let loop ([c c] [cnt 0] [color #f])
     (cond 
@@ -88,27 +92,36 @@
       [(and color (symbol=? color (first c))) (loop (rest c) (add1 cnt) color)]
       [else (loop (rest c) 1 (first c))])))
 
-(define (transpose b)
-  (apply map list b))
+;; Board -> Board^T
+(define (transpose b) (apply map list b))
 
+;; cons to the end of a list
 (define (snoc v l) (append l (list v)))
 
+;; shift the view of column up i squares
+;; this imagines an infinite board padded w/ #f
+;; Col Int -> Col
 (define (adjust-column c i)  
   (cond 
     [(< i 0) (append (make-list (abs i) #f) (take c (+ ROWS i)))]
     [(= i 0) c]
     [else (append (drop c i) (make-list i #f))]))
 
-;; Board -> Board
+;; Board -> Board^T
+;; produces a board where diagonals go across
 (define (diagonalize b)
   (define small (quotient COLS 2))
   (for/list ([c (in-list b)]
              [i (in-range (- small) (- COLS small))])
     (adjust-column c i)))
 
+;; is there a winner in some column?
 (define (win-cols? b) (ormap winner-col? b))
+;; is there a winner in some row?
 (define (win-rows? b) (win-cols? (transpose b)))
+;; is there a winner in some rising diagonal
 (define (win-riser? b) (win-rows? (diagonalize b)))
+;; is there a winner in some sinking diagonal?
 (define (win-sinker? b) (win-riser? (reverse b)))
 
 ;; winner? : Game -> Boolean
@@ -129,26 +142,35 @@
                         (make-posn 83 -7)))
               #t)
 
+;; Is this column full?
 (define (full? col)
   (not (member #f col)))
 
+;; does the next player to play in `g' have a possible winning move?
+;; Game -> Bool
 (define (has-winning-move? g)
   (for/or ([i (in-range COLS)]
            #:when (winner? (play-turn g i)))
-    i))
+    #t))
 
+;; Randomly chooses an index into `status' where `sym' can be found
 (define (random-index-of status sym)
   (choose (for/list ([(s i) (in-indexed status)] #:when (eq? s sym))
             i)))
 
+;; choose the best move in `g' with one-ply lookahead
 (define (pick-move g)
   (define status (evaluate g))
   (or (random-index-of status 'win)
       (random-index-of status 'unknown)
       (random-index-of status 'lose)))
        
+;; choose a random element of l, or #f if empty
+;; Listof[X] -> X or f
 (define (choose l) (if (null? l) #f (list-ref l (random (length l)))))
 
+;; produce an evaluation of the state of `g' for the next player
+;; Game -> Listof[One of 'full 'win 'lose 'unknown]
 (define (evaluate g)
   (for/list ([i (in-range COLS)])
     (cond [(full? (list-ref (game-board g) i)) 'full]
@@ -171,14 +193,13 @@
        board-scene)))
 
 ;; Game KeyEvent -> Game
-;; play in the column denoted by `k'
+;; "n" -> new game
+;; "p" -> print game state
 (define (handle-key g k)
-  (when (equal? "p" k) (pretty-print g))
-  (define n (string->number k))
-  (if (and n (<= 1 n 7))
-      (play-turn g (sub1 n))
-      g))
-
+  (cond [(key=? "n" k) (make-new-game (game-pos g))]
+        [(key=? "p" k) (displayln g) g]
+        [else g]))
+  
 (define (all-full? g) (andmap full? (game-board g)))
 
 ;; Game -> Scene
@@ -192,20 +213,27 @@
       [(symbol=? w 'red) (text "Red Player Wins!" 36 "green")]))
   (overlay str s))
 
+;; Handle a mouse event in game `g'
+;; If the button is released, play in that column.
 (define (handle-mouse g x y e)
   (cond [(mouse=? e "button-up")
-         (define played (play-turn g (quotient (- x left-margin) (* 2 RADIUS))))
-         (if (winner? played)
-             played
-             (play-turn played (pick-move played)))]
-        [else (game (game-next g) (game-board g) (make-posn x y))]))
+         (define col (quotient (- x left-margin) (* 2 RADIUS)))
+         (cond 
+           [(or (winner? g) (all-full? g)) g]
+           [(and (> x left-margin) (<= 0 col (sub1 COLS)))
+            (define played (play-turn g col))
+            (if (winner? played)
+                played
+                (play-turn played (pick-move played)))]
+           [else g])]
+         [else (game (game-next g) (game-board g) (make-posn x y))]))
 
 (define (go)
   (big-bang
    initial-game
-   (to-draw render-game)
-   #;(on-key handle-key)
+   (to-draw (λ (g) (if (or (winner? g) (all-full? g)) (render-winner g) (render-game g))))
+   (on-key handle-key)
    (on-mouse handle-mouse)
-   (stop-when (λ (g) (or (winner? g) (all-full? g))) render-winner)))
+   #;(stop-when (λ (g) (or (winner? g) (all-full? g))) render-winner)))
 
 (test)
