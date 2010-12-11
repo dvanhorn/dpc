@@ -106,14 +106,17 @@
              [i (in-range (- small) (- COLS small))])
     (adjust-column c i)))
 
+(define (win-cols? b) (ormap winner-col? b))
+(define (win-rows? b) (win-cols? (transpose b)))
+(define (win-riser? b) (win-rows? (diagonalize b)))
+(define (win-sinker? b) (win-riser? (reverse b)))
+
 ;; winner? : Game -> Boolean
 ;; has someone won the game?
 (define (winner? g)
-  (or (ormap winner-col? (game-board g))
-      (ormap winner-col? (transpose (game-board g)))
-      (ormap winner-col? (transpose (diagonalize (game-board g))))
-      (ormap winner-col? (transpose (diagonalize (reverse (game-board g)))))))
-
+  (define b (game-board g))
+  (or (win-cols? b) (win-rows? b) (win-riser? b) (win-sinker? b)))
+  
 (check-expect (winner? (game
                         'black
                         '((#f #f #f #f #f #f)
@@ -125,6 +128,33 @@
                           (red black black black #f #f))
                         (make-posn 83 -7)))
               #t)
+
+(define (full? col)
+  (not (member #f col)))
+
+(define (has-winning-move? g)
+  (for/or ([i (in-range COLS)]
+           #:when (winner? (play-turn g i)))
+    i))
+
+(define (random-index-of status sym)
+  (choose (for/list ([(s i) (in-indexed status)] #:when (eq? s sym))
+            i)))
+
+(define (pick-move g)
+  (define status (evaluate g))
+  (or (random-index-of status 'win)
+      (random-index-of status 'unknown)
+      (random-index-of status 'lose)))
+       
+(define (choose l) (if (null? l) #f (list-ref l (random (length l)))))
+
+(define (evaluate g)
+  (for/list ([i (in-range COLS)])
+    (cond [(full? (list-ref (game-board g) i)) 'full]
+          [(winner? (play-turn g i)) 'win]
+          [(has-winning-move? (play-turn g i)) 'lose]
+          [else 'unknown])))
 
 ;; Game -> Scene
 (define (render-game g)
@@ -149,18 +179,25 @@
       (play-turn g (sub1 n))
       g))
 
+(define (all-full? g) (andmap full? (game-board g)))
+
 ;; Game -> Scene
 (define (render-winner g)
   (define w (flip-player (game-next g)))
   (define s (render-game g))
   (define str
-    (cond [(symbol=? w 'black) (text "Black Player Wins!" 36 "green")]
-          [(symbol=? w 'red) (text "Red Player Wins!" 36 "green")]))
+    (cond 
+      [(all-full? g) (text "The Game is a Tie." 36 "green")]
+      [(symbol=? w 'black) (text "Black Player Wins!" 36 "green")]
+      [(symbol=? w 'red) (text "Red Player Wins!" 36 "green")]))
   (overlay str s))
 
 (define (handle-mouse g x y e)
   (cond [(mouse=? e "button-up")
-         (play-turn g (quotient (- x left-margin) (* 2 RADIUS)))]
+         (define played (play-turn g (quotient (- x left-margin) (* 2 RADIUS))))
+         (if (winner? played)
+             played
+             (play-turn played (pick-move played)))]
         [else (game (game-next g) (game-board g) (make-posn x y))]))
 
 (define (go)
@@ -169,6 +206,6 @@
    (to-draw render-game)
    #;(on-key handle-key)
    (on-mouse handle-mouse)
-   (stop-when winner? render-winner)))
+   (stop-when (λ (g) (or (winner? g) (all-full? g))) render-winner)))
 
 (test)
