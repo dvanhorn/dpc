@@ -30,29 +30,9 @@ to practical hands-on programming.
 
 @include-section["texts.scrbl"]
 
-@include-section["syllabus.scrbl"]
-
-@include-section["lectures.scrbl"]
-
-@include-section["labs.scrbl"]
-
-@include-section["assignments.scrbl"]
-
 @include-section["subversion.scrbl"]
 
 @section{Blog}
 
 @subsection{Welcome to CS2510H.}
               
-@section{TODO}
-
-@itemlist[#:style 'ordered
-  @item{Syllabus}
-  @item{Outline assignments, lectures and labs}
-  @item{Project?}
-  @item{The Style}
-  @item{Documentation for @racket[class0], ...}
-  @item{Local guide on using SVN}
-  @item{Staff coordinates, office hours, email addresses}
-  @item{History of objects}]
-

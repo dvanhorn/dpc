@@ -2,12 +2,13 @@
 @(require scribble/eval
           racket/sandbox
           (for-label lang/htdp-intermediate-lambda)
-          (for-label class0))
+          #;(for-label class0))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require lang/htdp-intermediate-lambda))
     (the-eval '(require class0))
+    (the-eval '(require 2htdp/image))
     (call-in-sandbox-context 
      the-eval 
      (lambda () ((dynamic-require 'htdp/bsl/runtime 'configure)
@@ -15,6 +16,10 @@
     the-eval))
 
 @title[#:tag "lec01"]{1/10: Object = structure + functions}
+
+@examples[#:eval the-eval
+          (circle 10 "solid" "red")]
+
 
 @bold{Outline}
 @itemlist[

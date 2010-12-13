@@ -18,20 +18,10 @@ Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise no
         Develop...}]
 
 
-@section[#:tag "assign03"]{1/26: Quick Edit}
+@section[#:tag "assign03"]{1/26: ??}
 
-@itemlist[#:style 'ordered 
- @item{@bold{QuickEdit.}
-        
-        Develop...}]
 
-@section[#:tag "assign04"]{2/2: Quick Chat}
-
-@itemlist[#:style 'ordered
-  @item{@bold{QuickChat}
-         
-         Starting with your QuickEdit program from last week's assignment,
-         develop QuickChat, a Universe-based chat client.}]
+@section[#:tag "assign04"]{2/2: ??}
 
 @section[#:tag "assign05"]{2/9: Inheritance/Composition?}
 @section[#:tag "assign06"]{2/18: Connect 4 Network (non-standard day)}

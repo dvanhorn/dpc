@@ -2,7 +2,7 @@
 @(require scribble/eval
           racket/sandbox
           (for-label lang/htdp-intermediate-lambda)
-          (for-label class0))
+          #;(for-label class0))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
