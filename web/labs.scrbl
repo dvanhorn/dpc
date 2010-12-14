@@ -3,6 +3,9 @@
 @title{Labs}
 
 @section[#:tag "lab01"]{1/10}
+
+Partner assignments.
+
 @section[#:tag "lab02"]{1/17 - MLK}
 @section[#:tag "lab03"]{1/24}
 @section[#:tag "lab04"]{1/31}
