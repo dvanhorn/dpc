@@ -19,7 +19,7 @@ of program design and computation.
 
 @bold{Prerequisites}
 
-@centered{@emph{``Think first, expirement later.''}}
+@centered{@emph{``Think first, experiment later.''}}
 
 The course assumes proficiency with the systematic design of 
 programs and some mathematical maturity. It demands curiosity 
