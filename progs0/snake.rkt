@@ -1,13 +1,10 @@
-#lang racket ;s-exp "../class0/main.rkt"
+#lang class0
 
 ;; The Snake Game in Object-Oriented Style
 ;; Copyright (c) 2010 David Van Horn
 ;; Licensed under the Academic Free License version 3.0
 
-;; lang ISL+
-;(require class0) ;; define-class
-(require "../class0/define-class.rkt")
-(require 2htdp/universe test-engine/racket-tests)
+(require 2htdp/universe)
 (require 2htdp/image)
 
 (define SNAKE-COLOR "red")
