@@ -21,6 +21,16 @@
           (circle 10 "solid" "red")]
 
 
+Rocket + Satellite.
+
+[High-level: here's why objects are a good idea.  Motivated by world
+programs.
+
+Data + functionality, using atomic data (numbers) and compound data
+(pair of numbers).  Methods for animation.]
+
+Ch. 1, 2, 10
+
 @bold{Outline}
 @itemlist[
  @item{Announcements

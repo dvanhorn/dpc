@@ -1,6 +1,8 @@
 #lang scribble/manual
 
-@title{Labs}
+@title[#:style 'toc]{Labs}
+
+@local-table-of-contents[]
 
 @section[#:tag "lab01"]{1/10}
 

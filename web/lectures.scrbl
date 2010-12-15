@@ -14,22 +14,14 @@
                  (dynamic-require 'htdp/isl/lang/reader 'options))))
     the-eval))
 
-@title{Lectures}
+@title[#:style 'toc]{Lectures}
 
 In this section, you'll find notes and code from 
 each lecture.
 
+@local-table-of-contents[]
+
 @include-section["lectures/lec01.scrbl"]
-
-Rocket + Satellite.
-
-[High-level: here's why objects are a good idea.  Motivated by world
-programs.
-
-Data + functionality, using atomic data (numbers) and compound data
-(pair of numbers).  Methods for animation.]
-
-Ch. 1, 2, 10
 
 @section[#:tag "lec02"]{1/13: Designing classes}
 
