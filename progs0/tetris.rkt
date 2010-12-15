@@ -46,7 +46,7 @@
     
     ;; -> Image
     (define/public (->image)
-      (rectangle (add1 block-size) (add1 block-size) 'solid (field color)))
+      (rectangle block-size block-size 'solid (field color)))
     
     ;; Scene -> Scene
     (define/public (+scene scn)
@@ -373,7 +373,8 @@
                              union
                              (field blocks))
                        ->scene)
-                 0 0 
+                 (/ (* board-width block-size) 2)
+                 (/ (* board-height block-size) 2)
                  (empty-scene (* board-width block-size)
                               (* board-height block-size))))
   
