@@ -55,7 +55,7 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 [Bigger system design.  In lecture: Snake Game.]
 
 @section[#:tag "lec06"]{1/27: Universes}
-@section[#:tag "lec07"]{1/31: }
+@section[#:tag "lec07"]{1/31: Constructors}
 @section[#:tag "lec08"]{ 2/3: }
 @section[#:tag "lec09"]{ 2/7: Abstracting with classes}                        
 @section[#:tag "lec10"]{2/10: Designing methods with accumulators}
@@ -65,7 +65,7 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
 There is no lecture on 2/21 since it is Presidents Day.
 
-@section[#:tag "lec14"]{2/24: }
+@section[#:tag "lec14"]{2/24: Indexed data}
 @section[#:tag "lec15"]{2/28 - Spring break}
 
 There is no lecture on 2/28 since it is during Spring break.
@@ -103,8 +103,8 @@ There is no lecture on 3/3 since it is during Spring break.
 @section[#:tag "lec24"]{3/31: Object equality: principles}
 @section[#:tag "lec25"]{ 4/4: Object equality: practice}
 @section[#:tag "lec26"]{4/7: Intermezzo: Ruby}
-@section[#:tag "lec27"]{4/11}
-@section[#:tag "lec28"]{4/14}
+@section[#:tag "lec27"]{4/11: Random and stress testing}
+@section[#:tag "lec28"]{4/14: Implementing OO}
 @section[#:tag "lec29"]{4/18 - Patriots}
 
 There is no lecture on 4/18 since it is Patriots Day.

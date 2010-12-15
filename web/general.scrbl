@@ -13,7 +13,7 @@ and
 
 TAs teach labs, supervise the grading of homework sets, hold office hours, and occasionally substitute in lectures. In general, they are apprentice teachers and are here to learn how to run a course. 
 
-@bold{Tutors:} TBD @;{Ryan Schwers, Nikko Patten}
+@bold{Tutors:} TBD @;{Ryan Schwers, Nikko Patten, Trevor Sontag, Yarian Gomez}
 
 @section{Office Hours}
 
