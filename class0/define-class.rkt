@@ -1,11 +1,11 @@
 #lang racket
 
 (provide (all-defined-out))
-(provide send define/public this)
+(provide send define/public define/private this)
 
 (require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
 
-(provide (rename-out [define define/value]))
+;(provide (rename-out [define define/value]))
 
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
@@ -32,8 +32,8 @@
              #:fail-when (eq? (syntax-e #'name) 'define/public) "class members may not be named `define/public'"
              #:fail-when (memf (λ (id) (eq? (syntax-e id) (syntax-e #'name))) names) "duplicate class member name"))
   (define-syntax-class (member-def names)
-    #:literals (define/public define)
-    (pattern ((~or define/public define/private define) ((~var f (member-name names)) x:id ...)  e:expr))
+    #:literals (define/public define/private)
+    (pattern ((~or define/public define/private) ((~var f (member-name names)) x:id ...)  e:expr))
     [pattern (define (~var f (member-name names)) e:expr)])
   
  (syntax-parse stx #:literals (super implements fields)
