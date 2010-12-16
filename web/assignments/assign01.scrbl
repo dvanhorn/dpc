@@ -9,7 +9,7 @@
     (the-eval '(require (only-in lang/htdp-intermediate-lambda sqr / + sqrt)))
    ;(the-eval '(require lang/htdp-intermediate-lambda))
    ;(the-eval '(require class0))
-    (call-in-sandbox-context 
+    #;(call-in-sandbox-context 
      the-eval 
      (lambda () ((dynamic-require 'htdp/bsl/runtime 'configure)
                  (dynamic-require 'htdp/isl/lang/reader 'options))))
@@ -73,24 +73,28 @@ Language: ISL+λ + class0.
                          (+ 2+3i 2)
                          (- 2+3i 2)
                          (* 2+3i 2)
-                         (/ 2+3i 2)]
+                         (/ 2+3i 2)
+			 (magnitude 3+4i)]
  
         @(begin0 
            "" 
-           (the-eval '(require racket/class))
+           (the-eval '(require class0))
            (the-eval 
             `(begin 
-               (define-struct complex (real imag) #:transparent)
-               (define ((liftb f) x y) 
-                 (f (to-number x) (to-number y)))
-               (define ((lift2 f) x y)
-                 (from-number (f (to-number x) (to-number y))))
-               (define ((lift1 f) x)
-                 (from-number (f (to-number x))))
+               (define-struct cpx (real imag))
+               (define (liftb f) 
+	         (lambda (x y) 
+                   (f (to-number x) (to-number y))))
+               (define (lift2 f)
+	         (lambda (x y)
+                   (from-number (f (to-number x) (to-number y)))))
+               (define (lift1 f)
+	         (lambda (x)
+                   (from-number (f (to-number x)))))
                (define (from-number n)
-                 (make-complex (real-part n) (imag-part n)))
+                 (make-cpx (real-part n) (imag-part n)))
                (define (to-number c)
-                 (+ (complex-real c) (* +1i (complex-imag c))))
+                 (+ (cpx-real c) (* +1i (cpx-imag c))))
                (define =? (liftb =))
                (define plus (lift2 +))
                (define minus (lift2 -))
@@ -99,45 +103,40 @@ Language: ISL+λ + class0.
                (define sq (lift1 sqr))
                (define sqroot (lift1 sqrt))))
            (the-eval
-            `(define complex%
-               (class* object% ()
-                 (inspect #f)
-                 (super-new)
-                 (init [(the-real real)]
-                       [(the-imag imag)])
-                 
-                 (define n (+ the-real (* +i the-imag)))
-                 
-                 (define/public (real) (real-part n))
-                 (define/public (imag) (imag-part n))
-                 
-                 (define/public (=? c)
-                   (= n (send c to-number)))
-                 
-                 (define/public (plus c)
-                   (from-number (+ n (send c to-number))))
-                 
-                 (define/public (minus c)
-                   (from-number (- n (send c to-number))))
-                 
-                 (define/public (times c)
-                   (from-number (* n (send c to-number))))
-                 
-                 (define/public (div c)
-                   (from-number (/ n (send c to-number))))
-                 
-                 (define/public (sq)
-                   (from-number (sqr n)))
-                 
-                 (define/public (sqroot)
-                   (from-number (sqrt n)))
-                 
-                 (define/private (from-number c)
-                   (new complex% 
-                        [real (real-part c)]
-                        [imag (imag-part c)]))
-                 
-                 (define/public (to-number) n)))))
+            `(define-class complex%
+	       (fields real imag)                 
+	       (define/private (n) (+ (field real) (* +i (field imag))))
+	       
+	       (define/public (=? c)
+		 (= (n) (send c to-number)))
+	       
+	       (define/public (plus c)
+		 (from-number (+ (n) (send c to-number))))
+	       
+	       (define/public (minus c)
+		 (from-number (- (n) (send c to-number))))
+	       
+	       (define/public (times c)
+		 (from-number (* (n) (send c to-number))))
+	       
+	       (define/public (div c)
+		 (from-number (/ (n) (send c to-number))))
+	       
+	       (define/public (sq)
+		 (from-number (sqr (n))))
+	       
+	       (define/public (sqroot)
+		 (from-number (sqrt (n))))
+	       
+	       (define/public (mag)
+		 (magnitude (n)))
+
+	       (define/private (from-number c)
+		 (new complex% 
+		      [real (real-part c)]
+		      [imag (imag-part c)]))
+	       
+	       (define/public (to-number) (n)))))
         
         Supposing your language was impoverished and didn't support
         complex numbers, you should be able to build them yourself 
@@ -147,7 +146,7 @@ Language: ISL+λ + class0.
         Design a structure-based data representation for @tt{Complex}
         values.
         Design the functions @racket[=?], @racket[plus], @racket[minus],
-        @racket[times], @racket[div], @racket[sq], and @racket[sqroot].
+        @racket[times], @racket[div], @racket[sq], @racket[mag], and @racket[sqroot].
         Finally, design a utility function
         @racket[to-number] which can convert @tt{Complex} values into
         the appropriate Racket complex number.  Only the code and tests
@@ -156,22 +155,28 @@ Language: ISL+λ + class0.
         for yourself.  However, you can use Racket to double-check your 
         understanding of complex arithmetic.
         
+	For mathematical definitions of complex number operations, see
+	the Wikipedia entries on
+	@link["http://en.wikipedia.org/wiki/Complex_number"]{complex numbers}
+	and the
+	@link["http://en.wikipedia.org/wiki/Square_root#Principal_square_root_of_a_complex_number"]{square root of a complex number}.
+
         @examples[#:eval the-eval
-                         (define c-1  (make-complex -1 0))
-                         (define c0+0 (make-complex 0 0))                         
-                         (define c2+3 (make-complex 2 3))
-                         (define c3+5 (make-complex 4 5))
+                         (define c-1  (make-cpx -1 0))
+                         (define c0+0 (make-cpx 0 0))                         
+                         (define c2+3 (make-cpx 2 3))
+                         (define c3+5 (make-cpx 4 5))
                          (=? c0+0 c0+0)
                          (=? c0+0 c2+3)
                          (=? (plus c2+3 c3+5)
-                             (make-complex 6 8))]
+                             (make-cpx 6 8))]
         
         Develop a class-based data representation for @tt{Complex}
         values.
         Add accessor methods for extracting the @racket[real] and @racket[imag] 
         parts.
         Develop the methods @racket[=?], @racket[plus], @racket[minus],
-        @racket[times], @racket[div], @racket[sq], @racket[sqroot] and
+        @racket[times], @racket[div], @racket[sq], @racket[mag], @racket[sqroot] and
         @racket[to-number].
         
         @examples[#:eval the-eval
@@ -194,7 +199,8 @@ Language: ISL+λ + class0.
                          (send (send c2+3 times c3+5) =?
                                (new complex% [real -7] [imag 22]))
                          (send (send c2+3 div c3+5) =?
-                               (new complex% [real 23/41] [imag 2/41]))]
+                               (new complex% [real 23/41] [imag 2/41]))
+			 (send (new complex% [real 3] [imag 4]) mag)]
                          
         }
  
