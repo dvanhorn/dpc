@@ -10,7 +10,7 @@
          (all-from-out lang/htdp-intermediate-lambda)
          define test require provide
          all-defined-out only-in all-from-out except-in
-         (all-from-out test-engine/racket-tests))
+         (except-out (all-from-out test-engine/racket-tests) test))
 
 (require (for-syntax syntax/parse racket/base))
 
