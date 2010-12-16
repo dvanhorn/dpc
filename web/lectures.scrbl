@@ -48,8 +48,8 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
 @section[#:tag "lec06"]{1/27: Universes}
 @section[#:tag "lec07"]{1/31: Constructors}
-@section[#:tag "lec08"]{ 2/3: }
-@section[#:tag "lec09"]{ 2/7: Abstracting with classes}                        
+@section[#:tag "lec08"]{ 2/3: Abstracting with classes}
+@section[#:tag "lec09"]{ 2/7: Modules}
 @section[#:tag "lec10"]{2/10: Designing methods with accumulators}
 @section[#:tag "lec11"]{2/14: Designing generative recursive methods}
 @section[#:tag "lec12"]{2/17: Intermezzo: Java}
