@@ -75,5 +75,5 @@
 (define-syntax (new stx)
   (syntax-parse stx
     [(_ cls:cls-name . args)
-     #'(r:new cls.real-name . args)]))
+     #'(r:make-object cls.real-name . args)]))
 
