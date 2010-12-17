@@ -19,7 +19,7 @@ TAs teach labs, supervise the grading of homework sets, hold office hours, and o
 
 @tabular[
   (list (list "Sam Tobin-Hochstadt " "WVH308 " "Monday" "1:30-3:30")
-        (list "David Van Horn" "WVH350" "Thursday " "1:30-30"))]
+        (list "David Van Horn" "WVH350" "Thursday " "1:30-3:30"))]
 
 @section{Class}
 

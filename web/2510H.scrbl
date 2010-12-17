@@ -53,8 +53,6 @@ to practical hands-on programming.
   @item{Outline assignments, lectures and labs}
   @item{Project?}
   @item{The Style}
-  @item{Documentation for @racket[class0], ...}
-  @item{Local guide on using SVN}
   @item{Staff coordinates, office hours, email addresses}
   @item{History of objects}]
 
