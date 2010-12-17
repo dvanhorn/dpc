@@ -1,9 +1,8 @@
 #lang scribble/manual
-@(require "../unnumbered.rkt")
-@(require scribble/eval
-          racket/sandbox
-          (for-label lang/htdp-intermediate-lambda)
-          #;(for-label class0))
+@(require "../utils.rkt"
+	  scribble/eval
+          racket/sandbox	  
+          (for-label class0))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -21,8 +20,9 @@
 
 Due: 1/12.
 
-Language: ISL+λ + class0.
+Language: @racketmodname[class0].
 
+@internal{
 @itemlist[#:style 'ordered 
  @item{@bold{The @racket[complex%] class.}
        
@@ -207,3 +207,4 @@ Language: ISL+λ + class0.
  @item{@bold{SVN basics}
         
         Check in your assigment.}]
+}

@@ -1,6 +1,6 @@
 #lang scribble/manual
-@(require "unnumbered.rkt")
-@(require scribble/eval
+@(require "utils.rkt"
+	  scribble/eval
           racket/sandbox
           (for-label lang/htdp-intermediate-lambda)
           #;(for-label class0))
@@ -26,6 +26,7 @@ each lecture.
 
 @section[#:tag "lec02"]{1/13: Designing classes}
 
+@internal[
 [Here we build OO-design from the gound up.]
 
 [Enumerations, unions (recursive), containment, ...]
@@ -36,6 +37,7 @@ each lecture.
 things.]
 
 Ch. 3, 4, 5, 6, 11, 12.
+]
 
 @section[#:tag "lec03"]{1/17: Holiday (MLK Day)}
 
@@ -45,7 +47,7 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
 @section[#:tag "lec05"]{1/24: Designing applicative classes}
 
-[Bigger system design.  In lecture: Snake Game.]
+@internal[Bigger system design.  In lecture: Snake Game.]
 
 @section[#:tag "lec06"]{1/27: Universes}
 @section[#:tag "lec07"]{1/31: Constructors}

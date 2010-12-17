@@ -5,3 +5,8 @@ main:
 
 web:
 	@STUDENTS=1 make main
+
+web-install: web	
+	scp 2510H/* login.ccs.neu.edu:/course/cs2510h/.www/
+
+

@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "unnumbered.rkt")
+@(require "utils.rkt")
 
 @title[#:style 'toc]{Assignments}
 
@@ -8,6 +8,8 @@ Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise no
 @local-table-of-contents[]
 
 @include-section["assignments/assign01.scrbl"]
+
+@internal[
 
 @section[#:tag "assign02"]{1/19: Zombie}
 
@@ -33,3 +35,4 @@ Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise no
 @section[#:tag "assign13"]{4/06: Proj Dev 3}
 @section[#:tag "assign14"]{4/13: Proj Dev 4}
 @section[#:tag "assign15"]{4/20: Proj Dev 5}
+]

@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "unnumbered.rkt")
+@(require "utils.rkt")
 
 @title[#:style 'toc]{Labs}
 
@@ -9,6 +9,7 @@
 
 Partner assignments.
 
+@internal{
 @section[#:tag "lab02"]{1/17: No lab (MLK Day)}
 @section[#:tag "lab03"]{1/24}
 @section[#:tag "lab04"]{1/31}
@@ -28,4 +29,4 @@ Partner switch for homework due on 3/23.
 @section[#:tag "lab12"]{3/28}
 @section[#:tag "lab13"]{4/4}
 @section[#:tag "lab14"]{4/11}
-@section[#:tag "lab15"]{4/18: No lab (Patriots Day)}
+@section[#:tag "lab15"]{4/18: No lab (Patriots Day)}}

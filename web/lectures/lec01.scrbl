@@ -1,6 +1,7 @@
 #lang scribble/manual
 @(require "../unnumbered.rkt")
 @(require scribble/eval
+	  "../utils.rkt"
           racket/sandbox
           (for-label lang/htdp-intermediate-lambda)
           #;(for-label class0))
@@ -18,6 +19,7 @@
 
 @title[#:tag "lec01"]{1/10: Object = structure + functions}
 
+@internal{
 @examples[#:eval the-eval
           (circle 10 "solid" "red")]
 
@@ -172,3 +174,4 @@ which can be invoked by sending the field name as a message to the object.
    (send (new coord% [x 1] [y 2]) x)
    (send (new coord% [x 1] [y 2]) y)]
 
+}
