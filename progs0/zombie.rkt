@@ -38,16 +38,16 @@
   (define/public (on-mouse x y m)
     (cond [(mouse=? "button-down" m)
            (new world%
-                [player (posn x y)]
-                [zombies (field zombies)]
-                [junk (field junk)]
-                [mouse-posn (posn x y)])]
+                (posn x y)
+                (field zombies)
+                (field junk) 
+                (posn x y))]
           [(mouse=? "move" m)
            (new world%
-                [player (field player)]
-                [zombies (field zombies)]
-                [junk (field junk)]
-                [mouse-posn (posn x y)])]
+                (field player)
+                (field zombies)
+                (field junk)
+                (posn x y))]
           [else this]))
 
   (define/public (stop-when)
@@ -65,14 +65,14 @@
   (define/public (move)
     (let ((p (field player)))
       (new world%
-           [player (+ (field player) 
-                      (min-taxi 5
-                                (field player)
-                                (field mouse-posn)))]
-           [zombies (map (λ (r) (+ r (min-taxi 1 r p)))
-                         (field zombies))]
-           [junk (field junk)]
-           [mouse-posn (field mouse-posn)])))
+           (+ (field player) 
+              (min-taxi 5
+                        (field player)
+                        (field mouse-posn)))
+           (map (λ (r) (+ r (min-taxi 1 r p)))
+                (field zombies))
+           (field junk)
+           (field mouse-posn))))
 
   ;; -> World
   ;; Junk all zombies that touch other zombies or junk.
@@ -81,10 +81,10 @@
     (local [(define (seg zs-to-consider maybe-zs junk)
               (cond [(empty? zs-to-consider) 
                      (new world%
-                          [player (field player)]
-                          [zombies (reverse maybe-zs)]
-                          [junk junk]
-                          [mouse-posn (field mouse-posn)])]
+                          (field player)
+                          (reverse maybe-zs)
+                          junk
+                          (field mouse-posn))]
                     [else
                      (let ((touching-first? (touching? (first zs-to-consider))))
                        (cond [(ormap touching-first? (append maybe-zs junk))
@@ -160,9 +160,9 @@
 ;; Run program, run!
 (big-bang
  (new world%
-      [player (posn 0 0)]
-      [mouse-posn (posn 0 0)]
-      [zombies (build-list (+ 20 (random 20))
-                           (λ (_)
-                             (random-posn *dim*)))]
-      [junk empty]))
+      (posn 0 0)
+      (build-list (+ 20 (random 20))
+                  (λ (_)
+                    (random-posn *dim*)))
+      empty
+      (posn 0 0)))
