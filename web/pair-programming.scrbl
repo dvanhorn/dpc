@@ -1,4 +1,5 @@
 #lang scribble/manual
+@(require "unnumbered.rkt")
 
 @title[#:tag "pair"]{Pair Programming}
 

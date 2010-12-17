@@ -1,4 +1,5 @@
 #lang scribble/manual
+@(require "unnumbered.rkt")
 
 @title{General}
 
@@ -18,8 +19,9 @@ TAs teach labs, supervise the grading of homework sets, hold office hours, and o
 @section{Office Hours}
 
 @tabular[
-  (list (list "Sam Tobin-Hochstadt " "WVH308 " "Monday" "1:30-3:30")
-        (list "David Van Horn" "WVH350" "Thursday " "1:30-3:30"))]
+  (list (list "Sam Tobin-Hochstadt " "WVH308 " "Monday" "1:30–3:30")
+        (list "David Van Horn" "WVH350" "Thursday " "1:30–3:30"))]
+        (list "Dan Brown" "WVH308" "Tuesday " "4:00–6:00"))]
 
 @section{Class}
 
@@ -27,11 +29,11 @@ Class consists of lecture (CS2510H) and lab (CS2511H) sections.
 
 @bold{Lectures:}
 
-Lectures are held Monday & Thursday in 108 West Village H from 11:45am until 1:25pm.
+Mon, Thu 11:45–1:25pm WVH 108
 
 @bold{Labs:}
 
-Labs are held Monday in 210 West Village H from 6:00pm until 7:40pm.
+Mon 6:00–7:40pm WVH 210
 
 
 @section{Policies}

@@ -1,4 +1,5 @@
 #lang scribble/manual
+@(require "unnumbered.rkt")
 @(require scribble/eval
           racket/sandbox
           (for-label lang/htdp-intermediate-lambda)
@@ -36,7 +37,7 @@ things.]
 
 Ch. 3, 4, 5, 6, 11, 12.
 
-@section[#:tag "lec03"]{1/17 - MLK}
+@section[#:tag "lec03"]{1/17: Holiday (MLK Day)}
 
 There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
@@ -48,26 +49,26 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
 @section[#:tag "lec06"]{1/27: Universes}
 @section[#:tag "lec07"]{1/31: Constructors}
-@section[#:tag "lec08"]{ 2/3: Abstracting with classes}
-@section[#:tag "lec09"]{ 2/7: Modules}
+@section[#:tag "lec08"]{2/03: Abstracting with classes}
+@section[#:tag "lec09"]{2/07: Modules}
 @section[#:tag "lec10"]{2/10: Designing methods with accumulators}
 @section[#:tag "lec11"]{2/14: Designing generative recursive methods}
 @section[#:tag "lec12"]{2/17: Intermezzo: Java}
-@section[#:tag "lec13"]{2/21 - Presidents}
+@section[#:tag "lec13"]{2/21: Holiday (Presidents Day)}
 
 There is no lecture on 2/21 since it is Presidents Day.
 
 @section[#:tag "lec14"]{2/24: Indexed data}
-@section[#:tag "lec15"]{2/28 - Spring break}
+@section[#:tag "lec15"]{2/28: Holiday (Spring break)}
 
 There is no lecture on 2/28 since it is during Spring break.
 
-@section[#:tag "lec16"]{3/3 - Spring break}
+@section[#:tag "lec16"]{3/03: Holiday (Spring break)}
 
 There is no lecture on 3/3 since it is during Spring break.
 
 
-@section[#:tag "lec17"]{ 3/7: Circular data; Methods for circular data}
+@section[#:tag "lec17"]{3/07: Circular data; Methods for circular data}
 @section[#:tag "lec18"]{3/10: Stateful objects (1)}
 @section[#:tag "lec19"]{3/14: Stateful objects (2)}
 @section[#:tag "lec20"]{3/17: Abstracting with mixins}
@@ -93,10 +94,10 @@ There is no lecture on 3/3 since it is during Spring break.
 @section[#:tag "lec22"]{3/24: Traversals}
 @section[#:tag "lec23"]{3/28: Visitors}
 @section[#:tag "lec24"]{3/31: Object equality: principles}
-@section[#:tag "lec25"]{ 4/4: Object equality: practice}
-@section[#:tag "lec26"]{4/7: Intermezzo: Ruby}
+@section[#:tag "lec25"]{4/04: Object equality: practice}
+@section[#:tag "lec26"]{4/07: Intermezzo: Ruby}
 @section[#:tag "lec27"]{4/11: Random and stress testing}
 @section[#:tag "lec28"]{4/14: Implementing OO}
-@section[#:tag "lec29"]{4/18 - Patriots}
+@section[#:tag "lec29"]{4/18: Holiday (Patriots Day)}
 
 There is no lecture on 4/18 since it is Patriots Day.

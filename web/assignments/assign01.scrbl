@@ -1,4 +1,5 @@
 #lang scribble/manual
+@(require "../unnumbered.rkt")
 @(require scribble/eval
           racket/sandbox
           (for-label lang/htdp-intermediate-lambda)

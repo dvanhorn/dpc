@@ -1,4 +1,5 @@
 #lang scribble/manual
+@(require "unnumbered.rkt")
 @(require (only-in racket first rest make-list))
 
 @title{Syllabus}

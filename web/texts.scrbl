@@ -1,4 +1,6 @@
 #lang scribble/manual
+@(require "unnumbered.rkt")
+
 @title{Texts}
 
 @section{Required Reading}

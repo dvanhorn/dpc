@@ -1,4 +1,5 @@
 #lang scribble/manual
+@(require "unnumbered.rkt")
 
 @(define (ittt . args) (italic (apply tt args)))
 
