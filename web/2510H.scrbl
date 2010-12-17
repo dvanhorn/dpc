@@ -1,4 +1,5 @@
 #lang scribble/manual
+@(require "utils.rkt")
 
 @title{@bold{Fundamentals of Computer Science II (Honors)}
        @linebreak[]
@@ -40,12 +41,17 @@ to practical hands-on programming.
 
 @include-section["subversion.scrbl"]
 
+@include-section["pair-programming.scrbl"]
+
+@include-section["style.scrbl"]
+
+@include-section["class.scrbl"]
+
 @section{Blog}
 
 @subsection{Welcome to CS2510H.}
 
-@include-section["class.scrbl"]
-              
+@internal[              
 @section{TODO}
 
 @itemlist[#:style 'ordered
@@ -53,6 +59,7 @@ to practical hands-on programming.
   @item{Outline assignments, lectures and labs}
   @item{Project?}
   @item{The Style}
+  @item{Ping operations for tutors; hire tutors.}
   @item{Staff coordinates, office hours, email addresses}
-  @item{History of objects}]
+  @item{History of objects}]]
 

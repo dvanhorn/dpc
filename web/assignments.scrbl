@@ -1,12 +1,10 @@
 #lang scribble/manual
 
-@title{Assignments}
+@title[#:style 'toc]{Assignments}
 
 Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise noted.
 
-@include-section["pair-programming.scrbl"]
-
-@include-section["style.scrbl"]
+@local-table-of-contents[]
 
 @include-section["assignments/assign01.scrbl"]
 

@@ -105,6 +105,12 @@ class0
 (big-bang (new counter-world% 0))
 ]}
 
+@defform[#:id name
+         #:literals (send name)
+  (send a-world name)]{
+
+  Produces the name of the world.}
+
 @defform[#:id on-tick 
 	 #:literals (send on-tick) 
   (send a-world on-tick)]{
