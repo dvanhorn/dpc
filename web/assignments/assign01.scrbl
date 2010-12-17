@@ -133,8 +133,8 @@ Language: ISL+λ + class0.
 
 	       (define/private (from-number c)
 		 (new complex% 
-		      [real (real-part c)]
-		      [imag (imag-part c)]))
+		      (real-part c)
+		      (imag-part c)))
 	       
 	       (define/public (to-number) (n)))))
         
@@ -181,28 +181,27 @@ Language: ISL+λ + class0.
         
         @examples[#:eval the-eval
                          @code:comment{Some example Complex values.}
-                         (define c-1  (new complex% [real -1] [imag 0]))
-                         (define c0+0 (new complex% [real 0] [imag 0]))
-                         (define c2+3 (new complex% [real 2] [imag 3]))
-                         (define c3+5 (new complex% [real 4] [imag 5]))
+			 (define c-1  (new complex% -1 0))
+			 (define c0+0 (new complex% 0 0))
+			 (define c2+3 (new complex% 2 3))
+			 (define c3+5 (new complex% 4 5))
                          @code:comment{Verify the imaginary unit property.}
-                         (send (send (send c-1 sqroot) sq) =? c-1)
-                         (send (send (new complex% [real 0] [imag 1]) sq) =? c-1)
+			 (send c-1 mag)
+			 (send c-1 sqroot) 
+			 (send (send (send c-1 sqroot) sq) =? c-1)
+			 (send (send (new complex% 0 1) sq) =? c-1)
                          @code:comment{Arithmetic on complex numbers.}
-                         (send c0+0 =? c0+0)
-                         (send c0+0 =? c2+3)
-                         c0+0
-                         (send (send c2+3 plus c3+5) =?
-                               (new complex% [real 6] [imag 8]))
-                         (send (send c2+3 minus c3+5) =?
-                               (new complex% [real -2] [imag -2]))
-                         (send (send c2+3 times c3+5) =?
-                               (new complex% [real -7] [imag 22]))
-                         (send (send c2+3 div c3+5) =?
-                               (new complex% [real 23/41] [imag 2/41]))
-			 (send (new complex% [real 3] [imag 4]) mag)]
-                         
-        }
+			 (send c0+0 =? c0+0)
+			 (send c0+0 =? c2+3)
+			 (send (send c2+3 plus c3+5) =?
+			       (new complex% 6 8))
+			 (send (send c2+3 minus c3+5) =?
+			       (new complex% -2 -2))
+			 (send (send c2+3 times c3+5) =?
+			       (new complex% -7 22))
+			 (send (send c2+3 div c3+5) =?
+			       (new complex% 23/41 2/41))
+			 (send (new complex% 3 4) mag)]}
  
  @item{@bold{SVN basics}
         

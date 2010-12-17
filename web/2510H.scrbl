@@ -43,6 +43,8 @@ to practical hands-on programming.
 @section{Blog}
 
 @subsection{Welcome to CS2510H.}
+
+@include-section["class.scrbl"]
               
 @section{TODO}
 
