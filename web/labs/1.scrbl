@@ -1,8 +1,9 @@
 #lang scribble/manual
-@(require "../unnumbered.rkt")
+@(require "../utils.rkt")
 
 @title[#:tag "lab01"]{1/10: Playing with objects}
 
+@internal{
 Setup:
 @itemlist[
   @item{partner assignments}
@@ -24,3 +25,4 @@ Objects:
   @item{named arguments for constructors (only)}
   @item{send}
 ]
+}

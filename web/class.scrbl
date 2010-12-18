@@ -1,6 +1,7 @@
 #lang scribble/manual
+@(require (prefix-in u: "unnumbered.rkt"))
 
-@title[#:style 'toc]{Class system}
+@u:title[#:style 'toc]{Class system}
 
 @local-table-of-contents[]
 

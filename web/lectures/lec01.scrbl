@@ -1,5 +1,4 @@
 #lang scribble/manual
-@(require "../unnumbered.rkt")
 @(require scribble/eval
 	  "../utils.rkt"
           racket/sandbox

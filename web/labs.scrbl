@@ -1,13 +1,12 @@
 #lang scribble/manual
-@(require "utils.rkt")
+@(require "utils.rkt"
+	  (prefix-in u: "unnumbered.rkt"))
 
-@title[#:style 'toc]{Labs}
+@u:title[#:style 'toc]{Labs}
 
 @local-table-of-contents[]
 
 @include-section["labs/1.scrbl"]
-
-Partner assignments.
 
 @internal{
 @section[#:tag "lab02"]{1/17: No lab (MLK Day)}
