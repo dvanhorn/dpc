@@ -10,4 +10,4 @@ web:
 web-install: web	
 	scp -r 2510H/* login.ccs.neu.edu:/course/cs2510h/.www/
 
-
+push: web-install
