@@ -145,6 +145,7 @@ table td {
 }
 .version {
   font-size: small;
+  opacity: 0;
 }
 .versionNoNav {
   font-size: xx-small; /* avoid overlap with author */
