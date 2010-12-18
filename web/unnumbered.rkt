@@ -1,6 +1,6 @@
 #lang racket
 
-(require (prefix-in scribble: scribble/manual))
+(require scribble/manual)
 (require scribble/core)
 (require (for-syntax syntax/parse))
 (require "keywords.rkt")
@@ -32,17 +32,11 @@
                        (string-append (symbol->string pre)
                                       (symbol->string (syntax->datum stx))))))
 
-(define-syntax redefine-unnumbered
-  (syntax-parser
-    [(_ id:id)
-     #`(define/kw-dict (id kws . args)
-         (keyword-apply/dict
-           #,(prefix-syntax #'() 'scribble: #'id)
-           (kw-style-add-props kws 'unnumbered)
-           args))]))
+(define (unnumbered f)
+  (λ/kw-dict (kws . args)
+    (keyword-apply/dict f (kw-style-add-props kws 'unnumbered) args)))
 
-(redefine-unnumbered title)
-(redefine-unnumbered section)
-(redefine-unnumbered subsection)
-(redefine-unnumbered subsubsection)
-(redefine-unnumbered subsubsub*section)
+(define title*         (unnumbered title))
+(define section*       (unnumbered section))
+(define subsection*    (unnumbered subsection))
+(define subsubsection* (unnumbered subsubsection))

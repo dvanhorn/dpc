@@ -1,9 +1,9 @@
 #lang scribble/manual
 @(require "unnumbered.rkt")
 
-@title{General}
+@title*{General}
 
-@section{People}
+@section*{People}
 
 @bold{Instructors:} 
 @link[#:style "plainlink" "http://www.ccs.neu.edu/home/samth/"]{Sam Tobin-Hochstadt}
@@ -16,14 +16,14 @@ TAs teach labs, supervise the grading of homework sets, hold office hours, and o
 
 @bold{Tutors:} TBD @;{Ryan Schwers, Nikko Patten, Trevor Sontag, Yarian Gomez}
 
-@section{Office Hours}
+@section*{Office Hours}
 
 @tabular[
   (list (list "Sam Tobin-Hochstadt " "WVH308 " "Monday" "1:30–3:30")
         (list "David Van Horn" "WVH350" "Thursday " "1:30–3:30"))]
         (list "Dan Brown" "WVH308" "Tuesday " "4:00–6:00"))]
 
-@section{Class}
+@section*{Class}
 
 Class consists of lecture (CS2510H) and lab (CS2511H) sections.
 
@@ -36,7 +36,7 @@ Mon, Thu 11:45–1:25pm WVH 108
 Mon 6:00–7:40pm WVH 210
 
 
-@section{Policies}
+@section*{Policies}
 
 @itemlist[
   @item{Late policy: there is no late policy; solutions to 
@@ -50,7 +50,7 @@ Mon 6:00–7:40pm WVH 210
   assigned partner.  Violations of academic integrity will be reported
   to OSCCR and will have a negative impact on your grade.}]
 
-@section{Computing Environment}
+@section*{Computing Environment}
 
 We will use @link[#:style "plainlink"
 "http://racket-lang.org/"]{DrRacket} v5.0.2.  DrRacket is installed on
@@ -63,7 +63,7 @@ need to install.
 You will use @secref{Subversion} to work on your homework sets, to
 keep track of revisions, and to submit your homework.
 
-@section{Problem Sets}
+@section*{Problem Sets}
 
 There will be weekly problem sets. 
 
@@ -72,7 +72,7 @@ grade from consideration for the final grade. Thus, if you just don't
 get it one week, nothing is lost. The story is different for the
 second or third or ... time.
 
-@section{Pair Programming}
+@section*{Pair Programming}
 
 You must work on your problem sets in pairs. Your lab TA will assign
 you a partner. Every few weeks, you will get a new partner.
@@ -87,18 +87,18 @@ keyboard and explains aloud what is going on; it is the co-pilot's
 responsibility to question everything. After a problem is solved to
 the satisfaction of both, you @emph{must} switch roles.
 
-@section{Exams}
+@section*{Exams}
 
 @itemlist[
   @item{Exam 1: 2/15 at 6-9 PM}
   @item{Exam 2: 3/22 at 6-9 PM}]
 
-@section{Projects}
+@section*{Projects}
 
 There will be a substantial class project implemented over the last
 several weeks of the course.
 
-@section{Grades}
+@section*{Grades}
 
 You will get a gpa for your homework (including the project) and for
 your exams. You must have both a passing homework gpa and a passing

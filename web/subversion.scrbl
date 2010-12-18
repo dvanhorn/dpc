@@ -3,7 +3,7 @@
 
 @(define (ittt . args) (italic (apply tt args)))
 
-@title{Subversion}
+@title*{Subversion}
 
 In this course, we will
 @link["http://subversion.tigris.org/"]{Subversion} for collaboration,
@@ -13,7 +13,7 @@ Working with subversion is relatively straightforward (for this
 course). Read this local guide closely and pay close attention in the
 @seclink["lab01"]{first lab}.
 
-@section{Purpose}
+@section*{Purpose}
 
 Subversion is a version control system that keeps versions of your
 files in a "repository."  For this course, we provide a repository on
@@ -28,7 +28,7 @@ of many different versions of your software system. In addition, the
 system helps you work on the same project from many different places
 (and in company settings in a distributed manner).
 
-@section{Your homework directories}
+@section*{Your homework directories}
 
 You will use subversion to work on your homework sets, to keep track
 of revisions, and to submit your homework. In particular, for each
@@ -53,7 +53,7 @@ problem. This ensures that we can track problems within pairings, that
 you can prove your innocence in terms of code theft, and that you
 always have a backup of your work.
 
-@section{Homework submission}
+@section*{Homework submission}
 
 On the due date, an automated script will collect every pair's current
 solution at midnight. Since you will commit intermediate solutions,
@@ -62,7 +62,7 @@ deadline. We will grade the code that we collected
 on the due date. We will not use a revision that you submit
 later. Never.
 
-@section{Getting Subversion}
+@section*{Getting Subversion}
 
 The Subversion client may be downloaded at:
 
@@ -82,7 +82,7 @@ usage: svn <subcommand> [options] [args]
 Subversion command-line client, version 1.6.5.
 ...}
 
-@section{Command reference}
+@section*{Command reference}
 
 Subversion commands are of the form:
 
@@ -96,7 +96,7 @@ The @ittt{verb} says @emph{what} to do, such as to @tt{update} or
 @tt{-N}on-recursively.  The optional @ittt{nouns} are usually files or
 URLs on which verb should act.
 
-@subsection{Essential verbs}
+@subsection*{Essential verbs}
 
 Two important Subversion verbs are for displaying information:
 

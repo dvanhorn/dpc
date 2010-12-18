@@ -1,9 +1,9 @@
 #lang scribble/manual
 @(require (only-in racket first rest make-list)
-	  (prefix-in u: "unnumbered.rkt")
+	  "unnumbered.rkt"
 	  "utils.rkt")
 
-@u:title{Syllabus}
+@title*{Syllabus}
 
 @(define (number->string2 n)
    (let ((r (number->string n)))

@@ -1,6 +1,6 @@
 #lang scribble/manual
 @(require "utils.rkt"
-	  (prefix-in u: "unnumbered.rkt")
+	  "unnumbered.rkt"
 	  scribble/eval
           racket/sandbox
           (for-label lang/htdp-intermediate-lambda)
@@ -16,7 +16,7 @@
                  (dynamic-require 'htdp/isl/lang/reader 'options))))
     the-eval))
 
-@u:title[#:style 'toc]{Lectures}
+@title*[#:style 'toc]{Lectures}
 
 In this section, you'll find notes and code from 
 each lecture.

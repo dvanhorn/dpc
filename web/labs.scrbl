@@ -1,8 +1,8 @@
 #lang scribble/manual
 @(require "utils.rkt"
-	  (prefix-in u: "unnumbered.rkt"))
+          "unnumbered.rkt")
 
-@u:title[#:style 'toc]{Labs}
+@title*[#:style 'toc]{Labs}
 
 @local-table-of-contents[]
 

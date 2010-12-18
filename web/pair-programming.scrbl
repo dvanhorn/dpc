@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require "unnumbered.rkt")
 
-@title[#:tag "pair"]{Pair Programming}
+@title*[#:tag "pair"]{Pair Programming}
 
 Pair programming emerged in the 1990s in several different settings. 
 Companies realized that when individual programmers left, they were 

@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require "unnumbered.rkt")
 
-@title[#:tag "style"]{The Style}
+@title*[#:tag "style"]{The Style}
 
 In addition to following the design recipe, all code written for this class
 should adhere to the following basic style guidelines for your programs:

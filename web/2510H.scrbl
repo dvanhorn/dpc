@@ -1,6 +1,6 @@
 #lang scribble/manual
 @(require "utils.rkt"
-	  (prefix-in u: "unnumbered.rkt"))
+          "unnumbered.rkt")
 
 @title{@bold{Fundamentals of Computer Science II (Honors)}
        @linebreak[]
@@ -48,12 +48,12 @@ to practical hands-on programming.
 
 @include-section["class.scrbl"]
 
-@u:section{Blog}
+@section*{Blog}
 
 @subsection{Welcome to CS2510H.}
 
 @internal[              
-@u:section{TODO}
+@section*{TODO}
 
 @itemlist[#:style 'ordered
   @item{Syllabus}

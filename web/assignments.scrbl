@@ -1,8 +1,8 @@
 #lang scribble/manual
 @(require "utils.rkt"
-	  (prefix-in u: "unnumbered.rkt"))
+          "unnumbered.rkt")
 
-@u:title[#:style 'toc]{Assignments}
+@title*[#:style 'toc]{Assignments}
 
 Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise noted.
 
