@@ -28,7 +28,7 @@ each lecture.
 @section[#:tag "lec02"]{1/13: Designing classes}
 
 @internal{
-[Here we build OO-design from the gound up.]
+[Here we build OO-design from the ground up.]
 
 [Enumerations, unions (recursive), containment, ...]
 
@@ -44,24 +44,30 @@ Ch. 3, 4, 5, 6, 11, 12.
 
 There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
-@section[#:tag "lec04"]{1/20: Dispatch and Interfaces}
+@section[#:tag "lec04"]{1/20: Dispatch}
 
-@section[#:tag "lec05"]{1/24: Designing applicative classes}
+@section[#:tag "lec05"]{1/24: Programming with interfaces}
 
 @internal{Bigger system design.  In lecture: Snake Game.}
 
 @section[#:tag "lec06"]{1/27: Universes}
-@section[#:tag "lec07"]{1/31: Constructors}
-@section[#:tag "lec08"]{2/03: Abstracting with classes}
-@section[#:tag "lec09"]{2/07: Modules}
-@section[#:tag "lec10"]{2/10: Designing methods with accumulators}
-@section[#:tag "lec11"]{2/14: Designing generative recursive methods}
+
+@internal{ POPL: 1/27. }
+
+@section[#:tag "lec07"]{1/31: Abstracting with classes}
+
+@internal{ Inheritance. }
+
+@section[#:tag "lec08"]{2/03: Constructors}
+@section[#:tag "lec09"]{2/07: Generative recursion and accumulators}
+@section[#:tag "lec10"]{2/10: Modules}
+@section[#:tag "lec11"]{2/14: Indexed data}
 @section[#:tag "lec12"]{2/17: Intermezzo: Java}
 @section[#:tag "lec13"]{2/21: Holiday (Presidents Day)}
 
 There is no lecture on 2/21 since it is Presidents Day.
 
-@section[#:tag "lec14"]{2/24: Indexed data}
+@section[#:tag "lec14"]{2/24: ??}
 @section[#:tag "lec15"]{2/28: Holiday (Spring break)}
 
 There is no lecture on 2/28 since it is during Spring break.
