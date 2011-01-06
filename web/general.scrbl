@@ -14,13 +14,13 @@ and
 
 TAs teach labs, supervise the grading of homework sets, hold office hours, and occasionally substitute in lectures. In general, they are apprentice teachers and are here to learn how to run a course. 
 
-@bold{Tutors:} TBD @;{Ryan Schwers, Nikko Patten, Trevor Sontag, Yarian Gomez}
+@bold{Tutors:} Nikko Patten, Trevor Sontag, Alex Lee, Jim Shargo
 
 @section*{Office Hours}
 
 @tabular[
   (list (list "Sam Tobin-Hochstadt " "WVH308 " "Monday" "1:30–3:30")
-        (list "David Van Horn" "WVH350" "Thursday " "1:30–3:30"))]
+        (list "David Van Horn" "WVH350" "Thursday " "1:30–3:30")
         (list "Dan Brown" "WVH308" "Tuesday " "4:00–6:00"))]
 
 @section*{Class}
@@ -57,8 +57,14 @@ We will use @link[#:style "plainlink"
 the CCS computers. It is also freely available on the web in case you
 wish install it on your own computer.
 
-We will also be providing a package of course software that you will
-need to install.
+@(define plt-ver "01-06")
+
+You will need to install our @link[(format "class-system-~a.plt" plt-ver)]{course software} into DrRacket.
+In the DrRacket @tt{File} menu, select @tt{Install PLT File}, and then
+enter the url
+
+@tt[(format "http://www.ccs.neu.edu/course/cs2510h/class-system-~a.plt" plt-ver)]
+
 
 You will use @secref{Subversion} to work on your homework sets, to
 keep track of revisions, and to submit your homework.

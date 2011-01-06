@@ -38,7 +38,7 @@ a problem set @emph{N}, you will create, add, and commit a file called
 @tt{K.rkt} in directory @tt{setN}. Thus, all the work for problem set
 1 for your group @tt{GGG} should be visible at
 
-@tt{   https://trac.ccs.neu.edu/svn/cs2510Hspring2011/pairGGG/set1/}
+@tt{   https://trac.ccs.neu.edu/svn/cs2510hspring2011/pairGGG/set1/}
 
 where @tt{GGG} is your pairings index. At any time you can check what
 we will see by pointing a web browser to the above url. The browser
