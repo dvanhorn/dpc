@@ -2,7 +2,7 @@
 @(require "utils.rkt"
           "unnumbered.rkt")
 
-@title{@bold{Fundamentals of Computer Science II (Honors)}
+@title{Fundies II (Honors)
        @linebreak[]
        Introduction to Class-based Program Design}
 
