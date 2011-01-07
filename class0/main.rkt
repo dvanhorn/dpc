@@ -1,6 +1,6 @@
 #lang racket/base
 (require "define-class.rkt"
-         (except-in lang/htdp-intermediate-lambda define require #%module-begin)
+         (except-in lang/htdp-intermediate-lambda define require #%module-begin define-struct)
          test-engine/racket-tests)
 
 (require (prefix-in isl+: lang/htdp-intermediate-lambda))
@@ -20,4 +20,20 @@
      #'(r:#%module-begin forms ... (test))]))
 
 (provide #%module-begin)
+
+(provide define-struct)
+(require (for-syntax syntax/struct))
+(define-syntax (define-struct stx)
+  (syntax-parse stx
+    [(_ name:id (field:id ...))
+     (with-syntax ([(_ _ _ acc ...) 
+                    (build-struct-names #'name (syntax->list #'(field ...)) #f #t)])
+       #'(r:define-struct name (field ...) #:transparent 
+                          #:property prop:custom-write
+                          (r:λ (s p w?) 
+                            (fprintf p "(make-~a" 'name)
+                            (fprintf p " ~a" (acc s))
+                            ...
+                            (fprintf p ")"))))]))
+                  
     

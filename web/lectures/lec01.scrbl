@@ -2,25 +2,55 @@
 @(require scribble/eval
 	  "../utils.rkt"
           racket/sandbox
-          (for-label lang/htdp-intermediate-lambda)
-          #;(for-label class0))
+          #;(for-label lang/htdp-intermediate-lambda)
+  	  (for-label (only-in lang/htdp-intermediate-lambda define-struct))
+          (for-label (except-in class0 define-struct)))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
-    (the-eval '(require lang/htdp-intermediate-lambda))
+    ;(the-eval '(require lang/htdp-intermediate-lambda))
     (the-eval '(require class0))
     (the-eval '(require 2htdp/image))
-    (call-in-sandbox-context 
+    (the-eval '(require (prefix-in r: racket)))
+    #|(call-in-sandbox-context 
      the-eval 
      (lambda () ((dynamic-require 'htdp/bsl/runtime 'configure)
-                 (dynamic-require 'htdp/isl/lang/reader 'options))))
+                 (dynamic-require 'htdp/isl/lang/reader 'options))))|#
     the-eval))
 
 @title[#:tag "lec01"]{1/10: Object = structure + functions}
 
+
+@bold{Outline}
+@itemlist[
+ @item{Announcements
+   @itemlist[
+     @item{Course staff introductions.}
+     @item{Basic class mechanics.}
+     @item{On the experimental nature of this course.}
+     @item{The @seclink["assign01"]{first assignment}
+           is due @bold{this} Wednesday.}
+     @item{The @seclink["lab01"]{first lab} is @bold{tonight}.}
+     @item{Partners have already been assigned.  See the @seclink["Blog"]{blog}.}
+     @item{Questions?}]}
+ @item{Basics of objects
+   @itemlist[
+     @item{New paradigm.  Open your mind and embrace it (or you will be miserable).}
+     @item{Rocket, designed in functional style.}
+     @item{Rocket, designed in object-oriented style.}
+     @item{Landing and take off.}
+     @item{Satellite.}]}]
+
+@scheme-from-file["lectures/rocket-oo.rkt" #:start "lang" #:end "big-bang"]
+
+
 @internal{
 @examples[#:eval the-eval
-          (circle 10 "solid" "red")]
+                 (bitmap "lectures/rocket.png")
+                 (circle 10 "solid" "red")]
+ 
+ 
+
 
 
 Rocket + Satellite.
@@ -33,17 +63,6 @@ Data + functionality, using atomic data (numbers) and compound data
 
 Ch. 1, 2, 10
 
-@bold{Outline}
-@itemlist[
- @item{Announcements
-   @itemlist[
-     @item{The @seclink["assign01"]{first assignment}
-           is due @bold{this} Wednesday.}
-     @item{The @seclink["lab01"]{first lab} is @bold{tonight}.  (Partner assignments.)}]}
- @item{Course overview}
- @item{Basics of objects
-   @itemlist[
-     @item{New paradigm.  Open your mind and embrace it (or you will be miserable).}]}]
 
 @bold{Objects} are an old programming concept that first appeared in the 1950s
 across the Charles river.
@@ -146,7 +165,7 @@ Let's demonstrate the idea by re-designing the coordinate data definition and
 functions using a class-oriented design.
 
 @racketblock[
-  @code:comment{A Coord is a (new coord% [x Real] [y Real]).}]
+  @code:comment{A Coord is a (new coord% Real Real).}]
 @interaction[#:eval the-eval 
   (define-class coord%
     (fields x y))]
@@ -159,9 +178,7 @@ Just like an instance of the @racket[coord] structure, an instance of the
 @racket[coord%] class has an @racket[x] and a @racket[y] component.
 The syntax for constructing and tearing apart @racket[coord%]s is slightly different
 from strutures.  Rather than using the @racket[make-coord] constructor function,
-a @racket[coord%] object is constructed with @racket[(new coord% [x 1] [y 2])].
-Notice that the components are @emph{named} in the constructor, so the order does
-not matter; the same coordinate is constructed with @racket[(new coord% [y 2] [x 1])].
+a @racket[coord%] object is constructed with @racket[(new coord% 1 2)].
 
 The way to invoke a computation on an object is to send the object a message it
 understands.  The simplest computations on structured data are the accessor computations
@@ -170,7 +187,9 @@ accessors functions, class definitions provide objects with accessor @emph{metho
 which can be invoked by sending the field name as a message to the object.
 
 @examples[#:eval the-eval
-   (send (new coord% [x 1] [y 2]) x)
-   (send (new coord% [x 1] [y 2]) y)]
+   (send (new coord% 1 2) x)
+   (send (new coord% 1 2) y)
+   (new coord% 1 (circle 10 "solid" "red"))]
+
 
 }

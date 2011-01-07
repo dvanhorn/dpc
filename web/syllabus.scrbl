@@ -5,6 +5,8 @@
 
 @title*{Syllabus}
 
+This syllabus will evolve throughout the semester so check it often.
+
 @(define (number->string2 n)
    (let ((r (number->string n)))
      (cond [(= (string-length r) 1)
