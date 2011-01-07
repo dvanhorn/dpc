@@ -10,30 +10,35 @@
 and 
 @link[#:style "plainlink" "http://www.ccs.neu.edu/home/dvanhorn/"]{David Van Horn}.
 
-@bold{TAs:} @link[#:style "plainlink" "http://www.ccs.neu.edu/home/dbrown/"]{Dan Brown}
+@bold{TA:} @link[#:style "plainlink" "http://www.ccs.neu.edu/home/dbrown/"]{Dan Brown}
 
-TAs teach labs, supervise the grading of homework sets, hold office hours, and occasionally substitute in lectures. In general, they are apprentice teachers and are here to learn how to run a course. 
+TAs teach labs, supervise the grading of homework sets, hold office
+hours, and occasionally substitute in lectures. In general, they are
+apprentice teachers and are here to learn how to run a course.
 
 @bold{Tutors:} Nikko Patten, Trevor Sontag, Alex Lee, Jim Shargo
 
 @section*{Office Hours}
 
 @tabular[
-  (list (list "Sam Tobin-Hochstadt " "WVH308 " "Monday" "1:30–3:30")
-        (list "David Van Horn" "WVH350" "Thursday " "1:30–3:30")
-        (list "Dan Brown" "WVH308" "Tuesday " "4:00–6:00"))]
+  (list (list "Sam Tobin-Hochstadt" (tt "samth") "WVH308 " "Monday" "1:30–3:30")
+        (list "David Van Horn" (tt "dvanhorn") "WVH350" "Thursday " "1:30–3:30")
+        (list "Dan Brown" (tt "dbrown") "WVH308" "Tuesday " "4:00–6:00")
+	(list "Nikko Patten" (tt "npatten")"WVH102" "TBD" "TBD")
+	(list "Trevor Sontag" (tt "tasontag") "WVH102" "TBD" "TBD")
+	(list "Alex Lee" (tt "lee") "WVH102" "TBD" "TBD")
+	(list "Jim Shargo" (tt "shargoj") "WVH102" "TBD" "TBD"))]
 
-@section*{Class}
+@bold{Communication}: Use CCIS email (@tt{@"@"ccs.neu.edu}) to reach
+any of the course staff; usernames are given above.
 
-Class consists of lecture (CS2510H) and lab (CS2511H) sections.
 
-@bold{Lectures:}
+@bold{Class:} Class consists of lecture (CS2510H) and lab (CS2511H)
+sections.
 
-Mon, Thu 11:45–1:25pm WVH 108
+@bold{Lectures:} Mon, Thu 11:45–1:25pm WVH 108
 
-@bold{Labs:}
-
-Mon 6:00–7:40pm WVH 210
+@bold{Labs:} Mon 6:00–7:40pm WVH 210
 
 
 @section*{Policies}

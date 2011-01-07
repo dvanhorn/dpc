@@ -32,6 +32,8 @@ p, .SIntrapara {
 
 h2 { /* per-page main title */
   margin-top: 0;
+  font-family: 'KulminoituvaRegular', times, serif;
+  font-weight: normal;
 }
 
 h3, h4, h5, h6, h7, h8 {
@@ -432,4 +434,12 @@ i {
 .author {
   display: inline;
   white-space: nowrap;
+}
+
+@font-face {
+    font-family: 'KulminoituvaRegular';
+    src: url('kulminoituva-webfont.eot');
+    src: local('☺'), url('kulminoituva-webfont.woff') format('woff'), url('kulminoituva-webfont.ttf') format('truetype'), url('kulminoituva-webfont.svg#webfontVvRU3foq') format('svg');
+    font-weight: normal;
+    font-style: normal;
 }
