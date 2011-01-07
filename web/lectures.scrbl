@@ -46,17 +46,19 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
 @section[#:tag "lec04"]{1/20: Dispatch}
 
+@internal{[Examples: shapes, lists]}
+
 @section[#:tag "lec05"]{1/24: Programming with interfaces}
 
 @internal{Bigger system design.  In lecture: Snake Game.}
 
 @section[#:tag "lec06"]{1/27: Universes}
 
-@internal{ POPL: 1/27. }
+@internal{ POPL: 1/27. Example: Hangman}
 
 @section[#:tag "lec07"]{1/31: Abstracting with classes}
 
-@internal{ Inheritance. }
+@internal{ Inheritance. Example: Lists, ?}
 
 @section[#:tag "lec08"]{2/03: Constructors}
 @section[#:tag "lec09"]{2/07: Generative recursion and accumulators}
