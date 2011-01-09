@@ -1,13 +1,5 @@
 #lang racket
 
-; Questions:
-;  - big-bang macro or world objects?
-;  - style for calling methods on this?
-;  - #lang or ASL?
-
-; TODO:
-;  - named args -> positional args
-
 (require class0)
 (require 2htdp/image)
 (require 2htdp/universe)

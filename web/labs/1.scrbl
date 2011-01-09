@@ -28,7 +28,6 @@
   @item{#lang or ASL?}
   @item{style for calling methods on @racket[this]?}
   @item{@racket[big-bang] or World objects?}
-  @item{named args -> positional args}
 ]
 
 @section{Partner assignments}
