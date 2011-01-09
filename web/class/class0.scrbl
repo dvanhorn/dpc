@@ -132,10 +132,10 @@ class0
 
 @defform[#:id on-mouse
 	 #:literals (send on-mouse)
-  (send a-world on-mouse m x y)
-  #:contracts [(m mouse-event?)
-               (x integer?) 
-               (y integer?)]]{
+  (send a-world on-mouse x y m)
+  #:contracts [(x integer?) 
+               (y integer?)
+               (m mouse-event?)]]{
   Handle the mouse event @racket[m] at location  (@racket[x],@racket[y]),
   producing a world.}
 
