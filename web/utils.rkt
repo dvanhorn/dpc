@@ -23,8 +23,14 @@
 (define (indented . args)
   (apply nested #:style 'inset args))
 
-(define (exercise . args)
-  (apply nested (bold "Exercise: ") args))
+(define exercise
+  (let [(i 0)]
+    (λ xs
+      (set! i (+ 1 i))
+      (apply nested #:style "exercise"
+                    (bold (format "Exercise ~s." i))
+                    " "
+                    xs))))
 
 (require (for-syntax racket syntax/strip-context))
 

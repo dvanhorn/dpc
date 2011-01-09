@@ -1,8 +1,22 @@
-#lang racket
+#lang class0
 
-(require class0)
 (require 2htdp/image)
-(require 2htdp/universe)
+(require class0/universe)
+
+; random-between : Integer Integer -> Integer
+; Randomly choose a number between a and b (inclusive)
+(define (random-between a b)
+  (+ b (random (+ 1 (- b a)))))
+
+; choose : [Listof X] -> X
+; Randomly choose an element from the list
+(define (choose xs)
+  (list-ref xs (random (length xs))))
+
+; random-color : -> Color
+; Randomly choose a color from a set of common colors
+(define (random-color)
+  (choose (list "red" "blue" "green" "yellow" "orange" "purple" "black")))
 
 ; A Ball is a (new ball% Number Number Number Color)
 (define-class ball%
@@ -12,11 +26,17 @@
   ; The diameter of the Ball
   (define/public (diameter)
     (* 2 pi (field radius)))
-
-  ; Number -> Ball
-  ; Scale the radius of the Ball by a factor of x
-  (define/public (scale-radius x)
-    (new ball% (field x) (field y) (* x (field radius)) (field color)))
+  
+  ; Ball -> Number
+  ; The distance between the centers of the Balls
+  (define/public (distance-to b)
+    (sqrt (sqr (- (send b x) (field x)))
+          (sqr (- (send b y) (field y)))))
+  
+  ; Ball -> Boolean
+  ; Do the Balls overlap?
+  (define/public (overlaps? b)
+    (< (distance-to b) (+ (field radius) (send b radius))))
 
   ; -> Image
   ; The image representing the Ball
@@ -26,7 +46,17 @@
   ; -> Ball
   ; The next Ball in the animation sequence
   (define/public (step)
-    (scale-radius 49/50)))
+    (scale-radius 49/50))
+
+  ; Number -> Ball
+  ; Scale the radius of the Ball by a factor of x
+  (define/public (scale-radius x)
+    (new ball% (field x) (field y) (* x (field radius)) (field color))))
+
+; spawn-ball : Number Number -> Ball
+; Create a Ball with random parameters at location (x,y)
+(define (spawn-ball x y)
+  (new ball% x y (random-between 10 20) (random-color)))
 
 ; A Block is a (new block% Number Number Number Number Color)
 (define-class block%
@@ -52,67 +82,47 @@
          (field height)
          (field color))))
 
-; random-between : Integer Integer -> Integer
-; Randomly choose a number between a and b (inclusive)
-(define (random-between a b)
-  (+ b (random (+ 1 (- b a)))))
-
-; choose : [Listof X] -> X
-; Randomly choose an element from the list
-(define (choose xs)
-  (list-ref xs (random (length xs))))
-
-; random-color : -> Color
-; Randomly choose a color from a set of common colors
-(define (random-color)
-  (choose (list "red" "blue" "green" "yellow" "orange" "purple" "black")))
-
-; spawn-ball : Number Number -> Ball
-; Create a Ball with random parameters at location (x,y)
-(define (spawn-ball x y)
-  (new ball% x y (random-between 10 20) (random-color)))
-
 ; spawn-block : Number Number -> Block
 (define (spawn-block x y)
   (new block% x y (random-between 10 20) (random-between 10 20) (random-color)))
 
-; A Creature is an object that understands the `x', `y', `draw', and `step'
-; messages
+; A Creature is one of:
+;  - Ball
+;  - Block
 
-; spawn-functions : [Listof (-> Creature)]
-(define spawn-functions
+; creature-spawners : [Listof (-> Creature)]
+(define creature-spawners
   (list spawn-ball spawn-block))
 
-; creature-spawner : -> (Number Number -> Creature)
-(define (creature-spawner)
+; random-creature-spawner : -> (Number Number -> Creature)
+(define (random-creature-spawner)
   (choose (list spawn-ball spawn-block)))
 
-; A World is a [Listof Creature]
+; A World is a (new world% [Listof Creature])
+(define-class world%
+  (fields creatures)
+  
+  ; -> World
+  ; Advance the World
+  (define/public (on-tick)
+    (new world% (map (λ (c) (send c step)) (field creatures))))
+  
+  ; -> Image
+  ; Draw the World
+  (define/public (to-draw)
+    (foldr (λ (c scn) (place-image (send c draw)
+                                   (send c x)
+                                   (send c y)
+                                   scn))
+           (empty-scene 400 400)
+           (field creatures)))
+  
+  ; MouseEvent Integer Integer -> World
+  ; Respond to mouse events
+  (define/public (on-mouse x y ev)
+    (cond
+      [(equal? ev "button-down")
+       (new world% (cons ((random-creature-spawner) x y) (field creatures)))]
+      [else this])))
 
-; tick : World -> World
-; Advance the World
-(define (tick w)
-  (map (λ (c) (send c step)) w))
-
-; draw : World -> Image
-; Draw the World
-(define (draw w)
-  (foldr (λ (c scn) (place-image (send c draw)
-                                 (send c x)
-                                 (send c y)
-                                 scn))
-         (empty-scene 400 400)
-         w))
-
-; mouse : World Number Number MouseEvent -> World
-; Respond to mouse events
-(define (mouse w x y ev)
-  (cond
-    [(equal? ev "button-down")
-     (cons ((creature-spawner) x y) w)]
-    [else w]))
-
-(big-bang empty
-          (on-tick tick)
-          (on-draw draw)
-          (on-mouse mouse))
+(big-bang (new world% empty))
