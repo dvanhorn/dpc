@@ -1,5 +1,11 @@
 #lang racket
-(provide internal if-internal scheme-from-file)
+(provide internal
+         if-internal
+         indented
+         exercise
+         scheme-from-file)
+(require scribble/base)
+
 (define-syntax (internal stx)
   (syntax-case stx ()
     [(internal . forms)
@@ -13,6 +19,12 @@
      (if (getenv "STUDENTS")
 	 #'e2
 	 #'e1)])) 
+
+(define (indented . args)
+  (apply nested #:style 'inset args))
+
+(define (exercise . args)
+  (apply nested (bold "Exercise: ") args))
 
 (require (for-syntax racket syntax/strip-context))
 
