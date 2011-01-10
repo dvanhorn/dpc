@@ -6,16 +6,16 @@
 
 @title*{Subversion}
 
-In this course we will @link["http://subversion.tigris.org/"]{Subversion} for
-collaboration, version control, and homework submission. This guide and the
-@seclink["lab01"]{first lab} should show you everything you'll need to use
+In this course we will use @link["http://subversion.tigris.org/"]{Subversion}
+for collaboration, version control, and homework submission. This guide and the
+@seclink["lab01"]{first lab} will show you everything you'll need to use
 Subversion in this course.
 
 @section*{Purpose}
 
 Subversion is a version control system that keeps versions of your files in a
 "repository", which we will provide for you on a server. The repository will
-enable you to retrieve ("checkout," "update") and store ("commit") your files
+enable you to retrieve ("checkout", "update") and store ("commit") your files
 from multiple locations, and it will enable us to easily access your code for
 grading. It also provides a backup mechanism for you in case you ever need to
 revert to older versions of your code.
