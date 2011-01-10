@@ -47,7 +47,7 @@ To install the @racket[class0] language in DrRacket, go to @tt{File → Install
 .plt File... → Web} and copy in this URL:
 
 @indented{
-  @tt["http://www.ccs.neu.edu/course/cs2510h/class-system-lastest.plt"]
+  @tt["http://www.ccs.neu.edu/course/cs2510h/class-system-latest.plt"]
   @;@tt[(format "http://www.ccs.neu.edu/course/cs2510h/~a" plt-filename)]
 }
 
