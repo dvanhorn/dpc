@@ -19,15 +19,25 @@
 
 @internal{
 
-@section{Assignment 0: Subversion test run}
+@section{Subversion test run: Assignment 0}
 
-@itemlist[
-  @item{partner assignments}
-  @item{svn basics}
-  @item{submit assn0}
-]
+@exercise{
+  Find your @seclink["Initial_partnership_assignments"]{homework partner}
+}
 
-@section{Classes and objects}
+@exercise{
+  Familiarize yourself with @seclink["Subversion"]{how we will use Subversion}
+}
+
+@exercise{
+  Create and submit a dummy Assignment 0 with your homework partner:
+  @itemlist[
+    @item{Problem 1: Add some numbers together}
+    @item{Problem 2: Create an image}
+  ]
+}
+
+@section{Setting up @racket[class0]}
 
 To write object-oriented programs we will use a special dialect of Racket called
 @racket[class0] that includes support for classes and objects. Just like we
@@ -35,16 +45,16 @@ progressed through BSL, ISL, and ASL last semester, we will progress from
 @racket[class0] on to richer object-oriented dialects as we learn more about how
 to program with objects.
 
-To install the @racket[class0] language in DrRacket, go to @bold{File} →
-@bold{Install .plt File...} → @bold{Web} and copy in this URL:
+To install the @racket[class0] language in DrRacket, go to @tt{File → Install
+.plt File... → Web} and copy in this URL:
 
 @indented{
   @tt[(format "http://www.ccs.neu.edu/course/cs2510h/~a" plt-filename)]
 }
 
-Once installed, use the @racket[class0] language by selecting @bold{Language} →
-@bold{Choose Language...} → @bold{Use the language declared in the source}. Then
-start your file with the following lines:
+Once installed, use the @racket[class0] language by selecting @tt{Language →
+Choose Language... → Use the language declared in the source}. Then start your
+file with the following lines:
 
 @#reader scribble/comment-reader
 (racketmod class0
@@ -56,8 +66,10 @@ The @tt{#lang} line tells Racket to use the @racket[class0] language, and the
 two @racket[require] lines load the image and universe libraries that we'll use
 to create images and interactive programs.
 
-Here is a simple class in Racket to represent balls that we can draw to the
-screen:
+@section{Classes and objects}
+
+Here is an example class in Racket to represent balls that we can ask geometric
+questions of and draw to the screen.
 
 @#reader scribble/comment-reader
 (racketblock+eval #:eval the-eval
@@ -65,10 +77,22 @@ screen:
   (define-class ball%
     (fields x y radius color)
 
+    ; -> Number
+    ; The Ball's area
+    (define/public (area)
+      (* pi (sqr (field radius))))
+
     ; Ball -> Boolean
-    ; Do the Balls have the same color?
-    (define/public (same-color? b)
-      (equal? (field color) (send b color)))
+    ; Do the Balls have the same radius?
+    (define/public (same-radius? b)
+      (equal? (field radius)    ; (How to access our own field)
+              (send b radius))) ; (How to access someone else's field)
+
+    ; Ball -> Boolean
+    ; Do the Balls have the same area?
+    (define/public (same-area? b)
+      (equal? (area)            ; (How to call our own method)
+              (send b area)))   ; (How to call someone else's method)
 
     ; -> Image
     ; The image representing the Ball
@@ -76,22 +100,24 @@ screen:
       (circle (field radius) "solid" (field color))))
 )
 
-Recall that we can create and use Ball objects as follows:
+We can create and use Ball objects as follows:
 
 @interaction[#:eval the-eval
   (define b (new ball% 50 25 10 "red"))
   b
   (send b x)
   (send b radius)
-  (send b same-color? (new ball% 10 20 3 "red"))
+  (send b area)
+  (send b same-radius? (new ball% 10 20 3 "red"))
+  (send b same-area? (new ball% 10 20 3 "red"))
   (send b draw)
 ]
 
 We can add new Ball behaviors by adding methods to the @racket[ball%] class.
 
 @exercise{
-  Write a @racket[diameter] method for the class @racket[ball%] that calculates
-  the Ball's diameter.
+  Write a @racket[circumference] method for the class @racket[ball%] that
+  calculates the Ball's circumference.
 }
 
 @exercise{
@@ -253,9 +279,10 @@ over time.
   of its creatures.
 }
 
-Now we have a basic framework for animating various kinds of Creatures. Any
-objects that understand the @racket[x], @racket[y], @racket[draw], and
-@racket[step] methods should slot in with minimal changes.
+Now we have a basic framework for animating various kinds of Creatures. Unless
+you've done something strange, any objects that understand the @racket[x],
+@racket[y], @racket[draw], and @racket[step] methods should slot in with minimal
+changes.
 
 @exercise{
   @bold{(Open ended)} Create new kinds of Creatures with new kinds of movement.

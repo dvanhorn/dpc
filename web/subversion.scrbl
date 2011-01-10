@@ -7,9 +7,8 @@
 @title*{Subversion}
 
 In this course we will use @link["http://subversion.tigris.org/"]{Subversion}
-for collaboration, version control, and homework submission. This guide and the
-@seclink["lab01"]{first lab} will show you everything you'll need to use
-Subversion in this course.
+for collaboration, version control, and homework submission. This guide will
+show you everything you'll need to use Subversion in this course.
 
 @section*{Purpose}
 
@@ -20,38 +19,70 @@ from multiple locations, and it will enable us to easily access your code for
 grading. It also provides a backup mechanism for you in case you ever need to
 revert to older versions of your code.
 
-@section*{Your homework directories}
+@section*{Getting Subversion}
 
-You will use subversion to (1) work on your homework sets, (2) keep track of
-revisions, and (3) submit your homework. For each homework set @emph{N} create a
-directory @tt{setN} containing each problem in a separate racket file named
-@tt{K.rkt}, where @emph{K} is the problem number. For example, if homework set 1
-has three problems, your directory should look like this:
+The Subversion client may be downloaded at:
+
+@indented[
+  @url{http://subversion.tigris.org}
+]
+
+Binaries for several systems such as Windows, Mac OS X, and Linux are
+available.  If you have Windows, for example, you should the follow
+the link to ``Windows binaries''.  If you have Linux or Mac OS X,
+Subversion is likely pre-installed.
+
+You can confirm your Subversion installation
+by running it at your system's command prompt:
 
 @indented[@verbatim{
-  set1
-   - 1.rkt
-   - 2.rkt
-   - 3.rkt
+  $ svn help
+  usage: svn <subcommand> [options] [args]
+  Subversion command-line client, version 1.6.5.
+  ...
 }]
 
-Your work will always be visible within the repository at
+@section*{Your Subversion repository and homework directories}
+
+You will use Subversion to (1) keep track of revisions as you work on your
+assignments, and (2) submit your assignments for grading. If you are in pair
+number @emph{P}, then your repository is located at
 
 @indented[
   @tt{https://trac.ccs.neu.edu/svn/cs2510hspring2011/pairP/}
 ]
 
-where @emph{P} identifies your pair. So the current state of your work for
-homework set 1, as far as the repository is concerned, would be available at
+You should @tt{svn checkout} the above URL to create your local working
+directory. If you just want to view what files are there, you can also load it
+in a web browser (but you won't be able to commit anything from the browser).
+
+For each assignment @emph{N}, you will create a directory in your local working
+directory named @tt{assnN} containing each problem in a separate racket file
+named @tt{M.rkt}, where @emph{M} is the problem number. For example, if
+assignment 1 has three problems, your repository should look like this:
+
+@indented[@verbatim{
+  pairP
+   - assn1
+     - 1.rkt
+     - 2.rkt
+     - 3.rkt
+}]
+
+Whenever you want to push your changes to your repository, you will need to
+@tt{svn commit} them. (You will need to @tt{svn add} them first---see the
+command reference below).
+
+You could then verify the current state of your work for assignment 1, for
+instance, by pointing your browser to
 
 @indented[
-  @tt{https://trac.ccs.neu.edu/svn/cs2510hspring2011/pairP/set1/}
+  @tt{https://trac.ccs.neu.edu/svn/cs2510hspring2011/pairP/assn1/}
 ]
 
-If you point your browser at the above url you will see your submitted directory
-from the repository's point of view. Just like the design recipe asks you to run
-tests at the end of a design cycle, you should check on your homework assignment
-on the server whenever you think you're done.
+Just like the design recipe asks you to run tests at the end of a design cycle,
+you should check on your homework assignment on the server whenever you think
+you're done.
 
 You should commit all of your work every time you finish working on a
 problem. This ensures that we can track problems within pairings, that
@@ -65,29 +96,6 @@ at midnight. Each time you commit an intermediate solution you're guaranteeing
 yourself to have something available at the deadline. We will grade the code
 that we collect at midnight and ignore any revisions that you submit later. No
 exceptions.
-
-@section*{Getting Subversion}
-
-The Subversion client may be downloaded at:
-
-@indented[
-  @url{http://subversion.tigris.org}
-]
-
-Binaries for several systems such as Windows, Mac OS X, and Linux are
-available.  If you have Windows, for example, you should the follow
-the link to ``Windows binaries.''  If you have Linux or Mac OS X,
-Subversion is likely pre-installed.
-
-You can confirm your Subversion installation
-by running it at your system's command prompt:
-
-@indented[@verbatim{
-  $ svn help
-  usage: svn <subcommand> [options] [args]
-  Subversion command-line client, version 1.6.5.
-  ...
-}]
 
 @section*{Command reference}
 
