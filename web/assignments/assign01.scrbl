@@ -22,7 +22,6 @@ Due: 1/12.
 
 Language: @racketmodname[class0].
 
-@internal{
 @itemlist[#:style 'ordered 
  @item{@bold{The @racket[complex%] class.}
        
@@ -203,8 +202,4 @@ Language: @racketmodname[class0].
 			 (send (send c2+3 div c3+5) =?
 			       (new complex% 23/41 2/41))
 			 (send (new complex% 3 4) mag)]}
- 
- @item{@bold{SVN basics}
-        
-        Check in your assigment.}]
-}
+ ]

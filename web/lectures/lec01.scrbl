@@ -4,7 +4,8 @@
           racket/sandbox
           #;(for-label lang/htdp-intermediate-lambda)
   	  (for-label (only-in lang/htdp-intermediate-lambda define-struct))
-          (for-label (except-in class0 define-struct)))
+          (for-label (except-in class0 define-struct))
+	  (for-label class0/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -20,8 +21,6 @@
 
 @title[#:tag "lec01"]{1/10: Object = structure + functions}
 
-@internal{
-
 @bold{Outline}
 @itemlist[
  @item{Announcements
@@ -32,7 +31,10 @@
      @item{The @seclink["assign01"]{first assignment}
            is due @bold{this} Wednesday.}
      @item{The @seclink["lab01"]{first lab} is @bold{tonight}.}
-     @item{Partners have already been assigned.  See the @seclink["Blog"]{blog}.}
+     @item{Partners have already been assigned.  See the @seclink["Blog"]{blog}.
+
+     Make sure to check your CCIS username is correct in the pair
+     assignments on the blog.  Make sure your partner exists.}     
      @item{Questions?}]}
  @item{Basics of objects
    @itemlist[
@@ -42,16 +44,265 @@
      @item{Landing and take off.}
      @item{Satellite.}]}]
 
-@scheme-from-file["lectures/rocket-oo.rkt" #:start "lang" #:end "big-bang"]
+
+@section{Functional rocket}
+
+Here's a review of the first program we wrote last semester.  It's the
+program to launch a rocket:
+
+@racketmod[
+class0
+(require 2htdp/image)
+(require 2htdp/universe)
+
+@code:comment{Use the rocket key to insert the rocket here.}
+(define ROCKET (bitmap "lectures/rocket.png"))
+
+(define WIDTH 100)
+(define HEIGHT 300)
+(define MT-SCENE (empty-scene WIDTH HEIGHT))
+
+@code:comment{A World is a Number.}
+@code:comment{Interp: distance from the ground in AU.}
+
+@code:comment{render : World -> Scene}
+(check-expect (render 0) 
+	      (place-image ROCKET (/ WIDTH 2) HEIGHT MT-SCENE))
+(define (render h)
+  (place-image ROCKET
+               (/ WIDTH 2)
+               (- HEIGHT h)
+               MT-SCENE))
+
+@code:comment{next : World -> World}
+(check-expect (next 0) 7)
+(define (next h)
+  (+ h 7))
+
+(big-bang 0
+          (on-tick next)
+          (to-draw render))
+]
+
+@section{Object-oriented rocket}
+
+You'll notice that there are two significant components to this
+program.  There is the @emph{data}, which in this case is a number
+representing the height of the rocket, and the @emph{functions} that
+operate over that class of data, in this case @racket[next] and
+@racket[render].
+
+This should be old-hat programming by now.  But in this class, we are
+going to explore a new programming paradigm that is based on
+@emph{objects}.  Objects are an old programming concept that first
+appeared in the 1950s just across the Charles river.  As a first
+approximation, you can think of an @emph{object} as the coupling
+together of the two significant components of our program (data and
+functions) into a single entity: an object.
+
+The way to define a class is with @racket[define-class]:
+@racketblock[
+(define-class world%
+  (fields height))
+]
+
+This declares a new class of values, namely @racket[world%] objects.
+(By convention, we will use the @tt{%} suffix for the
+name of classes.)  For the moment, @racket[world%] objects consist
+only of data: they have one @emph{field}, the @racket[height] of the
+rocket.
+
+Like a structure definition, this class definition defines a new kind
+of data, but it does not make any particular instance of that data.
+To make an new instance of a particular class, you use the
+@racket[new] syntax, which takes a class name and expressions that
+produce a value for each field of the new object.  Since a
+@racket[world%] has one field, @racket[new] takes the shape:
+@racketblock[
+(new world% 7)
+]
+This creates a @racket[world%] representing a rocket with height @racket[7].
+
+This suggests that we can now re-write the data definition for Worlds:
+@racketblock[
+@code:comment{A World is a (new world% Number).}
+@code:comment{Interp: height represents distance from the ground in AU.}
+]
+
+To add functionality to our class, we define @emph{methods} using the
+@racket[define/public] form.  In this case, we want to add two methods
+@racket[on-tick] and @racket[to-draw]: 
+
+@racketblock[ 
+@code:comment{A World is a (new world% Number).}  
+@code:comment{Interp: height represents distance from the ground in AU.}
+(define-class world% 
+  (fields height)
+
+  @code:comment{on-tick : ...}
+  (define/public (on-tick ...) ...)
+
+  @code:comment{to-draw : ...}
+  (define/public (to-draw ...) ...))
+]
+
+We will return to the contracts and code, but now that we've seen how
+to define methods, let's look at how to @emph{invoke} them in order to
+actually compute something.  To call a method, use the @racket[send]
+form, which takes an object, a method name, and any inputs to the
+method:
+
+@racketblock[
+(send (new world% 7) on-tick ...)
+]
+
+This will call the @racket[on-tick] method of the object created with
+@racket[(new world% 7)].  This is analogous to calling the
+@racket[next] function on the world @racket[7].  The ellided code
+(@racket[...]) is where we would write additional inputs to the
+method, but it's not clear what further inputs are needed, so now
+let's turn to the contract and method signatures for @racket[on-tick]
+and @racket[to-draw].
+
+When we designed the functional analogues of these methods, the
+functions took as input the world on which they operated, i.e. they
+had contracts like:
+
+@racketblock[
+@code:comment{tick : World -> World}
+@code:comment{render : World -> Scene}]
+
+But in an object, the data and functions are packaged together.
+Consequently, the method does not need to take the world input; that
+data is already a part of the object and the values of the fields are
+accessible using the @racket[field] form.
+
+That leads us to the following method signatures:
+
+@racketblock[
+@code:comment{A World is a (new world% Number).}  
+@code:comment{Interp: height represents distance from the ground in AU.}
+(define-class world% 
+  (fields height)
+
+  @code:comment{on-tick : -> World}
+  (define/public (on-tick) ...)
+
+  @code:comment{to-draw : -> Scene}
+  (define/public (to-draw) ...))
+]
+
+Since we have contracts and have seen how to invoke methods, we can
+now formulate test cases:
+
+@racketblock[
+(check-expect (send (new world% 7) on-tick)
+	      (new world% 8))
+(check-expect (send (new world% 7) to-draw)
+	      (place-image ROCKET
+	      		   (/ WIDTH 2)
+			   (- HEIGHT 7)
+			   MT-SCENE))
+]
+
+Finally, we can write the code from our methods:
+
+@racketblock[
+@code:comment{A World is a (new world% Number).}  
+(define-class world% 
+  (fields height)
+
+  @code:comment{on-tick : -> World}
+  (define/public (on-tick)
+    (new world% (add1 (field height))))
+
+  @code:comment{to-draw : -> Scene}
+  (define/public (to-draw)
+    (place-image ROCKET
+    		 (/ WIDTH 2)
+		 (- HEIGHT (field height))
+		 MT-SCENE)))]
+
+At this point, we can construct @racket[world%] objects and invoke
+methods.
+
+@(the-eval '(define ROCKET (bitmap "lectures/rocket.png")))
+@(the-eval '(define WIDTH 100))
+@(the-eval '(define HEIGHT 300))
+@(the-eval '(define MT-SCENE (empty-scene WIDTH HEIGHT)))
+@(the-eval
+'(define-class world% 
+  (fields height)
+  (define/public (on-tick)
+    (new world% (add1 (field height))))
+  (define/public (to-draw)
+    (place-image ROCKET
+    		 (/ WIDTH 2)
+		 (- HEIGHT (field height))
+		 MT-SCENE))))
 
 
 @examples[#:eval the-eval
-                 (bitmap "lectures/rocket.png")
-                 (circle 10 "solid" "red")]
- 
- 
+(new world% 7)
+(send (new world% 7) on-tick)
+(send (new world% 80) to-draw)
+]
+
+But if we want to see an animation, we need to have our program
+interact with the @racket[big-bang] system.  Since we are now writing
+programs in an object-oriented style, we have a new @racket[big-bang]
+system that uses an interface more suited to objects.  To import this
+OO-style @racket[big-bang], add the following to the top of your
+program:
+
+@racketblock[
+(require class0/universe)]
+
+In the functional setting, we had to explicitly give a piece of data
+representing the state of the initial world and list which functions
+should be used for each event in the system.  In other words, we had
+to give both data and functions to the @racket[big-bang] system.  In
+an object-oriented system, the data and functions are already packaged
+together, and thus the @racket[big-bang] form takes a single argument:
+an object that both represents the initial world and implements the
+methods needed to handle system events such as @racket[to-draw] and
+@racket[on-tick].  (Our choice of method names was important; had we
+used the names @racket[render] and @racket[next], for example,
+@racket[big-bang] would not have known how to make the animation
+work.)
+
+So to launch our rocket, we simply do the following:
+
+@racketblock[
+(big-bang (new world% 0))]
+
+@section{Landing and taking off}
+
+Let's now revise our program so that the rocket first descends toward
+the ground, lands, then lifts off again.  Our current representation
+of a world is insufficient since it's ambiguous whether we are going
+up or down.  For example, if the rocket is at @racket[42], are we
+landing or taking off?  There's no way to know.  We can revise our
+data definition to included a representation of this missing
+information.  A simple solution is to add a number representing the
+velocity of the rocket.  When it's negative, we are moving toward the
+ground.  When positive, we are taking off.
+
+In the functional approach, this new design criterion motivated the
+use of compound data, which are represented with structures.  With
+objects, atomic and compound data are represented the same way; all
+that changes are the number of fields contained in each object.
+
+Our revised class definition is then:
 
 
+@section{Adding a moon}
+
+
+
+@internal{
+
+@;scheme-from-file["lectures/rocket-oo.rkt" #:start "lang" #:end "big-bang"]
 
 Rocket + Satellite.
 
@@ -64,16 +315,10 @@ Data + functionality, using atomic data (numbers) and compound data
 Ch. 1, 2, 10
 
 
-@bold{Objects} are an old programming concept that first appeared in the 1950s
-across the Charles river.
-
-As a first approximation, you can think of an @emph{object} as
-a structure coupled together with the functions that operate 
-on that structure.
 
 @margin-note{Compared with 2500, we will use more precise data
              definitions for numbers.
-             There are many kinds of numbers, including @tt{Natural},
+             There are many kinds of numbers, including @tt{Number},
              @tt{Integer}, @tt{Rational}, @tt{Real}, @tt{Complex},
              or the all-encompasing @tt{Number}.                          
              Here, we use @tt{Real} numbers, which are numbers
@@ -190,6 +435,5 @@ which can be invoked by sending the field name as a message to the object.
    (send (new coord% 1 2) x)
    (send (new coord% 1 2) y)
    (new coord% 1 (circle 10 "solid" "red"))]
-
 
 }
