@@ -14,30 +14,36 @@
     (the-eval '(require 2htdp/image))
     the-eval))
 
-@title[#:tag "lab01"]{1/10: Introduction to objects}
+@title[#:tag "lab01"]{1/10: Classes and objects}
 
 @internal{
 
-Partner assignments
+@section{Assignment 0: Subversion test run}
 
-@section{Getting set up}
-
-@subsection{svn basics, submit assn0}
-
-@subsection{Install teachpacks}
-
-@url{http://www.ccs.neu.edu/course/cs2510h/class-system-01-06.plt}
+@itemlist[
+  @item{partner assignments}
+  @item{svn basics}
+  @item{submit assn0}
+]
 
 @section{Classes and objects}
 
 To write object-oriented programs we will use a special dialect of Racket called
 @racket[class0] that includes support for classes and objects. Just like we
-progressed from BSL to ISL to ASL last semester, we will progress on to richer
-object-oriented dialects as we learn more about how to program with objects.
+progressed through BSL, ISL, and ASL last semester, we will progress from
+@racket[class0] on to richer object-oriented dialects as we learn more about how
+to program with objects.
 
-To use the @racket[class0] language in DrRacket, go to @emph{Language → Choose
-Language...} and select @emph{Use the language declared in the source}. Then add
-the following lines to the top of your file:
+To install the @racket[class0] language in DrRacket, go to @bold{File} →
+@bold{Install .plt File...} → @bold{Web} and copy in this URL:
+
+@indented{
+  http://www.ccs.neu.edu/course/cs2510h/class-system-01-06.plt
+}
+
+Once installed, use the @racket[class0] language by selecting @bold{Language} →
+@bold{Choose Language...} → @bold{Use the language declared in the source}. Then
+start your file with the following lines:
 
 @#reader scribble/comment-reader
 (racketmod class0
@@ -45,9 +51,9 @@ the following lines to the top of your file:
   (require class0/universe)
 )
 
-The @tt{#lang} line tells Racket to use the @racket[class0] dialect, and the two
-@racket[require] lines load the image and universe teachpacks that we'll use to
-create images and interactive programs.
+The @tt{#lang} line tells Racket to use the @racket[class0] language, and the
+two @racket[require] lines load the image and universe libraries that we'll use
+to create images and interactive programs.
 
 Here is a simple class in Racket to represent balls that we can draw to the
 screen:
@@ -118,7 +124,7 @@ Let's construct another class to represent rectangles.
 
 @section{The World as an object}
 
-Recall @racket[big-bang] from last semester:
+Recall how we used @racket[big-bang] last semester:
 
 @#reader scribble/comment-reader
 (racketblock
@@ -141,11 +147,15 @@ Recall @racket[big-bang] from last semester:
 We would define functions to implement the various behaviors of the World and
 then pass each of them off to @racket[big-bang], along with an initial World
 value. In other words, @racket[big-bang] needed a combination of
-@emph{structure}, the initial World, and @emph{functions}, the various
-behaviors---which we can now represent using an @emph{object}.
+@emph{structure}---the initial World---and @emph{functions}---the various
+behaviors. But we know that
 
-Here's what @racket[big-bang] will look like from now on, using classes and
-objects:
+@indented[@emph{
+  structure + functions = object
+}]
+
+So here's how we will use our new version of @racket[big-bang] that expects just
+a single object:
 
 @#reader scribble/comment-reader
 (racketblock
@@ -164,12 +174,12 @@ objects:
   (big-bang (new world% ...))
 )
 
-The @racket[big-bang] function now takes an object (here, @racket[(new world%
-...)]) which @emph{must} respond to the @racket[to-draw] method, and @emph{may}
-respond to a handful of others, including @racket[on-tick], @racket[on-mouse],
-and @racket[on-key]---see the @racket[big-bang] docs for full details. To create
-such an object, we define a class with the desired methods. Here we use the name
-@racket[world%], but you can call it anything you like.
+@racket[big-bang] is now a function that takes an object (here, @racket[(new
+world% ...)]) which @emph{must} respond to the @racket[to-draw] method, and
+@emph{may} respond to a handful of others, including @racket[on-tick],
+@racket[on-mouse], and @racket[on-key]---see the @racket[big-bang] docs for the
+full list. To create such an object, we define a class with the desired methods.
+Here we use the name @racket[world%], but you can call it anything you like.
 
 @exercise{
   Using @racket[big-bang], create an animation where the user clicks to place
@@ -248,12 +258,21 @@ objects that understand the @racket[x], @racket[y], @racket[draw], and
 
 @exercise{
   @bold{(Open ended)} Create new kinds of Creatures with new kinds of movement.
-  How would you make a Creature that speeds up over time? How about one that
-  moves in a circle? Spirals outward from its starting point? Gravitates toward
-  the center of the screen? Spirals toward the center of the screen?
+  Try some of these ideas:
+
+  @itemlist[
+    @item{speeding up over time}
+    @item{changing direction over time}
+    @item{moving randomly}
+    @item{moving randomly with a bias}
+    @item{gravitating toward a fixed point}
+    @item{gravitating toward each other}
+    @item{moving in circles}
+    @item{moving in spirals}
+  ]
 
   If large numbers of off-screen or invisible Creatures are slowing down your
-  animation, devise a way to remove them once they disappear.
+  animation, detect when they disappear and remove them.
 }
 
 }
