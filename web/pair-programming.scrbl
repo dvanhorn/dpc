@@ -7,7 +7,7 @@ Pair programming emerged in the 1990s in several different settings.
 Companies realized that when individual programmers left, they were 
 left with a team that lacked knowledge of critical pieces of software.
 Academics began to understand the importance of articulating technical 
-ideas and discussing programs for the design process
+ideas and discussing programs for the design process.
 
 Roughly speaking, pair programming is a collaboration technique. As 
 the name says, you and a partner design programs together. In practice, 
