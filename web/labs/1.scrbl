@@ -17,8 +17,6 @@
 
 @title[#:tag "lab01"]{1/10: Classes and objects}
 
-@internal{
-
 @section{Subversion test run: Assignment 0}
 
 @exercise{
@@ -302,6 +300,4 @@ changes.
 
   If large numbers of off-screen or invisible Creatures are slowing down your
   animation, detect when they disappear and remove them.
-}
-
 }
