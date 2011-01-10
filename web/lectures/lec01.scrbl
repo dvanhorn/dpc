@@ -48,15 +48,14 @@
 @section{Functional rocket}
 
 Here's a review of the first program we wrote last semester.  It's the
-program to launch a rocket:
+program to launch a rocket, written in the Beginner Student Language:
 
-@racketmod[
-class0
+@racketblock[
 (require 2htdp/image)
 (require 2htdp/universe)
 
 @code:comment{Use the rocket key to insert the rocket here.}
-(define ROCKET (bitmap "lectures/rocket.png"))
+(define ROCKET (bitmap class0/rocket.png))
 
 (define WIDTH 100)
 (define HEIGHT 300)
@@ -84,6 +83,32 @@ class0
           (to-draw render))
 ]
 
+It's a shortcoming of our documentation system that we can't define
+@racket[ROCKET] to be the rocket image directly, but as you can see
+this did the right thing:
+
+@(the-eval '(define ROCKET (bitmap class0/rocket.png)))
+@(the-eval '(define WIDTH 100))
+@(the-eval '(define HEIGHT 300))
+@(the-eval '(define MT-SCENE (empty-scene WIDTH HEIGHT)))
+@(the-eval
+'(define-class world% 
+  (fields height)
+  (define/public (on-tick)
+    (new world% (add1 (field height))))
+  (define/public (to-draw)
+    (place-image ROCKET
+    		 (/ WIDTH 2)
+		 (- HEIGHT (field height))
+		 MT-SCENE))))
+
+@interaction[#:eval the-eval
+ROCKET
+]
+
+You can use the same trick, or you can copy this rocket image and
+paste it directly into DrRacket.
+
 @section{Object-oriented rocket}
 
 You'll notice that there are two significant components to this
@@ -99,6 +124,14 @@ appeared in the 1950s just across the Charles river.  As a first
 approximation, you can think of an @emph{object} as the coupling
 together of the two significant components of our program (data and
 functions) into a single entity: an object.
+
+Since we are learning a new programming language, you will no longer
+be using BSL and friends.  Instead, select
+@menuitem["Language"]{Choose Language...} in DrRacket, then select the
+"Use the language declared in the source" option and add the following
+to the top of your program:
+
+@racketmod[class0]
 
 The way to define a class is with @racket[define-class]:
 @racketblock[
@@ -118,10 +151,17 @@ To make an new instance of a particular class, you use the
 @racket[new] syntax, which takes a class name and expressions that
 produce a value for each field of the new object.  Since a
 @racket[world%] has one field, @racket[new] takes the shape:
-@racketblock[
-(new world% 7)
-]
+@interaction[#:eval the-eval
+(new world% 7)]
+
 This creates a @racket[world%] representing a rocket with height @racket[7].
+
+In order to access the data, we can invoke the @racket[height]
+accessor method.  Methods are like functions for objects and they are
+called (or @emph{invoked}) by using the @racket[send] form like so: 
+
+@interaction[#:eval the-eval
+(send (new world% 7) height)]
 
 This suggests that we can now re-write the data definition for Worlds:
 @racketblock[
@@ -148,9 +188,9 @@ To add functionality to our class, we define @emph{methods} using the
 
 We will return to the contracts and code, but now that we've seen how
 to define methods, let's look at how to @emph{invoke} them in order to
-actually compute something.  To call a method, use the @racket[send]
-form, which takes an object, a method name, and any inputs to the
-method:
+actually compute something.  To call a defined method, we again use
+the @racket[send] form, which takes an object, a method name, and any
+inputs to the method:
 
 @racketblock[
 (send (new world% 7) on-tick ...)
@@ -209,6 +249,7 @@ Finally, we can write the code from our methods:
 
 @racketblock[
 @code:comment{A World is a (new world% Number).}  
+@code:comment{Interp: height represents distance from the ground in AU.}
 (define-class world% 
   (fields height)
 
@@ -225,22 +266,6 @@ Finally, we can write the code from our methods:
 
 At this point, we can construct @racket[world%] objects and invoke
 methods.
-
-@(the-eval '(define ROCKET (bitmap "lectures/rocket.png")))
-@(the-eval '(define WIDTH 100))
-@(the-eval '(define HEIGHT 300))
-@(the-eval '(define MT-SCENE (empty-scene WIDTH HEIGHT)))
-@(the-eval
-'(define-class world% 
-  (fields height)
-  (define/public (on-tick)
-    (new world% (add1 (field height))))
-  (define/public (to-draw)
-    (place-image ROCKET
-    		 (/ WIDTH 2)
-		 (- HEIGHT (field height))
-		 MT-SCENE))))
-
 
 @examples[#:eval the-eval
 (new world% 7)
@@ -276,6 +301,47 @@ So to launch our rocket, we simply do the following:
 @racketblock[
 (big-bang (new world% 0))]
 
+Our complete program is:
+
+@racketmod[
+class0
+(require 2htdp/image)
+(require class0/universe)
+
+@code:comment{Use the rocket key to insert the rocket here.}
+(define ROCKET (bitmap class0/rocket.png))
+
+(define WIDTH 100)
+(define HEIGHT 300)
+(define MT-SCENE (empty-scene WIDTH HEIGHT))
+
+@code:comment{A World is a (new world% Number).}  
+@code:comment{Interp: height represents distance from the ground in AU.}
+(define-class world% 
+  (fields height)
+
+  @code:comment{on-tick : -> World}
+  (define/public (on-tick)
+    (new world% (add1 (field height))))
+
+  @code:comment{to-draw : -> Scene}
+  (define/public (to-draw)
+    (place-image ROCKET
+    		 (/ WIDTH 2)
+		 (- HEIGHT (field height))
+		 MT-SCENE)))
+
+(check-expect (send (new world% 7) on-tick)
+	      (new world% 8))
+(check-expect (send (new world% 7) to-draw)
+	      (place-image ROCKET
+	      		   (/ WIDTH 2)
+			   (- HEIGHT 7)
+			   MT-SCENE))
+
+@code:comment{Run, program, run!}
+(big-bang (new world% 0))]
+
 @section{Landing and taking off}
 
 Let's now revise our program so that the rocket first descends toward
@@ -295,9 +361,167 @@ that changes are the number of fields contained in each object.
 
 Our revised class definition is then:
 
+@(the-eval
+'(define-class world%
+  (fields height velocity)))
+
+@racketblock[
+;; A World is a (new world% Number Number).
+;; Interp: height represents the height of the rocket in AU,
+;; velocity represents the speed of the rocket in AU/seconds.
+(define-class world%
+  (fields height velocity)
+  ...)]
+
+When constructing @racket[world%] objects now give two arguments in
+addition to the class name:
+
+@interaction[#:eval the-eval
+(new world% 7 -1)]
+
+Both components can be accessed through the accessor methods:
+
+@interaction[#:eval the-eval
+(send (new world% 7 -1) height)
+(send (new world% 7 -1) velocity)]
+
+And within method definitions, we can refer to the values of fields
+using the @racket[field] form.  The signatures for our methods don't
+change, and rockets should render just the same as before, however we
+need a new behavior for @racket[on-tick].  When a world ticks, we want
+its new height to be calculated based on its current height and
+velocity, and its new velocity is the same as the old velocity, unless
+the rocket has landed, in which case we want to flip the direction of
+the velocity.
+
+First, let's make some test cases for the new @racket[on-tick]:
+
+@racketblock[
+(check-expect (send (new world% 0 1) on-tick)
+              (new world% 1 1))
+(check-expect (send (new world% 10 -2) on-tick)
+              (new world% 8 -2))
+(check-expect (send (new world% 0 -1) on-tick)
+              (new world% -1 1))
+]
+
+Based on this specification, we revise the @racket[on-tick] method
+definition as follows:
+
+@racketblock[
+(define-class world%
+  ...
+  ;; on-tick : -> World 
+  (define/public (on-tick)
+    (new world%
+         (+ (field velocity) (field height))
+         (cond [(<= (field height) 0) (abs (field velocity))]
+               [else (field velocity)])))
+  ...)]
+
+Giving us an overall program of:
+
+@#reader scribble/comment-reader
+(racketmod
+class0
+(require 2htdp/image)
+(require class0/universe)
+
+(define ROCKET (bitmap class0/rocket.png))
+
+(define WIDTH 100)
+(define HEIGHT 300)
+(define MT-SCENE (empty-scene WIDTH HEIGHT))
+
+;; A World is a (new world% Number Number).
+;; Interp: height represents the height of the rocket in AU,
+;; velocity represents the speed of the rocket in AU/seconds.
+(define-class world%
+  (fields height velocity)
+  
+  ;; on-tick : -> World 
+  (define/public (on-tick)
+    (new world%
+         (+ (field velocity) (field height))
+         (cond [(<= (field height) 0) (abs (field velocity))]
+               [else (field velocity)])))
+  
+  ;; to-draw : -> Scene
+  (define/public (to-draw)
+    (place-image ROCKET
+                 (/ WIDTH 2) 
+                 (- HEIGHT (field height))
+                 (empty-scene WIDTH HEIGHT))))
+
+(check-expect (send (new world% 0 1) to-draw)
+              (place-image ROCKET 
+                           (/ WIDTH 2) 
+                           HEIGHT 
+                           MT-SCENE))
+
+(check-expect (send (new world% 0 1) on-tick)
+              (new world% 1 1))
+(check-expect (send (new world% 10 -2) on-tick)
+              (new world% 8 -2))
+(check-expect (send (new world% 0 -1) on-tick)
+              (new world% -1 1))
+
+(big-bang (new world% HEIGHT -1)))
 
 @section{Adding a moon}
 
+Adding more components is straightforward.
+
+Here is a complete program that includes an orbiting moon:
+
+@#reader scribble/comment-reader
+(racketmod
+class0
+(require 2htdp/image)
+(require class0/universe)
+
+(define ROCKET (bitmap class0/rocket.png))
+(define MOON (circle 20 "solid" "blue"))
+
+(define WIDTH 300)
+(define HEIGHT 300)
+(define MT-SCENE (empty-scene WIDTH HEIGHT))
+
+; A World is a (new world% Number Number Number).
+; Interp: height represents distance from the ground in AU.
+; velocity represents the speed of the rocket in AU/sec.
+; moon-height represents the height of the moon.
+(define-class world%
+  (fields height velocity moon-height)
+  
+  ;; on-tick : -> World 
+  (define/public (on-tick)
+    (new world%
+         (+ (field velocity) (field height))
+         (cond [(= (field height) 0) (abs (field velocity))]
+               [else (field velocity)])
+         (modulo (+ 5 (field moon-height)) 200)))
+  
+  ;; to-draw : -> Scene
+  (define/public (to-draw)
+    (place-image MOON
+                 (/ WIDTH 3) 
+                 (field moon-height)
+                 (place-image ROCKET
+                              (/ WIDTH 2) (- HEIGHT (field height))
+                              MT-SCENE))))
+
+(check-expect (send (new world% 0 1 100) to-draw)
+              (place-image MOON
+                           (/ WIDTH 3) 100
+                           (place-image ROCKET (/ WIDTH 2) HEIGHT MT-SCENE)))
+
+(check-expect (send (new world% 0 1 100) on-tick)
+              (new world% 1 1 105))
+(check-expect (send (send (new world% 10 -2 100) on-tick) height) 8)
+
+(big-bang (new world% HEIGHT -1 100))
+)
 
 
 @internal{
