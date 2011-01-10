@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "unnumbered.rkt")
+@(require "unnumbered.rkt" "utils.rkt")
 
 @title*{General}
 
@@ -62,13 +62,11 @@ We will use @link[#:style "plainlink"
 the CCS computers. It is also freely available on the web in case you
 wish install it on your own computer.
 
-@(define plt-ver "01-06")
-
-You will need to install our @link[(format "class-system-~a.plt" plt-ver)]{course software} into DrRacket.
+You will need to install our @link[plt-filename]{course software} into DrRacket.
 In the DrRacket @tt{File} menu, select @tt{Install PLT File}, and then
 enter the url
 
-@tt[(format "http://www.ccs.neu.edu/course/cs2510h/class-system-~a.plt" plt-ver)]
+@tt[(format "http://www.ccs.neu.edu/course/cs2510h/~a" plt-filename)]
 
 
 You will use @secref{Subversion} to work on your homework sets, to

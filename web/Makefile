@@ -1,7 +1,12 @@
-main:
+CURRENT_CLASS=class-system-01-10.plt
+
+main: plt
 	rm -rf compiled/ lectures/compiled/ labs/compiled/ assignments/compiled/ class/compiled/
-	raco make 2510H.scrbl
-	raco scribble --htmls ++extra fonts/kulminoituva-webfont.eot ++extra fonts/kulminoituva-webfont.svg ++extra fonts/kulminoituva-webfont.ttf ++extra fonts/kulminoituva-webfont.woff ++extra class-system-01-06.plt ++xref-in setup/xref load-collections-xref --redirect-main http://docs.racket-lang.org/ --style 2510H.css 2510H.scrbl
+	env CURRENT_CLASS=$(CURRENT_CLASS) raco make 2510H.scrbl
+	raco scribble --htmls ++extra fonts/kulminoituva-webfont.eot ++extra fonts/kulminoituva-webfont.svg ++extra fonts/kulminoituva-webfont.ttf ++extra fonts/kulminoituva-webfont.woff ++extra $(CURRENT_CLASS) ++xref-in setup/xref load-collections-xref --redirect-main http://docs.racket-lang.org/ --style 2510H.css 2510H.scrbl
+
+plt:
+	(cd .. && raco pack -v ++setup class0 ++setup scribblings/main --at-plt --replace class0.plt class0/)
 
 web:
 	rm -rf 2510H/

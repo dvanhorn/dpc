@@ -3,6 +3,7 @@
          if-internal
          indented
          exercise
+         plt-filename
          scheme-from-file)
 (require scribble/base)
 
@@ -114,3 +115,6 @@
     [(_ fname #:start start #:end end)
      #'(scheme-from-file fname #:start start #:end end schemeblock0)]
     ))
+
+(define-syntax (plt-filename stx)
+  (datum->syntax #'here (getenv "CURRENT_CLASS")))

@@ -20,6 +20,7 @@
 
 @title[#:tag "lec01"]{1/10: Object = structure + functions}
 
+@internal{
 
 @bold{Outline}
 @itemlist[
@@ -44,7 +45,6 @@
 @scheme-from-file["lectures/rocket-oo.rkt" #:start "lang" #:end "big-bang"]
 
 
-@internal{
 @examples[#:eval the-eval
                  (bitmap "lectures/rocket.png")
                  (circle 10 "solid" "red")]

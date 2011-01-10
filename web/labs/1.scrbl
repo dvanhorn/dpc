@@ -4,8 +4,9 @@
           racket/sandbox
           "../unnumbered.rkt"
           "../utils.rkt"
-          (for-label class0
+          (for-label (except-in class0 define-struct)
                      2htdp/image
+                     (only-in lang/htdp-intermediate-lambda define-struct)
                      class0/universe))
 
 @(define the-eval
@@ -38,7 +39,7 @@ To install the @racket[class0] language in DrRacket, go to @bold{File} →
 @bold{Install .plt File...} → @bold{Web} and copy in this URL:
 
 @indented{
-  http://www.ccs.neu.edu/course/cs2510h/class-system-01-06.plt
+  @tt[(format "http://www.ccs.neu.edu/course/cs2510h/~a" plt-filename)]
 }
 
 Once installed, use the @racket[class0] language by selecting @bold{Language} →
