@@ -4,6 +4,15 @@
 
 @title*{Blog}
 
+@section*{The Rust Programming Language}
+
+@link["http://www.ccs.neu.edu/home/dherman/"]{Dave Herman}, PRL
+alumnus, Mozilla Labs Research Engineer, and JavaScript committee
+member, is giving a talk on Mozilla's new programming language, Rust.
+If you want to hear about Rust, join us tomorrow, Tuesday, at 3:30pm.
+(The location hasn't been nailed down, but it will be posted here as
+soon as it is.)
+
 @section*{Initial partnership assignments}
 
 @verbatim{

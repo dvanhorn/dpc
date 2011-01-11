@@ -21,12 +21,12 @@ apprentice teachers and are here to learn how to run a course.
 @section*{Office Hours}
 
 @tabular[
-  (list (list "Sam Tobin-Hochstadt" (tt "samth") "WVH308 " "Monday" "1:30–3:30")
-        (list "David Van Horn" (tt "dvanhorn") "WVH350" "Thursday " "1:30–3:30")
-        (list "Dan Brown" (tt "dbrown") "WVH308" "Tuesday " "4:00–6:00")
-	(list "Nikko Patten" (tt "npatten")"WVH102" "TBD" "TBD")
-	(list "Trevor Sontag" (tt "tasontag") "WVH102" "TBD" "TBD")
-	(list "Alex Lee" (tt "lee") "WVH102" "TBD" "TBD")
+  (list (list "Sam Tobin-Hochstadt" (tt "samth") "WVH308 " "Monday" "2:00pm-4:00pm")
+        (list "David Van Horn" (tt "dvanhorn") "WVH350" "Thursday " "2:00pm-4:00pm")
+        (list "Dan Brown" (tt "dbrown") "WVH308" "Tuesday " "4:00pm-6:00pm")
+	(list "Nikko Patten" (tt "npatten")"WVH102" "Wednesday" "11:00am-noon")
+	(list "Trevor Sontag" (tt "tasontag") "WVH102" "Wednesday" "7:00pm-8:00pm")
+	(list "Alex Lee" (tt "lee") "WVH102" "Wednesday" "10:00pm-11:00pm")
 	(list "Jim Shargo" (tt "shargoj") "WVH102" "TBD" "TBD"))]
 
 @bold{Communication}: Use CCIS email (@tt{@"@"ccs.neu.edu}) to reach
