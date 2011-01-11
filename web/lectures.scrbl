@@ -24,8 +24,7 @@ each lecture.
 @local-table-of-contents[]
 
 @include-section["lectures/lec01.scrbl"]
-
-@section[#:tag "lec02"]{1/13: Designing classes}
+@include-section["lectures/lec02.scrbl"]
 
 @internal{
 [Here we build OO-design from the ground up.]

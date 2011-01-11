@@ -4,7 +4,15 @@
 
 @title*{Blog}
 
+@section*{Office hours}
+
+@tt{Tue Jan 11 00:30:48 EST 2011}
+
+@seclink["General"]{Office hours} have been finalized for the course staff.
+
 @section*{The Rust Programming Language}
+
+@tt{Mon Jan 10 19:24:32 EST 2011}
 
 @link["http://www.ccs.neu.edu/home/dherman/"]{Dave Herman}, PRL
 alumnus, Mozilla Labs Research Engineer, and JavaScript committee
@@ -14,6 +22,8 @@ If you want to hear about Rust, join us tomorrow, Tuesday, at 3:30pm.
 soon as it is.)
 
 @section*{Initial partnership assignments}
+
+@tt{Mon Jan 10 07:10:12 EST 2011}
 
 @verbatim{
 pair 001: mcoppola, mcarroll, naraghi
@@ -35,6 +45,8 @@ pair 016: ekelly, maxgoren
 pair 017: fnimick, wjhsie
 }
 
-@section*{Welcome to CS2510H.}
+@section*{Welcome to CS2510H}
+
+@tt{Mon Jan 10 07:10:12 EST 2011} 
 
 We hope you'll have fun.

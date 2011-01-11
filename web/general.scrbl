@@ -27,7 +27,7 @@ apprentice teachers and are here to learn how to run a course.
 	(list "Nikko Patten" (tt "npatten")"WVH102" "Wednesday" "11:00am-noon")
 	(list "Trevor Sontag" (tt "tasontag") "WVH102" "Wednesday" "7:00pm-8:00pm")
 	(list "Alex Lee" (tt "lee") "WVH102" "Wednesday" "10:00pm-11:00pm")
-	(list "Jim Shargo" (tt "shargoj") "WVH102" "TBD" "TBD"))]
+	(list "Jim Shargo" (tt "shargoj") "WVH102" "Monday" "4:00pm-5:00pm"))]
 
 @bold{Communication}: Use CCIS email (@tt{@"@"ccs.neu.edu}) to reach
 any of the course staff; usernames are given above.
