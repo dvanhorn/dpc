@@ -4,6 +4,14 @@
 
 @title*{Blog}
 
+@section*{Rust talk}
+
+@tt{Tue Jan 11 10:38:56 EST 2011}
+
+Dave Herman's talk on the programming language Rust is today at 3:30 in WVH 366.
+
+Dan's office hours will be changed today to 2:30–3:30 and 5:00–6:00.
+
 @section*{Office hours}
 
 @tt{Tue Jan 11 00:30:48 EST 2011}
