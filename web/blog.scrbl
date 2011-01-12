@@ -4,6 +4,32 @@
 
 @title*{Blog}
 
+@section*{Name fix in assignment 1}
+
+@tt{Wed Jan 12 15:21:37 EST 2011}
+
+David Corbett pointed out there was a poor choice of names in the
+examples given in @seclink["assign01"]{Assignment 1}.  Originally, we had:
+
+@racketblock[
+(define c3+5 (make-cpx 4 5))]
+
+and:
+
+@racketblock[
+(define c3+5 (new complex% 4 5))]
+
+We've changed these names to:
+
+@racketblock[
+(define c4+5 (make-cpx 4 5))]
+
+and:
+
+@racketblock[
+(define c4+5 (new complex% 4 5))]
+
+
 @section*{Rust talk}
 
 @tt{Tue Jan 11 10:38:56 EST 2011}

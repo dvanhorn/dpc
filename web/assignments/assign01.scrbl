@@ -165,10 +165,10 @@ Language: @racketmodname[class0].
                          (define c-1  (make-cpx -1 0))
                          (define c0+0 (make-cpx 0 0))                         
                          (define c2+3 (make-cpx 2 3))
-                         (define c3+5 (make-cpx 4 5))
+                         (define c4+5 (make-cpx 4 5))
                          (=? c0+0 c0+0)
                          (=? c0+0 c2+3)
-                         (=? (plus c2+3 c3+5)
+                         (=? (plus c2+3 c4+5)
                              (make-cpx 6 8))]
         
         Develop a class-based data representation for @tt{Complex}
@@ -184,7 +184,7 @@ Language: @racketmodname[class0].
 			 (define c-1  (new complex% -1 0))
 			 (define c0+0 (new complex% 0 0))
 			 (define c2+3 (new complex% 2 3))
-			 (define c3+5 (new complex% 4 5))
+			 (define c4+5 (new complex% 4 5))
                          @code:comment{Verify the imaginary unit property.}
 			 (send c-1 mag)
 			 (send c-1 sqroot) 
@@ -193,13 +193,13 @@ Language: @racketmodname[class0].
                          @code:comment{Arithmetic on complex numbers.}
 			 (send c0+0 =? c0+0)
 			 (send c0+0 =? c2+3)
-			 (send (send c2+3 plus c3+5) =?
+			 (send (send c2+3 plus c4+5) =?
 			       (new complex% 6 8))
-			 (send (send c2+3 minus c3+5) =?
+			 (send (send c2+3 minus c4+5) =?
 			       (new complex% -2 -2))
-			 (send (send c2+3 times c3+5) =?
+			 (send (send c2+3 times c4+5) =?
 			       (new complex% -7 22))
-			 (send (send c2+3 div c3+5) =?
+			 (send (send c2+3 div c4+5) =?
 			       (new complex% 23/41 2/41))
 			 (send (new complex% 3 4) mag)]}
  ]
