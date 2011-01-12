@@ -2,6 +2,8 @@
 #lang scribble/manual
 @(require "unnumbered.rkt")
 
+@(require (for-label class0))
+
 @title*{Blog}
 
 @section*{Name fix in assignment 1}
