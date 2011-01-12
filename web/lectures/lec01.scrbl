@@ -42,7 +42,7 @@
      @item{Rocket, designed in functional style.}
      @item{Rocket, designed in object-oriented style.}
      @item{Landing and take off.}
-     @item{Satellite.}]}]
+     @item{Moon.}]}]
 
 
 @section{Functional rocket}
