@@ -116,11 +116,11 @@
 ;; IWorld IWorld -> Game
 (define (init-game iw1 iw2)
   (game (cycle iw1 
-               "left" 
+               "right" 
                (list (posn (quotient GRID-WIDTH 3)
                            (quotient GRID-HEIGHT 2))))
         (cycle iw2 
-               "right"
+               "left"
                (list (posn (* 2 (quotient GRID-WIDTH 3))
                            (quotient GRID-HEIGHT 2))))))
 
@@ -178,7 +178,7 @@
                                           empty)])]
                      [else
                       (make-bundle u empty empty)]))
-             1/3)
+             1/20)
             
             (on-msg
              (λ (u iw msg)
@@ -266,8 +266,8 @@
                           (cond [(outcome? msg) (final msg w)]
                                 [else msg])))))
                        
-(play)         
-;(launch-many-worlds (serve) (play)) ; (play))
+;(play)         
+(launch-many-worlds (serve) (play)) ; (play))
                                          
                            
                            
