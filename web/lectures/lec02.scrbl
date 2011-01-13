@@ -25,7 +25,17 @@
      @item{Assignment 1 was due last night.}
      @item{Assignment 2 is out and due Wednesday night.}
      @item{Partner touch ups.}]}
- @item{Using a terminal}]
+ @item{Using a terminal}
+ @item{Designing classes
+   @itemlist[
+     @item{Atomic data}
+     @item{Compound data}
+     @item{Enumerations}
+     @item{Unions}
+     @item{Recursive unions}]}
+ @item{Review of event handling in Universe}]
+
+@internal{
 
 @section{Using a terminal}
 
@@ -331,7 +341,7 @@ logout
 Connection to login.ccs.neu.edu closed.
 doom:~ dvanhorn$}
 
-
+}
 
 
 

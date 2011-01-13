@@ -9,10 +9,9 @@ Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise no
 @local-table-of-contents[]
 
 @include-section["assignments/assign01.scrbl"]
+@include-section["assignments/assign02.scrbl"]
 
 @internal[
-
-@section[#:tag "assign02"]{1/19: Zombie}
 
 @itemlist[#:style 'ordered 
  @item{@bold{Zombie.}

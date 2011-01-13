@@ -23,6 +23,8 @@
   (define/public (tick-rate)
     1/10)
   
+  (define/public (record?) true)
+  
   ;; -> Scene
   (define/public (to-draw)
     (foldr (posn+scn "gray")
@@ -161,7 +163,7 @@
 (big-bang
  (new world%
       (posn 0 0)
-      (build-list (+ 20 (random 20))
+      (build-list (+ 10 (random 20))
                   (λ (_)
                     (random-posn *dim*)))
       empty
