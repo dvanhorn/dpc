@@ -34,9 +34,9 @@ Language: @racketmodname[class0].
         brains, and you die.  If two zombies happen to come in to
         contact with eachother, they will mistakenly eat eachothers
         brain, which it turns out is fatal to the zombie species, and
-        so they both die.  When a zombie dies, the dead undead flesh
+        so they both die.  When a zombie dies, the zombie flesh
         will permanently remain where it is and should any subsequent
-        zombie touch the dead flesh, they try to eat and therefore die
+        zombie touch the dead flesh, they will try to eat it and therefore die
         on the spot.  Survive longer than all the zombies, and you
         have won the game.
 
