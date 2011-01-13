@@ -13,8 +13,8 @@
 (define posn-x first)
 (define posn-y second)
 
-(define GRID-WIDTH 30)
-(define GRID-HEIGHT 30)
+(define GRID-WIDTH 60)
+(define GRID-HEIGHT 60)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Server
@@ -57,10 +57,10 @@
                (posn (posn-x (first t))
                      (sub1 (posn-y (first t))))]
               [(string=? d "left")
-               (posn (add1 (posn-x (first t)))
+               (posn (sub1 (posn-x (first t)))
                      (posn-y (first t)))]
               [(string=? d "right")
-               (posn (sub1 (posn-x (first t)))
+               (posn (add1 (posn-x (first t)))
                      (posn-y (first t)))])
         t))
 
@@ -92,11 +92,11 @@
                         (end-draw (game-p1 g) 
                                   (game-p2 g))]
                        [else
-                        (end-win (game-p1 g) 
-                                 (game-p2 g))])]
+                        (end-win (game-p2 g)
+                                 (game-p1 g))])]
                 [else 
-                 (end-win (game-p2 g) 
-                          (game-p1 g))])))
+                 (end-win (game-p1 g)
+                          (game-p2 g))])))
          
 
 ;; Cycle Cycle -> [Listof Mail]
@@ -178,7 +178,7 @@
                                           empty)])]
                      [else
                       (make-bundle u empty empty)]))
-             1)
+             1/3)
             
             (on-msg
              (λ (u iw msg)
@@ -250,7 +250,7 @@
 
 (define (play)
   (big-bang #f
-            (register LOCALHOST)          
+            (register "192.168.20.242")          
             (to-draw (λ (w)
                        (cond [(false? w) WAITING]
                              [(final? w) (draw-final w)]
@@ -266,8 +266,8 @@
                           (cond [(outcome? msg) (final msg w)]
                                 [else msg])))))
                        
-          
-(launch-many-worlds (serve) (play) (play))
+(play)         
+;(launch-many-worlds (serve) (play)) ; (play))
                                          
                            
                            
