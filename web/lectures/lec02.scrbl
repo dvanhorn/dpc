@@ -23,19 +23,209 @@
  @item{Announcements
    @itemlist[
      @item{Assignment 1 was due last night.}
-     @item{Assignment 2 is out and due Wednesday night.}
+     @item{Assignment 2 is out and due Wednesday night.
+     
+     Discussion of class-based design for everything.
+     Discussion of assignment, playing zombies.
+     Do we die when we hit dead zombies?  Up to you.
+     How do you set the name of the game? Use `name' method.
+     Review of event system, record.
+     }
      @item{Partner touch ups.}]}
  @item{Using a terminal}
  @item{Designing classes
    @itemlist[
      @item{Atomic data}
      @item{Compound data}
-     @item{Enumerations}
-     @item{Unions}
-     @item{Recursive unions}]}
+     @item{Enumerations
+     
+     A Light is one of:
+      - 'Red
+      - 'Green
+      - 'Yellow
+
+      Template for functions on Lights
+      @codeblock{
+      ; Light -> ?
+      (define (light-temp l)
+        (cond [(symbol=? 'Red l)]
+	      [(symbol=? 'Green l)]
+	      [(symbol=? 'Yellow l)]))
+      
+      ;; next : Light -> Light
+      ;; switch to the next light in the cycle
+      (define (light-temp l)
+        (cond [(symbol=? 'Red l) 'Green]
+	      [(symbol=? 'Green l) 'Yellow]
+	      [(symbol=? 'Yellow l) 'Red]))
+      (check-expect (next 'Green) 'Yellow)
+      (check-expect (next 'Red) 'Green)
+      (check-expect (next 'Yellow) 'Red)}
+
+      Let's design this in an OO fashion.  How?
+
+      Answer 1: Class with a single field which is an enumeration.
+      Not OO enough.
+
+      Answer 2: 3 different classes - one for each
+
+      @codeblock{
+      #lang class0
+      ;; A Light is one of:
+      ;; - (new red%)
+      ;; - (new green%)
+      ;; - (new yellow%)
+      (define-class red%
+        ;; -> Light
+	;; Produce the next traffic light
+	(define/public (next)
+	  (new green%)))
+      (define-class green%
+        ;; -> Light
+	;; Produce the next traffic light
+	(define/public (next)
+	  (new yellow%)))
+      (define-class yellow%
+        ;; -> Light
+	;; Produce the next traffic light
+	(define/public (next)
+	  (new red%)))
+      }
+
+      If you have a Light @racket[L], how do you get the next light?
+
+      @racket[(send L next)]
+
+      What just happend?  Where did the @racket[cond] go?  The
+@racket[cond] is happening behind your back, because the object system
+pick which version of @racket[next] method to call.
+
+      }
+     @item{Unions --- Skip directly to recursive unions}
+     @item{
+     Recursive unions
+                     
+     Binary trees of numbers.  We want to represent
+
+@verbatim{7}
+     
+     @verbatim{
+   6
+  / \
+ 8   4
+    / \
+   3   2
+ }
+
+ and
+
+ @verbatim{
+   8
+  / \
+ 2   1
+ }
+
+How do we represent this with classes and objects?
+
+@codeblock{
+#lang class0
+;; A BT is one of:
+;; - (new leaf% Number)
+;; - (new node% Number BT BT)
+(define-class leaf%
+  (fields number)
+  )
+(define-class node%
+  (fields number left right))
+
+(check-expect (send (new leaf% 7) count) 1)
+(check-expect (send (new node% 8
+			 (new leaf% 2)
+			 (new left% 1))
+		    count)
+	      3)
+}
+
+Now we provide a definition of the @racket[count] method for each of our classes.
+
+For @racket[leaf%]:
+@racketblock[
+;; -> Number
+;; count the number of numbers in this leaf
+(define/public (count)
+  1)
+]
+
+What's the template for @racket[leaf%]:
+@racketblock[
+;; -> ??
+;; leaf% template
+(define/public (leaf%-method)
+ (field number))
+]
+
+What's the template for @racket[node%]:
+@racketblock[
+;; -> ??
+;; node% template
+(define/public (node%-method)
+ (field number) 
+ (send (field left) node%-method)
+ (send (field right) node%-method))
+]
+
+For @racket[node%]:
+@racketblock[
+;; -> Number
+;; count the number of numbers in this node
+(define/public (count)
+  (+ 1
+     (send (field left) count)
+     (send (field right) count)))
+]
+	   }]
+
+Writing the @racket[double] function:
+
+@racketblock[
+;; Number -> BT
+;; double the leaf and put the number on top
+;; template
+(define/public (double n)
+  (field number) ...) 
+
+(define/public (double n)
+  (new node%
+       n
+       (new node% (field number))
+       (new node% (field number))))
+
+(define/public (double n)
+  (new node% n this this))
+]
+
+for @racket[node%]:
+
+@racketblock[
+;; Number -> BT
+;; double the node and put the number on top
+(define/public (double n)
+  (new node% n this this))
+]
+
+
+}
+
  @item{Review of event handling in Universe}]
 
 @internal{
+
+Questions --
+ - Revision numbers
+ - Batch add of a whole directory
+ - Sam: make sure to follow the directions about directory naming
+ - Conflict resolution
+ - email notification
 
 @section{Using a terminal}
 
