@@ -2,10 +2,9 @@
 @(require scribble/eval
 	  "../utils.rkt"
           racket/sandbox
-  	  (for-label (only-in lang/htdp-intermediate-lambda define-struct))
-          (for-label (except-in class0 define-struct))
+  	  (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
+          (for-label (except-in class0 define-struct ...))
 	  (for-label class0/universe))
-
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -18,214 +17,40 @@
 @title[#:tag "lec02"]{1/13: Designing classes}
 
 
-@bold{Outline}
+@section{Announcements}
 @itemlist[
- @item{Announcements
-   @itemlist[
-     @item{Assignment 1 was due last night.}
-     @item{Assignment 2 is out and due Wednesday night.
-     
-     Discussion of class-based design for everything.
-     Discussion of assignment, playing zombies.
-     Do we die when we hit dead zombies?  Up to you.
-     How do you set the name of the game? Use `name' method.
-     Review of event system, record.
-     }
-     @item{Partner touch ups.}]}
- @item{Using a terminal}
- @item{Designing classes
-   @itemlist[
-     @item{Atomic data}
-     @item{Compound data}
-     @item{Enumerations
-     
-     A Light is one of:
-      - 'Red
-      - 'Green
-      - 'Yellow
-
-      Template for functions on Lights
-      @codeblock{
-      ; Light -> ?
-      (define (light-temp l)
-        (cond [(symbol=? 'Red l)]
-	      [(symbol=? 'Green l)]
-	      [(symbol=? 'Yellow l)]))
-      
-      ;; next : Light -> Light
-      ;; switch to the next light in the cycle
-      (define (light-temp l)
-        (cond [(symbol=? 'Red l) 'Green]
-	      [(symbol=? 'Green l) 'Yellow]
-	      [(symbol=? 'Yellow l) 'Red]))
-      (check-expect (next 'Green) 'Yellow)
-      (check-expect (next 'Red) 'Green)
-      (check-expect (next 'Yellow) 'Red)}
-
-      Let's design this in an OO fashion.  How?
-
-      Answer 1: Class with a single field which is an enumeration.
-      Not OO enough.
-
-      Answer 2: 3 different classes - one for each
-
-      @codeblock{
-      #lang class0
-      ;; A Light is one of:
-      ;; - (new red%)
-      ;; - (new green%)
-      ;; - (new yellow%)
-      (define-class red%
-        ;; -> Light
-	;; Produce the next traffic light
-	(define/public (next)
-	  (new green%)))
-      (define-class green%
-        ;; -> Light
-	;; Produce the next traffic light
-	(define/public (next)
-	  (new yellow%)))
-      (define-class yellow%
-        ;; -> Light
-	;; Produce the next traffic light
-	(define/public (next)
-	  (new red%)))
-      }
-
-      If you have a Light @racket[L], how do you get the next light?
-
-      @racket[(send L next)]
-
-      What just happend?  Where did the @racket[cond] go?  The
-@racket[cond] is happening behind your back, because the object system
-pick which version of @racket[next] method to call.
-
-      }
-     @item{Unions --- Skip directly to recursive unions}
-     @item{
-     Recursive unions
-                     
-     Binary trees of numbers.  We want to represent
-
-@verbatim{7}
-     
-     @verbatim{
-   6
-  / \
- 8   4
-    / \
-   3   2
- }
-
- and
-
- @verbatim{
-   8
-  / \
- 2   1
- }
-
-How do we represent this with classes and objects?
-
-@codeblock{
-#lang class0
-;; A BT is one of:
-;; - (new leaf% Number)
-;; - (new node% Number BT BT)
-(define-class leaf%
-  (fields number)
-  )
-(define-class node%
-  (fields number left right))
-
-(check-expect (send (new leaf% 7) count) 1)
-(check-expect (send (new node% 8
-			 (new leaf% 2)
-			 (new left% 1))
-		    count)
-	      3)
+@item{Assignment 1 was due last night.
+  
+  In the future, it is @emph{required} that your Subversion
+  directory layout follow the format described
+  @seclink["svnlayout"]{on the Subversion page}.  In particular,
+  assignment @tt{N} must go in a directory called @tt{assnN}.  
 }
 
-Now we provide a definition of the @racket[count] method for each of our classes.
-
-For @racket[leaf%]:
-@racketblock[
-;; -> Number
-;; count the number of numbers in this leaf
-(define/public (count)
-  1)
-]
-
-What's the template for @racket[leaf%]:
-@racketblock[
-;; -> ??
-;; leaf% template
-(define/public (leaf%-method)
- (field number))
-]
-
-What's the template for @racket[node%]:
-@racketblock[
-;; -> ??
-;; node% template
-(define/public (node%-method)
- (field number) 
- (send (field left) node%-method)
- (send (field right) node%-method))
-]
-
-For @racket[node%]:
-@racketblock[
-;; -> Number
-;; count the number of numbers in this node
-(define/public (count)
-  (+ 1
-     (send (field left) count)
-     (send (field right) count)))
-]
-	   }]
-
-Writing the @racket[double] function:
-
-@racketblock[
-;; Number -> BT
-;; double the leaf and put the number on top
-;; template
-(define/public (double n)
-  (field number) ...) 
-
-(define/public (double n)
-  (new node%
-       n
-       (new node% (field number))
-       (new node% (field number))))
-
-(define/public (double n)
-  (new node% n this this))
-]
-
-for @racket[node%]:
-
-@racketblock[
-;; Number -> BT
-;; double the node and put the number on top
-(define/public (double n)
-  (new node% n this this))
-]
-
-
+@item{Assignment 2 is out and due Wednesday night.
+  
+  In this assignment, and in the future, when the assignment asks
+  you to ``design'' or to ``develop'' a program, you should carry
+  out this design using classes and objects.  You can use functions
+  where needed, but in this class, our primary design tools will be
+  classes, methods, and objects.
+  
+  @;{Discussion of assignment, playing zombies.}
+  
+  @;{Do we die when we hit dead zombies?  Up to you.}
+  The behavior
+  of the game when the player comes into contact with a dead zombie
+  is unspecified---you are welcome to add the behavior you prefer.
+  Possibilities include the player getting stuck, dying, the zombie
+  coming back to life, or whatever you can imagine.
+  
+  Developing the game will require using the event handling
+  facilities of @racketmodname[class0/universe].  See the
+  documentation for @racket[on-key] and @racket[on-mouse].
 }
 
- @item{Review of event handling in Universe}]
-
-@internal{
-
-Questions --
- - Revision numbers
- - Batch add of a whole directory
- - Sam: make sure to follow the directions about directory naming
- - Conflict resolution
- - email notification
+@item{If your partner drops the class, please let us know right away,
+so that you can be assigned a new partner.  }]
 
 @section{Using a terminal}
 
@@ -531,16 +356,321 @@ logout
 Connection to login.ccs.neu.edu closed.
 doom:~ dvanhorn$}
 
-}
+
+
+@;$
 
 
 
+@section{Designing Classes}
 
-
-@internal{
 One of the most important lessons of @emph{How to Design Programs} is
 that the structure of code follows the structure of the data it
 operates on, which means that the structure of your code can be
-derived @emph{systematically} from your data definitions.
+derived @emph{systematically} from your data definitions.  In this
+lecture, we see how to apply the design recipe to design data
+represented using classes as well as operations implemented as methods
+in these classes. 
+
+@subsection{Atomic and Compound Data}
+
+We saw already in @secref["lec01"] and in @secref["assign01"] how to
+design classes that contain multiple pieces of data. Given a class
+defined as follows:
+
+@#reader scribble/comment-reader
+(racketblock
+;; A Posn is (new posn% Number Number)
+(define-class posn%
+  (fields x y)
+  
+  ...)
+)
+
+the template for a @racket[posn%] method is:
+
+@#reader scribble/comment-reader
+(racketblock
+ ;; -> ???
+ (define (posn%-method)
+   ... (field x) ... (field y) ...))
+
+Here we see that our template lists the available parts of the
+@racket[posn%] object, in particular the two fields @racket[x] and
+@racket[y].
+
+@subsection{Enumerations}
+
+An @deftech{enumeration} is a data definition for a finite set of
+possibilities.  For example, we can represent a traffic light like the
+ones on Huntington Avenue with a finite set of symbols, as we did in
+Fundies I:
+
+@codeblock{
+;; A Light is one of:
+;; - 'Red
+;; - 'Green
+;; - 'Yellow
 }
 
+Following the design recipe, we can construct the template for
+functions on @tt{Light}s:
+
+@#reader scribble/comment-reader
+(racketblock
+ ;; Light -> ?
+ (define (light-temp l)
+   (cond [(symbol=? 'Red l)]
+	 [(symbol=? 'Green l)]
+	 [(symbol=? 'Yellow l)]))
+ )
+
+Finally, we can define functions over @tt{Light}s, following the template.  
+
+@#reader scribble/comment-reader
+(racketblock
+ ;; next : Light -> Light
+ ;; switch to the next light in the cycle
+ (define (light-temp l)
+   (cond [(symbol=? 'Red l) 'Green]
+	 [(symbol=? 'Green l) 'Yellow]
+	 [(symbol=? 'Yellow l) 'Red]))
+ (check-expect (next 'Green) 'Yellow)
+ (check-expect (next 'Red) 'Green)
+ (check-expect (next 'Yellow) 'Red))
+
+That's all well and good for a function-oriented design, but we want
+to design this using classes, methods, and objects.
+
+
+There are two obvious possibilities.  First, we could create a
+@racket[light%] class, with a field holding a @racket[Light].
+However, this fails to use classes and objects to their full
+potential.  Instead, we will design a class for each state the traffic
+light can be in.  Each of the three classes will have their own
+implementation of the @racket[next] method, producing the appropriate
+@tt{Light}.
+
+@codeblock{
+  #lang class0
+  ;; A Light is one of:
+  ;; - (new red%)
+  ;; - (new green%)
+  ;; - (new yellow%)
+  (define-class red%
+    ;; -> Light
+    ;; Produce the next traffic light
+    (define/public (next)
+      (new green%)))
+  (define-class green%
+    ;; -> Light
+    ;; Produce the next traffic light
+    (define/public (next)
+      (new yellow%)))
+  (define-class yellow%
+    ;; -> Light
+    ;; Produce the next traffic light
+    (define/public (next)
+      (new red%)))
+}
+
+If you have a @tt{Light} @racket[L], how do you get the next light?
+
+@racket[(send L next)]
+
+Note that there is no use of @racket[cond] in this program, although
+the previous design using functions needed a @racket[cond].  Instead,
+the @racket[cond] is happening behind your back, because the object
+system pick which version of @racket[next] method to call.
+
+
+@section{Unions and Recursive Unions}
+
+@deftech{Unions} are a generalization of enumerations to represent
+infinite families of data.  One example is @emph{binary trees}, which can contain arbitrary other data as elements.  We'll now look at how to model binary trees of numbers, such as:
+
+@verbatim{7    6         8  
+     	      / \       / \ 
+             8   4     2   1
+	        / \ 
+	       3   2
+
+}
+
+How would we represent this with classes and objects?
+
+@#reader scribble/comment-reader
+(racketmod
+class0
+;; A BT is one of:
+;; - (new leaf% Number)
+;; - (new node% Number BT BT)
+(define-class leaf%
+  (fields number))
+
+(define-class node%
+  (fields number left right))
+
+(define ex1 (new leaf% 7))
+(define ex2 (new node% 6
+		 (new leaf% 8)
+		 (new node% 4
+		      (new leaf% 3)
+		      (new leaf% 2))))
+(define ex3 (new node% 8
+		 (new leaf% 2)
+		 (new leaf% 1)))
+)
+
+We then want to design a method @racket[count] which produces the
+number of numbers stored in a @tt{BT}.  
+
+Here are our examples:
+
+@racketblock[
+(check-expect (send ex1 count) 1)
+(check-expect (send ex2 count) 5)
+(check-expect (send ex3 count) 3)
+]
+
+Next, we write down the
+templates for methods of our two classes.
+
+The template for @racket[leaf%]:
+@#reader scribble/comment-reader
+(racketblock
+;; -> Number
+;; count the number of numbers in this leaf
+(define/public (count)
+ ... (field number) ...)
+)
+
+The template for @racket[node%]:
+@#reader scribble/comment-reader
+(racketblock
+;; -> Number
+;; count the number of numbers in this node
+(define/public (count)
+ ... (field number) ...
+ (send (field left) count) ...
+ (send (field right) count) ...)
+)
+
+
+Now we provide a definition of the @racket[count] method for each of
+our classes.
+
+For @racket[leaf%]:
+@#reader scribble/comment-reader
+(racketblock
+;; -> Number
+;; count the number of numbers in this leaf
+(define/public (count)
+  1)
+)
+
+For @racket[node%]:
+@#reader scribble/comment-reader
+(racketblock
+;; -> Number
+;; count the number of numbers in this node
+(define/public (count)
+  (+ 1
+     (send (field left) count)
+     (send (field right) count)))
+)
+
+
+Next, we want to write the @racket[double] function, which takes a
+number and produces two copies of the @tt{BT} with the given number at
+the top.  Here is a straightforward implementation for @racket[leaf%]:
+
+@#reader scribble/comment-reader
+(racketblock
+;; Number -> BT
+;; double the leaf and put the number on top
+(define/public (double n)
+  (new node%
+       n
+       (new leaf% (field number))
+       (new leaf% (field number))))
+)
+
+Note that @racket[(new leaf% (field number))] is just constructing a
+new @racket[leaf%] object just like the one we started with.
+Fortunately, we have a way of referring to ourselves, using the
+identifier @racket[this].  We can thus write the method as:
+
+@#reader scribble/comment-reader
+(racketblock
+;; Number -> BT
+;; double the leaf and put the number on top
+(define/public (double n)
+  (new node% n this this))
+)
+
+For @racket[node%], the method is very similar:
+@margin-note{Since these two methods are so similar, you may wonder if
+they can be abstracted to avoid duplication.  We will see how to do
+this in a subsequent class.}
+
+@#reader scribble/comment-reader
+(racketblock
+;; Number -> BT
+;; double the node and put the number on top
+(define/public (double n)
+  (new node% n this this))
+)
+
+
+The full @tt{BT} code is now:
+@#reader scribble/comment-reader
+(racketmod
+class0
+;; A BT is one of:
+;; - (new leaf% Number)
+;; - (new node% Number BT BT)
+
+(define-class leaf%
+  (fields number)
+  ;; -> Number
+  ;; count the number of numbers in this leaf
+  (define/public (count)
+  1)
+  ;; Number -> BT
+  ;; double the leaf and put the number on top
+  (define/public (double n)
+    (new node% n this this)))
+
+(define-class node%
+  (fields number left right)
+  ;; -> Number
+  ;; count the number of numbers in this node
+  (define/public (count)
+    (+ 1
+       (send (field left) count)
+       (send (field right) count)))
+  ;; Number -> BT
+  ;; double the node and put the number on top
+  (define/public (double n)
+    (new node% n this this)))
+
+(define ex1 (new leaf% 7))
+(define ex2 (new node% 6
+		 (new leaf% 8)
+		 (new node% 4
+		      (new leaf% 3)
+		      (new leaf% 2))))
+(define ex3 (new node% 8
+		 (new leaf% 2)
+		 (new leaf% 1)))
+
+(check-expect (send ex1 count) 1)
+(check-expect (send ex2 count) 5)
+(check-expect (send ex3 count) 3)
+
+(check-expect (send ex1 double 5)
+	      (new node% 5 ex1 ex1))
+(check-expect (send ex3 double 0)
+	      (new node% 0 ex3 ex3))
+)

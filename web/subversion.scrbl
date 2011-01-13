@@ -42,7 +42,7 @@ by running it at your system's command prompt:
   ...
 }]
 
-@section*{Your Subversion repository and homework directories}
+@section*[#:tag "svnlayout"]{Your Subversion repository and homework directories}
 
 You will use Subversion to (1) keep track of revisions as you work on your
 assignments, and (2) submit your assignments for grading. If you are in pair
@@ -132,9 +132,11 @@ directory it is responsible for. Here's the most common one:
 @itemlist[
   @item{@tt{add [@ittt{files and directories}]}
 
-  Places @ittt{files and directories} under Subversion's control: the @emph{next
-  time you commit} they will be sent to the repository. (Also see @tt{rm},
-  @tt{mkdir}, @tt{mv}, and @tt{cp}.)}]
+  Places @ittt{files and directories} under Subversion's control: the
+  @emph{next time you commit} they will be sent to the repository. If
+  you @tt{add} a directory, all files inside of that directory will
+  also be added. (Also see @tt{rm}, @tt{mkdir}, @tt{mv}, and
+  @tt{cp}.)}]
 
 And there are several verbs for talking to the repository:
 
@@ -148,7 +150,17 @@ And there are several verbs for talking to the repository:
   @item{@tt{update [@ittt{files and directories}]}
 
   Updates your local files with changes from the repository, merging if
-  necessary.}
+  necessary.
+
+  This will print the current revision number of the repository.  Note
+  that this will increase quickly, since it is a @emph{global} number
+  for the entire class, not just for your pair.
+
+  Sometimes, when your partner has made changes to a file that you
+  have also edited, Subversion will report a conflict.  There are a
+  number of ways to resolve conflicts, but the simplest way is for you
+  and your partner to work together as a pair, so that conflicts do
+  not arise at all.}
 
   @item{@tt{commit [@ittt{files and directories}]}
 
