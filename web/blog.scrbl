@@ -6,6 +6,14 @@
 
 @title*{Blog}
 
+@section*{Assignment 2 is out}
+
+@tt{Wed Jan 12 19:14:25 EST 2011}
+
+@seclink["assign02"]{Assignment 2} has been posted and is due at the
+usual time on Wednesday.
+
+
 @section*{Name fix in assignment 1}
 
 @tt{Wed Jan 12 15:21:37 EST 2011}
