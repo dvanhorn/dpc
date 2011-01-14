@@ -3,8 +3,20 @@
 @(require "unnumbered.rkt")
 
 @(require (for-label class0))
+@(require (for-label class0/universe))
 
 @title*{Blog}
+
+@section*{Object-oriented universe}
+
+@tt{Thu Jan 13 22:05:09 EST 2011}
+
+In addition to an object-oriented version of @racket[big-bang], we've
+just added an object-oriented version of @racket[universe] for
+designing distributed programs (see the documentation for details).
+There's no need to use it, @emph{yet}, but it's there if you want to
+explore.
+
 
 @section*{Assignment 2 is out}
 
