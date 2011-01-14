@@ -18,7 +18,7 @@
 
 @title[#:tag "assign01"]{1/12: Complex}
 
-Due: 1/12.
+Due: 1/12 [@seclink["soln01"]{Solution}].
 
 Language: @racketmodname[class0].
 

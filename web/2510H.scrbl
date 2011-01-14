@@ -29,36 +29,15 @@ and self-driven exploration and requires a serious commitment
 to practical hands-on programming. 
 
 @include-section["general.scrbl"]
-
 @include-section["texts.scrbl"]
-
 @include-section["syllabus.scrbl"]
-
 @include-section["lectures.scrbl"]
-
 @include-section["labs.scrbl"]
-
 @include-section["assignments.scrbl"]
-
+@include-section["solutions.scrbl"]
 @include-section["subversion.scrbl"]
-
 @include-section["pair-programming.scrbl"]
-
 @include-section["style.scrbl"]
-
 @include-section["class.scrbl"]
-
 @include-section["blog.scrbl"]
-
-@internal[              
-@section*{TODO}
-
-@itemlist[#:style 'ordered
-  @item{Syllabus}
-  @item{Outline assignments, lectures and labs}
-  @item{Project?}
-  @item{The Style}
-  @item{Ping operations for tutors; hire tutors.}
-  @item{Staff coordinates, office hours, email addresses}
-  @item{History of objects}]]
 

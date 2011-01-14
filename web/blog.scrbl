@@ -7,6 +7,15 @@
 
 @title*{Blog}
 
+@section*{Solutions available}
+
+@tt{Fri Jan 14 11:53:19 EST 2011}
+
+We have decided to make solutions to assignments available after they
+are due.  The first assignment's @seclink["soln01"]{solution} is now
+on the course webpage.  We welcome design improvements, bug reports,
+and feature requests.
+
 @section*{Object-oriented universe}
 
 @tt{Thu Jan 13 22:05:09 EST 2011}
