@@ -182,3 +182,72 @@ class0
   If this method produces @racket[true] for the initial world,
   DrRacket displays a seperate window in which the current state is
   rendered.}
+
+
+
+@defproc[(universe [obj Universe]) Universe]{
+
+An object-oriented version of @racket[2htdp:universe].}
+
+The given universe object should provide some of the methods descibed
+below.  For any methods that are not provided, DrRacket will use a
+default behavior.  The universe @emph{must} at least provide a
+@racket[on-new] and @racket[on-msg] method.
+
+@defform[#:id on-new
+	 #:literals (send on-new) 
+  (send a-universe on-new iw)
+  #:contracts [(iw iworld?)]]{
+
+  Signal that the given new world has joined the universe, producing a bundle.}
+
+@defform[#:id on-msg
+	 #:literals (send on-msg) 	 
+  (send a-universe on-msg iw msg)
+  #:contracts [(iw iworld?)
+               (msg sexp?)]]{
+
+  Signal that the given world has sent the given message to the
+  universe, producing a bundle.}
+
+@defform[#:id on-tick 
+	 #:literals (send on-tick) 
+  (send a-universe on-tick)]{
+
+  Tick this universe, producing a bundle.}
+
+@require[(for-label "tick-rate.rkt")]
+
+@defform[#:id tick-rate
+	 #:literals (send tick-rate)
+  (send a-universe tick-rate)]{
+
+  Produce the rate at which the clock should tick for this universe.}
+
+@defform[#:id on-disconnect
+	 #:literals (send on-disconnect) 
+  (send a-universe on-disconnect iw)
+  #:contracts [(iw iworld?)]]{
+
+  Signal that the given world has left the universe, producing a bundle.}
+
+@defform[#:id check-with
+	 #:literals (send check-with)
+  (send a-universe check-with)]{
+  
+  If this method produces @racket[true], the universe is considered a 
+  valid universe; otherwise the universe program signals an error.}
+
+@defform[#:id to-string
+	 #:literals (send to-string) 
+  (send a-universe to-string)]{
+
+  Produce a string representation of the universe.}
+
+@defform[#:id state
+	 #:literals (send state)
+  (send a-universe state)]{
+  
+  If this method produces @racket[true] for the initial universe,
+  DrRacket displays a seperate window in which the current state is
+  rendered.}
