@@ -29,7 +29,7 @@ apprentice teachers and are here to learn how to run a course.
 	(list "Alex Lee" (tt "lee") "WVH102" "Wednesday" "10:00pm-11:00pm")
 	(list "Jim Shargo" (tt "shargoj") "WVH102" "Monday" "4:00pm-5:00pm"))]
 
-@bold{Communication}: Use CCIS email (@tt{@"@"ccs.neu.edu}) to reach
+@bold{Communication}: Use CCIS email (@tt["@ccs.neu.edu"]) to reach
 any of the course staff; usernames are given above.
 
 

@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require "../utils.rkt"
-          (for-label class0))
-
+          (for-label (only-in lang/htdp-intermediate-lambda define-struct))
+          (for-label (except-in class0 define-struct)))
 
 @title[#:tag "soln01"]{1/12: Complex}
 
