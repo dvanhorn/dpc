@@ -7,6 +7,35 @@
 
 @title*{Blog}
 
+@section*{Ed Fries talk on Tuesday}
+
+@tt{Fri Jan 14 12:13:15 EST 2011}
+
+The Creative Industries program at NEU is hosting Ed Fries, former
+Microsoft Vice-President of Game Publishing and co-founder of the
+Xbox, who will be speaking on Tuesday, 1/18, from 1:30-3:00pm in the
+Raytheon Amphitheater (240 Egan).  Here is Ed's bio from the
+@link["http://www.ci.neu.edu/"]{talk announcement}:
+
+@nested[#:style 'inset]{
+Ed Fries created his first video games for the Atari 800 in the early
+1980s. He joined Microsoft in 1986, and spent the next ten years as
+one of the founding developers of both Excel and Word. He left the
+Office team to pursue his passion for interactive entertainment and
+created Microsoft Game Studios. Over the next eight years he grew the
+team from 50 people to over 1200, published more than 100 games
+including more than a dozen million+ sellers, co-founded the Xbox
+project, and made Microsoft one of the leaders in the interactive
+entertainment business. In 2004, Ed retired from his Microsoft Vice
+President job to continue his work in the video game business as board
+member, advisor and consultant to a broad range of publishers,
+independent game developers, and media companies. In 2007 Ed launched
+his own startup, FigurePrints, an innovative company that uses 3D
+color printing technology to bring video game characters to life. In
+the summer of 2010 Ed released "Halo 2600", a "demake" of the Halo
+video game series for the Atari 2600.}
+
+
 @section*{Solutions available}
 
 @tt{Fri Jan 14 11:53:19 EST 2011}
