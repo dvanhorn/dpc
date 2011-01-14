@@ -311,7 +311,7 @@ What I'm saying here is "whenever I say @tt{svn}, the terminal should
 interpret that as @tt{/usr/bin/svn}".  This alias will go away if I
 log out of the CCIS machine and log back in.  If I want to set up this
 convenience for every time I use a CCIS computer, I can edit my
-@tt{.login} file and add the alias line.
+@tt{~/.login} file and add the alias line.
 
 Moving on, now I can do all of the things I did on my Mac.  Here is a
 transcript:
