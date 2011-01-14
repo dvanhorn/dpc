@@ -406,7 +406,8 @@ possibilities.  For example, we can represent a traffic light like the
 ones on Huntington Avenue with a finite set of symbols, as we did in
 Fundies I:
 
-@codeblock{
+@codeblock[#:keep-lang-line? #f]{
+#lang class0
 ;; A Light is one of:
 ;; - 'Red
 ;; - 'Green
@@ -418,11 +419,11 @@ functions on @tt{Light}s:
 
 @#reader scribble/comment-reader
 (racketblock
- ;; Light -> ?
+ ;; Light -> ???
  (define (light-temp l)
-   (cond [(symbol=? 'Red l)]
-	 [(symbol=? 'Green l)]
-	 [(symbol=? 'Yellow l)]))
+   (cond [(symbol=? 'Red l) ...]
+	 [(symbol=? 'Green l) ...]
+	 [(symbol=? 'Yellow l) ...]))
  )
 
 Finally, we can define functions over @tt{Light}s, following the template.  
@@ -431,7 +432,7 @@ Finally, we can define functions over @tt{Light}s, following the template.
 (racketblock
  ;; next : Light -> Light
  ;; switch to the next light in the cycle
- (define (light-temp l)
+ (define (next l)
    (cond [(symbol=? 'Red l) 'Green]
 	 [(symbol=? 'Green l) 'Yellow]
 	 [(symbol=? 'Yellow l) 'Red]))
@@ -451,28 +452,37 @@ light can be in.  Each of the three classes will have their own
 implementation of the @racket[next] method, producing the appropriate
 @tt{Light}.
 
-@codeblock{
-  #lang class0
+@#reader scribble/comment-reader
+(racketmod
+  class0
   ;; A Light is one of:
   ;; - (new red%)
   ;; - (new green%)
   ;; - (new yellow%)
+
   (define-class red%
     ;; -> Light
     ;; Produce the next traffic light
     (define/public (next)
       (new green%)))
+
   (define-class green%
     ;; -> Light
     ;; Produce the next traffic light
     (define/public (next)
       (new yellow%)))
+
   (define-class yellow%
     ;; -> Light
     ;; Produce the next traffic light
     (define/public (next)
       (new red%)))
-}
+
+  (check-expect (send (new red%) next) (new green%))
+  (check-expect (send (new green%) next) (new yellow%))
+  (check-expect (send (new yellow%) next) (new red%))
+)
+
 
 If you have a @tt{Light} @racket[L], how do you get the next light?
 
@@ -481,7 +491,7 @@ If you have a @tt{Light} @racket[L], how do you get the next light?
 Note that there is no use of @racket[cond] in this program, although
 the previous design using functions needed a @racket[cond].  Instead,
 the @racket[cond] is happening behind your back, because the object
-system pick which version of @racket[next] method to call.
+system picks the appropriate @racket[next] method to call.
 
 
 @section{Unions and Recursive Unions}
@@ -489,13 +499,12 @@ system pick which version of @racket[next] method to call.
 @deftech{Unions} are a generalization of enumerations to represent
 infinite families of data.  One example is @emph{binary trees}, which can contain arbitrary other data as elements.  We'll now look at how to model binary trees of numbers, such as:
 
-@verbatim{7    6         8  
-     	      / \       / \ 
-             8   4     2   1
-	        / \ 
-	       3   2
-
-}
+@verbatim[#:indent 2]{
+          7         6              8  
+     	           / \            / \ 
+                  8   4          2   1
+	             / \ 
+	            3   2}
 
 How would we represent this with classes and objects?
 
