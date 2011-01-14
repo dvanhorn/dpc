@@ -69,6 +69,8 @@ method with the given arguments, @racket[arg]s.}
 
 @section[#:style 'hidden]{Object-oriented Universe}
 
+@subsection[#:style 'hidden #:tag-prefix 'big-bang]{Big bang}
+
 @defmodule[class0/universe #:use-sources ("class/tick-rate.rkt")]
 
 @defproc[(big-bang [obj World]) World]{
@@ -184,6 +186,7 @@ class0
   rendered.}
 
 
+@subsection[#:style 'hidden #:tag-prefix 'universe]{Universe}
 
 @defproc[(universe [obj Universe]) Universe]{
 
