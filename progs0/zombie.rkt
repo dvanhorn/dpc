@@ -11,20 +11,15 @@
 (require 2htdp/image)
 (require class0/universe)
 
-(define CELL-SIZE 20)
+(define CELL 20)
+(define 1/2-CELL (/ CELL 2))
 (define WIDTH 400)
 (define HEIGHT 400)
 (define MT-SCENE (empty-scene WIDTH HEIGHT))
 
-;; FIXME: Inconsistent state -- moving toward more OO-design.
-
-;; FIXME: change to 
+;; ==========================================================
 ;; A World is a (new world% Dot LoDot LoDot Posn).
-;; Interp: player, living zombies, dead zombies, mouse position.
-
-;; A World is a (new world% Posn [Listof Posn] [Listof Posn] Posn).
-;; A Posn is a Int + (* +i Int).
-
+;; Interp: player, list of living and dead zombies, mouse.
 (define-class world%
   (fields player live dead mouse)
   
@@ -48,7 +43,9 @@
   (define/public (on-mouse x y m)
     (cond [(mouse=? "button-down" m)
            (new world%
-                (new dot% x y)   ;; FIXME: make random
+                (new dot% 
+                     (random WIDTH)
+                     (random HEIGHT))
                 (field live)
                 (field dead) 
                 (new dot% x y))]
@@ -58,14 +55,11 @@
                 (field live)
                 (field dead)
                 (new dot% x y))]
-          [else this]))
-  
-  (define/public (stop-when)
-    (game-over?))
+          [else this]))  
   
   ;; -> Boolean
   ;; Does the player touch any zombies?
-  (define/public (game-over?)
+  (define/public (stop-when)
     (or (send (field dead) touching? (field player))
         (send (field live) touching? (field player))))
   
@@ -90,45 +84,6 @@
            (r-dead res)
            (field mouse)))))
 
-(define-struct r (live dead))
-
-;; Posn Posn -> Nat
-;; Distance in taxicab geometry (domain knowledge).
-(define (dist p1 p2)
-  (+ (abs (- (posn-x p1)
-             (posn-x p2)))
-     (abs (- (posn-y p1)
-             (posn-y p2)))))
-
-;; FIXME: this contract is broken since the function returns
-;; x * Dir, which is not a Dir by the current definition unless
-;; x is in {-1,0,1}.
-
-;; Nat Posn Posn -> Dir
-;; Compute a direction that minimizes the distance between from and to.
-(define (min-taxi x from to)
-  ;; Dir Dir -> Dir
-  (local [(define (select-shorter-dir d1 d2)
-            (if (< (dist (posn+ from d1) to)
-                   (dist (posn+ from d2) to))
-                d1
-                d2))]
-    (foldl (λ (d sd) (select-shorter-dir sd (make-posn (* x (posn-x d)) (* x (posn-y d)))))
-           (make-posn 0 0)
-           DIRS)))
-
-;; A Dir (Direction) is one of:
-(define DIRS
-  (list (make-posn -1 -1)
-        (make-posn -1  0)
-        (make-posn -1 +1)
-        (make-posn  0 -1)
-        (make-posn  0  0)
-        (make-posn  0 +1)
-        (make-posn +1 -1)
-        (make-posn +1  0)
-        (make-posn +1 +1)))
-
 
 ;; ==========================================================
 ;; A LoDot is one of:
@@ -144,8 +99,10 @@
 ;; move-toward : Nat Dot -> LoDot
 ;; Move all dots in this list n units toward the given dot.
 
-;; LoDot -> (make-r LoDot LoDot)
+;; kill : LoDot -> (make-r LoDot LoDot)
 ;; Kill any live zombies in this list and move to dead list.
+
+(define-struct r (live dead))
 
 (define-class empty%
   (define/public (draw-on c scn)
@@ -189,36 +146,27 @@
 
 
 ;; ==========================================================
-;; A Dot is a (new dot% Int Int).
+;; A Dot is a (new dot% [0,WIDTH] [0,HEIGHT]).
+;; Interp: a position on the board.
+;; A Delta is a (new dot% Int Int).
+;; Interp: a directional vector.
 (define-class dot%
   (fields x y)
   
   ;; Is this dot touching the given dot?
   ;; Dot -> Boolean
   (define/public (touching? d)
-    (<= (dist d) 
-        (/ CELL-SIZE 2)))
+    (<= (dist d) 1/2-CELL))
   
   ;; Move this dot n units toward the given dot.
   ;; Nat Nat -> Dot
-  ;; FIXME: temporary hack
   (define/public (move-toward n d)
-    (let ((new-posn            
-           (posn+ (make-posn (field x)
-                             (field y))
-                  (min-taxi n 
-                            (make-posn (field x)
-                                       (field y))
-                            (make-posn (send d x)
-                                       (send d y))))))
-      (new dot% 
-           (posn-x new-posn)
-           (posn-y new-posn))))
+    (plus (min-taxi n d)))
   
   ;; Draw this dot with the given color on the scene.
   ;; Color Scene -> Scene
   (define/public (draw-on c scn)
-    (place-image (circle (/ CELL-SIZE 2) "solid" c)
+    (place-image (circle 1/2-CELL "solid" c)
                  (field x)
                  (field y)
                  scn))
@@ -229,15 +177,74 @@
     (+ (abs (- (field x)
                (send d x)))
        (abs (- (field y)
-               (send d y))))))
+               (send d y)))))
+  
+  ;; Compute delta minimizing distance from this dot and to.
+  ;; Nat Dot -> Delta
+  (define/public (min-taxi n to)
+    (min-taxi* n this to))
+  
+  ;; Dot -> Dot
+  (define/public (plus d)
+    (new dot% 
+         (+ (field x) (send d x))
+         (+ (field y) (send d y)))))
 
-;; Posn Posn -> Posn
-(define (posn+ p1 p2) 
-  (make-posn (+ (posn-x p1) (posn-x p2))
-             (+ (posn-y p1) (posn-y p2))))
+(define origin (new dot% 0 0))
+(check-expect (send origin touching? (new dot% CELL 0))
+              false)
+(check-expect (send origin touching? (new dot% 1/2-CELL 0))
+              true)
+(check-expect (send origin move-toward 1 (new dot% 5 5))
+              (new dot% 1 1))
+
+;; A Dir (Direction) is one of:
+(define DIRS
+  (list (new dot% -1 -1)
+        (new dot% -1  0)
+        (new dot% -1 +1)
+        (new dot%  0 -1)
+        (new dot%  0  0)
+        (new dot%  0 +1)
+        (new dot% +1 -1)
+        (new dot% +1  0)
+        (new dot% +1 +1)))
+
+
+;; ==========================================================
+;; HACK functions needed to port from less OO design.
+
+;; Nat Posn Posn -> Delta
+;; Compute a delta that minimizes the distance between from and to.
+(define (min-taxi* x from to)
+  ;; Dir Dir -> Dir
+  (local [(define (select-shorter-dir d1 d2)
+            (if (< (send (send from plus d1) dist to)
+                   (send (send from plus d2) dist to))
+                d1
+                d2))]
+    (foldl (λ (d sd) 
+             (select-shorter-dir sd
+                                 (new dot% 
+                                      (* x (send d x)) 
+                                      (* x (send d y)))))
+           (new dot% 0 0)
+           DIRS)))
+
+
+;; ==========================================================
+;; Helper constructor for LoDot.
 
 ;; Nat (-> Nat Dot) -> LoDot
 ;; Like build-list for LoDot.
+(check-expect (build-lodot 0 (λ (i) (new dot% i i)))
+              (new empty%))
+(check-expect (build-lodot 2 (λ (i) (new dot% i i)))
+              (new cons% 
+                   (new dot% 0 0)
+                   (new cons%
+                        (new dot% 1 1)
+                        (new empty%))))
 (define (build-lodot n f)
   (local [(define (loop i)
             (cond [(= i n) (new empty%)]
@@ -248,6 +255,7 @@
     (loop 0)))
 
 
+;; ==========================================================
 ;; Run program, run!
 (big-bang
  (new world%
