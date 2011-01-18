@@ -11,7 +11,8 @@
 (require 2htdp/image)
 (require class0/universe)
 
-;; A World is a (world Posn [Listof Posn] [Listof Posn]).
+;; A World is a (world Posn LoP LoP Posn).
+;; An LoP is a [Listof Posn].
 ;; A Posn is a Int + (* +i Int).
 
 (define-class world%
@@ -79,32 +80,33 @@
 
   ;; -> World
   ;; Junk all zombies that touch other zombies or junk.
-  (define/public (junk-it)    
-    ;; [Listof Posn] [Listof Posn] -> (make-r [Listof Posn] [Listof Posn])
-    (local [(define-struct r (live dead))
-            (define (loop maybe-live definite-dead)
-              (cond [(empty? maybe-live)
-                     (make-r empty definite-dead)]                    
-                    [else
-                     (local [(define z (first maybe-live))]                       
-                       (cond [(or (ormap (λ (ml) (touching? z ml)) 
-                                         (rest maybe-live))
-                                  (ormap (λ (dd) (touching? z dd)) 
-                                         definite-dead))
-                              (loop (rest maybe-live)
-                                    (cons z definite-dead))]
-                             [else
-                              (let ((res (loop (rest maybe-live) 
-                                               definite-dead)))
-                                (make-r (cons z (r-live res)) 
-                                        (r-dead res)))]))]))]
-                             
-      (let ((res (loop (field zombies) (field junk))))
-        (new world% 
-             (field player)
-             (r-live res)
-             (r-dead res)
-             (field mouse-posn))))))
+  (define/public (junk-it)                                    
+    (let ((res (kill (field zombies) (field junk))))
+      (new world% 
+           (field player)
+           (r-live res)
+           (r-dead res)
+           (field mouse-posn)))))
+
+;; LoP LoP -> (make-r LoP LoP)
+;; Killing any live zombies and move to dead list.
+(define-struct r (live dead))
+(define (kill maybe-live definite-dead)
+  (cond [(empty? maybe-live)
+         (make-r empty definite-dead)]                    
+        [else
+         (local [(define z (first maybe-live))]
+           (cond [(or (ormap (λ (ml) (touching? z ml))
+                             (rest maybe-live))
+                      (ormap (λ (dd) (touching? z dd))
+                             definite-dead))
+                  (kill (rest maybe-live)
+                        (cons z definite-dead))]
+                 [else
+                  (let ((res (kill (rest maybe-live)
+                                   definite-dead)))
+                    (make-r (cons z (r-live res)) 
+                            (r-dead res)))]))]))
   
 ;; Posn Posn -> Nat
 ;; Distance in taxicab geometry (domain knowledge).
@@ -112,7 +114,7 @@
   (posn-sum (posn-abs (- p1 p2))))
 
 ;; Nat Posn Posn -> Dir
-;; Compute a direction that minimizes the distance between from and to.
+;; Find direction to minimizes distance between from and to.
 (define (min-taxi x from to)
   ;; Dir Dir -> Dir
   (local [(define (select-shorter-dir d1 d2)
@@ -120,7 +122,10 @@
                    (dist (+ from d2) to))
                 d1
                 d2))]
-    (foldl (λ (d sd) (select-shorter-dir sd (posn (* x (posn-x d)) (* x (posn-y d)))))
+    (foldl (λ (d sd) 
+             (select-shorter-dir sd 
+                                 (posn (* x (posn-x d)) 
+                                       (* x (posn-y d)))))
            0
            DIRS)))
 
