@@ -79,30 +79,33 @@
 
   ;; -> World
   ;; Junk all zombies that touch other zombies or junk.
-  (define/public (junk-it)
-    ;; maybe-zs are zombies if they don't touch any zs-to-consider.
-    (local [(define (seg zs-to-consider maybe-zs junk)
-              (cond [(empty? zs-to-consider) 
-                     (new world%
-                          (field player)
-                          (reverse maybe-zs)
-                          junk
-                          (field mouse-posn))]
+  (define/public (junk-it)    
+    ;; [Listof Posn] [Listof Posn] -> (make-r [Listof Posn] [Listof Posn])
+    (local [(define-struct r (live dead))
+            (define (loop maybe-live definite-dead)
+              (cond [(empty? maybe-live)
+                     (make-r empty definite-dead)]                    
                     [else
-                     (let ((touching-first? (λ (p) (touching? (first zs-to-consider) p))))
-                       (cond [(ormap touching-first? (append maybe-zs junk))
-                              (seg (rest zs-to-consider)
-                                   (filter (λ (x) (not (touching-first? x))) maybe-zs)
-                                   (cons (first zs-to-consider)
-                                         (append (filter touching-first? maybe-zs)
-                                                 junk)))]
+                     (local [(define z (first maybe-live))]                       
+                       (cond [(or (ormap (λ (ml) (touching? z ml)) 
+                                         (rest maybe-live))
+                                  (ormap (λ (dd) (touching? z dd)) 
+                                         definite-dead))
+                              (loop (rest maybe-live)
+                                    (cons z definite-dead))]
                              [else
-                              (seg (rest zs-to-consider)
-                                   (cons (first zs-to-consider)
-                                         maybe-zs)
-                                   junk)]))]))]
-      (seg (field zombies) empty (field junk)))))
-
+                              (let ((res (loop (rest maybe-live) 
+                                               definite-dead)))
+                                (make-r (cons z (r-live res)) 
+                                        (r-dead res)))]))]))]
+                             
+      (let ((res (loop (field zombies) (field junk))))
+        (new world% 
+             (field player)
+             (r-live res)
+             (r-dead res)
+             (field mouse-posn))))))
+  
 ;; Posn Posn -> Nat
 ;; Distance in taxicab geometry (domain knowledge).
 (define (dist p1 p2)
