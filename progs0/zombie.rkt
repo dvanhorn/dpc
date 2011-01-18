@@ -137,8 +137,6 @@
            DIRS)))
 
 ;; A Dir (Direction) is one of:
-;; -1-1i -1 -1+1i 0-1i 0 0+1i 1-1i 1 1+1i
-;; Interp: unit positions
 (define DIRS
   (list (make-posn -1 -1)
         (make-posn -1  0)
@@ -169,10 +167,6 @@
 (define (posn+ p1 p2) 
   (make-posn (+ (posn-x p1) (posn-x p2))
              (+ (posn-y p1) (posn-y p2))))
-;; Posn Posn -> Posn
-(define (posn- p1 p2)
-  (make-posn (- (posn-x p1) (posn-x p2))
-             (- (posn-y p1) (posn-y p2))))
 
 ;; Run program, run!
 (big-bang
