@@ -1,12 +1,15 @@
 #lang class0
+;; ==========================================================
 ;; Play the classic game of Zombie Brains!
-;; All zombies move towards the player.  Zombies collision cause flesh heaps
-;; that are deadly to other zombies (and you!).  Teleport as a last resort!
+
+;; All zombies move towards the player.  The player moves 
+;; toward the mouse. Zombies collision cause flesh heaps 
+;; that are deadly to other zombies and the player.  
+;; Randomly teleport via mouse click as a last resort!
 
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
 (require 2htdp/image)
 (require class0/universe)
-(require (only-in racket for*/fold in-range))
 
 ;; A World is a (world Posn [Listof Posn] [Listof Posn]).
 ;; A Posn is a Int + (* +i Int).
@@ -21,9 +24,7 @@
     (send (junk-it) move))
   
   (define/public (tick-rate)
-    1/10)
-  
-  (define/public (record?) true)
+    1/10)    
   
   ;; -> Scene
   (define/public (to-draw)
@@ -58,7 +59,7 @@
   ;; -> Boolean
   ;; Does the player touch zombies or junk?
   (define/public (game-over?)
-    (ormap (touching? (field player))
+    (ormap (λ (p) (touching? (field player) p))
            (append (field junk)
                    (field zombies))))
   
@@ -88,7 +89,7 @@
                           junk
                           (field mouse-posn))]
                     [else
-                     (let ((touching-first? (touching? (first zs-to-consider))))
+                     (let ((touching-first? (λ (p) (touching? (first zs-to-consider) p))))
                        (cond [(ormap touching-first? (append maybe-zs junk))
                               (seg (rest zs-to-consider)
                                    (filter (λ (x) (not (touching-first? x))) maybe-zs)
@@ -104,33 +105,37 @@
 
 ;; Posn Posn -> Nat
 ;; Distance in taxicab geometry (domain knowledge).
-(define (taxi-dist p1 p2)
+(define (dist p1 p2)
   (posn-sum (posn-abs (- p1 p2))))
 
-;; [Posn -> Nat] -> Nat Posn Posn -> Dir
+;; Nat Posn Posn -> Dir
 ;; Compute a direction that minimizes the distance between from and to.
-(define ((minimize dist) x from to)
-  (define (select-shorter-dir d1 d2)
-    (if (< (dist (+ from d1) to)
-           (dist (+ from d2) to))
-        d1
-        d2))
-  (for*/fold ([d 0])
-    ([i (in-range -1 2)]
-     [j (in-range -1 2)])
-    (select-shorter-dir d (posn (* x i) (* x j)))))
+(define (min-taxi x from to)
+  ;; Dir Dir -> Dir
+  (local [(define (select-shorter-dir d1 d2)
+            (if (< (dist (+ from d1) to)
+                   (dist (+ from d2) to))
+                d1
+                d2))]
+    (foldl select-shorter-dir 0 DIRS)))
 
-;; Posn Posn -> Dir
-(define min-taxi (minimize taxi-dist))
+
+
+;; A Dir (Direction) is one of:
+;; -1-1i -1 -1+1i 0-1i 0 0+1i 1-1i 1 1+1i
+;; Interp: unit positions
+(define DIRS 
+  '(-1-1i -1 -1+1i 0-1i 0 0+1i 1-1i 1 1+1i))
+
+
 
 (define *cell-size* 20)
 
-;; Posn -> Posn -> Boolean
+;; Posn Posn -> Boolean
 ;; Are the points "touching"?
-(define (touching? p1) 
-  (λ (p2)
-    (<= (taxi-dist p1 p2) 
-        (/ *cell-size* 2))))
+(define (touching? p1 p2)
+  (<= (dist p1 p2) 
+      (/ *cell-size* 2)))
   
 ;; Color -> Posn Scene -> Scene
 ;; Render the posn on the scene in the given color.
