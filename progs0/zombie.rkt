@@ -16,7 +16,7 @@
 ;; A Posn is a Int + (* +i Int).
 
 (define-class world%
-  (fields player zombies junk mouse-posn)
+  (fields player live dead mouse)
   
   (define/public (name)
     "Zombie Attack!")
@@ -28,29 +28,29 @@
     1/10)    
   
   ;; -> Scene
-  (define/public (to-draw)
-    (foldr (posn+scn "gray")
-           (foldr (posn+scn "red") 
-                  ((posn+scn "green")
-                   (field player)
+  (define/public (to-draw)    
+    (foldr (posn+scn "red") 
+           ((posn+scn "green")
+            (field player)
+            (foldr (posn+scn "gray")
                    (empty-scene (posn-x *dim*)
-                                (posn-y *dim*)))
-                  (field zombies))
-           (field junk)))
+                                (posn-y *dim*))
+                   (field dead)))
+           (field live)))
   
   ;; Int Int Mouse -> World
   (define/public (on-mouse x y m)
     (cond [(mouse=? "button-down" m)
            (new world%
                 (posn x y)
-                (field zombies)
-                (field junk) 
+                (field live)
+                (field dead) 
                 (posn x y))]
           [(mouse=? "move" m)
            (new world%
                 (field player)
-                (field zombies)
-                (field junk)
+                (field live)
+                (field dead)
                 (posn x y))]
           [else this]))
 
@@ -61,8 +61,8 @@
   ;; Does the player touch zombies or junk?
   (define/public (game-over?)
     (ormap (λ (p) (touching? (field player) p))
-           (append (field junk)
-                   (field zombies))))
+           (append (field dead)
+                   (field live))))
   
   ;; -> World
   ;; Move all the zombies toward the player.
@@ -72,24 +72,24 @@
            (+ (field player) 
               (min-taxi 5
                         (field player)
-                        (field mouse-posn)))
+                        (field mouse)))
            (map (λ (r) (+ r (min-taxi 1 r p)))
-                (field zombies))
-           (field junk)
-           (field mouse-posn))))
+                (field live))
+           (field dead)
+           (field mouse))))
 
   ;; -> World
   ;; Junk all zombies that touch other zombies or junk.
   (define/public (junk-it)                                    
-    (let ((res (kill (field zombies) (field junk))))
+    (let ((res (kill (field live) (field dead))))
       (new world% 
            (field player)
            (r-live res)
            (r-dead res)
-           (field mouse-posn)))))
+           (field mouse)))))
 
 ;; LoP LoP -> (make-r LoP LoP)
-;; Killing any live zombies and move to dead list.
+;; Kill any live zombies and move to dead list.
 (define-struct r (live dead))
 (define (kill maybe-live definite-dead)
   (cond [(empty? maybe-live)
