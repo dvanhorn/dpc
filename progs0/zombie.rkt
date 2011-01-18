@@ -134,12 +134,12 @@
                                  (make-posn (* x (posn-x d)) 
                                             (* x (posn-y d)))))
            (make-posn 0 0)
-           (DIRS))))
+           DIRS)))
 
 ;; A Dir (Direction) is one of:
 ;; -1-1i -1 -1+1i 0-1i 0 0+1i 1-1i 1 1+1i
 ;; Interp: unit positions
-(define (DIRS)
+(define DIRS
   (list (make-posn -1 -1)
         (make-posn -1  0)
         (make-posn -1 +1)
