@@ -1,8 +1,8 @@
 #lang class0
 ;; ==========================================================
-;; Play the classic game of Zombie Brains!
+;; Play the classic game of Zombie Attack!
 
-;; All zombies move towards the player.  The player moves 
+;; All zombies move toward the player.  The player moves 
 ;; toward the mouse. Zombies collision cause flesh heaps 
 ;; that are deadly to other zombies and the player.  
 ;; Randomly teleport via mouse click as a last resort!
@@ -182,7 +182,19 @@
   ;; Compute delta minimizing distance from this dot and to.
   ;; Nat Dot -> Delta
   (define/public (min-taxi n to)
-    (min-taxi* n this to))
+    ;; Delta Delta -> Delta
+    (local [(define (select-shorter-dir d1 d2)
+              (cond [(< (send (plus d1) dist to)
+                        (send (plus d2) dist to))
+                     d1]
+                    [else d2]))]
+      (foldl (λ (d sd) 
+               (select-shorter-dir sd
+                                   (new dot% 
+                                        (* n (send d x)) 
+                                        (* n (send d y)))))
+             (new dot% 0 0)
+             DIRS)))
   
   ;; Dot -> Dot
   (define/public (plus d)
@@ -198,7 +210,7 @@
 (check-expect (send origin move-toward 1 (new dot% 5 5))
               (new dot% 1 1))
 
-;; A Dir (Direction) is one of:
+;; A Dir is one of:
 (define DIRS
   (list (new dot% -1 -1)
         (new dot% -1  0)
@@ -209,27 +221,6 @@
         (new dot% +1 -1)
         (new dot% +1  0)
         (new dot% +1 +1)))
-
-
-;; ==========================================================
-;; HACK functions needed to port from less OO design.
-
-;; Nat Posn Posn -> Delta
-;; Compute a delta that minimizes the distance between from and to.
-(define (min-taxi* x from to)
-  ;; Dir Dir -> Dir
-  (local [(define (select-shorter-dir d1 d2)
-            (if (< (send (send from plus d1) dist to)
-                   (send (send from plus d2) dist to))
-                d1
-                d2))]
-    (foldl (λ (d sd) 
-             (select-shorter-dir sd
-                                 (new dot% 
-                                      (* x (send d x)) 
-                                      (* x (send d y)))))
-           (new dot% 0 0)
-           DIRS)))
 
 
 ;; ==========================================================
