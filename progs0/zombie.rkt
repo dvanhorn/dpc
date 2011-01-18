@@ -46,7 +46,8 @@
   (define/public (on-mouse x y m)
     (cond [(mouse=? "button-down" m)
            (new world%
-                (make-posn x y)
+                (make-posn (random WIDTH)
+                           (random HEIGHT))
                 (field live)
                 (field dead) 
                 (make-posn x y))]
