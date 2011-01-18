@@ -117,7 +117,9 @@
                    (dist (+ from d2) to))
                 d1
                 d2))]
-    (foldl select-shorter-dir 0 DIRS)))
+    (foldl (λ (d sd) (select-shorter-dir sd (posn (* x (posn-x d)) (* x (posn-y d)))))
+           0
+           DIRS)))
 
 
 
