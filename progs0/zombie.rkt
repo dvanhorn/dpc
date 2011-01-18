@@ -16,6 +16,8 @@
 (define WIDTH 400)
 (define HEIGHT 400)
 (define MT-SCENE (empty-scene WIDTH HEIGHT))
+(define P-SPEED 5)
+(define Z-SPEED 1)
 
 ;; ==========================================================
 ;; A World is a (new world% Dot LoDot LoDot Posn).
@@ -67,9 +69,9 @@
   ;; Move all the zombies toward the player.
   (define/public (move)
     (new world%
-         (send (field player) move-toward 5
+         (send (field player) move-toward P-SPEED
                (field mouse))
-         (send (field live) move-toward 1
+         (send (field live) move-toward Z-SPEED
                (field player))
          (field dead)
          (field mouse)))
@@ -83,6 +85,62 @@
            (r-live res)
            (r-dead res)
            (field mouse)))))
+
+
+;; Some worlds for testing
+(define (w0)
+  (new world% 
+       (new dot% 0 0)
+       (new empty%)
+       (new empty%)
+       (new dot% 0 0)))
+(define (w1)
+  (new world% 
+       (new dot% 0 0)
+       (new cons% (new dot% 0 0) (new empty%))            
+       (new empty%)
+       (new dot% 0 0)))
+(define (w2)
+    (new world% 
+       (new dot% 0 0)
+       (new empty%)
+       (new cons% (new dot% 0 0) (new empty%)) 
+       (new dot% 0 0)))
+(define (w3)
+  (new world% 
+       (new dot% 0 0)
+       (new empty%)
+       (new empty%)
+       (new dot% 0 30)))
+(define (w4)
+  (new world% 
+       (new dot% 0 0)
+       (new cons% (new dot% 30 0) (new empty%))
+       (new cons% (new dot% 30 0) (new empty%))
+       (new dot% 0 30)))
+(define (w5)
+  (new world% 
+       (new dot% 0 P-SPEED)
+       (new cons% (new dot% (- 30 Z-SPEED) 0) (new empty%))
+       (new cons% (new dot% 30 0) (new empty%))
+       (new dot% 0 30)))
+(define (w7)
+  (send (w0) on-mouse 0 30 "button-down"))
+
+;; on-mouse
+(check-expect (send (w0) on-mouse 0 30 "drag") (w0))
+(check-expect (send (w0) on-mouse 0 30 "move") (w3))
+(check-range (send (send (w7) player) x) 0 WIDTH)
+(check-range (send (send (w7) player) y) 0 HEIGHT)
+(check-expect (send (w7) live) (new empty%))
+(check-expect (send (w7) dead) (new empty%))
+(check-expect (send (w7) mouse) (new dot% 0 30))
+;; stop-when
+(check-expect (send (w0) stop-when) false)
+(check-expect (send (w1) stop-when) true)
+(check-expect (send (w2) stop-when) true)
+;; move
+(check-expect (send (w4) move) (w5))
 
 
 ;; ==========================================================
