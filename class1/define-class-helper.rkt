@@ -42,5 +42,3 @@
            #:attr methods (map syntax-local-introduce (class-name-methods (attribute v)))
            #:with real-name (class-name-id (attribute v))))
 
-
-
