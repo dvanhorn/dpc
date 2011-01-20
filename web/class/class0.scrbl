@@ -26,7 +26,7 @@ Imports all the modules named @racket[module-name]s.}
 Defines a new class named @racket[class-name] with fields
 @racket[field-name]s and methods @racket[method-name]s.
 The class has one additional method for each field name
-@racket[field-name].
+@racket[field-name], which access the field values.
 
 Methods defined with @racket[define/public] are accessible both inside
 and outside of the class definition, while methods defined with

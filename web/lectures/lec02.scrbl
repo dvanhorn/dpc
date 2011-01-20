@@ -1,18 +1,8 @@
 #lang scribble/manual
-@(require scribble/eval
-	  "../utils.rkt"
-          racket/sandbox
-  	  (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
+@(require "../utils.rkt"
+          (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class0 define-struct ...))
 	  (for-label class0/universe))
-
-@(define the-eval
-  (let ([the-eval (make-base-eval)])
-    ;(the-eval '(require lang/htdp-intermediate-lambda))
-    (the-eval '(require class0))
-    (the-eval '(require 2htdp/image))
-    (the-eval '(require (prefix-in r: racket)))
-    the-eval))
 
 @title[#:tag "lec02"]{1/13: Designing classes}
 
