@@ -314,7 +314,7 @@
 (define w7 (send w0 teleport))
 
 ;; World tests
-;; -----------
+;; ===========
 
 ;; on-mouse
 (check-expect (send w0 on-mouse 0 30 "drag") w0)
@@ -338,7 +338,7 @@
 (check-expect (send w4 kill) w6)
 
 ;; LoDot tests
-;; -----------
+;; ===========
 
 ;; draw-on
 (check-expect (send mt draw-on "red" MT-SCENE) MT-SCENE)
@@ -364,7 +364,8 @@
               (make-r mt (new cons% d1 l1)))
 
 ;; Dot tests
-;; ---------
+;; =========
+
 ;; touching?
 (check-expect (send d0 touching? d0) true)
 (check-expect (send d0 touching? d1) false)
