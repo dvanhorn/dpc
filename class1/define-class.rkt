@@ -3,14 +3,14 @@
 (provide new send define/public define/private this field fields)
 
 (require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
-(require (only-in "../class0/define-class.rkt" new field fields))
+(require (only-in "../class0/define-class.rkt" field fields))
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
-                     "../class0/define-class-helper.rkt"
+                     unstable/syntax
                      "define-class-helper.rkt"))
 (require (prefix-in r: racket))
 
-(define-syntax object% (class-name #'r:object%))
+(define-syntax object% (class-name #'r:object% null null))
 
 (define-syntax (super stx) 
   (raise-syntax-error #f "can only be used inside define-class" stx))
@@ -38,31 +38,55 @@
              "duplicate class member name"))
   (define-syntax-class (member-def names)
     #:literals (define/public define/private)
-    (pattern ((~or define/public define/private) 
+    (pattern ((~or define/public #;define/private) 
               ((~var f (member-name names)) x:id ...) e:expr)))
   
   (syntax-parse stx #:literals (super implements fields)
     [(define-class class%
        (~optional (super super%:cls-name)
-                  #:defaults ([super%.real-name #'r:object%]))
+                  #:defaults ([super%.real-name #'r:object%]
+                              [super%.fields null]
+                              [super%.methods null]))
        (~optional (implements i%:ifc-name ...)
-                  #:defaults ([(i%.real-name 1) null]))
+                  #:defaults ([(i%.real-name 1) null]
+                              #;
+                              [(i%.methods 1) null]))
        (~optional (fields (~var fld (member-name null)) ...)
                   #:defaults ([(fld 1) null]))
        (~var <definition> (member-def (syntax->list #'(fld ...))))
        ...)
      #:with -class% (datum->syntax #f (syntax-e #'class%))
-     (with-syntax ([field (datum->syntax stx 'field)]
-                   [(the-fld ...)
-                    (generate-temporaries (syntax (fld ...)))])
+     (with-syntax* ([field (datum->syntax stx 'field)]
+                    [(the-fld ...)
+                     (generate-temporaries (syntax (fld ...)))]
+                    [(super-methods ...) (attribute super%.methods)]
+                    [(meths ...) #'(super-methods ... <definition>.f ...)]
+                    [(inherit-fld ...)
+                     (map reverse (attribute super%.fields))]
+                    ;; the real names
+                    [(all-field-names ...)
+                     (append (map second (attribute super%.fields))
+                             (syntax->list #'(the-fld ...)))]
+                    ;; the external names
+                    [(all-flds ...)
+                     (append (map first (attribute super%.fields))
+                             (syntax->list #'(fld ...)))])
+       #;
+       (define all-fields (map list
+                               (syntax->list #'(all-flds ...))                               
+                               (syntax->list #'(all-field-names ...))))
        (quasisyntax
         (begin
-          (define-syntax class% (class-name #'-class%))
+          (define-syntax class% (class-name #'-class% 
+                                            (list (list #'all-flds #'all-field-names) ...)
+                                            (list #'meths ...)))
           (r:define -class%
-            (r:class/derived #,stx (class% r:object% super%.real-name (i%.real-name ...) #f)
+            (r:class/derived #,stx (class% #;r:object% super%.real-name (i%.real-name ...) #f)
               (r:inspect #f)
               
+              (r:inherit-field inherit-fld) ...
               (r:init-field [(the-fld fld)] ...)
+              (r:inherit super-methods) ...
               (r:super-new)
               (r:define/public (fld) the-fld)
               ...
@@ -72,17 +96,17 @@
                     (syntax-parse stx
                       [(_ arg) 
                        (let ([r (assf (λ (id) (eq? id (syntax-e #'arg)))
-                                      (list (list 'fld #'the-fld) ...))])
+                                      (list (list 'all-flds #'all-field-names) ...))])
                          (if r
                              (second r)
                              (raise-syntax-error #f 
                                                  "no field by that name" 
                                                  stx 
                                                  #'arg)))]))])
+               (void)
                <definition>
                ...))))))]))
 
-#;
 (define-syntax (new stx)
   (syntax-parse stx
     [(_ cls:cls-name . args)
