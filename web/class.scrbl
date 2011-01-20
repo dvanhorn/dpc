@@ -6,3 +6,4 @@
 @local-table-of-contents[]
 
 @include-section["class/class0.scrbl"]
+@include-section["class/class1.scrbl"]
