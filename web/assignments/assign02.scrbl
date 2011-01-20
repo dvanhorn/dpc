@@ -32,7 +32,7 @@ Language: @racketmodname[class0].
         The zombies, on the other hand, always move toward you.  If
         the zombies ever come in contact with you, they eat your
         brains, and you die.  If two zombies happen to come in to
-        contact with eachother, they will mistakenly eat eachothers
+        contact with each other, they will mistakenly eat each other's
         brain, which it turns out is fatal to the zombie species, and
         so they both die.  When a zombie dies, the zombie flesh
         will permanently remain where it is and should any subsequent
