@@ -1,6 +1,6 @@
 #lang racket
 (provide (all-defined-out))
-(provide new send define/public define/private this)
+(provide new send define/public define/private this field fields)
 
 (require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
 (require (only-in "../class0/define-class.rkt" new field fields))
@@ -41,7 +41,7 @@
     (pattern ((~or define/public define/private) 
               ((~var f (member-name names)) x:id ...) e:expr)))
   
-  (syntax-parse stx #:literals (#;super implements fields)
+  (syntax-parse stx #:literals (super implements fields)
     [(define-class class%
        (~optional (super super%:cls-name)
                   #:defaults ([super%.real-name #'r:object%]))

@@ -57,11 +57,15 @@
               (splicing-let-syntax
                ([field (λ (stx)
                          (syntax-parse stx
-                           [(_ arg) (let ([r (assf (λ (id) (eq? id (syntax-e #'arg)))
-                                                   (list (list 'fld #'the-fld) ...))])
-                                      (if r
-                                          (second r)
-                                          (raise-syntax-error #f "no field by that name" stx #'arg)))]))])
+                           [(_ arg) 
+                            (let ([r (assf (λ (id) (eq? id (syntax-e #'arg)))
+                                           (list (list 'fld #'the-fld) ...))])
+                              (if r
+                                  (second r)
+                                  (raise-syntax-error #f 
+                                                      "no field by that name" 
+                                                      stx 
+                                                      #'arg)))]))])
                <definition>
                ...))))))]))
 
