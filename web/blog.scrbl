@@ -7,6 +7,15 @@
 
 @title*{Blog}
 
+@section*{Small tweak to assignment 2}
+
+@tt{Wed Jan 19 14:50:15 EST 2011}
+
+There's been a small change to the write-up of
+@seclink["assign02"]{assignment 2}.  The @tt{max} of an empty list may
+be defined as @racket[-inf.0], negative infinity.
+
+
 @section*{Ed Fries talk on Tuesday}
 
 @tt{Fri Jan 14 12:13:15 EST 2011}

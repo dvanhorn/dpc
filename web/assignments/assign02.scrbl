@@ -17,7 +17,7 @@
 
 @title[#:tag "assign02"]{1/19: Zombie}
 
-Due: 1/19.
+Due: 1/19 [@seclink["soln02"]{Solution}].
 
 Language: @racketmodname[class0].
 
@@ -58,8 +58,12 @@ Language: @racketmodname[class0].
 
         Design classes to represent lists of numbers.  Implement the
 	methods @tt{length}, @tt{append}, @tt{sum}, @tt{prod},
-	@tt{contains?}, @tt{reverse}, @tt{map}, and @tt{max} (for
-	non-empty lists).  You may not use @racket[class0] lists to
+	@tt{contains?}, @tt{reverse}, @tt{map}, and @tt{max}.  Note
+	that @tt{max} raises some interesting design decisions in the
+	case of the empty list.  One solution is to define the
+	@tt{max} of the empty list as negative infinity,
+	@racket[-inf.0], a number smaller than every other number
+	(except itself).  You may not use @racket[class0] lists to
 	implement these classes.}
 
  ]
