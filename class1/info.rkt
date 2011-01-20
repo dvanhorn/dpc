@@ -1,3 +1,3 @@
 #lang setup/infotab
-(define name "class0")
-(define scribblings '(("scribblings/class0.scrbl" ())))
+(define name "class1")
+(define scribblings '(("scribblings/class1.scrbl" ())))

@@ -1,5 +1,5 @@
 #lang s-exp syntax/module-reader
-class0
+class1
 #:read 
 (λ args
   (parameterize ([read-decimal-as-inexact #f]
