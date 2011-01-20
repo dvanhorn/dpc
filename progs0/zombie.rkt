@@ -22,51 +22,81 @@
 ;; ==========================================================
 ;; A World is a (new world% Dot LoDot LoDot Posn).
 ;; Interp: player, list of living and dead zombies, mouse.
+
+;; name : -> String
+;; The name of the game.
+
+;; tick-rate : -> Number
+;; The animation rate for the game.
+
+;; on-tick : -> World
+;; Kill any zombies and move player and zombies.
+
+;; to-draw : -> Scene
+;; Draw the player and live and dead zombies.
+
+;; on-mouse : Int Int MouseEvent -> World
+;; Handle mouse events. 
+
+;; teleport : -> World
+;; Teleport to random location.
+
+;; mouse-move : Int Int -> World
+;; Record mouse movement.
+
+;; touching? : -> Boolean
+;; Does the player touch any zombies?
+
+;; move-toward : -> World
+;; Move all the zombies toward the player.
+
+;; kill : -> World
+;; Kill all zombies that touch other live or dead zombies.
+
 (define-class world%
   (fields player live dead mouse)
   
-  (define/public (name)
-    "Zombie Attack!")
+  (define/public (name) "Zombie Attack!")
+    
+  (define/public (tick-rate) 1/10)
   
   (define/public (on-tick)
-    (send (kill) move))
+    (send (kill) move))  
   
-  (define/public (tick-rate)
-    1/10)    
-  
-  ;; -> Scene
   (define/public (to-draw)
     (send (field live) draw-on "red"
           (send (field dead) draw-on "gray"
                 (send (field player) draw-on "green"
                       MT-SCENE))))
   
-  ;; Int Int Mouse -> World
   (define/public (on-mouse x y m)
     (cond [(mouse=? "button-down" m)
-           (new world%
-                (new dot% 
-                     (random WIDTH)
-                     (random HEIGHT))
-                (field live)
-                (field dead) 
-                (new dot% x y))]
+           (teleport)]
           [(mouse=? "move" m)
-           (new world%
-                (field player)
-                (field live)
-                (field dead)
-                (new dot% x y))]
-          [else this]))  
+           (mouse-move x y)]
+          [else this]))    
+
+  (define/public (teleport)
+    (new world%
+         (new dot% 
+              (random WIDTH)
+              (random HEIGHT))
+         (field live)
+         (field dead) 
+         (field mouse)))
   
-  ;; -> Boolean
-  ;; Does the player touch any zombies?
+  (define/public (mouse-move x y)
+    (new world%
+         (field player)
+         (field live)
+         (field dead)
+         (new dot% x y)))
+  
   (define/public (stop-when)
     (or (send (field dead) touching? (field player))
         (send (field live) touching? (field player))))
   
-  ;; -> World
-  ;; Move all the zombies toward the player.
+
   (define/public (move)
     (new world%
          (send (field player) move-toward P-SPEED
@@ -76,8 +106,6 @@
          (field dead)
          (field mouse)))
   
-  ;; -> World
-  ;; Kill all zombies that touch other zombies (living or dead).
   (define/public (kill)      
     (local [(define res 
               (send (field live) kill (field dead)))]
@@ -143,7 +171,8 @@
              (send (field rest) kill
                    (new cons% z dead))]
             [else
-             (let ((res (send (field rest) kill dead)))
+             (local [(define res
+                       (send (field rest) kill dead))]
                (make-r (new cons% z (r-live res))
                        (r-dead res)))]))))
 
@@ -151,41 +180,50 @@
 ;; ==========================================================
 ;; A Dot is a (new dot% [0,WIDTH] [0,HEIGHT]).
 ;; Interp: a position on the board.
-;; A Delta is a (new dot% Int Int).
-;; Interp: a directional vector.
+;; A Vec is a (new dot% Int Int).
+;; Interp: a Euclidean vector (a direction with magnitude).
+
+;; touching? : Dot -> Boolean
+;; Is this dot touching the given dot?
+
+;; move-toward : Nat Nat -> Dot
+;; Move this dot n units toward the given dot.
+
+;; draw-on : Color Scene -> Scene
+;; Draw this dot with the given color on the scene.
+
+;; dist : Dot -> Nat
+;; Compute taxi distance from this dot to the given dot.
+
+;; min-taxi : Nat Dot -> Delta
+;; Compute delta minimizing distance from this dot and to.
+
+;; plus : Vec -> Dot
+;; Move this dot by the given vector.
+
 (define-class dot%
   (fields x y)
   
-  ;; Is this dot touching the given dot?
-  ;; Dot -> Boolean
   (define/public (touching? d)
-    (<= (dist d) 1/2-CELL))
-  
-  ;; Move this dot n units toward the given dot.
-  ;; Nat Nat -> Dot
+    (<= (dist d) 1/2-CELL))  
+
   (define/public (move-toward n d)
     (plus (min-taxi n d)))
   
-  ;; Draw this dot with the given color on the scene.
-  ;; Color Scene -> Scene
   (define/public (draw-on c scn)
     (place-image (circle 1/2-CELL "solid" c)
                  (field x)
                  (field y)
                  scn))
   
-  ;; Compute taxi distance from this dot to the given dot.
-  ;; Dot -> Nat
   (define/public (dist d)
     (+ (abs (- (field x)
                (send d x)))
        (abs (- (field y)
-               (send d y)))))
-  
-  ;; Compute delta minimizing distance from this dot and to.
-  ;; Nat Dot -> Delta
+               (send d y)))))  
+
   (define/public (min-taxi n to)
-    ;; Delta Delta -> Delta
+    ;; Vec Vec -> Vec
     (local [(define (select-shorter-dir d1 d2)
               (cond [(< (send (plus d1) dist to)
                         (send (plus d2) dist to))
@@ -199,13 +237,11 @@
              (new dot% 0 0)
              DIRS)))
   
-  ;; Dot -> Dot
   (define/public (plus d)
     (new dot% 
          (+ (field x) (send d x))
          (+ (field y) (send d y)))))
 
-;; A Dir is one of:
 (define DIRS
   (list (new dot% -1 -1)
         (new dot% -1  0)
@@ -275,7 +311,7 @@
        l1
        d1))
 (define w6 (new world% d0 mt (new cons% d1 l1) d1))
-(define w7 (send w0 on-mouse 0 30 "button-down"))
+(define w7 (send w0 teleport))
 
 ;; World tests
 ;; -----------
@@ -283,11 +319,15 @@
 ;; on-mouse
 (check-expect (send w0 on-mouse 0 30 "drag") w0)
 (check-expect (send w0 on-mouse 0 30 "move") w3)
+;; teleport
 (check-range (send (send w7 player) x) 0 WIDTH)
 (check-range (send (send w7 player) y) 0 HEIGHT)
 (check-expect (send w7 live) mt)
 (check-expect (send w7 dead) mt)
-(check-expect (send w7 mouse) d1)
+(check-expect (send w7 mouse) d0)
+;; mouse-move
+(check-expect (send w0 mouse-move 0 30)
+              (new world% d0 mt mt d1))
 ;; stop-when
 (check-expect (send w0 stop-when) false)
 (check-expect (send w1 stop-when) true)
