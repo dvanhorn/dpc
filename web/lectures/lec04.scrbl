@@ -317,9 +317,8 @@ adjust our programming language.  We'll now program in
 difference is the addition of the @racket[(super _class-name)] form.
 
 @(the-eval
-  '(begin
-     (define-syntaxes (node%) (values))
-
+  '(module m class1
+     (provide bt% node% leaf%)
      (define-class bt%
        ;; -> BT
        ;; Double this tree and put the number on top.
@@ -344,8 +343,15 @@ difference is the addition of the @racket[(super _class-name)] form.
        (define/public (count)
 	 1))))
 
+@(the-eval '(require 'm))
+
+At this point we can construct binary trees just as before, 
+and all binary trees understand the @racket[double] method
+even though it is only defined in @racket[bt%]:
+
 @interaction[#:eval the-eval
 (send (new leaf% 7) double 8)
+(send (send (new leaf% 7) double 8) double 9)
 ]
 
 
