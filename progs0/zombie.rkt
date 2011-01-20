@@ -29,7 +29,7 @@
     "Zombie Attack!")
   
   (define/public (on-tick)
-    (send (junk-it) move))
+    (send (kill) move))
   
   (define/public (tick-rate)
     1/10)    
@@ -77,70 +77,15 @@
          (field mouse)))
   
   ;; -> World
-  ;; Junk all zombies that touch other zombies or junk.
-  (define/public (junk-it)      
-    (let ((res (send (field live) kill (field dead))))
+  ;; Kill all zombies that touch other zombies (living or dead).
+  (define/public (kill)      
+    (local [(define res 
+              (send (field live) kill (field dead)))]
       (new world% 
            (field player)
            (r-live res)
            (r-dead res)
            (field mouse)))))
-
-
-;; Some worlds for testing
-(define (w0)
-  (new world% 
-       (new dot% 0 0)
-       (new empty%)
-       (new empty%)
-       (new dot% 0 0)))
-(define (w1)
-  (new world% 
-       (new dot% 0 0)
-       (new cons% (new dot% 0 0) (new empty%))            
-       (new empty%)
-       (new dot% 0 0)))
-(define (w2)
-    (new world% 
-       (new dot% 0 0)
-       (new empty%)
-       (new cons% (new dot% 0 0) (new empty%)) 
-       (new dot% 0 0)))
-(define (w3)
-  (new world% 
-       (new dot% 0 0)
-       (new empty%)
-       (new empty%)
-       (new dot% 0 30)))
-(define (w4)
-  (new world% 
-       (new dot% 0 0)
-       (new cons% (new dot% 30 0) (new empty%))
-       (new cons% (new dot% 30 0) (new empty%))
-       (new dot% 0 30)))
-(define (w5)
-  (new world% 
-       (new dot% 0 P-SPEED)
-       (new cons% (new dot% (- 30 Z-SPEED) 0) (new empty%))
-       (new cons% (new dot% 30 0) (new empty%))
-       (new dot% 0 30)))
-(define (w7)
-  (send (w0) on-mouse 0 30 "button-down"))
-
-;; on-mouse
-(check-expect (send (w0) on-mouse 0 30 "drag") (w0))
-(check-expect (send (w0) on-mouse 0 30 "move") (w3))
-(check-range (send (send (w7) player) x) 0 WIDTH)
-(check-range (send (send (w7) player) y) 0 HEIGHT)
-(check-expect (send (w7) live) (new empty%))
-(check-expect (send (w7) dead) (new empty%))
-(check-expect (send (w7) mouse) (new dot% 0 30))
-;; stop-when
-(check-expect (send (w0) stop-when) false)
-(check-expect (send (w1) stop-when) true)
-(check-expect (send (w2) stop-when) true)
-;; move
-(check-expect (send (w4) move) (w5))
 
 
 ;; ==========================================================
@@ -260,14 +205,6 @@
          (+ (field x) (send d x))
          (+ (field y) (send d y)))))
 
-(define origin (new dot% 0 0))
-(check-expect (send origin touching? (new dot% CELL 0))
-              false)
-(check-expect (send origin touching? (new dot% 1/2-CELL 0))
-              true)
-(check-expect (send origin move-toward 1 (new dot% 5 5))
-              (new dot% 1 1))
-
 ;; A Dir is one of:
 (define DIRS
   (list (new dot% -1 -1)
@@ -308,7 +245,7 @@
 ;; Run program, run!
 (big-bang
  (new world%
-      (new dot% 0 0)
+      (new dot% (/ WIDTH 2) (/ HEIGHT 2))
       (build-lodot (+ 10 (random 20))
                    (λ (_)
                      (new dot% 
@@ -316,3 +253,97 @@
                           (random HEIGHT))))
       (new empty%)
       (new dot% 0 0)))
+
+
+;; ==========================================================
+;; Test cases
+
+(define mt (new empty%))
+(define d0 (new dot% 0 0))
+(define d1 (new dot% 0 30))
+(define l0 (new cons% d0 mt))
+(define l1 (new cons% d1 mt))
+(define w0 (new world% d0 mt mt d0))
+(define w1 (new world% d0 l0 mt d0))
+(define w2 (new world% d0 mt l0 d0))
+(define w3 (new world% d0 mt mt d1))
+(define w4 (new world% d0 l1 l1 d1))
+(define w5
+  (new world% 
+       (new dot% 0 P-SPEED)
+       (new cons% (new dot% 0 (- 30 Z-SPEED)) mt)
+       l1
+       d1))
+(define w6 (new world% d0 mt (new cons% d1 l1) d1))
+(define w7 (send w0 on-mouse 0 30 "button-down"))
+
+;; World tests
+;; -----------
+
+;; on-mouse
+(check-expect (send w0 on-mouse 0 30 "drag") w0)
+(check-expect (send w0 on-mouse 0 30 "move") w3)
+(check-range (send (send w7 player) x) 0 WIDTH)
+(check-range (send (send w7 player) y) 0 HEIGHT)
+(check-expect (send w7 live) mt)
+(check-expect (send w7 dead) mt)
+(check-expect (send w7 mouse) d1)
+;; stop-when
+(check-expect (send w0 stop-when) false)
+(check-expect (send w1 stop-when) true)
+(check-expect (send w2 stop-when) true)
+;; move
+(check-expect (send w4 move) w5)
+;; kill
+(check-expect (send w4 kill) w6)
+
+;; LoDot tests
+;; -----------
+
+;; draw-on
+(check-expect (send mt draw-on "red" MT-SCENE) MT-SCENE)
+(check-expect (send l1 draw-on "red" MT-SCENE)
+              (send d1 draw-on "red" MT-SCENE))
+;; touching?
+(check-expect (send mt touching? d0) false)
+(check-expect (send l0 touching? d0) true)
+(check-expect (send l0 touching? d1) false)
+;; move-toward
+(check-expect (send mt move-toward 5 d0) mt)
+(check-expect (send l0 move-toward 5 d0) l0)
+(check-expect (send l1 move-toward 5 d0)
+              (new cons% (new dot% 0 25) mt))                
+;; kill
+(check-expect (send mt kill mt)
+              (make-r mt mt))
+(check-expect (send mt kill l1)
+              (make-r mt l1))
+(check-expect (send l1 kill mt)
+              (make-r l1 mt))
+(check-expect (send l1 kill l1)
+              (make-r mt (new cons% d1 l1)))
+
+;; Dot tests
+;; ---------
+;; touching?
+(check-expect (send d0 touching? d0) true)
+(check-expect (send d0 touching? d1) false)
+;; move-toward
+(check-expect (send d0 move-toward 5 d0) d0)
+(check-expect (send d1 move-toward 5 d0)
+              (new dot% 0 25))
+;; draw-on
+(check-expect (send d0 draw-on "red" MT-SCENE)
+              (place-image (circle 1/2-CELL "solid" "red")
+                           0 0
+                           MT-SCENE))
+;; dist
+(check-expect (send d0 dist d1) 30)
+;; min-taxi
+(check-expect (send d0 min-taxi 5 d0) d0)
+(check-expect (send d0 min-taxi 5 d1) (new dot% 0 5))
+;; plus
+(check-expect (send d0 plus d0) d0)
+(check-expect (send d0 plus d1) d1)
+(check-expect (send d1 plus d1) 
+              (new dot% 0 60))
