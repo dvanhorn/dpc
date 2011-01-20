@@ -487,7 +487,9 @@ system picks the appropriate @racket[next] method to call.
 @section{Unions and Recursive Unions}
 
 @deftech{Unions} are a generalization of enumerations to represent
-infinite families of data.  One example is @emph{binary trees}, which can contain arbitrary other data as elements.  We'll now look at how to model binary trees of numbers, such as:
+infinite families of data.  One example is @emph{binary trees}, which
+can contain arbitrary other data as elements.  We'll now look at how
+to model binary trees of numbers, such as:
 
 @verbatim[#:indent 2]{
           7         6              8  

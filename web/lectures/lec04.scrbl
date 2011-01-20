@@ -7,6 +7,7 @@
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
+    (the-eval '(require (for-syntax racket/base)))
     (the-eval '(require class1))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
@@ -317,7 +318,14 @@ difference is the addition of the @racket[(super _class-name)] form.
 
 @(the-eval
   '(begin
-     ;(define-class bt%) ; pre-bt% -- doesn't work
+     (define-syntaxes (node%) (values))
+
+     (define-class bt%
+       ;; -> BT
+       ;; Double this tree and put the number on top.
+       (define/public (double n)
+	 (new node% n this this)))
+
      (define-class node%
        (super bt%)
        (fields number left right)
@@ -334,13 +342,7 @@ difference is the addition of the @racket[(super _class-name)] form.
        ;; -> Number
        ;; count the number of numbers in this leaf
        (define/public (count)
-	 1))
-
-     (define-class bt%
-       ;; -> BT
-       ;; Double this tree and put the number on top.
-       (define/public (double n)
-	 (new node% n this this)))))
+	 1))))
 
 @interaction[#:eval the-eval
 (send (new leaf% 7) double 8)
