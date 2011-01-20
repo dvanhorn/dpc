@@ -9,7 +9,8 @@
 (require (prefix-in r: racket))
 
 (provide (all-from-out "define-class.rkt")
-         (all-from-out lang/htdp-intermediate-lambda)
+         (except-out (all-from-out lang/htdp-intermediate-lambda) quote)
+	 quote
          #%module-begin
          define test require provide define-struct
          all-defined-out only-in all-from-out except-in
