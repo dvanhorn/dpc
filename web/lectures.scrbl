@@ -26,6 +26,11 @@ each lecture.
 @include-section["lectures/lec01.scrbl"]
 @include-section["lectures/lec02.scrbl"]
 
+@section[#:tag "lec03"]{1/17: Holiday (MLK Day)}
+There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
+
+@include-section["lectures/lec04.scrbl"]
+
 @internal{
 [Here we build OO-design from the ground up.]
 
@@ -38,12 +43,6 @@ things.]
 
 Ch. 3, 4, 5, 6, 11, 12.
 }
-
-@section[#:tag "lec03"]{1/17: Holiday (MLK Day)}
-
-There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
-
-@section[#:tag "lec04"]{1/20: Dispatch}
 
 @internal{[Examples: shapes, lists]}
 
