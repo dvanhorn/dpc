@@ -31,9 +31,9 @@
 ;; Guidelines:
 
 ;; If someone repeatedly makes the same mistake, eg:
-;; Self Complex -> Complex
+;;   Self Complex -> Complex
 ;; instead of
-;; Complex -> Complex
+;;   Complex -> Complex
 ;; Treat it like they did this on only half of the problems.
 ;; So if Self Complex -> Complex is worth 1 out of 2 contract
 ;; points, you'd get 9+9/2 (= 13.5 ~ 14) points for contracts

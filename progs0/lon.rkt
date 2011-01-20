@@ -1,4 +1,46 @@
 #lang class0
+
+;; Rubric:
+
+;; Per method:
+;; Contract  - 2pt
+;; Purpose   - 1pt
+;; Tests     - 2pt
+;; Code      - 3pt
+;; ===============
+;; Subtotal  - 8pt x 8 = 64pt
+
+;; Overall:
+;; Style     - 20pt
+;; Data Defn - 10pt
+;; ================
+;; Subtotal  - 30pt
+
+;; Methods   - 64pt
+;; Overall   - 30pt
+;; ================
+;; Total     - 94pt
+
+;; Comments:
+
+;; The `max' method is particularly tricky. Be accepting of various solutions.
+
+;; General Guidelines:
+
+;; If someone repeatedly makes the same mistake, eg:
+;;   Self Complex -> Complex
+;; instead of
+;;   Complex -> Complex
+;; treat it like they did this on only half of the problems.
+;; So if Self Complex -> Complex is worth 1 out of 2 contract
+;; points, you'd get 9+9/2 (= 13.5 ~ 14) points for contracts
+;; on methods.
+
+;; Style points are up to the grader's discretion, but should
+;; follow the style guidelines on the web page.
+
+;; (Let us know if you have further guidelines we should add.)
+
 ;; ==========================================================
 ;; Lists of Numbers
 

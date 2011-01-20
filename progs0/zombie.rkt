@@ -1,4 +1,56 @@
 #lang class0
+
+;; Rubric:
+
+;; Features:
+;; Data: player, zombies, flesh       -  20pt
+;; Drawing                            -  10pt
+;; Remember last seen mouse position  -  20pt
+;; Player pursues last seen mouse     -  20pt
+;; Zombies pursue player              -  20pt
+;; Flesh pursues nothing              -  10pt
+;; Colliding zombies die              -  20pt
+;; Colliding player ends game         -  20pt
+;; Clicking randomly teleports player -  20pt
+;; ==========================================
+;; Subtotal                           - 160pt
+
+;; Deductions per function/method:
+;; Bad contract                       -  -2pt
+;; Bad purpose                        -  -1pt
+;; Bad tests                          -  -2pt
+
+;; Overall:
+;; Style                              -  20pt
+;; Data defns                         -  20pt
+;; ==========================================
+;; Subtotal                           -  40pt
+
+;; Features                           - 160pt
+;; Overall                            -  40pt
+;; ==========================================
+;; Total                              - 200pt
+
+;; Comments:
+
+;; Built-in lists are fair game for this problem.
+
+;; General Guidelines:
+
+;; If someone repeatedly makes the same mistake, eg:
+;;   Self Complex -> Complex
+;; instead of
+;;   Complex -> Complex
+;; treat it like they did this on only half of the problems.
+;; So if Self Complex -> Complex is worth 1 out of 2 contract
+;; points, you'd get 9+9/2 (= 13.5 ~ 14) points for contracts
+;; on methods.
+
+;; Style points are up to the grader's discretion, but should
+;; follow the style guidelines on the web page.
+
+;; (Let us know if you have further guidelines we should add.)
+
 ;; ==========================================================
 ;; Play the classic game of Zombie Attack!
 
