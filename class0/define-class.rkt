@@ -15,9 +15,10 @@
 
 (define-syntax field (λ (stx) (raise-syntax-error #f "can only be used inside define-class" stx)))
 (define-syntax fields (λ (stx) (raise-syntax-error #f "can only be used inside define-class" stx)))
-(define-syntax super (λ (stx) (raise-syntax-error #f "can only be used inside define-class" stx)))
-(define-syntax implements (λ (stx) (raise-syntax-error #f "can only be used inside define-class" stx)))
+;(define-syntax super (λ (stx) (raise-syntax-error #f "can only be used inside define-class" stx)))
+;(define-syntax implements (λ (stx) (raise-syntax-error #f "can only be used inside define-class" stx)))
 
+#;
 (define-syntax (define-interface stx)
   (syntax-parse stx
     [(_ name:id (meths:id ...))
@@ -36,10 +37,12 @@
     (pattern ((~or define/public define/private) ((~var f (member-name names)) x:id ...)  e:expr))
     #;[pattern (define (~var f (member-name names)) e:expr)])
   
- (syntax-parse stx #:literals (super implements fields)
+ (syntax-parse stx #:literals (#;super #;implements fields)
    [(define-class class%
+      #;
       (~optional (super super%:cls-name)
                  #:defaults ([super%.real-name #'r:object%]))
+      #;
       (~optional (implements i%:ifc-name ...)
                  #:defaults ([(i%.real-name 1) null]))
       (~optional (fields (~var fld (member-name null)) ...)
@@ -54,7 +57,7 @@
        (begin
          (define-syntax class% (class-name #'-class%))
          (r:define -class%
-           (r:class/derived #,stx (class% super%.real-name (i%.real-name ...) #f)
+           (r:class/derived #,stx (class% r:object% #;super%.real-name () #;(i%.real-name ...) #f)
              (r:inspect #f)
              
              (r:init-field [(the-fld fld)] ...)
@@ -68,7 +71,7 @@
                                                   (list (list 'fld #'the-fld) ...))])
                                      (if r
                                          (second r)
-                                         (raise-syntax-error #f "no field by that name" stx #'arg)))]))])                           
+                                         (raise-syntax-error #f "no field by that name" stx #'arg)))]))])
               <definition>
               ...))))))]))
 
