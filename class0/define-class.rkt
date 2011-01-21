@@ -47,7 +47,10 @@
         (begin
           (define-syntax class% (class-name #'-class%))
           (r:define -class%
-            (r:class/derived #,stx (class% r:object% () #f)
+            (r:class/derived #,stx (class% r:object% 
+                                           (r:writable<%>
+                                            (interface* () ([prop:custom-print-quotable 'never])))
+                                           #f)
               (r:inspect #f)
               
               (r:init-field [(the-fld fld)] ...)
@@ -66,6 +69,14 @@
                                                       "no field by that name" 
                                                       stx 
                                                       #'arg)))]))])
+               (void)
+               (define/public (custom-write p) 
+                (fprintf p "(new ~a" 'class%)
+                (for ([i (list #,@(syntax->list #'(the-fld ...)))])                                  
+                  (fprintf p " ~v" i))
+                (fprintf p ")"))
+               (define/public (custom-display p) (custom-write p))
+	       
                <definition>
                ...))))))]))
 

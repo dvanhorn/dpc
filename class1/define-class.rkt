@@ -80,7 +80,9 @@
                                             (list (list #'all-flds #'all-field-names) ...)
                                             (list #'meths ...)))
           (r:define -class%
-            (r:class/derived #,stx (class% #;r:object% super%.real-name (r:writable<%> i%.real-name ...) #f)
+            (r:class/derived #,stx (class% #;r:object% super%.real-name 
+                                           ((interface* () ([prop:custom-print-quotable 'never]))
+                                            r:writable<%> i%.real-name ...) #f)
               (r:inspect #f)
               
               (r:inherit-field inherit-fld) ...
@@ -107,9 +109,10 @@
                 (fprintf p "(new ~a" 'class%)
                 (for ([i (list #,@(append (syntax->list #'(the-fld ...))
                                           (map second (attribute super%.fields))))])
-                  (fprintf p " ~a" i))
+                  (fprintf p " ~v" i))
                 (fprintf p ")"))
                (over (custom-display p) (custom-write p))
+	       
                <definition>
                ...))))))]))
 

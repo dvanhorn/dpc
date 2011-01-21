@@ -30,10 +30,11 @@
      (with-syntax ([(_ _ _ acc ...) 
                     (build-struct-names #'name (syntax->list #'(field ...)) #f #t)])
        #'(r:define-struct name (field ...) #:transparent 
+			  #:property prop:custom-print-quotable 'never
                           #:property prop:custom-write
                           (r:λ (s p w?) 
                             (fprintf p "(make-~a" 'name)
-                            (fprintf p " ~a" (acc s))
+                            (fprintf p " ~v" (acc s))
                             ...
                             (fprintf p ")"))))]))
                   
