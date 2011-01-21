@@ -1,19 +1,6 @@
 #lang scribble/manual
 @(require "../utils.rkt"
-	  scribble/eval
-          racket/sandbox	  
           (for-label class0))
-
-@(define the-eval
-  (let ([the-eval (make-base-eval)])
-    (the-eval '(require (only-in lang/htdp-intermediate-lambda sqr / + sqrt)))
-   ;(the-eval '(require lang/htdp-intermediate-lambda))
-   ;(the-eval '(require class0))
-    #;(call-in-sandbox-context 
-     the-eval 
-     (lambda () ((dynamic-require 'htdp/bsl/runtime 'configure)
-                 (dynamic-require 'htdp/isl/lang/reader 'options))))
-    the-eval))
 
 @title[#:tag "assign02"]{1/19: Zombie}
 

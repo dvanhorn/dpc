@@ -10,17 +10,9 @@ Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise no
 
 @include-section["assignments/assign01.scrbl"]
 @include-section["assignments/assign02.scrbl"]
+@include-section["assignments/assign03.scrbl"]
 
 @internal[
-
-@itemlist[#:style 'ordered 
- @item{@bold{Zombie.}
-        
-        Develop...}]
-
-
-@section[#:tag "assign03"]{1/26: ??}
-
 
 @section[#:tag "assign04"]{2/02: ??}
 

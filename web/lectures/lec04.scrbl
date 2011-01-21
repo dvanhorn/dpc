@@ -29,6 +29,9 @@ they simply represent a single design.}
 @item{Assignment 2 was due last night and assignment 3 will be out
 later today and is due Wednesday night.}
 
+@item{Assignment 4 will be with a new partner.  If you would like
+to work with someone, email us your request before next week.}
+
 @item{A new programming language, @racketmodname[class1], has been
 released.  Be sure to download and install the latest @tt{.plt} file.}
 
