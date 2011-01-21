@@ -7,6 +7,20 @@
 
 @title*{Blog}
 
+@section*{Constructor-style printer}
+
+@tt{Fri Jan 21 18:00:03 EST 2011}
+
+We've released a new version of the course @tt{.plt} file that
+implements a constructor-style printer for @racketmodname[class0] and
+@racketmodname[class1].  This change makes object values print in the
+same way they are constructed; it also fixes the issues we saw in
+class with inherited fields printed in the wrong order.
+
+Unfortunately, the tool we use for generating the web page doesn't use
+this fancy printer, so for the time-being you'll have to live with the
+discrepancy between what DrRacket prints and what's on the web.
+
 @section*{Assignment 1 graded, assignment 3 tweaked}
 
 @tt{Fri Jan 21 14:45:19 EST 2011}
