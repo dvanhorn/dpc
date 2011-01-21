@@ -15,6 +15,17 @@
     (the-eval '(require 2htdp/image))
     the-eval))
 
-@title[#:tag "lab02"]{1/17: No lab (MLK)}
+@title[#:tag "lab03"]{1/24: Interfaces and inheritance}
 
-There is no lab on 1/17 in observation of Martin Luther King, Jr. Day.
+@internal[
+
+@itemlist[
+  @item{New class system}
+  @item{Inheritance: abstraction, reuse}
+  @item{Interfaces: separation of concerns, modularity, swappable
+        implementations}
+  @item{Give them a client of an interface, have them provide multiple
+        implementations}
+]
+
+]

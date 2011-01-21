@@ -8,6 +8,7 @@
 
 @include-section["labs/1.scrbl"]
 @include-section["labs/2.scrbl"]
+@include-section["labs/3.scrbl"]
 
 @section[#:tag "lab03"]{1/24}
 
