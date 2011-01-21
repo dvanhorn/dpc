@@ -70,18 +70,17 @@
                     ;; the external names
                     [(all-flds ...)
                      (append (map first (attribute super%.fields))
-                             (syntax->list #'(fld ...)))])
-       #;
-       (define all-fields (map list
-                               (syntax->list #'(all-flds ...))                               
-                               (syntax->list #'(all-field-names ...))))
+                             (syntax->list #'(fld ...)))]
+                    [over (if (free-identifier=? #'super%.real-name #'r:object%)
+                              #'r:define/public ;; don't override if we're the top class
+                              #'r:define/override)])
        (quasisyntax
         (begin
           (define-syntax class% (class-name #'-class% 
                                             (list (list #'all-flds #'all-field-names) ...)
                                             (list #'meths ...)))
           (r:define -class%
-            (r:class/derived #,stx (class% #;r:object% super%.real-name (i%.real-name ...) #f)
+            (r:class/derived #,stx (class% #;r:object% super%.real-name (r:writable<%> i%.real-name ...) #f)
               (r:inspect #f)
               
               (r:inherit-field inherit-fld) ...
@@ -104,6 +103,13 @@
                                                  stx 
                                                  #'arg)))]))])
                (void)
+               (over (custom-write p) 
+                (fprintf p "(new ~a" 'class%)
+                (for ([i (list #,@(append (syntax->list #'(the-fld ...))
+                                          (map second (attribute super%.fields))))])
+                  (fprintf p " ~a" i))
+                (fprintf p ")"))
+               (over (custom-display p) (custom-write p))
                <definition>
                ...))))))]))
 
