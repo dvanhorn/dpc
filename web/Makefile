@@ -1,4 +1,6 @@
 CLASS=class-system-01-21.plt
+CCS=login.ccs.neu.edu
+CCS_PATH=/course/cs2510h/.www/
 
 all:   clean class web
 push:  clean class web-scp
@@ -52,5 +54,6 @@ clean-web:
 # web-scp
 #
 
-web-scp: web-students	
-	scp -r 2510H/* login.ccs.neu.edu:/course/cs2510h/.www/
+web-scp: clean-web web-students	
+	scp -r 2510H/* $(CCS):$(CCS_PATH)
+	ssh $(CCS) chmod -Rf g+w $(CCS_PATH)
