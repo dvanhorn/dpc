@@ -1,6 +1,7 @@
 CLASS=class-system-01-20.plt
 
-all: clean class web
+all:   clean class web
+push:  clean class web-scp
 
 clean: clean-class clean-web
 
@@ -40,7 +41,7 @@ web:
 		--style 2510H.css \
 		2510H.scrbl
 
-web-remote: clean-web
+web-students:
 	env STUDENTS=1 make web
 
 clean-web:
@@ -48,10 +49,8 @@ clean-web:
 	rm -rf 2510H/ class-system-*.plt
 
 #
-# web-install
+# web-scp
 #
 
-push: web-remote	
+web-scp: web-students	
 	scp -r 2510H/* login.ccs.neu.edu:/course/cs2510h/.www/
-
-web-install: push
