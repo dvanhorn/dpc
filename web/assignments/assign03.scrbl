@@ -41,7 +41,7 @@ Due: 1/26.
  implements your @racket[player<%>] interface.
 
  Do not use the functional abstraction recipe.  Instead, if you notice
- code that code can be shared between the various classes you've
+ code that could be shared between the various classes you've
  designed, design super classes and use inheritance to abstract the
  duplicated code.
 
@@ -74,7 +74,7 @@ Due: 1/26.
  on the very bottom, the player should move down to get to the top
  quickly.
 
- If you need to make changes to your interface design to accomodate
+ If you need to make changes to your interface design to accommodate
  these new game requirements, you must re-implement your solution to
  problem 2 in order to satisfy the revised interfaces.  In the end,
  the interfaces used and your implementation of the @racket[world%]
@@ -91,7 +91,7 @@ Due: 1/26.
  Write down an expression that launches the game using this
  combination.}
 
- @item{@bold{Finger exercises}
+ @item{@bold{Finger exercises: parametric lists}
 
  Language: @racketmodname[class1]. 
 
@@ -127,7 +127,7 @@ Any program that interacts with either of these representations
 according to the interface should not be able to tell them apart.
 
 Use inheritance to lift method definitions to a super class to the
-full extent possible.  (Hint: it will help if you realize that many of
+full extent possible.  (@emph{Hint}: it will help if you realize that many of
 these methods may be expressed in terms of a few "core" methods.)  If
 possible, have both the recursive union representation and the wrapper
 representation share a common super class.
