@@ -15,7 +15,7 @@ We've released a new version of the course @tt{.plt} file that
 implements a constructor-style printer for @racketmodname[class0] and
 @racketmodname[class1].  This change makes object values print in the
 same way they are constructed; it also fixes the issues we saw in
-class with inherited fields printed in the wrong order.
+class with inherited fields printing in the wrong order.
 
 Unfortunately, the tool we use for generating the web page doesn't use
 this fancy printer, so for the time-being you'll have to live with the
