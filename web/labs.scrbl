@@ -10,8 +10,6 @@
 @include-section["labs/2.scrbl"]
 @include-section["labs/3.scrbl"]
 
-@section[#:tag "lab03"]{1/24}
-
 @internal{
 @section[#:tag "lab04"]{1/31}
 @section[#:tag "lab05"]{2/7}

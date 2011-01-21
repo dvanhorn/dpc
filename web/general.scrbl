@@ -20,14 +20,14 @@ apprentice teachers and are here to learn how to run a course.
 
 @section*{Office Hours}
 
-@tabular[
+@indented[@tabular[
   (list (list "Sam Tobin-Hochstadt" (tt "samth") "WVH308 " "Monday" "2:00pm-4:00pm")
         (list "David Van Horn" (tt "dvanhorn") "WVH350" "Thursday " "2:00pm-4:00pm")
         (list "Dan Brown" (tt "dbrown") "WVH308" "Tuesday " "4:00pm-6:00pm")
 	(list "Nikko Patten" (tt "npatten")"WVH102" "Wednesday" "11:00am-noon")
 	(list "Trevor Sontag" (tt "tasontag") "WVH102" "Wednesday" "7:00pm-8:00pm")
 	(list "Alex Lee" (tt "lee") "WVH102" "Wednesday" "10:00pm-11:00pm")
-	(list "Jim Shargo" (tt "shargoj") "WVH102" "Monday" "4:00pm-5:00pm"))]
+	(list "Jim Shargo" (tt "shargoj") "WVH102" "Monday" "4:00pm-5:00pm"))]]
 
 @bold{Communication}: Use CCIS email (@tt["@ccs.neu.edu"]) to reach
 any of the course staff; usernames are given above.
@@ -62,11 +62,11 @@ We will use @link[#:style "plainlink"
 the CCS computers. It is also freely available on the web in case you
 wish install it on your own computer.
 
-You will need to install our @link[plt-filename]{course software} into DrRacket.
-In the DrRacket @tt{File} menu, select @tt{Install PLT File}, and then
+You will need to install our @seclink["class"]{course software} into
+DrRacket. In the DrRacket @tt{File} menu, select @tt{Install PLT File}, and then
 enter the url
 
-@tt[(format "http://www.ccs.neu.edu/course/cs2510h/~a" plt-filename)]
+@indented[@tt[class-system-latest]]
 
 
 You will use @secref{Subversion} to work on your homework sets, to

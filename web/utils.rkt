@@ -3,8 +3,10 @@
          if-internal
          indented
          exercise
-         plt-filename
-         scheme-from-file)
+         scheme-from-file
+         class-system-filename
+         class-system-url
+         class-system-latest)
 (require scribble/base)
 
 (define-syntax (internal stx)
@@ -116,5 +118,11 @@
      #'(scheme-from-file fname #:start start #:end end schemeblock0)]
     ))
 
-(define-syntax (plt-filename stx)
-  (datum->syntax #'here (getenv "CURRENT_CLASS")))
+(define-syntax (class-system-filename stx)
+  (datum->syntax #'here (getenv "CLASS")))
+
+(define class-system-url
+  (format "http://www.ccs.neu.edu/course/cs2510h/~a" class-system-filename))
+
+(define class-system-latest
+  "http://www.ccs.neu.edu/course/cs2510h/class-system-latest.plt")
