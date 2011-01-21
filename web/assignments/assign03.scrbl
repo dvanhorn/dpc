@@ -106,9 +106,9 @@ Due: 1/26.
 )
 
 Design an analogous class-based representation of parametric lists.
-Design a @racket[list<%>] interface that includes @racket[length],
-@racket[append], @racket[reverse], @racket[map], @racket[filter],
-@racket[foldl], and @racket[foldr].
+Design a @racket[list<%>] interface that includes @racket[cons],
+@racket[empty], @racket[length], @racket[append], @racket[reverse],
+@racket[map], @racket[filter], @racket[foldl], and @racket[foldr].
 
 Implement that interface in two ways:
 @itemlist[
@@ -131,10 +131,27 @@ full extent possible.  (@emph{Hint}: it will help if you realize that many of
 these methods may be expressed in terms of a few "core" methods.)  If
 possible, have both the recursive union representation and the wrapper
 representation share a common super class.
- }
-]
 
+The @racket[cons] and @racket[empty] methods have been added to
+facilitate opportunities for abstraction.  You might find them useful
+to use when you lift methods to a common super class so that the right
+kind of list (either a wrapped or a recursive union list) is
+constructed.
 
+Another hint: the names of methods we have chosen overlap with the
+name of some standard values that you may like to use when defining
+methods, especially in the wrapped list case.  If you refer to these
+names within a class, you refer to the method rather than the built-in
+value.  If you would like to refer to the built-in value, an easy
+work-around is to do something like this:
 
+@#reader scribble/comment-reader
+(racketblock
+  (define ls:cons cons) ; etc.
+)
 
+Now when you want to refer to the @racket[cons] @emph{function} instead
+of the @racket[cons] @emph{method}, you can use the name @racket[ls:cons].
+
+}]
 

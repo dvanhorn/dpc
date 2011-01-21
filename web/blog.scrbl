@@ -7,6 +7,22 @@
 
 @title*{Blog}
 
+@section*{Assignment 1 graded, assignment 3 tweaked}
+
+@tt{Fri Jan 21 14:45:19 EST 2011}
+
+There were only a couple remaining pairs that didn't have their
+assignment 1 graded by Wednesday because one of our tutors was out
+sick.  They are all graded now, so let us know if for some reason you
+can't see your graded work.
+
+Assignment 3 was released last night, but we've made a small addition
+to the finger exercise on parametric lists.  We've asked you to also
+implement @racket[cons] and @racket[empty] @emph{as methods}.  This
+will help when you try to abstract things to a super class.  There is
+also a hint about using built-in values that have names that clash
+with methods.
+
 @section*{Small tweak to assignment 2}
 
 @tt{Wed Jan 19 14:50:15 EST 2011}
