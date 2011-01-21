@@ -2,6 +2,7 @@
 @(require "../utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class1 define-struct ... length))
+	  (for-label 2htdp/image)
 	  (for-label class1/universe))
 
 @(require scribble/eval racket/sandbox)
@@ -169,7 +170,7 @@ alternative to resolving this issue.
 
 @section{Inheritance}
 
-@subsection{Method and data inheritance with binary trees}
+@subsection{Method inheritance with binary trees}
 
 Last time, we developed classes for representing binary trees and
 wrote a couple methods for binary trees.  The code we ended with was:
@@ -350,32 +351,444 @@ and all binary trees understand the @racket[double] method
 even though it is only defined in @racket[bt%]:
 
 @interaction[#:eval the-eval
+(new leaf% 7)
 (send (new leaf% 7) double 8)
 (send (send (new leaf% 7) double 8) double 9)
 ]
 
+@subsection{"Abstract" classes}
 
-@itemlist[
- @item{posn% and shapes:
-  data inheritance: a rect% is a posn% + width + height,
-                    a circ% is a posn% + radius}
- @item{implement some methods: area, draw-on}
+At this point, it is worth considering the question: what does a
+@racket[bt%] value represent?  We have arrived at the @racket[bt%]
+class as a means of abstracting identical methods in @racket[leaf%]
+and @racket[node%], but if I say @racket[(new bt%)], as I surely can,
+what does that @emph{mean}?  The answer is: @emph{nothing}.
 
- @item{a look back at binary trees: there was code duplication.
-  method inheritance: adding bt%, lifting double method}
+Going back to our data definition for @tt{BT}s, it's clear that the
+value @racket[(new bt%)] is @bold{not} a @tt{BT} since a @tt{BT} is
+either a @racket[(new leaf% Number)] or a @racket[(new node% Number BT
+BT)].  In other words, a @racket[(new bt%)] makes no more sense as a
+representation of a binary tree than does @racket[(new node% "Hello Fred"
+'y-is-not-a-number add1)].  With that in mind, it doesn't make
+sense for our program to ever construct @racket[bt%] objects---they
+exist purely as an abstraction mechanism.  Some languages, such as
+Java, allow you to enforce this property by declaring a
+class as "abstract"; a class that is declared abstract cannot be
+constructed.  Our language will not enforce this property, much as it
+does not enforce contracts.  Again we rely on data definitions to 
+make sense of data, and @racket[(new bt%)] doesn't make sense.
 
- @item{back to shapes: can we lift anything?  No, because the definition of
-  draw-on is different.  *But* we can refactor by adding an img method
-  that constructs the shape image.  Now draw-on is identical and
-  can be lifted.
+@subsection{Data inheritance with binary trees}
 
-  There is a subtlety here with method invocation.  In the first
-  identical implementations of draw-on, you have calls to (img), but
-  when you lift, you want (send this img) because the super class
-  does not have an img method. }]
+Inheritance allows us to share methods amongst classes, but it also
+possible to share data.  Just as we observed that @racket[double] was
+the same in both @racket[leaf%] and @racket[node%], we can also
+observe that there are data similarities between @racket[leaf%] and
+@racket[node%].  In particular, both @racket[leaf%] and @racket[node%]
+contain a @racket[number] field.  This field can be abstracted just
+like @racket[double] was---we can lift the field to the @racket[bt%]
+super class and elimate the duplicated field in the subclasses:
 
+@#reader scribble/comment-reader
+(racketblock
+ (define-class bt%
+   (fields number)
+   ;; -> BT
+   ;; Double this tree and put the number on top.
+   (define/public (double n)
+     (new node% n this this)))
+
+ (define-class leaf%
+   (super bt%)
+   ;; -> Number
+   ;; count the number of numbers in this leaf
+   (define/public (count)
+     1))
+
+ (define-class node%
+   (super bt%)
+   (fields left right)
+   ;; -> Number
+   ;; count the number of numbers in this node
+   (define/public (count)
+     (+ 1
+	(send (field left) count)
+	(send (field right) count)))))
+
+
+The @racket[leaf%] and @racket[node%] class now inherit both the
+@racket[number] field and the @racket[double] method from
+@racket[bt%].  This has a consequence for the class constructors.
+Previously it was straightforward to construct an object: you write
+down @racket[new], the class name, and as many expressions as there
+are fields in the class.  But now that a class may inherit fields, you
+must write down as many expressions as there are fields in the class
+definition itself and in all of the super classes.  What's
+more, the order of arguments is important.  The fields defined in the
+class come first, followed by the fields in the immediate super class,
+followed by the super class's super classes, and so on.  Hence, we
+still construct @racket[leaf%]s as before, but the arguments to the
+@racket[node%] constructor are changed: it takes the left subtree, the
+right subtree, and @emph{then} the number at that node:
+
+@margin-note{It's an unfortunate consequence of our documentation tool that
+the value is not printed in the same order it is constructed.
+For now, we hope you can just see through the confusion.}
+
+@(the-eval
+  '(module n class1
+     (provide bt% node% leaf%)
+     (define-class bt%
+       (fields number)
+       ;; -> BT
+       ;; Double this tree and put the number on top.
+       (define/public (double n)
+	 (new node% n this this)))
+
+     (define-class node%
+       (super bt%)
+       (fields left right)
+       ;; -> Number
+       ;; count the number of numbers in this node
+       (define/public (count)
+	 (+ 1
+	    (send (field left) count)
+	    (send (field right) count))))
+
+     (define-class leaf%
+       (super bt%)
+       ;; -> Number
+       ;; count the number of numbers in this leaf
+       (define/public (count)
+	 1))))
+
+@(the-eval '(require 'n))
+
+@#reader scribble/comment-reader
+(racketblock
+ ;; A BT is one of:
+ ;; - (new leaf% Number)
+ ;; - (new node% BT BT Number)
+)
+
+@interaction[#:eval the-eval
+(new leaf% 7)
+(new node% (new leaf% 7) (new leaf% 13) 8)
+]
+
+Although none of our method so far have needed to access the
+@racket[number] field, it is possible to access @racket[number] in
+@racket[leaf%] and @racket[node%] (and @racket[bt%]) methods
+@emph{as if} they had their own @racket[number] field.  Let's write a
+@racket[sum] method to make it clear:
+
+@margin-note{Notice that the @racket[double] method swapped the order
+of arguments when constructing a new @racket[node%] to reflect the
+fact that the node constructor now takes values for its fields first,
+then values for its inherited fields.}
+
+@#reader scribble/comment-reader
+(racketblock
+ (define-class bt%
+   (fields number)
+   ;; -> BT
+   ;; Double this tree and put the number on top.
+   (define/public (double n)
+     (new node% this this n)))
+
+ (define-class leaf%
+   (super bt%)
+   ;; -> Number
+   ;; count the number of numbers in this leaf
+   (define/public (count)
+     1)
+
+   ;; -> Number
+   ;; sum all the numbers in this leaf
+   (define/public (sum)
+     (field number)))
+
+ (define-class node%
+   (super bt%)
+   (fields left right)
+   ;; -> Number
+   ;; count the number of numbers in this node
+   (define/public (count)
+     (+ 1
+	(send (field left) count)
+	(send (field right) count)))
+
+   ;; -> Number
+   ;; sum all the numbers in this node
+   (define/public (sum)
+     (+ (field number)
+	(send (field left) sum)
+	(send (field right) sum))))
+)
+
+As you can see, both of the @racket[sum] methods refer to the
+@racket[number] field, which is inherited from @racket[bt%].
+
+@subsection{Inheritance with shapes}
+
+Let's consider another example and see how data and method inheritance
+manifests.  This example will raise some interesting issues for how
+super classes can invoke the methods of its subclasses.  Suppose we
+are writing a program that deals with shapes that have position.  To
+keep the example succint, we'll consider two kinds of shapes: circles
+and rectangles.  This leads us to a union data definition (and class
+definitions) of the following form:
+
+@margin-note{We are using @tt{+Real} to be really precise about the
+kinds of numbers that are allowable to make for a sensible notion of a
+shape.  A circle with radius @racket[-5] or @racket[3+2i] doesn't make
+a whole lot of sense.}
+
+@#reader scribble/comment-reader
+(racketblock
+ ;; A Shape is one of:
+ ;; - (new circ% +Real Real Real)
+ ;; - (new rect% +Real +Real Real Real)
+ ;; A +Real is a positive, real number.
+ (define-class circ%
+   (fields radius x y))
+ (define-class rect%
+   (fields width height x y))
+)
+
+Already we can see an opportunity for data abstraction since
+@racket[circ%]s and @racket[rect%]s both have @racket[x] and
+@racket[y] fields.  Let's define a super class and inherit these
+fields:
+
+@#reader scribble/comment-reader
+(racketblock
+ ;; A Shape is one of:
+ ;; - (new circ% +Real Real Real)
+ ;; - (new rect% +Real +Real Real Real)
+ ;; A +Real is a positive, real number.
+ (define-class shape%
+   (fields x y))
+ (define-class circ%
+   (super shape%)
+   (fields radius))
+ (define-class rect%
+   (super shape%)
+   (fields width height))
+)
+
+Now let's add a couple methods: @racket[area] will compute the area of the
+shape, and @racket[draw-on] will take a scene and draw the shape on
+the scene at the appropriate position:
+
+@#reader scribble/comment-reader
+(racketblock
+ (define-class circ%
+   (super shape%)
+   (fields radius)
+   
+   ;; -> +Real
+   (define/public (area)
+     (* pi (sqr (field radius))))
+   
+   ;; Scene -> Scene
+   ;; Draw this circle on the scene.
+   (define/public (draw-on scn)
+     (place-image (circle (field radius) "solid" "black")
+		  (field x)
+		  (field y)
+		  scn)))
+
+ (define-class rect%
+   (super shape%)
+   (fields width height) 
+   
+   ;; -> +Real
+   ;; Compute the area of this rectangle.
+   (define/public (area)
+     (* (field width)
+	(field height)))
+   
+   ;; Scene -> Scene
+   ;; Draw this rectangle on the scene.
+   (define/public (draw-on scn)
+     (place-image (rectangle (field width) (field height) "solid" "black")
+		  (field x)
+		  (field y)
+		  scn)))
+)
+
+@(the-eval
+  '(module p class1
+     (provide circ% rect%)
+     (require 2htdp/image)
+
+     (define-class shape%
+       (fields x y)
+       
+       ;; Scene -> Scene
+       ;; Draw this shape on the scene.
+       (define/public (draw-on scn)
+	 (place-image (send this img)
+		      (field x)
+		      (field y)
+		      scn)))
+
+     (define-class circ%
+       (super shape%)
+       (fields radius)
+       
+       ;; -> +Real
+       (define/public (area)
+	 (* pi (sqr (field radius))))
+       
+       ;; -> Image
+       ;; Render this circle as an image.
+       (define/public (img)
+	 (circle (field radius) "solid" "black")))
+
+     (define-class rect%
+       (super shape%)
+       (fields width height) 
+       
+       ;; -> +Real
+       ;; Compute the area of this rectangle.
+       (define/public (area)
+	 (* (field width)
+	    (field height)))
+       
+       ;; -> Image
+       ;; Render this rectangle as an image.
+       (define/public (img)
+	 (rectangle (field width) (field height) "solid" "black")))))
+
+@(the-eval '(require 'p))
+
+@examples[#:eval the-eval
+(send (new circ% 30 75 75) area)
+(send (new circ% 30 75 75) draw-on (empty-scene 150 150))
+(send (new rect% 30 50 75 75) area)
+(send (new rect% 30 50 75 75) draw-on (empty-scene 150 150))
+]
+
+The @racket[area] method is truly different in both variants of the
+shape union, so we shouldn't attempt to abstract it by moving it to
+the super class.  However, the two definitions of the @racket[draw-on]
+method are largely the same.  If they were @emph{identical}, it would
+be easy to abstract the method, but until the two methods are
+identical, we cannot lift the definition to the super class.  One way
+forward is to rewrite the methods by pulling out the parts that differ
+and making them seperate methods.  What differs between these two
+methods is the expression constructing the image of the shape, which
+suggests defining a new method @racket[img] that constructs the image.
+The @racket[draw-on] method can now call @racket[img] and rewriting it
+this way makes both @racket[draw-on] methods identical; the method can
+now be lifted to the super class:
+
+@#reader scribble/comment-reader
+(racketblock
+ (define-class shape%
+   (fields x y)
+
+   ;; Scene -> Scene
+   ;; Draw this shape on the scene.
+   (define/public (draw-on scn)
+     (place-image (img)
+		  (field x)
+		  (field y)
+		  scn)))
+)
+
+But there is a problem with this code.  While this code makes sense
+when it occurrs inside of @racket[rect%] and @racket[circ%], it
+doesn't make sense inside of @racket[shape%].  In particular, what
+does @racket[img] mean here?  The @racket[img] method is a method of
+@racket[rect%] and @racket[circ%], but not of @racket[shape%],
+and therefore the name @racket[img] is unbound in this context.
+
+On the other hand, observe that all shapes are either @racket[rect%]s
+or @racket[circ%]s.  We therefore @emph{know} that the object invoking
+the @racket[draw-on] method understands the @racket[img] message,
+since both @racket[rect%] and @racket[circ%] implement the
+@racket[img] method.  Therefore we can use @racket[send] to invoke the
+@racket[img] method on @racket[this] object and thanks to our data
+definitions for shapes, it's guaranteed to succeed.  (The message send
+would fail if @racket[this] referred to a @racket[shape%], but remember
+that @racket[shape%]s don't make sense as objects in their own right
+and should never be constructed).
+
+We arrive at the folllowing final code:
+
+@#reader scribble/comment-reader
+(racketmod
+ class1
+ (require 2htdp/image)
+
+ ;; A Shape is one of:
+ ;; - (new circ% +Real Real Real)
+ ;; - (new rect% +Real +Real Real Real)
+ ;; A +Real is a positive, real number.
+ (define-class shape%
+   (fields x y)
+   
+   ;; Scene -> Scene
+   ;; Draw this shape on the scene.
+   (define/public (draw-on scn)
+     (place-image (send this img)
+		  (field x)
+		  (field y)
+		  scn)))
+
+ (define-class circ%
+   (super shape%)
+   (fields radius)
+   
+   ;; -> +Real
+   ;; Compute the area of this circle.
+   (define/public (area)
+     (* pi (sqr (field radius))))
+   
+   ;; -> Image
+   ;; Render this circle as an image.
+   (define/public (img)
+     (circle (field radius) "solid" "black")))
+
+ (define-class rect%
+   (super shape%)
+   (fields width height) 
+   
+   ;; -> +Real
+   ;; Compute the area of this rectangle.
+   (define/public (area)
+     (* (field width)
+	(field height)))
+   
+   ;; -> Image
+   ;; Render this rectangle as an image.
+   (define/public (img)
+     (rectangle (field width) (field height) "solid" "black")))
+
+ (check-expect (send (new rect% 10 20 0 0) area)
+	       200)
+ (check-within (send (new circ% 10 0 0) area) 
+	       (* pi 100) 
+	       0.0001)
+ (check-expect (send (new rect% 5 10 10 20) draw-on 
+		     (empty-scene 40 40))
+	       (place-image (rectangle 5 10 "solid" "black") 
+			    10 20
+			    (empty-scene 40 40)))
+ (check-expect (send (new circ% 4 10 20) draw-on 
+		     (empty-scene 40 40))
+	       (place-image (circle 4 "solid" "black")
+			    10 20
+			    (empty-scene 40 40)))
+)
 
 @section{Interfaces}
+
+[This section is still under construction and will be posted soon.  Please
+check back later.]
 
 @subsection{Lights, redux}
 
@@ -386,7 +799,6 @@ even though it is only defined in @racket[bt%]:
  @item{what does it mean to be a light?  next and draw}
  @item{alternative design of light class}
  @item{Q: what changes in world?  A: nothing.}
- @item{motivates the use of interfaces}
  @item{add interface to light design.  both alternatives implement it,
   and the world will work with anything that implements it}]
 

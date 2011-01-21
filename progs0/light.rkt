@@ -90,5 +90,3 @@
 
 ;(big-bang (new world% (new red%)))
 (big-bang (new world% (new light% 0)))
-  
-  
