@@ -31,7 +31,7 @@ that was due on 1/19.
   class0
   ;; ==========================================================
   ;; Play the classic game of Zombie Attack!
-
+ 
   ;; All zombies move toward the player.  The player moves 
   ;; toward the mouse. Zombies collision cause flesh heaps 
   ;; that are deadly to other zombies and the player.  
@@ -74,10 +74,10 @@ that was due on 1/19.
   ;; mouse-move : Int Int -> World
   ;; Record mouse movement.
 
-  ;; touching? : -> Boolean
+  ;; stop-when : -> Boolean
   ;; Does the player touch any zombies?
 
-  ;; move-toward : -> World
+  ;; move : -> World
   ;; Move all the zombies toward the player.
 
   ;; kill : -> World
@@ -126,7 +126,6 @@ that was due on 1/19.
       (or (send (field dead) touching? (field player))
           (send (field live) touching? (field player))))
     
-
     (define/public (move)
       (new world%
            (send (field player) move-toward P-SPEED
@@ -197,15 +196,15 @@ that was due on 1/19.
     (define/public (kill dead)
       (local [(define z (field first))]
         (cond [(or (send (field rest) touching? z)
-		   (send dead touching? z))
-	       (send (field rest) kill
-		     (new cons% z dead))]
-	      [else
-	       (local [(define res
-			 (send (field rest) kill dead))]
-                 (make-r (new cons% z (r-live res))
+                   (send dead touching? z))
+               (send (field rest) kill
+                     (new cons% z dead))]
+              [else
+               (local [(define res
+                	 (send (field rest) kill dead))]
+	         (make-r (new cons% z (r-live res))
 			 (r-dead res)))]))))
-
+  
 
   ;; ==========================================================
   ;; A Dot is a (new dot% [0,WIDTH] [0,HEIGHT]).
@@ -216,7 +215,7 @@ that was due on 1/19.
   ;; touching? : Dot -> Boolean
   ;; Is this dot touching the given dot?
 
-  ;; move-toward : Nat Nat -> Dot
+  ;; move-toward : Nat Dot -> Dot
   ;; Move this dot n units toward the given dot.
 
   ;; draw-on : Color Scene -> Scene
@@ -260,12 +259,12 @@ that was due on 1/19.
                        d1]
                       [else d2]))]
         (foldl (λ (d sd) 
-		  (select-shorter-dir sd
-				      (new dot% 
-					   (* n (send d x)) 
-					   (* n (send d y)))))
-	       (new dot% 0 0)
-	       DIRS)))
+                 (select-shorter-dir sd
+                                     (new dot% 
+                                          (* n (send d x)) 
+                                          (* n (send d y)))))
+               (new dot% 0 0)
+               DIRS)))
     
     (define/public (plus d)
       (new dot% 
@@ -314,9 +313,9 @@ that was due on 1/19.
         (new dot% (/ WIDTH 2) (/ HEIGHT 2))
         (build-lodot (+ 10 (random 20))
                      (λ (_)
-                        (new dot% 
-                             (random WIDTH)
-                             (random HEIGHT))))
+                       (new dot% 
+                            (random WIDTH)
+                            (random HEIGHT))))
         (new empty%)
         (new dot% 0 0)))
 
@@ -336,10 +335,10 @@ that was due on 1/19.
   (define w4 (new world% d0 l1 l1 d1))
   (define w5
     (new world% 
-         (new dot% 0 P-SPEED)
-         (new cons% (new dot% 0 (- 30 Z-SPEED)) mt)
-         l1
-         d1))
+	 (new dot% 0 P-SPEED)
+	 (new cons% (new dot% 0 (- 30 Z-SPEED)) mt)
+	 l1
+	 d1))
   (define w6 (new world% d0 mt (new cons% d1 l1) d1))
   (define w7 (send w0 teleport))
 
@@ -357,7 +356,7 @@ that was due on 1/19.
   (check-expect (send w7 mouse) d0)
   ;; mouse-move
   (check-expect (send w0 mouse-move 0 30)
-                (new world% d0 mt mt d1))
+		(new world% d0 mt mt d1))
   ;; stop-when
   (check-expect (send w0 stop-when) false)
   (check-expect (send w1 stop-when) true)
@@ -373,7 +372,7 @@ that was due on 1/19.
   ;; draw-on
   (check-expect (send mt draw-on "red" MT-SCENE) MT-SCENE)
   (check-expect (send l1 draw-on "red" MT-SCENE)
-                (send d1 draw-on "red" MT-SCENE))
+		(send d1 draw-on "red" MT-SCENE))
   ;; touching?
   (check-expect (send mt touching? d0) false)
   (check-expect (send l0 touching? d0) true)
@@ -382,16 +381,16 @@ that was due on 1/19.
   (check-expect (send mt move-toward 5 d0) mt)
   (check-expect (send l0 move-toward 5 d0) l0)
   (check-expect (send l1 move-toward 5 d0)
-                (new cons% (new dot% 0 25) mt))                
+		(new cons% (new dot% 0 25) mt))                
   ;; kill
   (check-expect (send mt kill mt)
-                (make-r mt mt))
+		(make-r mt mt))
   (check-expect (send mt kill l1)
-                (make-r mt l1))
+		(make-r mt l1))
   (check-expect (send l1 kill mt)
-                (make-r l1 mt))
+		(make-r l1 mt))
   (check-expect (send l1 kill l1)
-                (make-r mt (new cons% d1 l1)))
+		(make-r mt (new cons% d1 l1)))
 
   ;; Dot tests
   ;; =========
@@ -402,12 +401,12 @@ that was due on 1/19.
   ;; move-toward
   (check-expect (send d0 move-toward 5 d0) d0)
   (check-expect (send d1 move-toward 5 d0)
-                (new dot% 0 25))
+		(new dot% 0 25))
   ;; draw-on
   (check-expect (send d0 draw-on "red" MT-SCENE)
-                (place-image (circle 1/2-CELL "solid" "red")
-                             0 0
-                             MT-SCENE))
+		(place-image (circle 1/2-CELL "solid" "red")
+			     0 0
+			     MT-SCENE))
   ;; dist
   (check-expect (send d0 dist d1) 30)
   ;; min-taxi
@@ -417,7 +416,7 @@ that was due on 1/19.
   (check-expect (send d0 plus d0) d0)
   (check-expect (send d0 plus d1) d1)
   (check-expect (send d1 plus d1) 
-                (new dot% 0 60))
+		(new dot% 0 60))
 )}
 
  @item{@bold{Finger exercises: Designing classes}
