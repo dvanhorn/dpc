@@ -96,10 +96,10 @@
 ;; mouse-move : Int Int -> World
 ;; Record mouse movement.
 
-;; touching? : -> Boolean
+;; stop-when : -> Boolean
 ;; Does the player touch any zombies?
 
-;; move-toward : -> World
+;; move : -> World
 ;; Move all the zombies toward the player.
 
 ;; kill : -> World
@@ -148,7 +148,6 @@
     (or (send (field dead) touching? (field player))
         (send (field live) touching? (field player))))
   
-
   (define/public (move)
     (new world%
          (send (field player) move-toward P-SPEED
@@ -238,7 +237,7 @@
 ;; touching? : Dot -> Boolean
 ;; Is this dot touching the given dot?
 
-;; move-toward : Nat Nat -> Dot
+;; move-toward : Nat Dot -> Dot
 ;; Move this dot n units toward the given dot.
 
 ;; draw-on : Color Scene -> Scene
