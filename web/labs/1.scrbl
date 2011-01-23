@@ -2,6 +2,7 @@
 
 @(require scribble/eval
           racket/sandbox
+          "../lab.rkt"
           "../unnumbered.rkt"
           "../utils.rkt"
           (for-label (except-in class0 define-struct)
@@ -15,9 +16,11 @@
     (the-eval '(require 2htdp/image))
     the-eval))
 
+@(define exercise (exercise-counter))
+
 @title[#:tag "lab01"]{1/10: Classes and objects}
 
-@section{Subversion test run: Assignment 0}
+@lab:section{Subversion test run: Assignment 0}
 
 @exercise{
   Find your @seclink["Initial_partnership_assignments"]{homework partner}
@@ -35,7 +38,7 @@
   ]
 }
 
-@section{Setting up @racket[class0]}
+@lab:section{Setting up @racket[class0]}
 
 To write object-oriented programs we will use a special dialect of Racket called
 @racket[class0] that includes support for classes and objects. Just like we
@@ -64,7 +67,7 @@ The @tt{#lang} line tells Racket to use the @racket[class0] language, and the
 two @racket[require] lines load the image and universe libraries that we'll use
 to create images and interactive programs.
 
-@section{Classes and objects}
+@lab:section{Classes and objects}
 
 Here is an example class in Racket to represent balls that we can ask geometric
 questions of and draw to the screen.
@@ -147,7 +150,7 @@ Let's construct another class to represent rectangles.
   representing the Block.
 }
 
-@section{The World as an object}
+@lab:section{The World as an object}
 
 Recall how we used @racket[big-bang] last semester:
 

@@ -458,6 +458,16 @@ i {
 .exercise {
   background-color: #ffd;
   border: 1px solid #ccc;
-  margin: 1em;
+  margin: 1em 0em 1em 1em;
   padding: 0em 2em;
+}
+
+.lab-heading {
+  font-size: 110%;
+  margin-top: 1em;
+  padding-top: 1em;
+  border-top: 1px solid #888;
+  /* Emulate h5 */
+  display: block;
+  font-weight: bold;
 }

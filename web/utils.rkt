@@ -2,7 +2,6 @@
 (provide internal
          if-internal
          indented
-         exercise-counter
          scheme-from-file
          class-system-filename
          class-system-url
@@ -25,15 +24,6 @@
 
 (define (indented . args)
   (apply nested #:style 'inset args))
-
-(define (exercise-counter)
-  (let [(i 0)]
-    (λ xs
-      (set! i (+ 1 i))
-      (apply nested #:style "exercise"
-                    (bold (format "Exercise ~s." i))
-                    " "
-                    xs))))
 
 (require (for-syntax racket syntax/strip-context))
 
