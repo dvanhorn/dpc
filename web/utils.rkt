@@ -2,7 +2,7 @@
 (provide internal
          if-internal
          indented
-         exercise
+         exercise-counter
          scheme-from-file
          class-system-filename
          class-system-url
@@ -26,7 +26,7 @@
 (define (indented . args)
   (apply nested #:style 'inset args))
 
-(define exercise
+(define (exercise-counter)
   (let [(i 0)]
     (λ xs
       (set! i (+ 1 i))
