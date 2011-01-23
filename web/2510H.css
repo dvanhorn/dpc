@@ -446,6 +446,13 @@ i {
 }
 
 /* ---------------------------------------- */
+/* Code */
+
+.RktBlk {
+  white-space: nowrap; /* Don't wrap long lines of code */
+}
+
+/* ---------------------------------------- */
 /* Labs */
 
 .exercise {
