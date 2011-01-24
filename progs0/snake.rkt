@@ -1,10 +1,10 @@
-#lang class0
+#lang class1
 
 ;; The Snake Game in Object-Oriented Style
 ;; Copyright (c) 2010 David Van Horn
 ;; Licensed under the Academic Free License version 3.0
 
-(require 2htdp/universe)
+(require class1/universe)
 (require 2htdp/image)
 
 (define SNAKE-COLOR "red")
@@ -45,9 +45,9 @@
   
   ;; Nat Nat -> Cell
   (define/public (mod mx my)
-    (new cell% 
-         [x (modulo (field x) mx)]
-         [y (modulo (field y) my)]))
+    (new cell%
+         (modulo (field x) mx)
+         (modulo (field y) my)))
   
   ;; -> Nat
   ;; Produce the x-coord of the pixel at the *center* of this cell.
@@ -66,20 +66,20 @@
                  (y->pixel)
                  scn)))
 
-(check-expect (send (new cell% [x 1] [y 2]) =? 
-                    (new cell% [x 1] [y 2]))
+(check-expect (send (new cell% 1 2) =? 
+                    (new cell% 1 2))
               true)
-(check-expect (send (new cell% [x 6] [y 4]) mod 5 3)
-              (new cell% [x 1] [y 1]))
+(check-expect (send (new cell% 6 4) mod 5 3)
+              (new cell% 1 1))
 
-(check-expect (send (new cell% [x 0] [y 0]) x->pixel) HALF-CELL)
-(check-expect (send (new cell% [x 4] [y 0]) x->pixel) (* CELL-SIZE 9/2))
-(check-expect (send (new cell% [x 0] [y 0]) y->pixel)
+(check-expect (send (new cell% 0 0) x->pixel) HALF-CELL)
+(check-expect (send (new cell% 4 0) x->pixel) (* CELL-SIZE 9/2))
+(check-expect (send (new cell% 0 0) y->pixel)
               (- BOARD-HEIGHT/PIXELS HALF-CELL))
-(check-expect (send (new cell% [x 0] [y 4]) y->pixel) 
+(check-expect (send (new cell% 0 4) y->pixel) 
               (- BOARD-HEIGHT/PIXELS (* 9/2 CELL-SIZE)))
 
-(check-expect (send (new cell% [x 0] [y 0]) +img+scene SEG-IMG EMPTY-BOARD)
+(check-expect (send (new cell% 0 0) +img+scene SEG-IMG EMPTY-BOARD)
               (place-image SEG-IMG 
                            HALF-CELL 
                            (- BOARD-HEIGHT/PIXELS HALF-CELL)
@@ -91,8 +91,8 @@
   ;; Nat Nat -> Seg
   (define/public (move dx dy)
     (new seg% 
-         [x (+ (send this x) dx)] 
-         [y (+ (send this y) dy)]))
+         (+ (send this x) dx) 
+         (+ (send this y) dy)))
   
   ;; Dir -> Seg
   (define/public (move-dir d)
@@ -105,19 +105,19 @@
   (define/public (+scene scn)
     (send this +img+scene SEG-IMG scn)))
 
-(check-expect (send (new seg% [x 1] [y 2]) move 2 4)
-              (new seg% [x 3] [y 6]))
-(check-expect (send (new seg% [x 0] [y 0]) move 1 1)
-              (new seg% [x 1] [y 1]))
+(check-expect (send (new seg% 1 2) move 2 4)
+              (new seg% 3 6))
+(check-expect (send (new seg% 0 0) move 1 1)
+              (new seg% 1 1))
 
-(check-expect (send (new seg% [x 0] [y 0]) move-dir "up")
-              (new seg% [x 0] [y 1]))
-(check-expect (send (new seg% [x 0] [y 0]) move-dir "down")
-              (new seg% [x 0] [y -1]))
-(check-expect (send (new seg% [x 0] [y 0]) move-dir "left")
-              (new seg% [x -1] [y 0]))
-(check-expect (send (new seg% [x 0] [y 0]) move-dir "right")
-              (new seg% [x 1] [y 0]))
+(check-expect (send (new seg% 0 0) move-dir "up")
+              (new seg% 0 1))
+(check-expect (send (new seg% 0 0) move-dir "down")
+              (new seg% 0 -1))
+(check-expect (send (new seg% 0 0) move-dir "left")
+              (new seg% -1 0))
+(check-expect (send (new seg% 0 0) move-dir "right")
+              (new seg% 1 0))
 
 
 
@@ -139,7 +139,7 @@
   ;;; (cons Seg [Listof Seg]) -> [Listof Seg]
   ;;; Drop the last segment from the list of segs.
   
-  (define/private (drop-last segs)
+  (define/public (drop-last segs)
     (cond [(empty? (rest segs)) empty]
           [else (cons (first segs)
                       (drop-last (rest segs)))]))
@@ -150,7 +150,7 @@
   ;; Dir -> Snake
   ;; Change direction of this snake.
   (define/public (change-dir dir)
-    (new snake% [dir dir] [segs (field segs)]))
+    (new snake% dir (field segs)))
     
   ;; -> Seg
   ;; Compute the next head segment.
@@ -178,16 +178,16 @@
   ;; -> Snake
   (define/public (slither)
     (new snake%
-         [dir (field dir)]
-         [segs (cons (next-head)
-                     (drop-last (field segs)))]))
+         (field dir)
+         (cons (next-head)
+               (drop-last (field segs)))))
   
   ;; Grow this snake one segment.
   ;; -> Snake
   (define/public (grow)
     (new snake%
-         [dir (field dir)]
-         [segs (cons (next-head) (field segs))]))
+         (field dir)
+         (cons (next-head) (field segs))))
   
   ;; Scene -> Scene
   (define/public (+scene scn)
@@ -196,29 +196,29 @@
 
 (define snake0
   (new snake%
-       [dir "right"]
-       [segs (list (new seg% [x 4] [y 5])
-                   (new seg% [x 3] [y 5])
-                   (new seg% [x 2] [y 5]))]))
+       "right"
+       (list (new seg% 4 5)
+             (new seg% 3 5)
+             (new seg% 2 5))))
 
 
 (check-expect (send snake0 slither)
               (new snake%
-                   [dir "right"]
-                   [segs (list (new seg% [x 5] [y 5])
-                               (new seg% [x 4] [y 5])
-                               (new seg% [x 3] [y 5]))]))
+                   "right"
+                   (list (new seg% 5 5)
+                         (new seg% 4 5)
+                         (new seg% 3 5))))
 
 
-(define origin-cell (new cell% [x 0] [y 0]))
+(define origin-cell (new cell% 0 0))
 
 (check-expect (send origin-cell +img+scene SEG-IMG EMPTY-BOARD)
               (place-image SEG-IMG 
                            (send origin-cell x->pixel)
                            (send origin-cell y->pixel)
                            EMPTY-BOARD))
-(check-expect (send (new seg%  [x 0] [y 0]) +scene EMPTY-BOARD)
-              (send (new cell% [x 0] [y 0]) +img+scene SEG-IMG EMPTY-BOARD))
+(check-expect (send (new seg%  0 0) +scene EMPTY-BOARD)
+              (send (new cell% 0 0) +img+scene SEG-IMG EMPTY-BOARD))
 
 (define-class world%
   (fields snake food)
@@ -226,46 +226,48 @@
   ;; -> World
   (define/public (eat&grow)
     (new world% ;; Potential this%. 
-         [snake (send (field snake) grow)]
-         [food (new food% 
-                    [x (random BOARD-WIDTH/CELLS)]
-                    [y (random BOARD-HEIGHT/CELLS)])]))
+         (send (field snake) grow)
+         (new food% 
+              (random BOARD-WIDTH/CELLS)
+              (random BOARD-HEIGHT/CELLS))))
   
   ;; -> World
-  (define/public (step)
+  (define/public (on-tick)
     (cond [(send (field snake) eating? (field food)) (eat&grow)]
           [else (new world% ;; Potential this%.
-                     [snake (send (field snake) slither)]
-                     [food (field food)])]))
+                     (send (field snake) slither)
+                     (field food))]))
     
     ;; -> Boolean
-    (define/public (game-over?)
+    (define/public (stop-when)
       (or (send (field snake) wall-collide?)
           (send (field snake) self-collide?)))
     
     ;; -> Scene
-    (define/public (->scene)
+    (define/public (to-draw)
       (send (field snake) +scene 
             (send (field food) +scene EMPTY-BOARD)))
     
     ;; -> Scene
-    (define/public (->loser-scene)
+    (define/public (last-image)
       (place-image LOSER-IMG
                    (quotient BOARD-HEIGHT/PIXELS 2)
                    (quotient BOARD-WIDTH/PIXELS 2)
-                   (->scene)))
+                   (to-draw)))    
+  
+  (define/public (tick-rate) 1/5)
     
     ;; Key -> World
-    (define/public (handle-key k)
+    (define/public (on-key k)
       (new world% ;; Potential this% 
-           [snake (send (field snake) change-dir
+           (send (field snake) change-dir
                         (cond [(key=? k "up")    k]
                               [(key=? k "down")  k]
                               [(key=? k "left")  k]
                               [(key=? k "right") k]
                               [else 
-                               (send (field snake) dir)]))]
-           [food (field food)])))
+                               (send (field snake) dir)]))
+           (field food))))
 
 
 
@@ -281,74 +283,69 @@
             BOARD-HEIGHT/CELLS))))
 |#
 (define food0
-  (new food% [x 7] [y 7]))
+  (new food% 7 7))
 
 (define world0
   (new world% 
-       [snake snake0]
-       [food food0]))
+       snake0
+       food0))
 
 (define world-eating
   (new world%
-       [snake (new snake% 
-                   [dir "right"]
-                   [segs (list (new seg% 
-                                    [x (send food0 x)]
-                                    [y (send food0 y)]))])]
-       [food food0]))
+       (new snake% 
+            "right"
+            (list (new seg% 
+                       (send food0 x)
+                       (send food0 y))))
+       food0))
 
-(check-expect (send world0 step)
+(check-expect (send world0 on-tick)
               (new world%
-                   [snake (send snake0 slither)]
-                   [food (send world0 food)]))
+                   (send snake0 slither)
+                   (send world0 food)))
 
-(check-expect (send (send world-eating step) snake)
+(check-expect (send (send world-eating on-tick) snake)
               (send (send world-eating snake) grow))    
 
 (check-expect (send (send world-eating snake) eating?
                     (send world-eating food))
               true)
 
-(check-expect (send world0 ->scene)
+(check-expect (send world0 to-draw)
               (send snake0 +scene
                     (send food0 +scene EMPTY-BOARD)))
-(check-expect (send world0 ->loser-scene)
+(check-expect (send world0 last-image)
               (place-image LOSER-IMG
                            (quotient BOARD-HEIGHT/PIXELS 2)
                            (quotient BOARD-WIDTH/PIXELS 2)
-                           (send world0 ->scene)))
+                           (send world0 to-draw)))
 
 (check-expect (send (send world0 eat&grow) snake)
               (send snake0 grow))
 
-(check-expect (send world0 game-over?) false)
+(check-expect (send world0 stop-when) false)
 
-(check-expect (send world0 handle-key "a") world0)             
-(check-expect (send world0 handle-key "up")
+(check-expect (send world0 on-key "a") world0)             
+(check-expect (send world0 on-key "up")
               (new world%
-                   [snake (send (send world0 snake) change-dir "up")]
-                   [food (send world0 food)]))
-(check-expect (send world0 handle-key "down")
+                   (send (send world0 snake) change-dir "up")
+                   (send world0 food)))
+(check-expect (send world0 on-key "down")
               (new world%
-                   [snake (send (send world0 snake) change-dir "down")]
-                   [food (send world0 food)]))
-(check-expect (send world0 handle-key "left")
+                   (send (send world0 snake) change-dir "down")
+                   (send world0 food)))
+(check-expect (send world0 on-key "left")
               (new world%
-                   [snake (send (send world0 snake) change-dir "left")]
-                   [food (send world0 food)]))
-(check-expect (send world0 handle-key "right")
+                    (send (send world0 snake) change-dir "left")
+                    (send world0 food)))
+(check-expect (send world0 on-key "right")
               (new world%
-                   [snake (send (send world0 snake) change-dir "right")]
-                   [food (send world0 food)]))
+                   (send (send world0 snake) change-dir "right")
+                   (send world0 food)))
 
-#;#;
-(big-bang world0
- (on-tick (λ (w) (send w step)) 1/5)
- (to-draw (λ (w) (send w ->scene)))
- (on-key  (λ (w k) (send w handle-key k)))
- (stop-when (λ (w) (send w game-over?))
-            (λ (w) (send w ->loser-scene))))
 
+(big-bang world0)
+#;
 (test)
 
 ; Play with bounding walls.
@@ -356,5 +353,5 @@
 ; Play in modulo mode.
 ;(play modulo-seg%)
 
-
+#;
 (equal? (new snake% [dir "right"] [segs null]) (new snake% [dir "right"] [segs null]))
