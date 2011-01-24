@@ -36,7 +36,12 @@
                (if (method-in-interface? 'stop-when i)
                    (λ (w)
                      (send w stop-when))
-                   (λ (w) false)))
+                   (λ (w) false))
+               (if (method-in-interface? 'last-image i)
+                   (λ (w)
+                     (send w last-image))
+                   (λ (w)
+                     (send w to-draw))))
               ;; check-with
               (record? (if (method-in-interface? 'record? i)
                            (send o record?)
