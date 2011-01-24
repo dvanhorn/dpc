@@ -285,9 +285,9 @@ you've done something strange, any objects that understand the @racket[x],
 @racket[y], @racket[draw], and @racket[step] methods should slot in with minimal
 changes.
 
-@exercise{
-  @bold{(Open ended)} Create new kinds of Creatures with new kinds of movement.
-  Try some of these ideas:
+@exercise{@bold{(Open ended)}
+  Create new kinds of Creatures with new kinds of movement. Try some of these
+  ideas:
 
   @itemlist[
     @item{speeding up over time}

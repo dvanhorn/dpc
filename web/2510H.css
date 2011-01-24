@@ -463,11 +463,16 @@ i {
 }
 
 .lab-heading {
-  font-size: 110%;
+  font-size: 125%;
   margin-top: 1em;
   padding-top: 1em;
   border-top: 1px solid #888;
   /* Emulate h5 */
   display: block;
   font-weight: bold;
+}
+
+.center {
+  text-align: center;
+  display: block;
 }
