@@ -56,4 +56,7 @@ clean-web:
 
 web-scp: clean-web web-students	
 	scp -r 2510H/* $(CCS):$(CCS_PATH)
-	ssh $(CCS) chmod -Rf g+w $(CCS_PATH)
+	make web-perms
+
+web-perms:
+	ssh $(CCS) chmod -Rf g+w $(CCS_PATH) || true
