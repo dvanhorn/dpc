@@ -14,6 +14,7 @@
   (let ([the-eval (make-base-eval)])
     (the-eval '(require class1))
     (the-eval '(require 2htdp/image))
+    ;(the-eval '(require class1/universe))
     the-eval))
 
 @(define exercise (exercise-counter))
@@ -44,12 +45,13 @@ Information about the latest version is always available at @secref["class"].
 
 @lab:section{Invaders}
 
-A @racket[World] consists of @racket[Invaders], each of which has a location
-(@racket[x], @racket[y]), can @racket[draw] itself, and can @racket[step] itself
-through an animation. an @racket[Invader] is either a @racket[Ball] or a
+Let me start you with a basic animation in need of abstraction. A @racket[World]
+consists of @racket[Invaders], each of which has a location (@racket[x],
+@racket[y]), can @racket[draw] itself, and can @racket[step] itself through an
+animation. An @racket[Invader], for now, is either a @racket[Ball] or a
 @racket[Block].
 
-@(racketmod class1) @; Report bug: racketmod loses one level of indentation
+@(racketmod class1) @; Report bug: racketmod loses first level of indentation
 @#reader scribble/comment-reader
 (racketblock
 (require 2htdp/image)
@@ -80,21 +82,31 @@ through an animation. an @racket[Invader] is either a @racket[Ball] or a
 ; An Invader is one of:
 ;  - Ball
 ;  - Block
+
+; A Location is a Complex where (x,y) is represented as the complex number x+yi
 )
 
-Here's a trick for working with 2D geometry: use
+---complex numbers? We're going to use a trick for working with 2D geometry:
+represent the location @math{(x,y)} with the
 @link["http://docs.racket-lang.org/reference/generic-numbers.html?q=complex+numbers#(part._.Complex_.Numbers)"]{complex
-numbers} @math{x+yi} to represent @math{(x,y)} locations. This is useful because
-most geometric transformations can be done simply by adding, subtracting, or
-multiplying complex numbers.
+number} @math{x+yi}. Common geometric transformations can now be done simply
+with addition and subtraction.
 
-For instance, if you're at location @math{(2,5)} and want to translate 1 step
-left and 2 steps down to get to location @math{(1,7)}, then you can use complex
-addition to calculate @math{2+5i + -1+2i = 1+7i}.
+For instance, if you're at location @math{(2,5)} and want to translate by
+@math{(-1,2)}---1 step left and 2 steps down, in screen coordinates---to get to
+location @math{(1,7)}, then you can @emph{add} your location @math{2+5i} to the
+translation @math{-1+2i} to get your new location @math{1+7i}.
+
+Or consider the opposite situation: if you're at @math{(2,5)} and want to know
+what you must translate by to get to @math{(1,7)}, you can @emph{subtract}
+@math{1+7i - 2+5i = -1+2i} to find out that @math{(-1,2)} is the translation
+from @math{(2,5)} to @math{(1,7)}.
+
+There's much more to say about the relationship between 2D geometry and complex
+arithmetic, but we can get a long way with just the basics. Now where were we?
 
 @#reader scribble/comment-reader
 (racketblock
-; A Location is a Complex where (x,y) is represented as the complex number x+yi
 ; A Non-Negative is a non-negative Number
 ; A Color is a String
 
@@ -125,6 +137,17 @@ addition to calculate @math{2+5i + -1+2i = 1+7i}.
          (field color)
          (+ 0+1i (field location)))))
 
+(check-expect (send (new ball% 5 "red" 50+10i) x) 50)
+(check-expect (send (new ball% 5 "red" 50-10i) x) 50)
+(check-expect (send (new ball% 5 "red" 50+10i) y) 10)
+(check-expect (send (new ball% 5 "red" 50-10i) y) -10)
+(check-expect (send (new ball% 5 "red" 50+10i) draw)
+              (circle 5 "solid" "red"))
+(check-expect (send (new ball% 5 "red" 50+10i) step)
+              (new ball% 5 "red" 50+11i))
+(check-expect (send (new ball% 5 "red" 50-10i) step)
+              (new ball% 5 "red" 50-9i))
+
 ; A Block is a (new block% Location Non-Negative Non-Negative Color)
 (define-class block%
   (fields width height color location)
@@ -153,16 +176,27 @@ addition to calculate @math{2+5i + -1+2i = 1+7i}.
          (field color)
          (+ 0+1i (field location)))))
 
-  (big-bang (new world% (list (new ball%   5    "red"   50+10i)
-                              (new ball%  10    "red"  150+10i)
-                              (new ball%  20    "red"  250+10i)
-                              (new ball%  10    "red"  350+10i)
-                              (new ball%   5    "red"  450+10i)
-                              (new block% 30 20 "blue"  50+60i)
-                              (new block% 15 10 "blue" 150+60i)
-                              (new block%  5  5 "blue" 250+60i)
-                              (new block% 15 10 "blue" 350+60i)
-                              (new block% 30 20 "blue" 450+60i))))
+(check-expect (send (new block% 10 20 "blue"  50+60i) x) 50)
+(check-expect (send (new block% 10 20 "blue" -50+60i) x) -50)
+(check-expect (send (new block% 10 20 "blue"  50+60i) y) 60)
+(check-expect (send (new block% 10 20 "blue" -50+60i) y) 60)
+(check-expect (send (new block% 10 20 "blue" -50+60i) draw)
+              (rectangle 10 20 "solid" "blue"))
+(check-expect (send (new block% 10 20 "blue" 50+60i) step)
+              (new block% 10 20 "blue" 50+61i))
+(check-expect (send (new block% 10 20 "blue" -50+60i) step)
+              (new block% 10 20 "blue" -50+61i))
+
+(big-bang (new world% (list (new ball%   5    "red"   50+10i)
+                            (new ball%  10    "red"  150+10i)
+                            (new ball%  20    "red"  250+10i)
+                            (new ball%  10    "red"  350+10i)
+                            (new ball%   5    "red"  450+10i)
+                            (new block% 30 20 "blue"  50+60i)
+                            (new block% 15 10 "blue" 150+60i)
+                            (new block%  5  5 "blue" 250+60i)
+                            (new block% 15 10 "blue" 350+60i)
+                            (new block% 30 20 "blue" 450+60i))))
 )
 
 When you run this, you should see balls and blocks falling. (Simple
@@ -173,34 +207,31 @@ with convenience methods for its @racket[x] and @racket[y] coordinates, can
 @racket[draw] itself, and can @racket[step] itself through an animation.
 
 @exercise{
-  Define an @racket[invader<%>] interface for @racket[ball%] and @racket[block%]
-  to implement.
+  Introduce an @racket[invader<%>] interface for the behaviors common to both
+  @racket[ball%] and @racket[block%].
 }
 
-The convenience methods @racket[x] and @racket[y] are useful, for instance, in
-the World's @racket[to-draw] method where it needs to use the x- and
-y-coordinates separately. But notice that the methods are implemented in the
-same way for Balls and Blocks. Also notice that both classes have a
-@racket[location] field. Moreover, whatever kinds of Invaders we introduce
-later, we will probably want them to also have a @racket[location], an
-@racket[x], and a @racket[y].
+The convenience methods @racket[x] and @racket[y] are useful in the World's
+@racket[to-draw] method where it needs to use the x- and y-coordinates
+separately, but notice that the methods are implemented in the same way for
+Balls and Blocks. Also notice that both classes have a @racket[location] field.
 
 @exercise{
-  Using inheritance, abstract the @racket[location] field and the @racket[x] and
+  Use inheritance to abstract the @racket[location] field and the @racket[x] and
   @racket[y] methods into a common superclass, @racket[invader%].
 }
 
-Also, the two @racket[step] methods for Balls and Blocks do essentially the same
-thing---move the Invader down by 1---but they aren't expressed in a way that we
-can abstract.
+Also, the two @racket[step] methods for Balls and Blocks are trying to do the
+same thing---move the Invader down by 1---but they aren't expressed in a way
+that we can abstract.
 
 @exercise{
-  Simplify each @racket[step] method: define a @racket[move] method that takes a
+  Refactor each @racket[step] method: define a @racket[move] method that takes a
   location @racket[dz] and updates the @racket[location] by translating by
   @racket[dz]. (Just as @math{x} and @math{y} are commonly used for real
   numbers, @math{z} is commonly used for complex numbers.)
 
-  Abstract @racket[step] into the superclass.
+  You should now be able to abstract @racket[step] into the superclass.
 }
 
 @lab:section{Invasion}
@@ -231,27 +262,29 @@ of the mouse. It's vertical position stays fixed.
 }
 
 How much did you have to change your @racket[to-draw] method in @racket[world%]?
-I hope not much...
+If your answer isn't ``very little'', then pause and reconsider your Ship
+design.
 
 A Ship isn't an Invader since it doesn't @racket[step] and never needs to answer
 @racket[invaded?], but it does @racket[draw] and have an @racket[x], @racket[y],
 and @racket[location]. Moreover, @racket[to-draw] in @racket[world%] only relies
-on these last four behaviors---but we lack an interface to codify it.
+on these last four behaviors---but we currently lack an interface to codify it.
 
 @exercise{
   Split the @racket[invader<%>] interface into two: a @racket[drawable<%>]
-  interface to support the needs of @racket[to-draw], and a new
+  interface to support the needs of @racket[to-draw], and a simpler
   @racket[invader<%>] interface that just includes @racket[step] and
   @racket[invaded?].
 
   Of your classes, which should implement which interfaces?---note that a class
-  can implement multiple interfaces.
+  can implement multiple interfaces (even though it can only have one
+  superclass).
 }
 
 Now compare your @racket[ship%] class with your @racket[invader%] class:
 @racket[invader%] has a @racket[location] field with @racket[x] and @racket[y]
 methods reading from it, and the @racket[ship%] class you just defined should
-have something very similar.
+look very similar.
 
 @exercise{
   Abstract the @racket[location] field and the @racket[x] and @racket[y] methods
@@ -290,8 +323,8 @@ But whence Bananas?
 
 @exercise{
   Add a @racket[shoot] method to @racket[ship%] that creates a new Banana at the
-  Ship's location. Add a @racket[shoot] method to @racket[world%] that asks the
-  Ship to shoot and begins tracking its newly fired Banana.
+  Ship's location. Also add a @racket[shoot] method to @racket[world%] that asks
+  the Ship to shoot and begins tracking its newly fired Banana.
 
   Fire Bananas when the user clicks the mouse.
 }
@@ -299,8 +332,9 @@ But whence Bananas?
 Too many Bananas!
 
 @exercise{
-  Remove Bananas after they leave the screen. Add an @racket[on-screen?] method
-  to @racket[banana%], and remove off-screen Bananas on each World tick.
+  Remove Bananas from the World after they leave the screen. Add an
+  @racket[on-screen?] method to @racket[banana%], and remove off-screen Bananas
+  on each World tick.
 }
 
 If a Banana falls in a forest...
@@ -312,7 +346,7 @@ If a Banana falls in a forest...
 
   Implement @racket[contains?] appropriately for each of @racket[ball%] and
   @racket[block%]. Note that circles and rectangles occupy different parts of
-  space.
+  space...
 }
 
 @exercise{
