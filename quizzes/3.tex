@@ -1,0 +1,69 @@
+\documentclass[10pt]{article}
+
+\usepackage{slatex}
+\usepackage{fullpage}
+
+\pagestyle{empty}
+\setlength{\parindent}{0mm}
+
+\begin{document}
+\section*{Lab Quiz 3}
+
+\bigskip
+\bigskip
+Name: \underline{\hspace*{4in}}
+
+\bigskip
+\setlength{\parskip}{8pt}
+
+I've made a mess! I wrote a couple different classes with similar behavior and
+then relied on the common behaviors in writing some client code, but I failed to
+put an appropriate interface between them.
+
+Define an interface to document the contract between my classes and my client.
+
+\medskip
+
+\begin{schemedisplay}
+  ; A Bread is a (new bread\% Number Number Number)
+  (define-class bread%
+    (fields Kcal mass density)
+
+    ; \scheme{-> Boolean}
+    ; Is this bread fresh?
+    (define/public (fresh?)
+      ...)
+
+    ; \scheme{Soup -> Bread}
+    ; Construct a new bread that has been dipped in soup
+    (define/public (dip-in-soup soup)
+      ...))
+
+  ; A Burrito is a (new burrito\% Number Number)
+  (define-class burrito%
+    (fields mass length)
+
+    ; \scheme{-> Boolean}
+    ; Is this burrito fresh?
+    (define/public (fresh?)
+      ...)
+
+    ; \scheme{-> Number}
+    ; The total Kcal contained in this burrito
+    (define/public (Kcal)
+      ...)
+
+    ; \scheme{-> Mess}
+    ; Unwrap this burrito into its fillings
+    (define/public (unwrap)
+      ...))
+
+  ; \scheme{nutrition : Food -> Number}
+  ; The nutritional value (in Kcal) of the input food
+  (define (nutrition x)
+    (if (send x fresh?)
+      (send x Kcal)
+      0))
+\end{schemedisplay}
+
+\end{document}
