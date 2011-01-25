@@ -4,19 +4,25 @@ class1
 (λ args
   (parameterize ([read-decimal-as-inexact #f]
                  [read-accept-dot #f]
-                 [read-accept-quasiquote #t])
+                 [read-accept-quasiquote #t]
+                 [current-readtable rt])
     (apply read args)))
 
 #:read-syntax 
 (λ args
   (parameterize ([read-decimal-as-inexact #f]
                  [read-accept-dot #f]
-                 [read-accept-quasiquote #t])
+                 [read-accept-quasiquote #t]
+                 [current-readtable rt])
     (apply read-syntax args)))
 
 #:info (make-info '(abbreviate-cons-as-list read-accept-quasiquote))
 #| #:language-info (make-language-info '(abbreviate-cons-as-list read-accept-quasiquote)) |#
                  
+(define rt (make-readtable #f
+                           #\. 'terminating-macro (lambda a '|.|)))
+
+
 (define ((make-info options) key default use-default)
   (case key
     [(drscheme:toolbar-buttons)

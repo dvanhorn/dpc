@@ -18,11 +18,11 @@
   (raise-syntax-error #f "can only be used inside define-class" stx))
 
 (define-syntax (define-interface stx)
-  (syntax-parse stx
-    [(_ name:id (meths:id ...))
+  (syntax-parse stx #:literals (super)
+    [(_ name:id (super super-ifc:ifc-name) ... (meths:id ...))
      #:with -ifc (datum->syntax #f (syntax-e #'name))
      #'(begin (define-syntax name (interface-name #'-ifc))
-              (define -ifc (interface () meths ...)))]))
+              (define -ifc (interface (super-ifc.real-name ...) meths ...)))]))
 
 (define-syntax (define-class stx)
   (define-syntax-class (member-name names)
