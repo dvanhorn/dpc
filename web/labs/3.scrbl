@@ -226,12 +226,20 @@ same thing---move the Invader down by 1---but they aren't expressed in a way
 that we can abstract.
 
 @exercise{
-  Refactor each @racket[step] method: define a @racket[move] method that takes a
-  location @racket[dz] and updates the @racket[location] by translating by
-  @racket[dz]. (Just as @math{x} and @math{y} are commonly used for real
-  numbers, @math{z} is commonly used for complex numbers.)
+  Refactor the @racket[step] methods. In each of @racket[ball%] and
+  @racket[block%], define a @racket[move] method that takes a location
+  @racket[dz] and updates the Ball's (or Block's) @racket[location] by
+  translating by @racket[dz].
 
-  You should now be able to abstract @racket[step] into the superclass.
+  This way, the @racket[ball%] @racket[move] method will know how to say
+  @racket[(new ball% ...)] and the @racket[block%] @racket[move] method will
+  know how to say @racket[(new block% ...)], and @racket[step] can remain
+  oblivious to which kind of object it's working on.
+
+  Abstract @racket[step] into the superclass.
+
+  (Aside: the letter @math{z} is typically used for complex numbers, just as
+  @math{x} and @math{y} are typically used for real numbers.)
 }
 
 @lab:section{Invasion}
