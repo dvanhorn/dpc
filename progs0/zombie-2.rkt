@@ -20,7 +20,7 @@
 (define Z-SPEED 1)
 
 ;; ==========================================================
-;; A World is a (new world% Player LoZombie Mouse).
+;; A World is a (new world% Player LoZ Mouse).
 ;; Interp: player, list of living and dead zombies, mouse.
 
 ;; name : -> String
@@ -190,9 +190,9 @@
 
 
 ;; ==========================================================
-;; A LoZombie is one:
+;; A LoZ is one:
 ;; - (new empty%)
-;; - (new cons% Zombie LoZombie)
+;; - (new cons% Zombie LoZ)
 
 ;; draw-on : Scene -> Scene
 ;; Draw this list of zombies on the scene.
@@ -203,10 +203,8 @@
 ;; move-toward : Player -> LoDot
 ;; Move all zombies toward the player.
 
-;; kill : -> LoZombie
+;; kill : -> LoZ
 ;; Kill any zombies that touch others.
-
-(define-struct r (live dead))
 
 (define-class empty%
   (define/public (draw-on scn)
@@ -260,6 +258,8 @@
 ;; ==========================================================
 ;; Functional abstractions
 
+;; [U Player Zombie] [U Player Mouse] -> Nat
+;; Compute the taxi distance between the given positions.
 (define (dist p1 p2)
   (+ (abs (- (send p1 x)
              (send p2 x)))
@@ -297,10 +297,11 @@
         (new vec% +1  0)
         (new vec% +1 +1)))
 
-;; ==========================================================
-;; Helper constructor for LoDot.
 
-;; Nat (-> Nat Dot) -> LoZ
+;; ==========================================================
+;; Helper constructor for LoZ
+
+;; Nat (-> Nat Zombie) -> LoZ
 ;; Like build-list for LoZ.
 (check-expect (build-loz 0 (λ (i) (new live-zombie% i i)))
               (new empty%))
@@ -332,27 +333,34 @@
                         (random HEIGHT))))
       (new mouse% 0 0)))
 
-#|
+
 ;; ==========================================================
 ;; Test cases
 
 (define mt (new empty%))
-(define d0 (new dot% 0 0))
-(define d1 (new dot% 0 30))
-(define l0 (new cons% d0 mt))
-(define l1 (new cons% d1 mt))
-(define w0 (new world% d0 mt mt d0))
-(define w1 (new world% d0 l0 mt d0))
-(define w2 (new world% d0 mt l0 d0))
-(define w3 (new world% d0 mt mt d1))
-(define w4 (new world% d0 l1 l1 d1))
+(define m0 (new mouse% 0 0))
+(define m1 (new mouse% 0 30))
+(define p0 (new player% 0 0))
+(define p1 (new player% 0 30))
+(define l0 (new live-zombie% 0 0))
+(define d0 (new dead-zombie% 0 0))
+(define l1 (new live-zombie% 0 30))
+(define d1 (new dead-zombie% 0 30))
+(define lz0 (new cons% l0 mt))
+(define dz0 (new cons% d0 mt))
+(define dz1 (new cons% d1 mt))
+(define zs0 (new cons% l1 dz1))
+(define w0 (new world% p0 mt m0))
+(define w1 (new world% d0 lz0 m0))
+(define w2 (new world% d0 dz0 m0))
+(define w3 (new world% p0 mt m1))
+(define w4 (new world% p0 zs0 m1))
 (define w5
   (new world% 
-       (new dot% 0 P-SPEED)
-       (new cons% (new dot% 0 (- 30 Z-SPEED)) mt)
-       l1
-       d1))
-(define w6 (new world% d0 mt (new cons% d1 l1) d1))
+       (new player% 0 P-SPEED)
+       (new cons% (new live-zombie% 0 (- 30 Z-SPEED)) dz1)
+       m1))
+(define w6 (new world% p0 (new cons% d1 dz1) m1))
 (define w7 (send w0 teleport))
 
 ;; World tests
@@ -364,12 +372,11 @@
 ;; teleport
 (check-range (send (send w7 player) x) 0 WIDTH)
 (check-range (send (send w7 player) y) 0 HEIGHT)
-(check-expect (send w7 live) mt)
-(check-expect (send w7 dead) mt)
-(check-expect (send w7 mouse) d0)
+(check-expect (send w7 zombies) mt)
+(check-expect (send w7 mouse) m0)
 ;; mouse-move
 (check-expect (send w0 mouse-move 0 30)
-              (new world% d0 mt mt d1))
+              (new world% p0 mt m1))
 ;; stop-when
 (check-expect (send w0 stop-when) false)
 (check-expect (send w1 stop-when) true)
@@ -379,52 +386,68 @@
 ;; kill
 (check-expect (send w4 kill) w6)
 
-;; LoDot tests
-;; ===========
+;; Player tests
+;; ============
 
-;; draw-on
-(check-expect (send mt draw-on "red" MT-SCENE) MT-SCENE)
-(check-expect (send l1 draw-on "red" MT-SCENE)
-              (send d1 draw-on "red" MT-SCENE))
-;; touching?
-(check-expect (send mt touching? d0) false)
-(check-expect (send l0 touching? d0) true)
-(check-expect (send l0 touching? d1) false)
-;; move-toward
-(check-expect (send mt move-toward 5 d0) mt)
-(check-expect (send l0 move-toward 5 d0) l0)
-(check-expect (send l1 move-toward 5 d0)
-              (new cons% (new dot% 0 25) mt))                
+;; ...
+
+;; Zombie tests
+;; ============
+
 ;; kill
-(check-expect (send mt kill mt)
-              (make-r mt mt))
-(check-expect (send mt kill l1)
-              (make-r mt l1))
-(check-expect (send l1 kill mt)
-              (make-r l1 mt))
-(check-expect (send l1 kill l1)
-              (make-r mt (new cons% d1 l1)))
-
-;; Dot tests
-;; =========
-
+(check-expect (send l0 kill) d0)
+(check-expect (send d0 kill) d0)
 ;; touching?
-(check-expect (send d0 touching? d0) true)
-(check-expect (send d0 touching? d1) false)
+(check-expect (send l0 touching? p0) true)
+(check-expect (send l0 touching? p1) false)
 ;; move-toward
-(check-expect (send d0 move-toward 5 d0) d0)
-(check-expect (send d1 move-toward 5 d0)
-              (new dot% 0 25))
+(check-expect (send l0 move-toward p0) l0)
+(check-expect (send l0 move-toward p1)
+              (new live-zombie% 0 Z-SPEED))
 ;; draw-on
-(check-expect (send d0 draw-on "red" MT-SCENE)
+(check-expect (send l0 draw-on MT-SCENE)
               (place-image (circle 1/2-CELL "solid" "red")
                            0 0
                            MT-SCENE))
+(check-expect (send d0 draw-on MT-SCENE)
+              (place-image (circle 1/2-CELL "solid" "gray")
+                           0 0
+                           MT-SCENE))
+
+;; LoZ tests
+;; =========
+
+;; draw-on
+(check-expect (send mt draw-on MT-SCENE) MT-SCENE)
+(check-expect (send dz1 draw-on MT-SCENE)
+              (send d1 draw-on MT-SCENE))
+;; touching?
+(check-expect (send mt touching? p0) false)
+(check-expect (send dz0 touching? p0) true)
+(check-expect (send dz0 touching? p1) false)
+;; move-toward
+(check-expect (send mt move-toward p0) mt)
+(check-expect (send dz0 move-toward p0) dz0)
+(check-expect (send lz0 move-toward p1)
+              (new cons% (new live-zombie% 0 Z-SPEED)
+                   mt))
+;; kill
+(check-expect (send mt kill) mt)
+(check-expect (send lz0 kill) lz0)
+(check-expect (send zs0 kill) (new cons% d1 dz1))
+
+;; Function tests
+;; ==============
+
 ;; dist
-(check-expect (send d0 dist d1) 30)
+(check-expect (dist l0 p1) 30)
 ;; min-taxi
-(check-expect (send d0 min-taxi 5 d0) d0)
-(check-expect (send d0 min-taxi 5 d1) (new dot% 0 5))
+(check-expect (min-taxi l0 5 p0) (new vec% 0 0))
+(check-expect (min-taxi l0 5 p1) (new vec% 0 5))
+;; zombie-touching?
+;; ...
+
+#|
 ;; plus
 (check-expect (send d0 plus d0) d0)
 (check-expect (send d0 plus d1) d1)
