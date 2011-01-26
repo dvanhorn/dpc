@@ -63,9 +63,9 @@ define all the methods of the interfaces, otherwise an error is
 signalled.}
 
 @deftogether[
-[@defform[(super class-name)]
+[@defform[(super class-or-interface-name)]
  @defform[(implements interface-name ...)]]]{
-See @racket[define-class].}
+See @racket[define-class] and @racket[define-interface].}
 
 @deftogether[
 [@defidform[this]
@@ -77,13 +77,19 @@ See @racket[define-class].}
  @defform[(send object message arg ...)]]]{
 These have the same meaning as in @racketmodname[class0].}
 
-@defform/subs[(define-interface interface-name (method-name ...))
+@defform/subs[#:literals (super)
+(define-interface interface-name 
+  (super super-interface) ... 
+  (method-name ...))
 	      ()]{
 Defines a new interface named @racket[interface-name].
 Classes declaring to implement @racket[interface-name] must
-provide methods implementing each of the @racket[method-name]s.}
+provide methods implementing each of the @racket[method-name]s, 
+as well as all methods declared in any of the @racket[super-interface]s.  
+The @racket[super-interface]s must name previously defined interfaces.  
+}
 
-@section[#:style 'hidden]{Object-oriented Universe (class 1)}
+@section[#:style (list 'toc-hidden 'hidden)]{Object-oriented Universe (class 1)}
 
 @defmodule[class1/universe]
 
