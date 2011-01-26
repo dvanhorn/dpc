@@ -30,25 +30,7 @@ each lecture.
 There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
 @include-section["lectures/lec04.scrbl"]
-
-@internal{
-[Here we build OO-design from the ground up.]
-
-[Enumerations, unions (recursive), containment, ...]
-
-[The Union lives in your head.  Move on to interface version quickly.]
-
-[Writing data definitions.  How to write methods for all of these
-things.]
-
-Ch. 3, 4, 5, 6, 11, 12.
-}
-
-@internal{[Examples: shapes, lists]}
-
-@section[#:tag "lec05"]{1/24: Programming with interfaces}
-
-@internal{Bigger system design.  In lecture: Snake Game.}
+@include-section["lectures/lec05.scrbl"]
 
 @section[#:tag "lec06"]{1/27: Universes}
 
