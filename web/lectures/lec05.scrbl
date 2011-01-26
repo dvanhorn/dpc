@@ -482,11 +482,6 @@ This satisfies part of our implementation right off the bat: we get an
 @racket[x-px] and @racket[y-px] methods:
 
 
-@#reader scribble/comment-reader
-
-...
-
-)
 
 
 
