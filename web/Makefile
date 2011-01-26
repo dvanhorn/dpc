@@ -12,7 +12,7 @@ clean: clean-class clean-web
 #
 
 .PHONY: class
-class: clean-class
+class: clean-class copy-doc
 	(cd .. && raco pack \
 		-v --at-plt --replace \
 		++setup class0 \
@@ -24,6 +24,13 @@ class: clean-class
 clean-class:
 	find ../class* -name compiled -type d | xargs rm -fr
 	rm -fr ../class-system-*.plt
+
+copy-doc:
+	rm -fr ../class1/scribblings/
+	rm -fr ../class0/scribblings/
+	cp -r ./class/ ../class1/scribblings/
+	cp -r ./class/ ../class0/scribblings/
+
 
 #
 # web
