@@ -22,8 +22,10 @@
     [(_ rcvr:expr |.| meth:id (~and (~not |.|) args:expr) ...)
      #'(send rcvr meth args ...)]
     [(_ rcvr:expr |.| meth:id (~and (~not |.|) args:expr) ... rest:expr ...)
-     #'(my-app (send rcvr meth args ...) rest ...)]))
-
+     #'(my-app (send rcvr meth args ...) rest ...)]
+    [(_ e ...)
+     #'(#%app e ...)]))
+      
 (define-syntax (|.| stx)
   (raise-syntax-error #f "not legal outside of method send syntax" stx))
 
