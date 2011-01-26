@@ -1,9 +1,7 @@
 #lang class1
 (require class1/universe)
 
-
 ;; A Universe is a (new universe% [U #f Number] [U #f IWorld] [U #f IWorld]).
-
 (define-class universe%
   (fields number
           picker
@@ -50,10 +48,7 @@
           [(guesser? iw)
            (make-bundle this
                         (list (make-mail iw "no number"))
-                        empty)]
-          #;
-          [else
-           (make-bundle this empty empty)])))
+                        empty)])))
   
 
 (define (respond guess number)
