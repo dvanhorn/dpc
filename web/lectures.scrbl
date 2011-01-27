@@ -31,8 +31,7 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 
 @include-section["lectures/lec04.scrbl"]
 @include-section["lectures/lec05.scrbl"]
-
-@section[#:tag "lec06"]{1/27: Universes}
+@include-section["lectures/lec06.scrbl"]
 
 @internal{ POPL: 1/27. Example: Hangman}
 
