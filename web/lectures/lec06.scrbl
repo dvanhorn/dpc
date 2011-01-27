@@ -40,8 +40,9 @@ So far we have focused on the design of single programs; we are now
 going to start looking at the design of communicating systems of
 programs.
 
-In addition to these notes, be sure to read the documentation on 
-@secref[#:doc '(lib "teachpack/teachpack.scrbl") "world2"].
+In addition to these notes, be sure to read the documentation on
+@secref[#:doc '(lib "teachpack/teachpack.scrbl") #:tag-prefixes
+'("2htdp") "world2"].
 
 @section{Messages}
 
