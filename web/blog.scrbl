@@ -7,6 +7,34 @@
 
 @title*{Blog}
 
+@section*{Second partnership assignments}
+
+@tt{Thu Jan 27 17:12:44 EST 2011}
+
+Here are the partner assignments for assignment 4 and on (until the
+next partner assignment):
+
+@verbatim{
+pair 018: tswartz, aldwin
+pair 019: ngoldman, schwarta
+pair 020: chiner, wconlon
+pair 021: laplante, ekelly
+pair 022: maxgoren, fnimick
+pair 023: rpless, jccoates
+pair 024: demaior, florence
+pair 025: gierb, markefus
+pair 026: morehd, jgramm
+pair 027: fungi, hfried7
+pair 028: dcorbett, kardon
+pair 029: lindeman, petey3
+pair 030: mcoppola, robbyk
+pair 031: forrest, dmsilva
+pair 032: naraghi, mmitlin
+pair 033: mcarroll, hloople
+pair 034: pfurtado, gressen
+pair 035: wjhsie, romelusw
+}
+
 @section*{Constructor-style printer}
 
 @tt{Fri Jan 21 18:00:03 EST 2011}

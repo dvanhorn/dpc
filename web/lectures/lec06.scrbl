@@ -474,23 +474,3 @@ The client stays the same!  You can launch the two players with:
    (big-bang (new guess-world% "guess a number"))
    (big-bang (new guess-world% "guess a number"))))
 
-
-@internal{
-
-Key Concepts:
-
-Server (universe) and Clients (worlds)
---------------------------------------
-
-Setting  up a world to communicate with a universe server.
-
-
-Sending messages (Client-side, world)
----------------
-
-;;;;;;;;;;;
-
-
-;;;;;
-
-}
