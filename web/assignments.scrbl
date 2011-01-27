@@ -11,10 +11,9 @@ Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise no
 @include-section["assignments/assign01.scrbl"]
 @include-section["assignments/assign02.scrbl"]
 @include-section["assignments/assign03.scrbl"]
+@include-section["assignments/assign04.scrbl"]
 
 @internal[
-
-@section[#:tag "assign04"]{2/02: ??}
 
 @section[#:tag "assign05"]{2/09: Inheritance/Composition?}
 @section[#:tag "assign06"]{2/18: Connect 4 Network (non-standard day)}
