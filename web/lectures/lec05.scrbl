@@ -32,12 +32,12 @@ growth.  Then add mouse handling and changing direction.)
 
 @item{Van Horn, Tobin-Hochstadt, and Brown will all be in lovely
 Austin, Texas for the remainder of the week in order to participate in
-the @link["http://popl/"]{ACM SIGPLAN/SIGACT Conference on the Principles of
-Programming Languages}.  Tobin-Hochstadt will have limited office
-hours today and Brown and Van Horn will not have office hours this
-week.  There will be a lecture on Thursday, given by Vincent
-St. Amour, a PhD candidate in the Programming Research Lab.  Come
-prepared with good Canadian jokes.}
+the @link["http://www.cse.psu.edu/popl/11/"]{ACM SIGPLAN/SIGACT
+Conference on the Principles of Programming Languages}.
+Tobin-Hochstadt will have limited office hours today and Brown and Van
+Horn will not have office hours this week.  There will be a lecture on
+Thursday, given by Vincent St. Amour, a PhD candidate in the
+Programming Research Lab.  Come prepared with good Canadian jokes.}
 
 @item{Just a reminder: there will be a partner swap next Wednesday
 that will go into effect for assignment 4.  If you would like to
@@ -179,6 +179,30 @@ includes:
  @item{food}
  @item{a world}]
 
+@section{The world}
+
+Let's start by designing a minimal @racket[world%] class.  We will
+iteratively refine it later to add more an more features.  For now,
+let's just have the snake move.
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A World is a (new world% Snake Food).
+  (define-class world%
+    (fields snake food)
+
+    (define/public (on-tick)
+      (new world% 
+           (send (field snake) move)
+           (field food)))
+
+    (define/public (tick-rate) 1/8)
+
+    (define/public (to-draw)
+      (send (field food) draw
+	    (send (field snake) draw MT-SCENE))))
+)
+
 @section{Coordinate interface}
 
 Let's focus on the system of coordinates. There are really two
@@ -206,32 +230,39 @@ size of the screen:
 @#reader scribble/comment-reader
 (racketmod
   class1
-  (define WIDTH 512) ; in pixels
-  (define HEIGH 512) ; in pixels
-  (define SIZE 16)   ; in pixels / grid unit
+  (define WIDTH  32) ; in grid units
+  (define HEIGHT 32) ; in grid units
+  (define SIZE   16) ; in pixels / grid unit
+  (define WIDTH-PX  (* SIZE WIDTH))  ; in pixels
+  (define HEIGHT-PX (* SIZE HEIGHT)) ; in pixels
 )
 
 This defines that our game is logically played on a 32x32 grid, which we
 will render visually as a 512x512 pixel image.  This are the values we
 cooked up in class, which results in the following grid for our game:
 
+@margin-note{As an exercise, try to write an expression that produces
+this image.}
+
 @(the-eval 
   '(begin
      (require 2htdp/image)
      (require (only-in racket for*/fold in-range))
      
-     (define SIZE 16)
-     (define WIDTH 512)
-     (define HEIGHT 512)
+     (define WIDTH  32) ; in grid units
+     (define HEIGHT 32) ; in grid units
+     (define SIZE   16) ; in pixels / grid unit
+     (define WIDTH-PX  (* SIZE WIDTH))  ; in pixels
+     (define HEIGHT-PX (* SIZE HEIGHT)) ; in pixels
      
      (define (grid->px-x x)
        (* SIZE (+ 1/2 x)))
      
      (define (grid->px-y y)
-       (- HEIGHT (* SIZE (+ 1/2 y))))
+       (- HEIGHT-PX (* SIZE (+ 1/2 y))))
      
      (check-expect (grid->px-x 0) (* 1/2 SIZE))
-     (check-expect (grid->px-y 0) (- HEIGHT (* 1/2 SIZE)))
+     (check-expect (grid->px-y 0) (- HEIGHT-PX (* 1/2 SIZE)))
      
      (define (add-sq x y scn)
        (place-image (overlay (text (string-append (number->string x)
@@ -244,11 +275,11 @@ cooked up in class, which results in the following grid for our game:
 		    (grid->px-y y)
 		    scn))
      
-     (define MT-SCENE (empty-scene WIDTH HEIGHT))
+     (define MT-SCENE (empty-scene WIDTH-PX HEIGHT-PX))
      
      (for*/fold ([scn MT-SCENE])
-       ([i (in-range 0 (/ WIDTH SIZE))]
-	[j (in-range 0 (/ HEIGHT SIZE))])
+       ([i (in-range 0 WIDTH)]
+	[j (in-range 0 HEIGHT)])
        (add-sq i j scn))))
 
 But for the sake of our notes, let's develop the game for a much
@@ -258,11 +289,10 @@ design.  If done properly, all of test cases will remain unaffected by
 the change.
 
 @#reader scribble/comment-reader
-(racketmod
-  class1
-  (define WIDTH 256) ; in pixels
-  (define HEIGH 256) ; in pixels
-  (define SIZE 32)   ; in pixels / grid unit
+(racketblock
+  (define WIDTH   8) ; in grid units
+  (define HEIGHT  8) ; in grid units
+  (define SIZE   32) ; in pixels / grid unit
 )
 
 This defines that our game is logically played on a 8x8 grid, which we
@@ -271,13 +301,16 @@ now looks like:
 
 @(the-eval 
   '(begin     
-     (define SIZE 32)
-     (define WIDTH 256)
-     (define HEIGHT 256)
+     (define WIDTH   8) ; in grid units
+     (define HEIGHT  8) ; in grid units
+     (define SIZE   32) ; in pixels / grid unit
+     (define WIDTH-PX  (* SIZE WIDTH))  ; in pixels
+     (define HEIGHT-PX (* SIZE HEIGHT)) ; in pixels
+
      (define (grid->px-x x)
        (* SIZE (+ 1/2 x)))     
      (define (grid->px-y y)
-       (- HEIGHT (* SIZE (+ 1/2 y))))     
+       (- HEIGHT-PX (* SIZE (+ 1/2 y))))     
      (define (add-sq x y scn)
        (place-image (overlay (text (string-append (number->string x)
 						  ","
@@ -289,11 +322,11 @@ now looks like:
 		    (grid->px-y y)
 		    scn))
      
-     (define MT-SCENE (empty-scene WIDTH HEIGHT))
+     (define MT-SCENE (empty-scene WIDTH-PX HEIGHT-PX))
      
      (for*/fold ([scn MT-SCENE])
-       ([i (in-range 0 (/ WIDTH SIZE))]
-	[j (in-range 0 (/ HEIGHT SIZE))])
+       ([i (in-range 0 WIDTH)]
+	[j (in-range 0 HEIGHT)])
        (add-sq i j scn))))
 
 Now we need to consider the interface for coordinates (henceforth, the
@@ -457,18 +490,19 @@ interface: segments and food.  Let's start with segments.
 
 @#reader scribble/comment-reader
 (racketblock
-  ;; A Segment is a (new seg% Nat Nat)
+  ;; A Segment is a (new seg% Int Int)
   ;; Interp: represents a segment grid-coordinate.
   (define-class seg%
     (implements coord<%>)
-    (fields x y))
+    (fields x y)
+    ...)
 )
 
 Our template for @racket[seg%] methods is:
 
 @#reader scribble/comment-reader
 (racketblock
-  ;; ?? -> ??
+  ;; ? ... -> ?
   (define/public (seg-template ...)
     (field x) ... (field y) ...)
 )
@@ -478,92 +512,761 @@ to implementing the interface.  This obligates us to implement all of
 the methods in @racket[coord%].  We've decided to implement the
 @racket[coord%] using a class with an @racket[x] and @racket[y] field.
 This satisfies part of our implementation right off the bat: we get an
-@racket[x] and @racket[y] method by definition.  Let's now do the
-@racket[x-px] and @racket[y-px] methods:
+@racket[x] and @racket[y] method by definition.  Let's now do
+@racket[same-pos?]:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new seg% 0 0) same-pos? (new seg% 0 0)) true)
+  (check-expect (send (new seg% 0 0) same-pos? (new seg% 1 0)) false)
+)
+
+@filebox["seg%"]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (same-pos? c)
+    (and (= (field x) (send c x))
+	 (= (field y) (send c y))))
+)
+}
+
+And now @racket[draw]:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new seg% 0 0) draw MT-SCENE)
+		(place-image (square SIZE "solid" "red")
+                             (* 1/2 SIZE)
+                             (- HEIGHT-PX (* 1/2 SIZE))
+                             MT-SCENE))
+)
+
+@filebox["seg%"]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (draw scn)
+    (place-image (square SIZE "solid" "red")
+		 (x-px)
+		 (y-px)
+		 scn))
+)
+}
+ 
+
+And now @racket[move]:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new seg% 0 0) move "up")    (new seg%  0  1))
+  (check-expect (send (new seg% 0 0) move "down")  (new seg%  0 -1))
+  (check-expect (send (new seg% 0 0) move "left")  (new seg% -1  0))
+  (check-expect (send (new seg% 0 0) move "right") (new seg%  1  0))
+)
+
+@filebox["seg%"]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (move d)
+    (cond [(string=? d "up")    
+	   (new seg% (field x) (add1 (field y)))]
+	  [(string=? d "down")  
+	   (new seg% (field x) (sub1 (field y)))]
+	  [(string=? d "left")  
+	   (new seg% (sub1 (field x)) (field y))]
+	  [(string=? d "right") 
+	   (new seg% (add1 (field x)) (field y))]))
+)
+}
+
+And now @racket[on-board?]:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new seg% 0  0) on-board?) true)
+  (check-expect (send (new seg% 0 -1) on-board?) false)
+  (check-expect (send (new seg% 0 (sub1 HEIGHT)) on-board?) true)
+  (check-expect (send (new seg% 0 HEIGHT) on-board?) false)
+)
+
+@filebox["seg%"]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (on-board?)
+    (and (<= 0 (field x) (sub1 WIDTH))
+         (<= 0 (field y) (sub1 HEIGHT))))
+)
+}
+
+And finally, the @racket[x-px] and @racket[y-px] methods:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new seg% 0 0) x-px) (* 1/2 SIZE))
+  (check-expect (send (new seg% 0 0) y-px) (- HEIGHT-PX (* 1/2 SIZE)))
+)
+
+@filebox["seg%"]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (x-px)
+    (* (+ 1/2 (field x)) SIZE))
+  (define/public (y-px)
+    (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE)))
+)
+}
+
+That completes all of the obligations of the @racket[seg%] interface.
+
+@section{Another implementation of coordinates: food}
+
+Food is another implementation of the @racket[coord<%>] interface, and
+it is largely similar to the @racket[seg%] class, which suggests that
+@racket[seg%] and @racket[food%] may be good candidates for
+abstraction, but that's something to worry about later.  For now,
+let's implement @racket[food%].  Since we've already been through the
+design of @racket[seg%], we'll do @racket[food%] quickly:
 
 
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Food is a (new food% Nat Nat).
+  (define-class food%
+    (implements coord<%>)
+    (fields x y)
+
+    (define/public (same-pos? c)
+      (and (= (field x) (send c x))
+	   (= (field y) (send c y))))    
+
+    (define/public (draw scn)
+      (place-image (square SIZE "solid" "green")
+		   (x-px)
+		   (y-px)
+		   scn))
+
+    (define/public (move d)
+      (cond [(string=? d "up")    
+	     (new food% (field x) (add1 (field y)))]
+	    [(string=? d "down")  
+	     (new food% (field x) (sub1 (field y)))]
+	    [(string=? d "left")  
+	     (new food% (sub1 (field x)) (field y))]
+	    [(string=? d "right") 
+	     (new food% (add1 (field x)) (field y))]))
+
+    (define/public (on-board?)
+      (and (<= 0 (field x) (sub1 WIDTH))
+	   (<= 0 (field y) (sub1 HEIGHT))))
+
+    (define/public (x-px)
+      (* (+ 1/2 (field x)) SIZE))
+    (define/public (y-px)
+      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+
+)
+
+You'll notice that this class definition is nearly identical to the
+definition of @racket[seg%].  The key differences are in @racket[move]
+and @racket[draw].  We'll hold off on abstracting for now.
+
+@section{Representing the snake}
 
 
+What information needs to be represented in a snake?
 
+@itemlist[
+  @item{Direction}
+  @item{Segments}
+]
+
+What are the operations we need to perform on snakes?
+
+@#reader scribble/comment-reader
+(racketblock
+  (define-interface snake<%>
+    [;; -> Snake
+     ;; Move this snake in its current direction.
+     move
+     ;; -> Snake
+     ;; Grow this snake in its current direction.
+     grow
+     ;; Dir -> Snake
+     ;; Turn this snake in the given direction.
+     turn
+     ;; Scene -> Scene
+     ;; Draw this snake on the scene.
+     draw])
+)
+
+Here's a possible data definition:
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Snake is a (new snake% Dir [Listof Seg])
+  (define-class snake%
+    (fields dir segs))
+)
+
+But after a moment of reflection, you will notice that a snake with no
+segments doesn't make sense---a snake should always have at least one
+segment.  Moreover, we need to settle on an interpretion of the order
+of the list; either the front of the list is interpreted as the front
+of the snake or the rear of the list is interpreted as the front of
+the snake.  Together, non-emptiness and order let us determine which
+element is the head of the snake.
+
+Here's our revised data definition:
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Snake is a (new snake% Dir (cons Seg [Listof Seg]))
+  (define-class snake%
+    (fields dir segs)
+    (implements snake<%>)
+    ...)
+)
+
+An alternative data definition that might be worth considering is:
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Snake is a (new snake% Dir Seg [Listof Seg])
+  (define-class snake%
+    (fields dir head segs))
+)
+
+But for the time being let's stick with the former one.
+
+Now let's implement the interface.  Here's the template:
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; ? ... -> ?
+  (define/public (snake-template ...)
+    (field dir) ... (field segs) ...)
+)
+
+The @racket[move] method works by moving the head of the snake and 
+dropping the last element of the list of segments:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new snake% "right" (list (new seg% 0 0))) move)
+                (new snake% "right" (list (new seg% 1 0))))
+)
+
+@filebox["snake%"]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (move)
+    (new snake% 
+         (field dir)
+         (cons (send (first (field segs)) move (field dir))
+               (all-but-last (field segs)))))
+)
+}
+
+This relies on a helper function, @racket[all-but-last], which is
+straightforward to write (recall that @racket[segs] is a non-empty
+list):
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (all-but-last (list "x")) empty)
+  (check-expect (all-but-last (list "y" "x")) (list "y"))
+
+  ;; (cons X [Listof X]) -> [Listof X]
+  ;; Drop the last element of the given list.
+  (define (all-but-last ls)
+    (cond [(empty? (rest ls)) empty]
+          [else (cons (first ls)
+                      (all-but-last (rest ls)))]))
+)
+
+The @racket[grow] method is much like @racket[move], except that no
+element is dropped from the segments list:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new snake% "right" (list (new seg% 0 0))) grow)
+                (new snake% "right" (list (new seg% 1 0) 
+					  (new seg% 0 0))))
+)
+
+@filebox["snake%"]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (grow)
+    (new snake% 
+         (field dir)
+         (cons (send (first (field segs)) move (field dir))
+               (field segs))))
+)
+}
+
+Now let's write the @racket[turn] method:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new snake% "left" (list (new seg% 0 0))) turn "up")
+                (new snake% "up" (list (new seg% 0 0))))
+)
+
+@filebox["snake%"]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (turn d)
+    (new snake% d (field segs)))
+)
+}
+
+And finally, @racket[draw]:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new snake% "left" (list (new seg% 0 0))) draw MT-SCENE)
+		(send (new seg% 0 0) draw MT-SCENE))
+)
+
+@filebox["snake%"]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (draw scn)
+    (foldl (λ (s scn) (send s draw scn))
+           scn
+           (field segs)))
+)
+}
+
+As this method shows, functions and methods can co-exist nicely in a
+single language.
+
+@section{Seeing the world}
+
+At this point we have a working but incomplete system and we can
+interact with it in the interactions window:
+
+@(the-eval
+'(begin
+  (require 2htdp/image)
+  (require class1/universe)
+
+  (define WIDTH   8) ; in grid units
+  (define HEIGHT  8) ; in grid units
+  (define SIZE   32) ; in pixels / grid unit
+  (define WIDTH-PX  (* SIZE WIDTH))  ; in pixels
+  (define HEIGHT-PX (* SIZE HEIGHT)) ; in pixels
+  (define MT-SCENE (empty-scene WIDTH-PX HEIGHT-PX))
+
+  ;; A World is a (new world% Snake Food).
+  (define-class world%
+    (fields snake food)
+
+    (define/public (on-tick)
+      (new world% 
+           (send (field snake) move)
+           (field food)))
+
+    (define/public (tick-rate) 1/8)
+
+    (define/public (to-draw)
+      (send (field food) draw
+	    (send (field snake) draw MT-SCENE))))
+
+
+  ;; A Coord implements coord<%>.
+  (define-interface coord<%>
+    [;; Coord -> Boolean
+     ;; Is this coordinate at the same position as the given one?
+     same-pos?
+     ;; Scene -> Scene
+     ;; Draw this coordinate on the scene.
+     draw
+     ;; Dir -> Coord
+     ;; Move this coordinate in the given direction.
+     move
+     ;; -> Boolean
+     ;; Is this coordinate on the board?
+     on-board?
+     ;; -> Nat
+     ;; The {x,y}-component of grid-coordinate.
+     x y
+     ;; -> Nat
+     ;; The {x,y}-component of pixel-graphics-coordinate.
+     x-px y-px])
+  
+  ;; A Dir is one of:
+  ;; - "left"
+  ;; - "right"
+  ;; - "up"
+  ;; - "down"
+
+  ;; A Segment is a (new seg% Int Int)
+  ;; Interp: represents a segment grid-coordinate.
+  (define-class seg%
+    (implements coord<%>)
+    (fields x y)
+    (define/public (same-pos? c)
+      (and (= (field x) (send c x))
+	   (= (field y) (send c y))))
+    (define/public (draw scn)
+      (place-image (square SIZE "solid" "red")
+		   (x-px)
+		   (y-px)
+		   scn))
+    (define/public (move d)
+      (cond [(string=? d "up")    
+	     (new seg% (field x) (add1 (field y)))]
+	    [(string=? d "down")  
+	     (new seg% (field x) (sub1 (field y)))]
+	    [(string=? d "left")  
+	     (new seg% (sub1 (field x)) (field y))]
+	    [(string=? d "right") 
+	     (new seg% (add1 (field x)) (field y))]))
+    (define/public (on-board?)
+      (and (<= 0 (field x) (sub1 WIDTH))
+	   (<= 0 (field y) (sub1 HEIGHT))))
+    (define/public (x-px)
+      (* (+ 1/2 (field x)) SIZE))
+    (define/public (y-px)
+      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+
+  (check-expect (send (new seg% 0 0) same-pos? (new seg% 0 0)) true)
+  (check-expect (send (new seg% 0 0) same-pos? (new seg% 1 0)) false)
+  (check-expect (send (new seg% 0 0) draw MT-SCENE)
+                (place-image (square SIZE "solid" "red")
+                             (* 1/2 SIZE)
+                             (- HEIGHT-PX (* 1/2 SIZE))
+                             MT-SCENE))
+  (check-expect (send (new seg% 0 0) move "up")    (new seg%  0  1))
+  (check-expect (send (new seg% 0 0) move "down")  (new seg%  0 -1))
+  (check-expect (send (new seg% 0 0) move "left")  (new seg% -1  0))
+  (check-expect (send (new seg% 0 0) move "right") (new seg%  1  0))
+  (check-expect (send (new seg% 0  0) on-board?) true)
+  (check-expect (send (new seg% 0 -1) on-board?) false)
+  (check-expect (send (new seg% 0 (sub1 HEIGHT)) on-board?) true)
+  (check-expect (send (new seg% 0 HEIGHT) on-board?) false)
+  (check-expect (send (new seg% 0 0) x-px) (* 1/2 SIZE))
+  (check-expect (send (new seg% 0 0) y-px) (- HEIGHT-PX (* 1/2 SIZE)))
+  
+  ;; A Food is a (new food% Nat Nat).
+  (define-class food%
+    (implements coord<%>)
+    (fields x y)
+
+    (define/public (same-pos? c)
+      (and (= (field x) (send c x))
+	   (= (field y) (send c y))))    
+
+    (define/public (draw scn)
+      (place-image (square SIZE "solid" "green")
+		   (x-px)
+		   (y-px)
+		   scn))
+
+    (define/public (move d)
+      (cond [(string=? d "up")    
+	     (new food% (field x) (add1 (field y)))]
+	    [(string=? d "down")  
+	     (new food% (field x) (sub1 (field y)))]
+	    [(string=? d "left")  
+	     (new food% (sub1 (field x)) (field y))]
+	    [(string=? d "right") 
+	     (new food% (add1 (field x)) (field y))]))
+
+    (define/public (on-board?)
+      (and (<= 0 (field x) (sub1 WIDTH))
+	   (<= 0 (field y) (sub1 HEIGHT))))
+
+    (define/public (x-px)
+      (* (+ 1/2 (field x)) SIZE))
+    (define/public (y-px)
+      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+
+  (define-interface snake<%>
+    [;; -> Snake
+     ;; Move this snake in its current direction.
+     move
+     ;; -> Snake
+     ;; Grow this snake in its current direction.
+     grow
+     ;; Dir -> Snake
+     ;; Turn this snake in the given direction.
+     turn
+     ;; Scene -> Scene
+     ;; Draw this snake on the scene.
+     draw])
+
+  ;; A Snake is a (new snake% Dir Seg [Listof Seg])
+  (define-class snake%
+    (fields dir segs)
+    (define/public (move)
+      (new snake%
+	   (field dir)
+	   (cons (send (first (field segs)) move (field dir))
+		 (all-but-last (field segs)))))
+
+    (define/public (grow)
+      (new snake%
+	   (field dir)
+	   (cons (send (first (field segs)) move (field dir))
+		 (field segs))))
+    
+    (define/public (turn d)
+      (new snake% d (field segs)))
+
+    (define/public (draw scn)
+      (foldl (λ (s scn) (send s draw scn))
+	     scn
+	     (field segs))))
+
+  (check-expect (send (new snake% "right" (list (new seg% 0 0))) move)
+		(new snake% "right" (list (new seg% 1 0))))
+  (check-expect (send (new snake% "right" (list (new seg% 0 0))) grow)
+                (new snake% "right" (list (new seg% 1 0)
+                                          (new seg% 0 0))))
+  (check-expect (send (new snake% "left" (list (new seg% 0 0))) turn "up")
+                (new snake% "up" (list (new seg% 0 0))))
+  (check-expect (send (new snake% "left" (list (new seg% 0 0))) draw MT-SCENE)
+                (send (new seg% 0 0) draw MT-SCENE))
+
+  (check-expect (all-but-last (list "x")) empty)
+  (check-expect (all-but-last (list "y" "x")) (list "y"))
+
+  ;; (cons X [Listof X]) -> [Listof X]
+  ;; Drop the last element of the given list.
+  (define (all-but-last ls)
+    (cond [(empty? (rest ls)) empty]
+          [else (cons (first ls)
+                      (all-but-last (rest ls)))]))
+))
+
+@examples[#:eval the-eval
+  (define w0 (new world% 
+		  (new snake% 
+		       "right" 
+		       (list (new seg% 5 1)
+			     (new seg% 5 0)
+			     (new seg% 4 0)))
+		  (new food% 3 4)))
+   (send w0 to-draw)
+   (send (send w0 on-tick) to-draw)
+   (send (send (send w0 on-tick) on-tick) to-draw)]
+
+We'll leave it at this point and further the refine the program in the
+future.
+
+@section{The whole ball of wax}
+
+@#reader scribble/comment-reader
+(racketmod
+  class1
+  (require 2htdp/image)
+  (require class1/universe)
+
+  (define WIDTH   8) ; in grid units
+  (define HEIGHT  8) ; in grid units
+  (define SIZE   32) ; in pixels / grid unit
+  (define WIDTH-PX  (* SIZE WIDTH))  ; in pixels
+  (define HEIGHT-PX (* SIZE HEIGHT)) ; in pixels
+  (define MT-SCENE (empty-scene WIDTH-PX HEIGHT-PX))
+
+  ;; A World is a (new world% Snake Food).
+  (define-class world%
+    (fields snake food)
+
+    (define/public (on-tick)
+      (new world% 
+           (send (field snake) move)
+           (field food)))
+
+    (define/public (tick-rate) 1/8)
+
+    (define/public (to-draw)
+      (send (field food) draw
+	    (send (field snake) draw MT-SCENE))))
+
+
+  ;; A Coord implements coord<%>.
+  (define-interface coord<%>
+    [;; Coord -> Boolean
+     ;; Is this coordinate at the same position as the given one?
+     same-pos?
+     ;; Scene -> Scene
+     ;; Draw this coordinate on the scene.
+     draw
+     ;; Dir -> Coord
+     ;; Move this coordinate in the given direction.
+     move
+     ;; -> Boolean
+     ;; Is this coordinate on the board?
+     on-board?
+     ;; -> Nat
+     ;; The {x,y}-component of grid-coordinate.
+     x y
+     ;; -> Nat
+     ;; The {x,y}-component of pixel-graphics-coordinate.
+     x-px y-px])
+  
+  ;; A Dir is one of:
+  ;; - "left"
+  ;; - "right"
+  ;; - "up"
+  ;; - "down"
+
+  ;; A Segment is a (new seg% Int Int)
+  ;; Interp: represents a segment grid-coordinate.
+  (define-class seg%
+    (implements coord<%>)
+    (fields x y)
+    (define/public (same-pos? c)
+      (and (= (field x) (send c x))
+	   (= (field y) (send c y))))
+    (define/public (draw scn)
+      (place-image (square SIZE "solid" "red")
+		   (x-px)
+		   (y-px)
+		   scn))
+    (define/public (move d)
+      (cond [(string=? d "up")    
+	     (new seg% (field x) (add1 (field y)))]
+	    [(string=? d "down")  
+	     (new seg% (field x) (sub1 (field y)))]
+	    [(string=? d "left")  
+	     (new seg% (sub1 (field x)) (field y))]
+	    [(string=? d "right") 
+	     (new seg% (add1 (field x)) (field y))]))
+    (define/public (on-board?)
+      (and (<= 0 (field x) (sub1 WIDTH))
+	   (<= 0 (field y) (sub1 HEIGHT))))
+    (define/public (x-px)
+      (* (+ 1/2 (field x)) SIZE))
+    (define/public (y-px)
+      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+
+  (check-expect (send (new seg% 0 0) same-pos? (new seg% 0 0)) true)
+  (check-expect (send (new seg% 0 0) same-pos? (new seg% 1 0)) false)
+  (check-expect (send (new seg% 0 0) draw MT-SCENE)
+                (place-image (square SIZE "solid" "red")
+                             (* 1/2 SIZE)
+                             (- HEIGHT-PX (* 1/2 SIZE))
+                             MT-SCENE))
+  (check-expect (send (new seg% 0 0) move "up")    (new seg%  0  1))
+  (check-expect (send (new seg% 0 0) move "down")  (new seg%  0 -1))
+  (check-expect (send (new seg% 0 0) move "left")  (new seg% -1  0))
+  (check-expect (send (new seg% 0 0) move "right") (new seg%  1  0))
+  (check-expect (send (new seg% 0  0) on-board?) true)
+  (check-expect (send (new seg% 0 -1) on-board?) false)
+  (check-expect (send (new seg% 0 (sub1 HEIGHT)) on-board?) true)
+  (check-expect (send (new seg% 0 HEIGHT) on-board?) false)
+  (check-expect (send (new seg% 0 0) x-px) (* 1/2 SIZE))
+  (check-expect (send (new seg% 0 0) y-px) (- HEIGHT-PX (* 1/2 SIZE)))
+  
+  ;; A Food is a (new food% Nat Nat).
+  (define-class food%
+    (implements coord<%>)
+    (fields x y)
+
+    (define/public (same-pos? c)
+      (and (= (field x) (send c x))
+	   (= (field y) (send c y))))    
+
+    (define/public (draw scn)
+      (place-image (square SIZE "solid" "green")
+		   (x-px)
+		   (y-px)
+		   scn))
+
+    (define/public (move d)
+      (cond [(string=? d "up")    
+	     (new food% (field x) (add1 (field y)))]
+	    [(string=? d "down")  
+	     (new food% (field x) (sub1 (field y)))]
+	    [(string=? d "left")  
+	     (new food% (sub1 (field x)) (field y))]
+	    [(string=? d "right") 
+	     (new food% (add1 (field x)) (field y))]))
+
+    (define/public (on-board?)
+      (and (<= 0 (field x) (sub1 WIDTH))
+	   (<= 0 (field y) (sub1 HEIGHT))))
+
+    (define/public (x-px)
+      (* (+ 1/2 (field x)) SIZE))
+    (define/public (y-px)
+      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+
+  (define-interface snake<%>
+    [;; -> Snake
+     ;; Move this snake in its current direction.
+     move
+     ;; -> Snake
+     ;; Grow this snake in its current direction.
+     grow
+     ;; Dir -> Snake
+     ;; Turn this snake in the given direction.
+     turn
+     ;; Scene -> Scene
+     ;; Draw this snake on the scene.
+     draw])
+
+  ;; A Snake is a (new snake% Dir Seg [Listof Seg])
+  (define-class snake%
+    (fields dir segs)
+    (define/public (move)
+      (new snake%
+	   (field dir)
+	   (cons (send (first (field segs)) move (field dir))
+		 (all-but-last (field segs)))))
+
+    (define/public (grow)
+      (new snake%
+	   (field dir)
+	   (cons (send (first (field segs)) move (field dir))
+		 (field segs))))
+    
+    (define/public (turn d)
+      (new snake% d (field segs)))
+
+    (define/public (draw scn)
+      (foldl (λ (s scn) (send s draw scn))
+	     scn
+	     (field segs))))
+
+  (check-expect (send (new snake% "right" (list (new seg% 0 0))) move)
+		(new snake% "right" (list (new seg% 1 0))))
+  (check-expect (send (new snake% "right" (list (new seg% 0 0))) grow)
+                (new snake% "right" (list (new seg% 1 0)
+                                          (new seg% 0 0))))
+  (check-expect (send (new snake% "left" (list (new seg% 0 0))) turn "up")
+                (new snake% "up" (list (new seg% 0 0))))
+  (check-expect (send (new snake% "left" (list (new seg% 0 0))) draw MT-SCENE)
+                (send (new seg% 0 0) draw MT-SCENE))
+
+  (check-expect (all-but-last (list "x")) empty)
+  (check-expect (all-but-last (list "y" "x")) (list "y"))
+
+  ;; (cons X [Listof X]) -> [Listof X]
+  ;; Drop the last element of the given list.
+  (define (all-but-last ls)
+    (cond [(empty? (rest ls)) empty]
+          [else (cons (first ls)
+                      (all-but-last (rest ls)))]))
+
+  (big-bang (new world% 
+		 (new snake% 
+		      "right" 
+		      (list (new seg% 5 1)
+			    (new seg% 5 0)
+			    (new seg% 4 0)))
+		 (new food% 3 4)))
+)
 
 
 @internal{
 
 Interfaces avoid commitments to representation choices.  So long as we
 implement the interface, we can make our own representation choices.
-
-An implementation of coord<%>, segment%:
-
-(implements coord%) - commits us to implementing a bunch of methods.
-
-- check:
-
-First let's write some tests.
-
-(check-expect (send (new segment% 100 100) check) false)
-(check-expect (send (new segment% 1 2) check) true)
-
-Template:
-
-(define/public (check)
-  ... (field x) ... (field y) ...)
-
-Code:
-
-;; In segment%:
-(define/public (check)
-  (and (< 0 (field x) GRIDW)
-       (< 0 (field y) GRIDH)))
-
-Is there anything wrong with this code?  Let's think about the grid
-coordinate system.
-
-Is (0,0) a legal coordinate?  Yes.
-
-Is `check' allowing.
-
-Choose good names.
-
-Change `check' to `in-bounds?'.  Requires a change to the interface
-which is oustide our domain of control (well, not really, we're
-writing this whole program).
-
-Interface design is one of the hardest problems in computer science.
-
-Unfortunately, the only way to avoid all these problems is to get it
-100% right at the very beginning and unfortunately there is no way to
-get it 100% right at the very beginning.
-
-The CREAT story.
-
-We can use aspects of class1 that aren't about classes.  Write a
-helper function for abstracting the grid to pixel conversion.
-
-Compare
-=======
-
-...
-
-Move
-====
-
-The Direction data defintion
-
-A Direction is one of:
-- "left"
-- "right"
-- "up"
-- "down"
-
-A Direction is one of:
-- (make-posn 0 +1)
-- (make-posn 0 -1)
-- (make-posn +1 0)
-- (make-posn -1 0)
-
-Can we abstract the `move' method?
-
-There is no abstraction mechanism in our language that helps here.
 
 WORLDS
 ======
@@ -572,78 +1275,9 @@ WORLDS
 
 vs
 
-;; A World is a (new world% Snake Food ...).
-;; [where the Snake has a direction]
+;; A World is a (new world% Snake Food).
 
-Food
-====
-
-Is a coordinate.
-
-Snake
-=====
-
-;; A Snake is a (new snake% ...)
-
-What information needs to be represented in a snake?
-
-- Direction
-- List of segments
-
-(define-class snake%
-  (field segments dir))
-
-What operations do we need?
-
-- tick : ??
-
-But what does the snake need to do on tick?
-
-Alternative:
-
-move : -> Snake
-grow : -> Snake
-turn [change direction] : Direction -> Snake
-
-(Or, do we change direction externally by constructing a new snake).
-
-We can make a choice about operations or doing things externally.
-
-;; move
-
-(define/public (snake-template ...)
-  (field segments) ... (field dir) ...)
-
-(define/public (move)
-  (new snake% ... ...))
-
-What's the new direction?  Same as before.
-
-(define/public (move)
-  (new snake% ... (field dir)))
-
-What's the new list of segments? 
-
-(define/public (move)
-  (new snake% 
-       (cons (send ... move ...)
-             ...missing tail...)
-       (field dir)))
-
-(define/public (move)
-  (new snake% 
-       (cons (send (first (field segments) move (field dir))
-             ...missing tail...)
-       (field dir)))
-
-;; leave drop-last as helper to be written.
-
-Revised interpretation on order of segments.
-Revised data definition to non-empty list of segments.
-
-;; grow -- a lot like move, but without the missing tail.
-
-What are we going to do on every turn?
+;;;;;;;;
 
 ;; draw 
 
