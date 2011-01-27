@@ -27,13 +27,36 @@ Due: 2/2.
 
  @item{@bold{Distributed Tron}
  
- 
+ The first version of Tron you will develop is a distributed one,
+ using the @racketmodname[class1/universe] library.  You will need to
+ design two separate parts of the program:
+
+ The server: this will accept connections from two clients,
+ communicate with the clients via messages indicating the directions
+ the clients want to move, and then send back updated information
+ about the positions of both players and the trails on the board.  
+
+ The client: you should only need to @emph{implement} one client, but you
+ will @emph{run} two of them, one for each player.  The client will
+ draw the world to the screen, recieve messages from the server and
+ update the world state in response, allow the user to input their
+ desired direction (probably via the arrow keys) and communicate this
+ direction to the server.  
+
+ Once you've implemented both the server and client, you'll be able to
+ play against your friends and classmates over the network.  
 
  }
 
  @item{@bold{Computer Tron}
 
  Language: @racketmodname[class1]. 
+
+ In this part of the assignment, you'll implement a new kind of
+ client---a computer player.  This player will, like the regular
+ client, display the world as well as send and recieve messages to and
+ from the server.  However, it won't take input from the user; instead
+ it will make decisions itself based on the state of the board.  
 
  }	   
 
