@@ -98,7 +98,61 @@
          (send (field zombies) kill)
          (field mouse))))
 
-(define-class posn% (fields x y))
+;; ==========================================================
+;; Abstract classes
+
+;; A Posn implements posn<%>.
+(define-interface posn<%>
+  [;; -> Nat
+   ;; Get the {x,y}-coordinate of this position.
+   x y])
+
+(define-class posn% 
+  (implements posn<%>)
+  (fields x y)
+  ;; Posn -> Nat
+  ;; Compute the taxi distance between the given positions.
+  (define/public (dist p)
+    (+ (abs (- (field x)
+               (send p x)))
+       (abs (- (field y)
+               (send p y)))))
+  
+  ;; Nat Posn -> Vec
+  ;; Compute the vector of length n minimizing dist to posn.
+  (define/public (min-taxi n to)
+    ;; Vec Vec -> Vec
+    (local [(define (select-shorter-dir d1 d2)
+              (cond [(< (send (send this plus d1) dist to)
+                        (send (send this plus d2) dist to))
+                     d1]
+                    [else d2]))]
+      (foldl (λ (d sd) 
+               (select-shorter-dir sd
+                                   (new vec% 
+                                        (* n (send d x)) 
+                                        (* n (send d y)))))
+             (new vec% 0 0)
+             DIRS))))
+
+(define-class being%
+  (super posn%)
+  
+  (define/public (draw-on scn)
+    (place-image (circle 1/2-CELL "solid" (send this color))
+                 (field x)
+                 (field y)
+                 scn)))
+
+(define-class zombie%
+  (super being%)  
+  
+  (define/public (touching? p)
+    (<= (dist p) 1/2-CELL))
+  
+  (define/public (kill)
+    (new dead-zombie% (field x) (field y))))
+
 
 ;; ==========================================================
 ;; A Player is a (new player% [0,WIDTH] [0,HEIGHT]).
@@ -118,18 +172,11 @@
    x y
    ;; -> Color
    ;; Get the color of this player.
-   color])
+   color
+   ;; Posn -> Nat
+   ;; Compute the taxi distance between this player and posn.
+   dist])
    
-(define-class being%
-  (super posn%)
-  
-  (define/public (draw-on scn)
-    (place-image (circle 1/2-CELL "solid" (send this color))
-                 (field x)
-                 (field y)
-                 scn)))
-  
-
 (define-class player%
   (super being%)
   (implements player<%>)
@@ -137,7 +184,7 @@
   (define/public (color) "green")  
   
   (define/public (move-toward mouse)
-    (plus (min-taxi this P-SPEED mouse)))
+    (plus (min-taxi P-SPEED mouse)))
 
   (define/public (plus v)
     (new player%
@@ -148,6 +195,17 @@
 ;; ==========================================================
 ;; Vec is a (new vec% Int Int).
 (define-class vec% (super posn%))
+
+(define DIRS
+  (list (new vec% -1 -1)
+        (new vec% -1  0)
+        (new vec% -1 +1)
+        (new vec%  0 -1)
+        (new vec%  0  0)
+        (new vec%  0 +1)
+        (new vec% +1 -1)
+        (new vec% +1  0)
+        (new vec% +1 +1)))
 
 
 ;; ==========================================================
@@ -178,16 +236,10 @@
    x y
    ;; -> Color
    ;; Get the color of this zombie.
-   color])
-
-(define-class zombie%
-  (super being%)  
-  
-  (define/public (touching? p)
-    (<= (dist this p) 1/2-CELL))
-  
-  (define/public (kill)
-    (new dead-zombie% (field x) (field y))))
+   color
+   ;; Posn -> Nat
+   ;; Compute the taxi distance between this zombie and posn.
+   dist])
 
 ;; A DeadZombie is a (new dead-zombie% [0,WIDTH] [0,HEIGHT]).
 ;; A LiveZombie is a (new live-zombie% [0,WIDTH] [0,HEIGHT]).
@@ -199,7 +251,7 @@
   (implements zombie<%>)
   
   (define/public (move-toward p)
-    (plus (min-taxi this Z-SPEED p)))
+    (plus (min-taxi Z-SPEED p)))
     
   (define/public (color) "red")
   
@@ -283,48 +335,6 @@
                 (field first)
                 (send (field rest) kill/acc
                       (new cons% (field first) seen)))])))
-
-;; ==========================================================
-;; Functional abstractions
-
-;; [U Player Zombie] [U Player Mouse] -> Nat
-;; Compute the taxi distance between the given positions.
-(define (dist p1 p2)
-  (+ (abs (- (send p1 x)
-             (send p2 x)))
-     (abs (- (send p1 y)
-             (send p2 y)))))
-
-;; Zombie [U Player Zombie] -> Boolean
-(define (zombie-touching? z p)
-  (<= (dist z p) 1/2-CELL))
-
-;; [U Player LiveZombie] Nat [U Player Mouse] -> Vec
-(define (min-taxi from n to)
-  ;; Vec Vec -> Vec
-  (local [(define (select-shorter-dir d1 d2)
-            (cond [(< (dist (send from plus d1) to)
-                      (dist (send from plus d2) to))
-                   d1]
-                  [else d2]))]
-    (foldl (λ (d sd) 
-             (select-shorter-dir sd
-                                 (new vec% 
-                                      (* n (send d x)) 
-                                      (* n (send d y)))))
-           (new vec% 0 0)
-           DIRS)))
-
-(define DIRS
-  (list (new vec% -1 -1)
-        (new vec% -1  0)
-        (new vec% -1 +1)
-        (new vec%  0 -1)
-        (new vec%  0  0)
-        (new vec%  0 +1)
-        (new vec% +1 -1)
-        (new vec% +1  0)
-        (new vec% +1 +1)))
 
 
 ;; ==========================================================
@@ -430,6 +440,11 @@
 (check-expect (send p0 move-toward m0) p0)
 (check-expect (send p0 move-toward m1)
               (new player% 0 P-SPEED))
+;; dist
+(check-expect (send p0 dist m1) 30)
+;; min-taxi
+(check-expect (send p0 min-taxi 1 m0) (new vec% 0 0))
+(check-expect (send p0 min-taxi 1 m1) (new vec% 0 1))
 
 ;; Zombie tests
 ;; ============
@@ -453,6 +468,11 @@
               (place-image (circle 1/2-CELL "solid" "gray")
                            0 0
                            MT-SCENE))
+;; dist
+(check-expect (send l0 dist p1) 30)
+;; min-taxi
+(check-expect (send l0 min-taxi 5 p0) (new vec% 0 0))
+(check-expect (send l0 min-taxi 5 p1) (new vec% 0 5))
 
 ;; LoZ tests
 ;; =========
@@ -476,13 +496,5 @@
 (check-expect (send lz0 kill) lz0)
 (check-expect (send zs0 kill) (new cons% d1 dz1))
 
-;; Function tests
-;; ==============
-
-;; dist
-(check-expect (dist l0 p1) 30)
-;; min-taxi
-(check-expect (min-taxi l0 5 p0) (new vec% 0 0))
-(check-expect (min-taxi l0 5 p1) (new vec% 0 5))
 
 
