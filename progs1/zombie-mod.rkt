@@ -155,7 +155,7 @@
 
 
 ;; ==========================================================
-;; A Player is a implements player<%>.
+;; A Player is a (new player% [0,WIDTH] [0,HEIGHT]).
 
 (define-interface player<%>
   [;; draw-on : Scene -> Scene
@@ -177,7 +177,6 @@
    ;; Compute the taxi distance between this player and posn.
    dist])
    
-;; A OPlayer is a (new player% [0,WIDTH] [0,HEIGHT]).
 (define-class player%
   (super being%)
   (implements player<%>)
@@ -215,7 +214,9 @@
 
 
 ;; ==========================================================
-;; A Zombie implements zombie<%>.
+;; A Zombie is one of:
+;; - LiveZombie 
+;; - DeadZombie
 
 (define-interface zombie<%>
   [;; move-toward : Player -> Zombie
@@ -239,10 +240,6 @@
    ;; Posn -> Nat
    ;; Compute the taxi distance between this zombie and posn.
    dist])
-
-;; A OZombie is one of:
-;; - LiveZombie 
-;; - DeadZombie
 
 ;; A DeadZombie is a (new dead-zombie% [0,WIDTH] [0,HEIGHT]).
 ;; A LiveZombie is a (new live-zombie% [0,WIDTH] [0,HEIGHT]).
