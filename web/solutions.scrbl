@@ -10,3 +10,4 @@ This section contains solutions to the weekly programming assignments.
 
 @include-section["solutions/assign01.scrbl"]
 @include-section["solutions/assign02.scrbl"]
+@include-section["solutions/assign03.scrbl"]
