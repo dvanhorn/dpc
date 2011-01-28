@@ -1,4 +1,29 @@
 #lang class1
+
+;; RUBRIC
+;; ========================================================
+
+;; Problem set 3, Problem 2 (total 35 points)
+
+;; Interfaces (Total 15 points)
+
+;; 5 points each for player<%> and zombie<%> interface use
+;; - they must have the interfaces and implement them in the correct classes
+
+;; 5 points for following interface
+;; - they must only call player<%> and zombie<%> methods from the world% class
+
+;; deduct points if they reference an interface in the contract of a method 
+;; and use methods not in the interface
+
+;; Inheritance and abstraction (total 20 points)
+
+;; 10 points for defining appropriate super classes
+;; 10 points total for not duplicating code
+;;  - using functional abstraction is *not* ok, grade that like code duplication
+
+;; =======================================================
+
 ;; ==========================================================
 ;; Play the classic game of Zombie Attack!
 
@@ -8,6 +33,8 @@
 ;; Randomly teleport via mouse click as a last resort!
 
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
+
+;; Problem Set 3, Problem 2
 (require 2htdp/image)
 (require class1/universe)
 

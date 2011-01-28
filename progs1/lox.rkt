@@ -1,4 +1,15 @@
 #lang class1
+
+;; RUBRIC
+;; ========================================================
+
+;; Problem Set 3, Problem 5 (total 20 points)
+
+;; 5 points for the list<%> interface (including contracts/purpose statements)
+;; 10 points for each implementation (including following the design recipe, tests, etc)
+;; 5 points for abstraction (eg, deduct points for failure to abstract)
+
+
 ;; ==========================================================
 ;; Parametric lists
 

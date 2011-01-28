@@ -7,6 +7,8 @@
 ;; that are deadly to other zombies and the player.  
 ;; Randomly teleport via mouse click as a last resort!
 
+;; This version implements wrapping over the sides of the world.
+
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
 (require 2htdp/image)
 (require class1/universe)
@@ -118,6 +120,32 @@
        (abs (- (field y)
                (send p y)))))
   
+  ;; Posn -> Nat
+  ;; Compute the modulo taxi distance between the given positions.
+  (define/public (modulo-dist p)
+    (min (dist p)
+         (dist (new posn% (+ (send p x) WIDTH) (send p y)))
+         (dist (new posn% (send p x) (+ (send p y) HEIGHT)))
+         (send (new posn% (+ (field x) WIDTH) (field y)) dist p)
+         (send (new posn% (field x) (+ (field y) HEIGHT)) dist p)))
+    
+  ;; Nat Posn -> Vec
+  ;; Compute the vector of length n minimizing dist to posn.
+  (define/public (modulo-min-taxi n to)
+    ;; Vec Vec -> Vec
+    (local [(define (select-shorter-dir d1 d2)
+              (cond [(< (send (send this plus d1) modulo-dist to)
+                        (send (send this plus d2) modulo-dist to))
+                     d1]
+                    [else d2]))]
+      (foldl (λ (d sd) 
+               (select-shorter-dir sd
+                                   (new vec% 
+                                        (* n (send d x)) 
+                                        (* n (send d y)))))
+             (new vec% 0 0)
+             DIRS)))
+  
   ;; Nat Posn -> Vec
   ;; Compute the vector of length n minimizing dist to posn.
   (define/public (min-taxi n to)
@@ -185,11 +213,25 @@
   
   (define/public (move-toward mouse)
     (plus (min-taxi P-SPEED mouse)))
-
+  
   (define/public (plus v)
     (new player%
          (+ (field x) (send v x))
          (+ (field y) (send v y)))))
+
+(define-class modulo-player%
+  (super being%)
+  (implements player<%>)
+  
+  (define/public (color) "green")  
+  
+  (define/public (move-toward mouse)
+    (plus (modulo-min-taxi P-SPEED mouse)))
+
+  (define/public (plus v)
+    (new player%
+         (modulo (+ (field x) (send v x)) WIDTH)
+         (modulo (+ (field y) (send v y)) HEIGHT))))
 
 
 ;; ==========================================================
@@ -217,6 +259,7 @@
 ;; A Zombie is one of:
 ;; - LiveZombie 
 ;; - DeadZombie
+;; - ModuloLiveZombie
 
 (define-interface zombie<%>
   [;; move-toward : Player -> Zombie
@@ -243,6 +286,7 @@
 
 ;; A DeadZombie is a (new dead-zombie% [0,WIDTH] [0,HEIGHT]).
 ;; A LiveZombie is a (new live-zombie% [0,WIDTH] [0,HEIGHT]).
+;; A ModuloLiveZombie is a (new modulo-live-zombie% [0,WIDTH] [0,HEIGHT]).
 
 ;; plus : Vec -> LiveZombie
 ;; Move this zombie by the given vector.
@@ -259,6 +303,20 @@
     (new live-zombie% 
          (+ (field x) (send v x))
          (+ (field y) (send v y)))))
+
+(define-class modulo-live-zombie% 
+  (super zombie%)
+  (implements zombie<%>)
+  
+  (define/public (move-toward p)
+    (plus (modulo-min-taxi Z-SPEED p)))
+    
+  (define/public (color) "pink")
+  
+  (define/public (plus v)
+    (new modulo-live-zombie% 
+         (modulo (+ (field x) (send v x)) WIDTH)
+         (modulo (+ (field y) (send v y)) HEIGHT))))
     
 (define-class dead-zombie% 
   (super zombie%)
@@ -364,10 +422,10 @@
 ;; Run program, run!
 (big-bang
  (new world%
-      (new player% (/ WIDTH 2) (/ HEIGHT 2))
+      (new modulo-player% (/ WIDTH 2) (/ HEIGHT 2))
       (build-loz (+ 10 (random 20))
                  (λ (_)
-                   (new live-zombie% 
+                   (new modulo-live-zombie% 
                         (random WIDTH)
                         (random HEIGHT))))
       (new mouse% 0 0)))

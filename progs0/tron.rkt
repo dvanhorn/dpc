@@ -266,8 +266,8 @@
                           (cond [(outcome? msg) (final msg w)]
                                 [else msg])))))
                        
-;(play)         
-(launch-many-worlds (serve) (play)) ; (play))
+(play)         
+;(launch-many-worlds (serve) (play)) ; (play))
                                          
                            
                            
