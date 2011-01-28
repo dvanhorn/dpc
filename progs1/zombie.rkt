@@ -1,4 +1,4 @@
-#lang class0
+#lang class1
 ;; ==========================================================
 ;; Play the classic game of Zombie Attack!
 
@@ -9,7 +9,7 @@
 
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
 (require 2htdp/image)
-(require class0/universe)
+(require class1/universe)
 
 (define CELL 20)
 (define 1/2-CELL (/ CELL 2))
@@ -102,16 +102,19 @@
 ;; ==========================================================
 ;; A Player is a (new player% [0,WIDTH] [0,HEIGHT]).
 
-;; draw-on : Scene -> Scene
-;; Draw this player on the scene.
-
-;; plus : Vec -> Player
-;; Move this player by the given vector.
-
-;; move-toward : Mouse -> Player
-;; Move this player toward the given mouse position.
-
+(define-interface player<%>
+  [;; draw-on : Scene -> Scene
+   ;; Draw this player on the scene.
+   draw-on
+   ;; plus : Vec -> Player
+   ;; Move this player by the given vector.
+   plus
+   ;; move-toward : Mouse -> Player
+   ;; Move this player toward the given mouse position.
+   move-toward])
+   
 (define-class player%
+  (implements player<%>)
   (fields x y)
   
   (define/public (draw-on scn)
@@ -144,17 +147,19 @@
 ;; - LiveZombie 
 ;; - DeadZombie
 
-;; move-toward : Player -> Zombie
-;; Move this zombie toward the given player.
-
-;; touching? : [U Player Zombie] -> Boolean
-;; Is this zombie touching the given player or zombie?
-
-;; draw-on : Scene -> Scene
-;; Draw this zombie on the given scene.
-
-;; kill : -> DeadZombie
-;; Make this zombie dead.
+(define-interface zombie<%>
+  [;; move-toward : Player -> Zombie
+   ;; Move this zombie toward the given player.
+   move-toward
+   ;; touching? : [U Player Zombie] -> Boolean
+   ;; Is this zombie touching the given player or zombie?
+   touching?
+   ;; draw-on : Scene -> Scene
+   ;; Draw this zombie on the given scene.
+   draw-on
+   ;; kill : -> DeadZombie
+   ;; Make this zombie dead.
+   kill])
 
 ;; A DeadZombie is a (new dead-zombie% [0,WIDTH] [0,HEIGHT]).
 ;; A LiveZombie is a (new live-zombie% [0,WIDTH] [0,HEIGHT]).
@@ -162,6 +167,7 @@
 ;; plus : Vec -> LiveZombie
 ;; Move this zombie by the given vector.
 (define-class live-zombie% 
+  (implements zombie<%>)
   (fields x y)
   
   (define/public (move-toward p)
@@ -185,6 +191,7 @@
          (+ (field y) (send v y)))))
     
 (define-class dead-zombie% 
+  (implements zombie<%>)
   (fields x y)
   (define/public (move-toward p)
     this)
