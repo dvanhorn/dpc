@@ -389,7 +389,18 @@
 ;; Player tests
 ;; ============
 
-;; ...
+;; draw-on
+(check-expect (send p0 draw-on MT-SCENE)
+              (place-image (circle 1/2-CELL "solid" "green")
+                           0 0
+                           MT-SCENE))
+;; plus
+(check-expect (send p0 plus (new vec% 0 0)) p0)
+(check-expect (send p0 plus (new vec% 0 30)) p1)
+;; move-toward
+(check-expect (send p0 move-toward m0) p0)
+(check-expect (send p0 move-toward m1)
+              (new player% 0 P-SPEED))
 
 ;; Zombie tests
 ;; ============
@@ -445,12 +456,7 @@
 (check-expect (min-taxi l0 5 p0) (new vec% 0 0))
 (check-expect (min-taxi l0 5 p1) (new vec% 0 5))
 ;; zombie-touching?
-;; ...
+(check-expect (zombie-touching? l0 p0) true)
+(check-expect (zombie-touching? l0 l0) true)
+(check-expect (zombie-touching? l0 p1) false)
 
-#|
-;; plus
-(check-expect (send d0 plus d0) d0)
-(check-expect (send d0 plus d1) d1)
-(check-expect (send d1 plus d1) 
-              (new dot% 0 60))
-|#
