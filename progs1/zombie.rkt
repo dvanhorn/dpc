@@ -98,6 +98,7 @@
          (send (field zombies) kill)
          (field mouse))))
 
+(define-class posn% (fields x y))
 
 ;; ==========================================================
 ;; A Player is a (new player% [0,WIDTH] [0,HEIGHT]).
@@ -111,21 +112,33 @@
    plus
    ;; move-toward : Mouse -> Player
    ;; Move this player toward the given mouse position.
-   move-toward])
+   move-toward
+   ;; -> Nat
+   ;; Get the {x,y}-coordinate of this player.
+   x y
+   ;; -> Color
+   ;; Get the color of this player.
+   color])
    
-(define-class player%
-  (implements player<%>)
-  (fields x y)
+(define-class being%
+  (super posn%)
   
   (define/public (draw-on scn)
-    (place-image (circle 1/2-CELL "solid" "green")
+    (place-image (circle 1/2-CELL "solid" (send this color))
                  (field x)
                  (field y)
-                 scn))
+                 scn)))
+  
+
+(define-class player%
+  (super being%)
+  (implements player<%>)
+  
+  (define/public (color) "green")  
   
   (define/public (move-toward mouse)
     (plus (min-taxi this P-SPEED mouse)))
-  
+
   (define/public (plus v)
     (new player%
          (+ (field x) (send v x))
@@ -134,12 +147,12 @@
 
 ;; ==========================================================
 ;; Vec is a (new vec% Int Int).
-(define-class vec% (fields x y))
+(define-class vec% (super posn%))
 
 
 ;; ==========================================================
 ;; A Mouse is a (new mouse% Int Int).
-(define-class mouse% (fields x y))
+(define-class mouse% (super posn%))
 
 
 ;; ==========================================================
@@ -159,7 +172,22 @@
    draw-on
    ;; kill : -> DeadZombie
    ;; Make this zombie dead.
-   kill])
+   kill
+   ;; -> Nat
+   ;; Get the {x,y}-coordinate of this zombie.
+   x y
+   ;; -> Color
+   ;; Get the color of this zombie.
+   color])
+
+(define-class zombie%
+  (super being%)  
+  
+  (define/public (touching? p)
+    (<= (dist this p) 1/2-CELL))
+  
+  (define/public (kill)
+    (new dead-zombie% (field x) (field y))))
 
 ;; A DeadZombie is a (new dead-zombie% [0,WIDTH] [0,HEIGHT]).
 ;; A LiveZombie is a (new live-zombie% [0,WIDTH] [0,HEIGHT]).
@@ -167,23 +195,13 @@
 ;; plus : Vec -> LiveZombie
 ;; Move this zombie by the given vector.
 (define-class live-zombie% 
+  (super zombie%)
   (implements zombie<%>)
-  (fields x y)
   
   (define/public (move-toward p)
     (plus (min-taxi this Z-SPEED p)))
-  
-  (define/public (touching? p)
-    (zombie-touching? this p))
-  
-  (define/public (draw-on scn)
-    (place-image (circle 1/2-CELL "solid" "red")
-                 (field x)
-                 (field y)
-                 scn))
-  
-  (define/public (kill)
-    (new dead-zombie% (field x) (field y)))
+    
+  (define/public (color) "red")
   
   (define/public (plus v)
     (new live-zombie% 
@@ -191,22 +209,13 @@
          (+ (field y) (send v y)))))
     
 (define-class dead-zombie% 
+  (super zombie%)
   (implements zombie<%>)
-  (fields x y)
+  
   (define/public (move-toward p)
     this)
-  
-  (define/public (touching? p)
-    (zombie-touching? this p))
-  
-  (define/public (draw-on scn)
-    (place-image (circle 1/2-CELL "solid" "gray")
-                 (field x)
-                 (field y)
-                 scn))
-  
-  (define/public (kill)
-    (new dead-zombie% (field x) (field y))))
+
+  (define/public (color) "gray"))
 
 
 ;; ==========================================================
@@ -475,8 +484,5 @@
 ;; min-taxi
 (check-expect (min-taxi l0 5 p0) (new vec% 0 0))
 (check-expect (min-taxi l0 5 p1) (new vec% 0 5))
-;; zombie-touching?
-(check-expect (zombie-touching? l0 p0) true)
-(check-expect (zombie-touching? l0 l0) true)
-(check-expect (zombie-touching? l0 p1) false)
+
 
