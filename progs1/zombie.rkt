@@ -1,4 +1,5 @@
 #lang class1
+(provide (all-defined-out))
 
 ;; RUBRIC
 ;; ========================================================
@@ -47,7 +48,7 @@
 (define Z-SPEED 1)
 
 ;; ==========================================================
-;; A World is a (new world% Player LoZ Mouse).
+;; A World is a (new world% IPlayer LoZ Mouse).
 ;; Interp: player, list of living and dead zombies, mouse.
 
 ;; name : -> String
@@ -98,9 +99,10 @@
 
   (define/public (teleport)
     (new world%
-         (new player% 
-              (random WIDTH)
-              (random HEIGHT))
+         (send (field player) 
+               place-at
+               (random WIDTH)
+               (random HEIGHT))
          (field zombies)
          (field mouse)))
   
@@ -128,6 +130,10 @@
 ;; ==========================================================
 ;; Abstract classes
 
+;; This is the posn<%> interface and implementation that is
+;; only needed for this module, but we use the extension 
+;; so that the modulo module will work.
+#|
 ;; A Posn implements posn<%>.
 (define-interface posn<%>
   [;; Posn -> Nat
@@ -166,6 +172,65 @@
                                         (* n (send d y)))))
              (new vec% 0 0)
              DIRS))))
+|#
+;; A Posn implements posn<%>.
+(define-interface posn<%>
+  [;; Posn -> Nat
+   ;; Compute the taxi distance between the given positions.  
+   dist
+   ;; Posn -> Nat
+   ;; Compute the modulo taxi distance between the given positions.
+   modulo-dist
+   ;; Nat Posn -> Vec
+   ;; Compute the vector of length n minimizing dist to posn.
+   min-taxi
+   ;; Nat Posn -> Vec
+   ;; Compute the vector of length n minimizing modulo dist to posn.
+   modulo-min-taxi
+   ;; -> Nat
+   ;; Get the {x,y}-coordinate of this position.
+   x y])
+
+(define-class posn% 
+  (implements posn<%>)
+  (fields x y)
+
+  (define/public (dist p)
+    (+ (abs (- (field x)
+               (send p x)))
+       (abs (- (field y)
+               (send p y)))))
+  
+  (define/public (modulo-dist p)
+    (min (dist p)
+         (dist (new posn% (+ (send p x) WIDTH) (send p y)))
+         (dist (new posn% (send p x) (+ (send p y) HEIGHT)))
+         (send (new posn% (+ (field x) WIDTH) (field y)) dist p)
+         (send (new posn% (field x) (+ (field y) HEIGHT)) dist p)))
+   
+  (define/public (modulo-min-taxi n to)
+    (min-taxi/abs n to (λ (p1 p2) (send p1 modulo-dist p2))))
+  
+  (define/public (min-taxi n to)
+    (min-taxi/abs n to (λ (p1 p2) (send p1 dist p2))))
+
+  ;; Nat Posn (Posn Posn -> Nat) -> Vec
+  ;; Compute the vector of length n minimizing dist,
+  ;; measured by func., to posn.
+  (define/public (min-taxi/abs n to dist-func)
+    ;; Vec Vec -> Vec
+    (local [(define (select-shorter-dir d1 d2)
+              (cond [(< (dist-func (send this plus d1) to)
+                        (dist-func (send this plus d2) to))
+                     d1]
+                    [else d2]))]
+      (foldl (λ (d sd) 
+               (select-shorter-dir sd
+                                   (new vec% 
+                                        (* n (send d x)) 
+                                        (* n (send d y)))))
+             (new vec% 0 0)
+             DIRS))))
 
 (define-class being%
   (super posn%)
@@ -187,16 +252,16 @@
 
 
 ;; ==========================================================
-;; A Player is a implements player<%>.
+;; A IPlayer is a implements player<%>.
 
 (define-interface player<%>
   [;; draw-on : Scene -> Scene
    ;; Draw this player on the scene.
    draw-on
-   ;; plus : Vec -> Player
+   ;; plus : Vec -> IPlayer
    ;; Move this player by the given vector.
    plus
-   ;; move-toward : Mouse -> Player
+   ;; move-toward : Mouse -> IPlayer
    ;; Move this player toward the given mouse position.
    move-toward
    ;; -> Nat
@@ -207,9 +272,12 @@
    color
    ;; Posn -> Nat
    ;; Compute the taxi distance between this player and posn.
-   dist])
+   dist
+   ;; [0,WIDTH] [0,HEIGHT] -> IPlayer
+   ;; Place this player at the given coordinate.
+   place-at])
    
-;; A OPlayer is a (new player% [0,WIDTH] [0,HEIGHT]).
+;; A Player is a (new player% [0,WIDTH] [0,HEIGHT]).
 (define-class player%
   (super being%)
   (implements player<%>)
@@ -222,7 +290,10 @@
   (define/public (plus v)
     (new player%
          (+ (field x) (send v x))
-         (+ (field y) (send v y)))))
+         (+ (field y) (send v y))))
+  
+  (define/public (place-at x y)
+    (new player% x y)))
 
 
 ;; ==========================================================
@@ -247,13 +318,13 @@
 
 
 ;; ==========================================================
-;; A Zombie implements zombie<%>.
+;; A IZombie implements zombie<%>.
 
 (define-interface zombie<%>
-  [;; move-toward : Player -> Zombie
+  [;; move-toward : IPlayer -> IZombie
    ;; Move this zombie toward the given player.
    move-toward
-   ;; touching? : [U Player Zombie] -> Boolean
+   ;; touching? : [U IPlayer IZombie] -> Boolean
    ;; Is this zombie touching the given player or zombie?
    touching?
    ;; draw-on : Scene -> Scene
@@ -272,7 +343,7 @@
    ;; Compute the taxi distance between this zombie and posn.
    dist])
 
-;; A OZombie is one of:
+;; A Zombie is one of:
 ;; - LiveZombie 
 ;; - DeadZombie
 
@@ -280,7 +351,7 @@
 ;; A LiveZombie is a (new live-zombie% [0,WIDTH] [0,HEIGHT]).
 
 ;; plus : Vec -> LiveZombie
-;; Move this zombie by the given vector.
+;; Move this live zombie by the given vector.
 (define-class live-zombie% 
   (super zombie%)
   (implements zombie<%>)
@@ -308,15 +379,15 @@
 ;; ==========================================================
 ;; A LoZ is one:
 ;; - (new empty%)
-;; - (new cons% Zombie LoZ)
+;; - (new cons% IZombie LoZ)
 
 ;; draw-on : Scene -> Scene
 ;; Draw this list of zombies on the scene.
 
-;; touching? : [U Player Zombie] -> Boolean
+;; touching? : [U IPlayer IZombie] -> Boolean
 ;; Are any of these zombies touching the player or zombie?
 
-;; move-toward : Player -> LoDot
+;; move-toward : IPlayer -> LoDot
 ;; Move all zombies toward the player.
 
 ;; kill : -> LoZ
@@ -375,7 +446,7 @@
 ;; ==========================================================
 ;; Helper constructor for LoZ
 
-;; Nat (-> Nat Zombie) -> LoZ
+;; Nat (-> Nat IZombie) -> LoZ
 ;; Like build-list for LoZ.
 (check-expect (build-loz 0 (λ (i) (new live-zombie% i i)))
               (new empty%))
@@ -397,15 +468,16 @@
 
 ;; ==========================================================
 ;; Run program, run!
-(big-bang
- (new world%
-      (new player% (/ WIDTH 2) (/ HEIGHT 2))
-      (build-loz (+ 10 (random 20))
-                 (λ (_)
-                   (new live-zombie% 
-                        (random WIDTH)
-                        (random HEIGHT))))
-      (new mouse% 0 0)))
+(define (play)
+  (big-bang
+   (new world%
+        (new player% (/ WIDTH 2) (/ HEIGHT 2))
+        (build-loz (+ 10 (random 20))
+                   (λ (_)
+                     (new live-zombie% 
+                          (random WIDTH)
+                          (random HEIGHT))))
+        (new mouse% 0 0))))
 
 
 ;; ==========================================================
@@ -448,6 +520,7 @@
 (check-range (send (send w7 player) y) 0 HEIGHT)
 (check-expect (send w7 zombies) mt)
 (check-expect (send w7 mouse) m0)
+(check-within w7 w0 (+ WIDTH HEIGHT))
 ;; mouse-move
 (check-expect (send w0 mouse-move 0 30)
               (new world% p0 mt m1))

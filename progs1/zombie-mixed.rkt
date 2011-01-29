@@ -445,8 +445,12 @@
       (build-loz (+ 10 (random 20))
                  (λ (_)
                    (if (= 1 (random 2))
-                       (new modulo-live-zombie% (random WIDTH) (random HEIGHT))
-                       (new live-zombie% (random WIDTH) (random HEIGHT)))))
+                       (new modulo-live-zombie% 
+                            (random WIDTH) 
+                            (random HEIGHT))
+                       (new live-zombie% 
+                            (random WIDTH) 
+                            (random HEIGHT)))))
       (new mouse% 0 0)))
 
 
