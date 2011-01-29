@@ -130,15 +130,20 @@
 
 ;; A Posn implements posn<%>.
 (define-interface posn<%>
-  [;; -> Nat
+  [;; Posn -> Nat
+   ;; Compute the taxi distance between the given positions.  
+   dist
+   ;; Nat Posn -> Vec
+   ;; Compute the vector of length n minimizing dist to posn.
+   min-taxi
+   ;; -> Nat
    ;; Get the {x,y}-coordinate of this position.
    x y])
 
 (define-class posn% 
   (implements posn<%>)
   (fields x y)
-  ;; Posn -> Nat
-  ;; Compute the taxi distance between the given positions.
+  
   (define/public (dist p)
     (+ (abs (- (field x)
                (send p x)))

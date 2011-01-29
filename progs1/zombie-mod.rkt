@@ -70,12 +70,13 @@
           [(mouse=? "move" m)
            (mouse-move x y)]
           [else this]))    
-
+  
   (define/public (teleport)
     (new world%
-         (new player% 
-              (random WIDTH)
-              (random HEIGHT))
+         (send (field player)
+               place-at
+               (random WIDTH)
+               (random HEIGHT))
          (field zombies)
          (field mouse)))
   
@@ -105,54 +106,53 @@
 
 ;; A Posn implements posn<%>.
 (define-interface posn<%>
-  [;; -> Nat
+  [;; Posn -> Nat
+   ;; Compute the taxi distance between the given positions.  
+   dist
+   ;; Posn -> Nat
+   ;; Compute the modulo taxi distance between the given positions.
+   modulo-dist
+   ;; Nat Posn -> Vec
+   ;; Compute the vector of length n minimizing dist to posn.
+   min-taxi
+   ;; Nat Posn -> Vec
+   ;; Compute the vector of length n minimizing modulo dist to posn.
+   modulo-min-taxi
+   ;; -> Nat
    ;; Get the {x,y}-coordinate of this position.
    x y])
 
 (define-class posn% 
   (implements posn<%>)
   (fields x y)
-  ;; Posn -> Nat
-  ;; Compute the taxi distance between the given positions.
+
   (define/public (dist p)
     (+ (abs (- (field x)
                (send p x)))
        (abs (- (field y)
                (send p y)))))
   
-  ;; Posn -> Nat
-  ;; Compute the modulo taxi distance between the given positions.
   (define/public (modulo-dist p)
     (min (dist p)
          (dist (new posn% (+ (send p x) WIDTH) (send p y)))
          (dist (new posn% (send p x) (+ (send p y) HEIGHT)))
          (send (new posn% (+ (field x) WIDTH) (field y)) dist p)
          (send (new posn% (field x) (+ (field y) HEIGHT)) dist p)))
-    
-  ;; Nat Posn -> Vec
-  ;; Compute the vector of length n minimizing dist to posn.
+   
   (define/public (modulo-min-taxi n to)
-    ;; Vec Vec -> Vec
-    (local [(define (select-shorter-dir d1 d2)
-              (cond [(< (send (send this plus d1) modulo-dist to)
-                        (send (send this plus d2) modulo-dist to))
-                     d1]
-                    [else d2]))]
-      (foldl (λ (d sd) 
-               (select-shorter-dir sd
-                                   (new vec% 
-                                        (* n (send d x)) 
-                                        (* n (send d y)))))
-             (new vec% 0 0)
-             DIRS)))
+    (min-taxi/abs n to (λ (p1 p2) (send p1 modulo-dist p2))))
   
-  ;; Nat Posn -> Vec
-  ;; Compute the vector of length n minimizing dist to posn.
   (define/public (min-taxi n to)
+    (min-taxi/abs n to (λ (p1 p2) (send p1 dist p2))))
+
+  ;; Nat Posn (Posn Posn -> Nat) -> Vec
+  ;; Compute the vector of length n minimizing dist,
+  ;; measured by func., to posn.
+  (define/public (min-taxi/abs n to dist-func)
     ;; Vec Vec -> Vec
     (local [(define (select-shorter-dir d1 d2)
-              (cond [(< (send (send this plus d1) dist to)
-                        (send (send this plus d2) dist to))
+              (cond [(< (dist-func (send this plus d1) to)
+                        (dist-func (send this plus d2) to))
                      d1]
                     [else d2]))]
       (foldl (λ (d sd) 
@@ -203,7 +203,10 @@
    color
    ;; Posn -> Nat
    ;; Compute the taxi distance between this player and posn.
-   dist])
+   dist
+   ;; Nat Nat -> Player
+   ;; Place this player at the given coordinate.
+   place-at])
    
 (define-class player%
   (super being%)
@@ -217,21 +220,27 @@
   (define/public (plus v)
     (new player%
          (+ (field x) (send v x))
-         (+ (field y) (send v y)))))
+         (+ (field y) (send v y))))
+  
+  (define/public (place-at x y)
+    (new player% x y)))
 
 (define-class modulo-player%
   (super being%)
   (implements player<%>)
   
-  (define/public (color) "green")  
+  (define/public (color) "orange")  
   
   (define/public (move-toward mouse)
     (plus (modulo-min-taxi P-SPEED mouse)))
 
   (define/public (plus v)
-    (new player%
+    (new modulo-player%
          (modulo (+ (field x) (send v x)) WIDTH)
-         (modulo (+ (field y) (send v y)) HEIGHT))))
+         (modulo (+ (field y) (send v y)) HEIGHT)))
+  
+  (define/public (place-at x y)
+    (new modulo-player% x y)))
 
 
 ;; ==========================================================
@@ -439,6 +448,7 @@
 (define m1 (new mouse% 0 30))
 (define p0 (new player% 0 0))
 (define p1 (new player% 0 30))
+(define mp0 (new modulo-player% 0 0))
 (define l0 (new live-zombie% 0 0))
 (define d0 (new dead-zombie% 0 0))
 (define l1 (new live-zombie% 0 30))
@@ -448,6 +458,7 @@
 (define dz1 (new cons% d1 mt))
 (define zs0 (new cons% l1 dz1))
 (define w0 (new world% p0 mt m0))
+(define mw0 (new world% mp0 mt m0))
 (define w1 (new world% d0 lz0 m0))
 (define w2 (new world% d0 dz0 m0))
 (define w3 (new world% p0 mt m1))
@@ -459,6 +470,7 @@
        m1))
 (define w6 (new world% p0 (new cons% d1 dz1) m1))
 (define w7 (send w0 teleport))
+(define mw7 (send mw0 teleport))
 
 ;; World tests
 ;; ===========
@@ -471,6 +483,8 @@
 (check-range (send (send w7 player) y) 0 HEIGHT)
 (check-expect (send w7 zombies) mt)
 (check-expect (send w7 mouse) m0)
+(check-within w7 w0 (+ WIDTH HEIGHT))
+(check-within mw7 mw0 (+ WIDTH HEIGHT))
 ;; mouse-move
 (check-expect (send w0 mouse-move 0 30)
               (new world% p0 mt m1))
