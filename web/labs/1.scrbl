@@ -227,7 +227,7 @@ the screen. Here are a few useful functions for choosing things randomly:
   ; random-between : Integer Integer -> Integer
   ; Randomly choose a number between a and b (inclusive)
   (define (random-between a b)
-    (+ b (random (+ 1 (- b a)))))
+    (+ a (random (+ 1 (- b a)))))
 
   ; choose : [Listof X] -> X
   ; Randomly choose an element from the list
