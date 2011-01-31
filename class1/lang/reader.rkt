@@ -20,7 +20,11 @@ class1
 #| #:language-info (make-language-info '(abbreviate-cons-as-list read-accept-quasiquote)) |#
                  
 (define rt (make-readtable #f
-                           #\. 'terminating-macro (lambda a '|.|)))
+                           #\. 'non-terminating-macro 
+			   (lambda (char port . xs) 
+			     (if (char-whitespace? (peek-char port))
+				 '|.|
+				 (read/recursive port #\. #f)))))
 
 
 (define ((make-info options) key default use-default)
