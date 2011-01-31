@@ -27,7 +27,7 @@ for pair assignments.}
 @section{A look at the Universe API}
 
 Today we're going to start looking at the design of multiple,
-concurrently running programs that communicate we eachother.  We will
+concurrently running programs that communicate we each other.  We will
 use the @racket[universe] system as our library for communicating
 programs.
 
@@ -242,7 +242,7 @@ to one that constructs a package:
 }
 
 Now let's re-run the world program.  Notice that messages are being
-received by the server in it console.
+received by the server in the console.
 
 @section{Migrating computation from client to server}
 
