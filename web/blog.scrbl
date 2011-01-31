@@ -7,6 +7,16 @@
 
 @title*{Blog}
 
+@section*{Subversion repository issue fixed}
+
+@tt{Sun Jan 30 01:16:43 EST 2011}
+
+There was an issue with the permissions set on the svn repository that
+prevented people from accessing the new pair directories.  That issue
+should be resolved, so let us know if you still cannot access your
+pair's directory.
+
+
 @section*{Second partnership assignments}
 
 @tt{Thu Jan 27 17:12:44 EST 2011}

@@ -32,12 +32,8 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 @include-section["lectures/lec04.scrbl"]
 @include-section["lectures/lec05.scrbl"]
 @include-section["lectures/lec06.scrbl"]
+@include-section["lectures/lec07.scrbl"]
 
-@internal{ POPL: 1/27. Example: Hangman}
-
-@section[#:tag "lec07"]{1/31: Abstracting with classes}
-
-@internal{ Inheritance. Example: Lists, ?}
 
 @section[#:tag "lec08"]{2/03: Constructors}
 @section[#:tag "lec09"]{2/07: Generative recursion and accumulators}
