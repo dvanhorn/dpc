@@ -15,6 +15,63 @@
  contacted already.}
 ]
 
+@section{New language features}
+
+@subsection{Interface intheritance}
+
+Interfaces can now inherit from other interfaces.  In this example,
+the @r[foo%] class promises to implement the methods specified in
+@r[bar<%>], but also the methods listed in the super-interfaces
+@r[baz<%>] and @r[foo<%>].
+
+@#reader scribble/comment-reader
+(racketmod
+  class1
+  (define-interface baz<%> (blah))
+  (define-interface foo<%> (blah))
+  (define-interface bar<%> 
+    (super foo<%>)
+    (super baz<%>)
+    (x y))
+
+  (define-class foo%
+    (implements bar<%>)
+    (fields x y z blah))
+)
+
+
+@subsection{Dot notation}
+
+To make programming with objects more convenient, we've added new
+syntax to @racketmodname[class1] to support method calls.  In
+particular, the following now sends method @r[x] to object @r[o] with
+argument @r[arg]:
+
+@racketblock[
+(x #,(racketidfont ".") o arg)
+]
+
+This is equivalent to
+@racketblock[
+(send x o arg)
+]
+
+We can chain method calls like this:
+
+@racketblock[
+(x #,(racketidfont ".") o arg #,(racketidfont ".") m arg*)
+]
+
+This sends the @r[m] method to the @emph{result} of the previous
+expression.  
+This is equivalent to
+@racketblock[
+(send (send x o arg) m arg*)
+]
+
+Although in lecture this didn't work in the interactions window, it
+now works everywhere that you use @racketmodname[class1]. 
+
 
 @section{Constructor design issue in modulo zombie (Assignment 3,
 Problem 3)}
@@ -161,7 +218,11 @@ it becomes identical in both classes, avoiding the code duplication.
 (send (new c% 50 100) origin)
 }
 
+
+
 @section{Abstracting list methods with different representations}
+
+Here is the list interface from the last homework assignment:
 
 @#reader scribble/comment-reader
 (racketblock
@@ -201,7 +262,8 @@ it becomes identical in both classes, avoiding the code duplication.
    foldl])
 )
 
-Here's the usual implementation of a small subset of this interface:
+Here's the usual implementation of a small subset of this interface,
+first for the recursive union implementation:
 
 @#reader scribble/comment-reader
 (racketblock
@@ -233,8 +295,12 @@ Here's the usual implementation of a small subset of this interface:
       0)
 
     (define/public (foldr c b)
-      b))
+      b)))
 
+And for the wrapper list implementation:
+
+@#reader scribble/comment-reader
+(racketblock
   (define-class wlist%
     (fields ls)
     
@@ -251,37 +317,63 @@ Here's the usual implementation of a small subset of this interface:
       (ls:foldr c b (field ls))))
 )
 
-None of these look the same, so how can we abstract?
+None of these look the same, so how can we abstract?  Our abstraction
+design recipe for using inheritance requires that methods look
+identical in order to abstract them into a common super class.  But,
+for example, the @r[length] method looks like this for @r[wlist%]:
 
 @#reader scribble/comment-reader
 (racketblock
-  (define-class list%
     (define/public (length)
-      (send this foldr (λ (a b) (add1 b)) 0)))
-)
+      (ls:length (field ls))))
 
-
-@section{New language features}
-
-Interface intheritance
+Like this for @r[empty%]:
 
 @#reader scribble/comment-reader
-(racketmod
-  class1
-  (define-interface baz<%> (blah))
-  (define-interface foo<%> (blah))
-  (define-interface bar<%> 
-    (super foo<%>)
-    (super baz<%>)
-    (x y))
+(racketblock
+    (define/public (length)
+      0))
 
-  (define-class foo%
-    (implements bar<%>)
-    (fields x y z blah))
+And like this for @r[cons%]:
+
+@#reader scribble/comment-reader
+(racketblock
+    (define/public (length)
+      (add1 (send (field rest) length))))
+
+
+@margin-note{In fact, all of
+		them---but
+		that's a topic
+		for another day.}
+Before we can abstract this method, we must make them all look the
+same. Fortunately, many list operations
+can be expressed using just a few simple operations, of which the most
+important is @r[foldr].  Here's an implementation of @r[length] which
+just uses @r[foldr] and simple arithmetic.  
+
+@#reader scribble/comment-reader
+(racketblock
+    (define/public (length)
+      (send this foldr (λ (a b) (add1 b)) 0))
+)
+
+Note that this isn't specific to any one implementation of lists---in
+fact, we can use it for any of them.  This means that we can now
+abstract the method, creating a new @r[list%] class to share all of
+our common code:
+
+
+@#reader scribble/comment-reader
+(racketblock
+ (define-class list%
+    (define/public (length)
+      (send this foldr (λ (a b) (add1 b)) 0))
+    (code:comment "other methods here"))
 )
 
 
-Dot notation
+
 
 
 @section{Constructors in interfaces}

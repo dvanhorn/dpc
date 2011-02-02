@@ -58,6 +58,9 @@ Now we can abstract
 (new c% 50 100)
 (send (new c% 50 100) origin)
 
+HERE
+
+
 - dot notation
 
 - interface inheritance

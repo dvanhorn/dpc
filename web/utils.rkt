@@ -5,7 +5,8 @@
          scheme-from-file
          class-system-filename
          class-system-url
-         class-system-latest)
+         class-system-latest
+	 (rename-out [racket r]))
 (require scribble/base)
 
 (define-syntax (internal stx)
