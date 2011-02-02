@@ -11,11 +11,13 @@
 @section[#:tag-prefix "lec07"]{Announcements}
 
 @itemlist[
- @item{You have a new partner -- hope you've made contact.}
+ @item{You have been assigned a new partner, who you should have
+ contacted already.}
 ]
 
 
-@section{Constructor design issue in modulo zombie}
+@section{Constructor design issue in modulo zombie (Assignment 3,
+Problem 3)}
 
 Course staff solution for regular zombie game:
 
@@ -32,6 +34,9 @@ Course staff solution for regular zombie game:
 )
 }
 
+This has a significant bug: it always produces a plain
+@racket[player%], not a @racket[modulo-player%].
+
 Bug (pair0MN):
 
 @filebox["modulo-player%"]{
@@ -43,6 +48,11 @@ Bug (pair0MN):
 	(* -1 (random WORLD-SIZE))))
 )
 }
+
+This has a similar bug: it always produces a plain
+@racket[player%], not a @racket[modulo-player%].  However, it's in the
+the @tt{modulo-player%} file, so there's an easy fix.  
+
 
 Lack of abstraction (pair0PQ):
 
@@ -72,7 +82,84 @@ Lack of abstraction (pair0PQ):
 )
 }
 
-How can fix these issues?
+This works correctly (this is the fix for the bug in Pair0MN's
+solution), but it duplicates code.  
+
+We want to fix these bugs without duplicating code.  
+
+Possible solutions (suggested in class):
+@itemlist[
+@item{Parameterize the @racket[teleport] method with a class name.
+Unfortunately, this doesn't work because the class name in
+@racket[new] is not an expression.}
+@item{Use @racket[this] as the class name.  This doesn't work because
+@racket[this] is an @emph{instance}, not a @emph{class}.}
+]
+
+The solution is to add a new method to the interface, which constructs
+a new method of the appropriate class.  So, we add this method to the
+@racket[player%] class:
+
+@racketblock[
+(define/public (move x y)
+  (new player% x y))
+]
+
+And this method to the @racket[modulo-player%] class:
+
+@racketblock[
+(define/public (move x y)
+  (new modulo-player% x y))
+]
+
+Here's an example of the technique in full.  We start with these classes:
+
+@codeblock{
+#lang class1
+(define-class s%
+  (fields x y))
+
+;; A Foo is one of:
+;; - (new c% Number Number)
+;; - (new d% Number Number)
+
+(define-class c%
+  (super s%)
+  (define/public (make x y) (new c% x y))
+  (define/public (origin) (new c% 0 0)))
+(define-class d%
+  (super s%)
+  (define/public (make x y) (new d% x y))
+  (define/public (origin) (new d% 0 0)))
+}
+
+
+Now we abstract the @racket[origin] method to use @racket[make], and
+we can abstract @racket[origin] to the superclass @racket[s%], since
+it becomes identical in both classes, avoiding the code duplication.
+
+@codeblock{
+#lang class1
+(define-class s%
+  (fields x y)
+  (send this make 0 0))
+
+;; A Foo is one of:
+;; - (new c% Number Number)
+;; - (new d% Number Number)
+
+(define-class c%
+  (super s%)
+  (define/public (make x y)
+    (new c% x y)))
+(define-class d%
+  (super s%)
+  (define/public (make x y) 
+    (new d% x y)))
+
+(new c% 50 100)
+(send (new c% 50 100) origin)
+}
 
 @section{Abstracting list methods with different representations}
 

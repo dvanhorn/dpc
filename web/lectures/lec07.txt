@@ -1,0 +1,272 @@
+Discussion of Zombie:
+ - teleport produces the wrong kind of player
+
+ - sometimes, there's no way to produce the right kind of player
+   except by duplicating the code
+
+ - how can we abstract this?
+
+ - suggestion 1: make the class name in `new' an expression
+     doesn't work because classes are named, not first-class
+
+ - suggestion 2: (new this ...)
+     this is an instance, not a class
+
+ - suggestion 3: a constructor in the class itself
+     add a method called `make-player'
+
+     drawback: methods are very similar
+               but we don't have a way to abstract any more
+
+#lang class1
+(define-class s%
+  (fields x y))
+
+;; A Foo is one of:
+;; - (new c% Number Number)
+;; - (new d% Number Number)
+
+(define-class c%
+  (super s%)
+  (define/public (make x y) (new c% x y))
+  (define/public (origin) (new c% 0 0))))
+(define-class d%
+  (super s%)
+  (define/public (make x y) (new d% x y))
+  (define/public (origin) (new d% 0 0)))
+
+Now we can abstract
+
+#lang class1
+(define-class s%
+  (fields x y)
+  (send this make 0 0))
+
+;; A Foo is one of:
+;; - (new c% Number Number)
+;; - (new d% Number Number)
+
+(define-class c%
+  (super s%)
+  (define/public (make x y)
+    (new c% x y)))
+(define-class d%
+  (super s%)
+  (define/public (make x y) 
+    (new d% x y)))
+
+(new c% 50 100)
+(send (new c% 50 100) origin)
+
+- dot notation
+
+- interface inheritance
+ - show multiple interface inheritance
+ - we don't have multiple class inheritance
+ - overlap between superinterface is allowed
+   but not between listed methods and super interfaces
+
+Looking at list assignment from the homework.
+The real issue is how to abstract.
+
+Show various methods.
+Note that we can use accumulators just like in Fundies 1.
+ - see design of reverse with accumulator
+
+What's common between the three classes?
+ There's no duplicated code, so how can we abstract?
+
+Hint in the assignment: some methods are expressible in terms of others.
+ What is fundamental? cons, empty, foldr
+ What about `empty?' -- not in the interface as given
+
+Now we implement `length' in terms of foldr:
+
+(define/public (length)
+  (send this foldr (lambda (a b) (add1 b)) 0))
+
+What if we write this bug:
+
+(define/public (length)
+  (send this foldr (lambda (a b) (add1 a)) 0)) ;; a instead of b
+
+All the test pass -- oh no!
+
+The problem testcase:
+
+(define rls (new cons% 2 (new cons% 3 (new cons% 4 (new empty%)))))
+(check-expect (send rls length) 3)
+
+call our buggy function `c'
+
+Then the result will be
+(c 2 (c 3 (c 4 0))) ==> 3, just like we expected
+
+Solution: add new test
+(define rls2 (new cons% 7 (new cons% 3 (new cons% 4 (new empty%)))))
+(check-expect (send rls2 length) 3)
+
+So, have we two methods, but they're not the same.
+Solution:
+  - change the `length' method in the empty class to be the same as
+    the cons class. 
+
+  - now we can abstract to the superclass
+
+    make a new superclass
+
+(define-class list%
+  (define/public (length)
+    (send this foldr (lambda (a b) (add1 b)) 0)))
+
+(define-class cons%
+  (super list%)
+  ... no `length' method ...)
+
+(define-class empty%
+  (super list%)
+  ... no `length' method ...)
+
+;; works here too!
+(define-class wlist%
+  (super list%)
+  ... no `length' method ...)
+
+Now, in the solution, we need many fewer methods that are in the leaf
+classes.  Now we can have just one implementation that we can check a
+lot in the superclass, and anyone who implements just a few methods
+gets it all for free.  
+
+This all relies on constructor methods.  In particular, all of the
+three different classes have constructors with different interfaces,
+but we can implement the same constructor methods in each one.  
+
+Question: do we need to write contracts/purpose statements in classes
+when they're also in the interface? No, we just refer to the ones in
+the interface.  
+
+=====================
+
+Brings up the design recipe/interface defs/data defs.
+
+Sometimes we have data defs that just refer to interfaces, w/o talking
+about the structure of the data.  
+
+Sometimes we have data defs that are more conventional, but we refer
+to an interface.  
+
+We propose two concepts:
+
+ - Data definition.  Talks about data and how to construct and process
+   it. For example:
+
+    A WList is (new wlist% [Listof X])
+
+ - Interface definition.  Describes the operations we can use on an
+   object -- what methods does it understand.  
+
+Data definitions can reference some interfaces to say what methods
+they understand.  
+
+In this class, we separate the concepts we teach from their
+implementation in the programming language.  In BSL, we provide very
+few mechanisms, but you'll find BSL in every language you program in. 
+
+What does `define-interface' buy me?  Nothing!
+What do interfaces buy me?  Everything!
+An interface is just the contracts and purpose statements -- the
+specification of the behavior of the methods.  
+
+`define-interface' is just a tool for helping you use your interface
+defintions, but the programming concept is the important part.  
+
+How do we write data and interface definitions?
+
+Data defintions stay the same:
+
+;; A [Listof X] is one of:
+;; - (new cons% X [Listof X])
+;; - (new empty%)
+
+;; An [IListof X] implements:
+;; - length : -> Number
+;;   produce the number of elements in the list
+
+Subtle issues here:
+ - what is the contract for `append'? 
+
+;; - append : [IListof X] -> [IListof X]
+;;   combines two lists
+
+Question: should the two different implementations work together,
+since they both use the same interface?
+
+Our contract for `append' gives us lots of freedom.  
+
+Template for `append':
+  things about `this' data
+  things in the interface of your arguments
+
+What happens when we append two lists with different representations?
+It works fine if you follow the design recipe and the interface.  
+
+In the solution, we use the representation of the *argument*.  Why?
+   Because we use the `cons' method of the argument, which determines
+   the representation of the result.  
+
+Brings up an issue:  testing!
+ our tests are representation specific, leading to overspecification.  
+
+How do we solve this?  Add a new method that does comparison.  Now we
+can rewrite our tests to avoid overspecification.
+
+More discussion of mechanism vs concept.
+
+Write Binary Trees in `class0', without even functions.  
+
+;; A BT is one of
+;; - (new leaf% Number)
+;; - (new number% Number BT BT)
+;; and implements
+;; double : Number -> BT
+;; double this tree and put the number on top
+
+(define-class leaf%
+  (fields number)
+  
+  (define/public (double n)
+    (new node% n this this)))
+
+(define-class node%
+  (fields number left right)
+
+  (define/public (double n)
+    (new node% n this this)))
+
+How can we abstract the `double' method?
+
+Various terrible suggestions for revising the data definition.  
+
+Let's add a helper class.  
+
+(define-class helper%
+  ;; what goes here?
+  (define/public (double-helper num bt)
+    (new node% num bt bt)))
+
+Now rewrite our original code:
+
+;; outside of the classes
+(define tutor (new helper%))
+
+;; in node%
+(define/public (double n)
+  (tutor . double-helper n this))
+
+;; in leaf%
+(define/public (double n)
+  (tutor . double-helper n this))
+
+Note that our two definitions are identical.  
+
+Question about efficency:  Grrrr!!
