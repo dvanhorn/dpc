@@ -2,10 +2,11 @@
 (provide (all-defined-out))
 (provide new send define/public define/private this field fields)
 
-(require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda 
+(require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
+(require (prefix-in isl+: (only-in "test-engine/racket-tests.rkt"
                                    check-expect check-within 
                                    check-error check-member-of
-                                   check-range define)))
+                                   check-range)))
 (require (only-in "../class0/define-class.rkt" field fields))
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list

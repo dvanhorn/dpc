@@ -1,7 +1,8 @@
 #lang racket/base
 (require "define-class.rkt"
          (except-in lang/htdp-intermediate-lambda define require #%module-begin
-                    define-struct image?)
+                    define-struct image? 
+                    check-expect check-within check-error check-range check-member-of)
          "../class1/test-engine/racket-tests.rkt")
 
 (require (prefix-in isl+: lang/htdp-intermediate-lambda))
