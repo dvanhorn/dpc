@@ -7,6 +7,14 @@
 
 @title*{Blog}
 
+@section*{Course Software Fixed}
+
+@tt{Thu Feb  3 17:06:01 EST 2011}
+
+A new version of the course software has been release, fixing a
+singificant bug in its use with DrRacket.  The newest version of the
+class system is @tt{class-system-02-03.plt}.
+
 @section*{Fixes to @racket[class1]}
 
 @tt{Wed Feb  2 21:54:21 EST 2011}
