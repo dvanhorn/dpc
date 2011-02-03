@@ -12,7 +12,10 @@
 @section[#:tag-prefix "lec08"]{Announcements}
 
 @itemlist[#:style 'ordered
-@item{New homework is up.  It's hard.  Think about your data definition design.}
+@item{The @seclink["assign04"]{new homework} is up.  It's hard, so you
+should start early on thinking about it.  In particular, think about
+your data definition design, because choosing appropriate data
+definitions is key to making the problem manageable.}
 ]
 
 
@@ -20,17 +23,19 @@
 
 @subsection{Dot Notation}
 
-Works in Interactions window.
+The use of @(racketidfont ".") for method calls now works in the
+Interactions window.
 
 @subsection{@r[check-expect] in new places}
 
-Works inside functions, run when it's called.
+It's now possible to use @r[check-expect] in several places that
+didn't work before.  First, it now works inside functions.  The test
+is run @emph{every} time the function is called.  Second, it works
+inside class definitions. Tests in classes are lifted out of the
+class, so they cannot refer to fields, or directly call methods, or
+refer to @r[this]. 
 
-Works inside class defintions, lifted out of the class.
-
-Question: how does a @r[check-expect] work with fields when it's
-inside a class?   
-
+For example:
 @codeblock{
 #lang class1
 (define-class c%
@@ -47,19 +52,18 @@ inside a class?
 (f 5)
 }
 
-What does @r[check-expect] produce?  Nothing.
-
-Can @r[check-expect]s in classes refer to private method?  No.  And
-private methods don't exist.
+When used in an expression, as in a function, @r[check-expect] does
+not produce any value, and should not be combined with any other
+expressions that do computation.  
 
 @section{Invariants of Data Structures}
 
-Here's the interface for a sorted list of numbers.
+Here's an interface for a sorted list of numbers.
 
 @codeblock{
 #lang class1
 ;; An ISorted implements
-;; insert : Nmber -> Sorted
+;; insert : Number -> Sorted
 ;; contains? : Number -> Boolean
 ;; ->list : -> [Listof Number]
 ;; empty? : -> Boolean
@@ -71,18 +75,11 @@ Here's the interface for a sorted list of numbers.
 ;; min : -> Number
 }
 
-How do we implement this interface?  
+How would we implement this interface?  
 
-Suggestion 1:
-@codeblock{
-#lang class1
-;; A Sorted is a (new list% Number Sorted)
-(define-class list%
-  (fields first rest))
-}
-This doesn't work: no base case.
-
-Suggestion 2:
+We can simply adopt the recursive union style that we've already seen
+for implementing lists.  Here we see the basic defintion as well as
+the implementation of the @r[contains?] method.
 @codeblock{
 #lang class1
 ;; A Sorted is one of
@@ -103,12 +100,13 @@ Suggestion 2:
 		false)
   (define/public (contains? n)
     (or (= n (field first))
-	((field rest) . contains? n)))
-  )
+	((field rest) . contains? n))))
 }
 
 
-New implementation using the invariant:
+However, we can write a new implementation that uses our invariant to
+avoid checking the rest of the list when it isn't necessary.  
+
 @racketblock[
   (define/public (contains? n)
     (cond [(= n (field first)) true]
@@ -116,15 +114,21 @@ New implementation using the invariant:
 	  [else ((field rest) #,(racketidfont ".") contains? n)]))
 ]
 
-Insert for empty lists:
+Because the list is always sorted in ascending order, if @r[n] is less
+than the first element, it must be less than every other element, and
+therefore can't possibly be equal to any element in the list.  
+
+Now we can implement the remaining methods from the interface. First, @r[insert]
+
+@filebox["smt%"]{
 @racketblock[
 (check-expect ((new smt%) #,(racketidfont ".") insert 5) 
 	      (new scons% 5 (new smt%)))
 (define/public (insert n)
   (new scons% n (new smt%)))
-]
+]}
 
-Insert for cons lists:
+@filebox["scons%"]{
 @racketblock[
 (check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") insert 7)
 	      (new scons% 5 (new scons% 7 (new smt%))))
@@ -137,17 +141,17 @@ Insert for cons lists:
 	 (new scons%
 	      (field first)
 	      ((field rest) #,(racketidfont ".") insert n))]))
-]
+]}
 
 Note that we don't have to look at the whole list to insert the
-elements.  This is a benefit of programming using the @emph{invariant}
-that we have a sorted list.  
+elements.  This is again a benefit of programming using the
+invariant that we have a sorted list.
 
-@racket[max]
-
+Next, the @racket[max] method.  
 We don't have to do anything for the empty list, because we have a 
 precondition that we can only call @r[max] when the list is non-empty.
 
+@filebox["scons%"]{
 @racketblock[
 (define real-max max)
 (check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") max) 5)
@@ -155,7 +159,7 @@ precondition that we can only call @r[max] when the list is non-empty.
 (define/public (max)
   (cond [((field rest) #,(racketidfont ".") empty?) (field first)]
 	[else ((field rest) #,(racketidfont ".") max)]))
-]
+]}
 
 Again, this implementation relies on our data structure invariant.  To
 make this work, though, we need to implement @r[empty?].
@@ -172,10 +176,8 @@ make this work, though, we need to implement @r[empty?].
 (define/public (empty?) false)
 ]}
 
-Question: does @r[max] work on non-natural numbers?  Answer: Yes.
-
-The rest of the interface
-
+The final two methods are similar.  Again, we don't implement @r[min]
+in @r[smt%], because of the precondition in the interface.  
 @filebox["smt%"]{
 @racketblock[
 (code:comment "no min method")
@@ -193,25 +195,31 @@ The rest of the interface
 
 @section{Properties of Programs and  Randomized Testing}
 
-A property is a claim about the behavior of a program.  
+A @emph{property} is a claim about the behavior of a program.  Unit
+tests check particular, very specific properties, but often there are
+more general properties that we can state and check about programs.  
 
-Here's a property about our sorted list library:
+Here's a property about our sorted list library, which we would like
+to be true:
 
 @tt{∀ sls . ∀ n . }@racket[((sls #,(racketidfont ".") insert n) #,(racketidfont ".") contains? n)]
 
 How would we check this?  We can check a few instances with unit
 tests, but this property makes a very strong claim.  If we were
 working in ACL2, as in the Logic and Computation class, we could
-provide a machine-checked proof of the property.  
+provide a machine-checked proof of the property, verifying that it is
+true for every single @tt{Sorted} and @{Number}.  
 
-For something in between these two, we can use randomized testing.  
+For something in between these two extremes, we can use @emph{randomized
+testing}.  This allows us to gain confidence that our property is
+true, with just a bit of programming effort.  
 
 First, we want to write a program that asks the question associated
 with this property.
 
 @racketblock[
-;; Property: forall sorted lists and numbers, this predicate holds
-;; insert-contains? : ISorted Number -> Boolean
+(code:comment "Property: forall sorted lists and numbers, this predicate holds")
+(code:comment  "insert-contains? : ISorted Number -> Boolean")
 (define (insert-contains? sls n)
   ((sls #,(racketidfont ".") insert n) #,(racketidfont ".") contains? n))
 ]
@@ -220,7 +228,7 @@ Now we make lots of randomly generated tests, and see if the predicate
 holds. First, let's build a random sorted list generator.
 
 @racketblock[
-;; build-sorted : Nat (Nat -> Number) -> Sorted
+(code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
 (define (build-sorted)
   (cond [(zero? i) (new smt%)]
 	[else
@@ -232,9 +240,11 @@ holds. First, let's build a random sorted list generator.
 
 Oh no!  We broke the invariant.  The @r[scons%] constructor allows you
 to break the invariant, and now all of our methods don't work.
+Fortunately, we can implement a fixed version that uses the @r[insert]
+method to maintain the sorted list invariant:
 
 @racketblock[
-;; build-sorted : Nat (Nat -> Number) -> Sorted
+(code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
 (define (build-sorted)
   (cond [(zero? i) (new smt%)]
 	[else
@@ -244,9 +254,11 @@ to break the invariant, and now all of our methods don't work.
 
 ]
 
-Now it produces the correct answer, which we can test.
+Now @r[build-sorted] produces the correct answer, which we can easily
+verify at the Interactions window.
 
-Now we build a random sorted list:
+Using @r[build-sorted], we can develop @r[random-sorted], which
+generates a sorted list of random numbers.:
 
 @racketblock[
 (code:comment "Nat -> Sorted")
@@ -254,54 +266,82 @@ Now we build a random sorted list:
   (build-sorted i (lambda (_) (random 100))))
 ]
 
-Now we can write tests that check our property.  
+Given these building blocks,
+we can write a test that checks our property.  
 
 @racketblock[
 (check-expect (insert-contains? (random-sorted 30) (random 50))
 	      true)
 ]
 
-If we could repeatedly check this property, it would be even more
-unlikely to allow us to make this mistake.
+Every time we hit the @tt{Run} button, we generate a random sorted
+list of numbers, and check if a particular random integer behaves
+appropriately when @r[insert]ed into it.  But if we could repeatedly
+check this property hundreds or thousands of times, it would be even
+more unlikely that our program violates the property.  After all, we
+could have just gotten lucky.
 
+
+First, we write a function to perform some action many times:
 @racketblock[
-;; Nat (Any -> Any) -> 'done
-;; run the function f i times
+(code:comment "Nat (Any -> Any) -> 'done")
+(code:comment "run the function f i times")
 (define (do i f)
   (cond [(zero? i) 'done]
-	[else (f (do (sub1 i) f))]))
+	[else (f (do (sub1 i) f))]))]
+
+Then we can run our test many times:
+@racketblock[
 (do 1000
     (lambda (_)
       (check-expect (insert-contains? (random-sorted 30) (random 50))
 		    true)))
 ]
 
-What if we change our property to:
+When this says that we've passed 1000 tests, we'll be more sure that
+we've gotten our function right.  
+
+What if we change our property to this untrue statement?
 @racketblock[
-;; Property: forall sorted lists and numbers, this predicate holds
-;; insert-contains? : ISorted Number -> Boolean
+(code:comment "Property: forall sorted lists and numbers, this predicate holds")
+(code:comment "insert-contains? : ISorted Number -> Boolean")
 (define (insert-contains? sls n)
   (sls #,(racketidfont ".") contains? n))
 ]
 
-Now we get lots of test failures, but the problem isn't in our code,
-it's in our property.  If we change our code to add a bug, we again
-see lots of failures.  Thus, you can't always tell from a test failure
-whether it's the code or the specification (here the
-@r[insert-contains?] function) is wrong---you have to look at the test
-failure to check.  
+Now we get lots of test failures, but the problem is @emph{not} in our
+implementation of sorted lists, it's in our property definition.  If
+we had instead had a bug in our implementation, we would have
+similarly seen many failures.  Thus, it isn't always possible to tell
+from a test failure, or even many failures, whether it's the code or
+the specification is wrong---you have to look at the test failure to
+check.  
+
+This is why it's extremely important to get your specifications (like
+contracts, data definitions, and interface definitions) correct.  Your
+program can only be correct if they are.
 
 @section{Abstraction Barriers and Modules}
 
 Recall that in our original version of @r[build-sorted], we saw that the
-@r[scons%] constructor allowed us to violate the invariant.  How can
-we prevent incorrect use of the constructor?
+@r[scons%] constructor allowed us to violate the invariant---it didn't
+check that the value provided for @r[first] was at least as small as
+the elements of @r[rest].  We would like to prevent clients of our
+sorted list implementation from having access to this capability, so
+that we can be sure that our invariant is maintained.
 
-To fix this, we set up an abstraction barrier, preventing other people
-from seeing the @r[scons%] class.  To create these barriers, we use a
-@emph{module system}.  We will consider our implementation of sorted
-lists to be one module, and we can add a simple specification to allow
-other modules to see parts of the implementation (but not all of it).  
+To address this, we set up an @emph{abstraction barrier}, preventing
+other people from seeing the @r[scons%] constructor.  To create these
+barriers, we use a @emph{module system}.  We will consider our
+implementation of sorted lists to be one module, and we can add a
+simple specification to allow other modules to see parts of the
+implementation (but not all of it).
+
+Modules in our languages are very simple---you've already written
+them.  They start with @tt{#lang classN} and cover a whole file.
+
+Here's the module implementing our sorted list, which we save in a
+file called @tt{"sorted-list.rkt"}.  
 
 @filebox["sorted-list.rkt"]{
 @codeblock{
@@ -313,6 +353,11 @@ other modules to see parts of the implementation (but not all of it).
 (provide smt)
 }}
 
+We've added two new pieces to this file.  First, we define @r[smt] to
+be an instance of the empty sorted list.  Then, we use @r[provide] to
+make @r[smt], but not @emph{any} other definition from our module,
+available to other modules.  
+
 Therefore, the @emph{only} part of our code that the rest of the world
 can see is the @r[smt] value.  To add new elements, the rest of the
 world has to use the @r[insert] method.  
@@ -323,3 +368,10 @@ class1
 
 (smt #,(racketidfont ".") insert 4)
 ]
+
+Here, we've used @r[require], which we've used to refer to libraries
+that come with DrRacket.  However, we can specify the name of a file,
+and we get everything that the module in that file @r[provide]s, which
+here is just the @r[smt] definition.  Everything else, such as the
+dangerous @r[scons%] constructor, is hidden, and our implementation of
+sorted lists can rely on its invariant.  
