@@ -1,4 +1,4 @@
-CLASS=class-system-02-02.plt
+CLASS=class-system-02-03.plt
 CCS=login.ccs.neu.edu
 CCS_PATH=/course/cs2510h/.www/
 
