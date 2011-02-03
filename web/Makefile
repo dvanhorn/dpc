@@ -1,4 +1,5 @@
 CLASS=class-system-02-03.plt
+CLASS_LATEST=class-system-latest.plt
 CCS=login.ccs.neu.edu
 CCS_PATH=/course/cs2510h/.www/
 
@@ -37,7 +38,8 @@ copy-doc:
 #
 
 web:
-	ln -sf ../class-system-*.plt .
+	ln -sf ../$(CLASS) $(CLASS)
+	ln -sf ../$(CLASS) $(CLASS_LATEST)
 	env CLASS=$(CLASS) raco make 2510H.scrbl
 	raco scribble --htmls \
 		++extra fonts/kulminoituva-webfont.eot \
@@ -45,6 +47,7 @@ web:
 		++extra fonts/kulminoituva-webfont.ttf \
 		++extra fonts/kulminoituva-webfont.woff \
 		++extra $(CLASS) \
+		++extra $(CLASS_LATEST) \
 		++xref-in setup/xref load-collections-xref \
 		--redirect-main http://docs.racket-lang.org/ \
 		--style 2510H.css \
