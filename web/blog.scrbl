@@ -7,6 +7,15 @@
 
 @title*{Blog}
 
+@section*{Fixes to @racket[class1]}
+
+@tt{Wed Feb  2 21:54:21 EST 2011}
+
+Several bugs in the implementation of @racketmodname[class1], including the
+use of @racketidfont["."] in the Interactions Window, have now been
+fixed.  The newest version of the class system is
+@tt{class-system-02-02.plt}.  
+
 @section*{Subversion repository issue fixed}
 
 @tt{Sun Jan 30 01:16:43 EST 2011}
