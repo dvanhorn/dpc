@@ -19,7 +19,7 @@
 (define-syntax (#%module-begin stx)
   (syntax-parse stx 
     [(_ forms ...)
-     #'(r:#%module-begin forms ... (test))]))
+     #'(r:#%module-begin (reset-tests) forms ... (test) (reset-tests))]))
 
 (provide #%module-begin)
 
