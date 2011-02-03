@@ -15,9 +15,16 @@
 
 ;; Range -> Nat
 (define (guess-my-number r)
-  (arithmetic-shift (+ (range-lo r) (range-hi r)) -1))
+  (half (+ (range-lo r) (range-hi r))))
 
 (check-expect (guess-my-number (range 0 100)) 50)
+
+;; Nat -> Nat
+(define (half n)
+  (quotient n 2))
+
+(check-expect (half 4) 2)
+(check-expect (half 3) 1)
 
 ;; Range -> Range
 (define (bigger r)
