@@ -208,7 +208,7 @@ How would we check this?  We can check a few instances with unit
 tests, but this property makes a very strong claim.  If we were
 working in ACL2, as in the Logic and Computation class, we could
 provide a machine-checked proof of the property, verifying that it is
-true for every single @tt{Sorted} and @{Number}.  
+true for every single @tt{Sorted} and @tt{Number}.  
 
 For something in between these two extremes, we can use @emph{randomized
 testing}.  This allows us to gain confidence that our property is

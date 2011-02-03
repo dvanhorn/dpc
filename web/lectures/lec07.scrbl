@@ -372,34 +372,11 @@ our common code:
     (code:comment "other methods here"))
 )
 
-
-
-
-
-@section{Constructors in interfaces}
-
-@#reader scribble/comment-reader
-(racketblock
- (define-class s%
-   (fields x y)
-   
-   (define/public (origin)
-     (send this make 0 0)))
-
- ;; A Foo is one of:
- ;; - (new c% Number Number)
- ;; - (new d% Number Number)
-
- (define-class c%
-   (super s%)
-   (define/public (make x y)
-     (new c% x y)))
- 
- (define-class d%
-   (super s%)
-   (define/public (make x y)
-     (new d% x y)))
-)
+The only methods that need to be implemented differently for different
+list versions are @r[empty] and @r[cons], because they construct new
+lists, and @r[foldr], because it's the fundamental operation we use to
+build the other operations out of.  It's also helpful to implementat
+@r[foldl], since it's fairly complex to factor out.  
 
 @section{Solidifying what we've done}
 
