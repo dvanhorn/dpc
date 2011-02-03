@@ -1,0 +1,50 @@
+\documentclass{article}
+
+\usepackage{slatex}
+
+\pagestyle{empty}
+\setlength{\parindent}{0mm}
+
+\begin{document}
+\section*{Lab Quiz 4}
+
+\bigskip
+\bigskip
+Name: \underline{\hspace*{4in}}
+
+\bigskip
+\setlength{\parskip}{8pt}
+
+\begin{schemedisplay}
+  (define TICK-RATE 1/10)
+
+  ; A Projectile is a (new projectile\% Complex Complex)
+  (define-class projectile%
+    (fields location velocity))
+
+  ; A Rock is a (new rock\% Complex Complex)
+  (define-class rock%
+    (super projectile%)
+
+    ; \scheme{-> Rock}
+    (define/public (tick)
+      (new rock%
+           (+ (field location) (* TICK-RATE (field velocity)))
+           (field velocity))))
+
+  ; A Banana is a (new banana\% Complex Complex)
+  (define-class banana%
+    (super projectile%)
+
+    ; \scheme{-> Banana}
+    (define/public (tick)
+      (new banana%
+           (+ (field location) (* TICK-RATE (field velocity)))
+           (field velocity))))
+\end{schemedisplay}
+
+The two \scheme{tick} methods do basically the same thing. Abstract
+\scheme{tick} up to the superclass by introducing appropriate constructor
+methods in \scheme{rock%} and \scheme{banana%}.
+
+\end{document}

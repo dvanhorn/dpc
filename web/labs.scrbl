@@ -9,9 +9,9 @@
 @include-section["labs/1.scrbl"]
 @include-section["labs/2.scrbl"]
 @include-section["labs/3.scrbl"]
+@include-section["labs/4.scrbl"]
 
 @internal{
-@section[#:tag "lab04"]{1/31}
 @section[#:tag "lab05"]{2/7}
 
 Partner switch for homework due on 2/16.
