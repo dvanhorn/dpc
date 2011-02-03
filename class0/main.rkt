@@ -2,7 +2,7 @@
 (require "define-class.rkt"
          (except-in lang/htdp-intermediate-lambda define require #%module-begin
                     define-struct image?)
-         test-engine/racket-tests)
+         "../class1/test-engine/racket-tests.rkt")
 
 (require (prefix-in isl+: lang/htdp-intermediate-lambda))
 (require (prefix-in r: racket))
@@ -11,7 +11,8 @@
          (all-from-out lang/htdp-intermediate-lambda)
          define test require provide
          all-defined-out only-in all-from-out except-in
-         (except-out (all-from-out test-engine/racket-tests) test))
+         (except-out (all-from-out "../class1/test-engine/racket-tests.rkt")
+                     test))
 
 (require (for-syntax syntax/parse racket/base))
 

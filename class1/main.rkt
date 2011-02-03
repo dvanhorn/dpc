@@ -2,7 +2,8 @@
 (require "define-class.rkt"
          (except-in lang/htdp-intermediate-lambda define require #%module-begin
                     define-struct image? quote #%app)
-         test-engine/racket-tests)
+         "../class1/test-engine/racket-tests.rkt")
+
 
 (require (only-in "../class0/main.rkt" define-struct #%module-begin)
          (for-syntax racket/base syntax/parse))
@@ -15,7 +16,8 @@
          #%module-begin |.| (rename-out [my-app #%app])
          define test require provide define-struct
          all-defined-out only-in all-from-out except-in
-         (except-out (all-from-out test-engine/racket-tests) test))
+         (except-out (all-from-out "../class1/test-engine/racket-tests.rkt")
+                     test))
 
 (define-syntax (my-app stx)
   (syntax-parse stx #:literals (|.|)
