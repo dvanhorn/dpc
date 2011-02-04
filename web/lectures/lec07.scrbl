@@ -380,11 +380,44 @@ build the other operations out of.  It's also helpful to implementat
 
 @section{Solidifying what we've done}
 
-DD
+So far in this class, we've seen a number of different ways of
+specifying the creation and behavior of the data we work with.  At
+this point, it's valuable to take a step back and consider all of the
+concepts we've seen, and how they differ from what we had in Fundies
+1. 
 
-ID
+@subsection{Data Definitions}
 
-DR
+Data defintions describe how data is constructed.  For example,
+primitive classes of data such as @tt{Number} and @tt{String} are
+examples, of data defintions, as is @r[(make-posn Number Number)].  We
+can also describe enumerations and unions, just as we did previously.  
+
+In this class, we've introduced a new way of writing data defintions,
+referring to @emph{classes}.  For example:
+
+@racketblock[
+(code:comment "A WList is (new wlist% [Listof X])")
+]
+
+We can combine this style of data defintion with other data definition
+forms, such as unions.  However, classes also need to describe one
+other important aspect---their @emph{interface}.  So we will add the
+following to the above data defintion:
+
+@racketblock[
+(code:comment "A WList is (new wlist% [Listof X])")
+(code:comment "    and implements the IList interface")
+]
+
+@subsection{Interface Definitions}
+
+An @emph{interface defintion} lists the operations that something that
+implements the interface will support.  
+
+@subsection{Contracts}
+
+@subsection{Design Recipe}
 
 
 @section{Delegation}
