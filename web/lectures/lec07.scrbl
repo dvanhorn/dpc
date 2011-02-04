@@ -397,7 +397,7 @@ In this class, we've introduced a new way of writing data defintions,
 referring to @emph{classes}.  For example:
 
 @racketblock[
-(code:comment "A WList is (new wlist% [Listof X])")
+(code:comment "A [WList X] is (new wlist% [Listof X])")
 ]
 
 We can combine this style of data defintion with other data definition
@@ -406,25 +406,91 @@ other important aspect---their @emph{interface}.  So we will add the
 following to the above data defintion:
 
 @racketblock[
-(code:comment "A WList is (new wlist% [Listof X])")
-(code:comment "    and implements the IList interface")
+(code:comment "A [WList X] is (new wlist% [Listof X])")
+(code:comment "    and implements the [IList X] interface")
 ]
 
 @subsection{Interface Definitions}
 
 An @emph{interface defintion} lists the operations that something that
-implements the interface will support.  
+implements the interface will support.  Just as we have a convention that data
+defintions start with a capital letter, interface defintions start with a
+capital letter "I".  The interface defintion for @tt{[IList X]} is:
+
+@codeblock[#:keep-lang-line? #f]{
+#lang racket
+;; An [IList X] implements
+
+;; empty : -> [IList X]
+;; Produce an empty list
+;; cons : X -> [IList X]
+;; Produce a list with the given element at the front.
+;; empty? : -> Boolean
+;; Determine if this list is empty.
+;; length : -> Number
+;; Count the elements in this list
+
+;; ... and other methods ...
+}
+
+There are several important aspects of this interface defintion to note.
+First, it lists all of the methods that can be used on an @tt{[IList X]}, along
+with their contracts and purpose statements.  Mere method names are not
+enough---with just a method name you have no idea how to use a method, or what
+to use it for.  Second, interface defintions can have parameters (here @tt{X}),
+just like data defintions.  Third, there is no description of how to
+@emph{construct} an @tt{[IList X]}.  That's the job of data defintions that
+implement this interface.  
+
+Of course, just like data defintions don't have to be named, interface
+defintions don't have to be named either.  If you need to describe an interface
+just once, it's fine to write the interface right there where you need it.  
 
 @subsection{Contracts}
 
+Contracts describe the appropriate inputs and outputs of functions and
+methods.  In the past, we've seen many contracts that refer to data
+defintions.  In this class, we've also seen contracts that refer to interface
+defintions, like so:
+
+@racketblock[(code:comment "[IList Number] -> [IList Number]")]
+
+When describing the contract of a function or method, it's almost always
+preferable to refer to an interface definition instead of a data defintion that
+commits to a specific representation.  @; Sometimes, there's only one data
+@; definition that makes sense, and then there isn't a difference between using
+@; the interface defintion and the data defintion.  
+
 @subsection{Design Recipe}
+
+Interfaces change the design recipe in one important way.  In the Template
+step, we take an inventory of what is available in the body of a function or
+method.  When designing a method, we have the following available to us:
+@itemlist[
+@item{The fields of this object, accessed with @r[field],}
+@item{The methods of this object, accessed by calling them,}
+@item{And the operations of the arguments, which are given by their @emph{interfaces}.}
+]
+
+For example, if a method takes an input @r[a-list] which is specified in the
+contract to be an @tt{IList}, then we know that @r[(send a-list empty?)],
+@r[(send a-list length)], and so on.  
 
 
 @section{Delegation}
 
-Seperate concept from mechanism.
+So far, we've seen multiple ways to abstract repeated code.  First, in Fundies
+1, we saw functional abstraction, where we take parts of functions that differ
+and make them parameters to the abstracted function.  Second, in this class
+we've seen abstraction  by using inheritance, where if methods in two related
+classes are identical, they can be lifted into one method in a common
+superclass.  
 
-Class 0 without helper functions:
+However, can we still abstract common code without @emph{either} of these
+mechanisms?  Yes.  
+
+Consider the @racketmodname[class0], @emph{without} helper functions.  We can
+write a binary tree class like this:
 
 @#reader scribble/comment-reader
 (racketmod
@@ -449,6 +515,13 @@ Class 0 without helper functions:
       (new node% n this this)))
 )
 
+Unfortunately, the @r[double] method is identical in both the @r[leaf%] and
+@r[node%] classes.  How can we abstract this without using inheritance or a
+helper function?
+
+One solution is to create a new class, and @emph{delegate} the responsibility
+of doing the doubling to it.  Below is an example of this:
+
 @#reader scribble/comment-reader
 (racketblock
   (define-class helper%
@@ -470,3 +543,9 @@ Class 0 without helper functions:
     (define/public (double n)
       (send tutor double-helper n this)))
 )
+
+The @r[helper%] class has just one method, although we could add as many as we
+wanted.  We also need only one instance of @r[helper%], called @r[tutor],
+although we could create new instances when we needed them as well.  Now the
+body of @r[double-helper] contains all of the doubling logic in our program,
+which might become much larger without needing duplicate code.  
