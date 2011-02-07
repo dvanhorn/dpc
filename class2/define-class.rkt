@@ -139,7 +139,7 @@
                                                  #'arg)))]))])
                (void)
                (over (custom-write p) 
-                (fprintf p "(new ~a" 'class%)
+                (fprintf p "(object:~a" 'class%)
                 (for ([i (list #,@(append (syntax->list #'(the-fld ...))
                                           (map second (attribute super%.fields))))])
                   (fprintf p " ~v" i))

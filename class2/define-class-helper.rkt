@@ -1,5 +1,5 @@
 #lang racket
-(require syntax/parse)
+(require syntax/parse (for-template racket/base racket/class))
 (provide (all-defined-out))
 
 (define-struct interface-name (id)
@@ -22,13 +22,14 @@
            ;#:attr methods (interface-name-methods (attribute v))
            ))
 
-
 (define-struct class-name (id flds methods)
   #:property prop:procedure 
   (λ (inst stx) 
-    (raise-syntax-error #f 
-                        "class names may not be used as expressions" 
-                        stx)))
+    (syntax-parse stx
+      [(_ args ...)
+       #`(make-object #,(class-name-id inst) args ...)]
+      [_
+       (raise-syntax-error #f "class names may not be used as expressions" stx)])))
 
 (define-syntax-class cls-name
   #:description "a class name"
