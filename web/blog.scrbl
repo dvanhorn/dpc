@@ -7,11 +7,19 @@
 
 @title*{Blog}
 
+@section*{@tt{class2} Released}
+
+@tt{Mon Feb  7 16:00:01 EST 2011}
+
+A new version of the course software has been released, including
+@tt{class2}.  The newest version of the class system is
+@tt{class-system-02-07.plt}.
+
 @section*{Course Software Fixed}
 
 @tt{Thu Feb  3 17:06:01 EST 2011}
 
-A new version of the course software has been release, fixing a
+A new version of the course software has been released, fixing a
 singificant bug in its use with DrRacket.  The newest version of the
 class system is @tt{class-system-02-03.plt}.
 

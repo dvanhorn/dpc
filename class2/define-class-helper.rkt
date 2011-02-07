@@ -28,8 +28,8 @@
     (syntax-parse stx
       [(_ args ...)
        #`(make-object #,(class-name-id inst) args ...)]
-      [_
-       (raise-syntax-error #f "class names may not be used as expressions" stx)])))
+      [i:id
+       #`(lambda a (apply make-object #,(class-name-id inst) a))])))
 
 (define-syntax-class cls-name
   #:description "a class name"

@@ -14,6 +14,11 @@
                      "define-class-helper.rkt"))
 (require (prefix-in r: racket))
 
+;; for field construction
+(define-struct field-wrapper (vals))
+
+(define (wrap . x) (make-field-wrapper x))
+
 (define-syntax object% (class-name #'r:object% null null))
 
 (define-syntax (super stx) 
@@ -115,9 +120,13 @@
               (r:init cargs ...)
               (r:field (the-fld (void)) ...)
               (r:let-values ([(the-fld2 ... inherit-fld ...)
-                              (let-syntax ([fields (make-rename-transformer #'r:values)])
-                                cbody)])
-                            (void)
+                              (let-syntax ([fields (make-rename-transformer #'wrap)])
+				(let ([v cbody])
+				  (if (field-wrapper? v)
+				      (apply values (field-wrapper-vals v))
+				      (error 
+				       'class% 
+				       "constructor must use `fields' to produce result"))))])
                             (r:set! the-fld the-fld2) ...
                             (r:super-make-object inherit-fld ...))
               (r:inherit super-methods) ...
