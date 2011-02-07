@@ -51,9 +51,9 @@ consists of @racket[Invaders], each of which has a location (@racket[x],
 animation. An @racket[Invader], for now, is either a @racket[Ball] or a
 @racket[Block].
 
-@(racketmod class1) @; Report bug: racketmod loses first level of indentation
 @#reader scribble/comment-reader
-(racketblock
+(racketmod
+class1
 (require 2htdp/image)
 (require class1/universe)
 

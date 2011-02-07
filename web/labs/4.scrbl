@@ -31,9 +31,9 @@
 
 @lab:section{Universe with objects}
 
-@(racketmod class1) @; Report bug: racketmod loses first level of indentation
 @#reader scribble/comment-reader
-(racketblock
+(racketmod
+class1
 (require class1/universe)
 (require 2htdp/image)
 

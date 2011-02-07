@@ -58,9 +58,10 @@ Choose Language... → Use the language declared in the source}. Then start your
 file with the following lines:
 
 @#reader scribble/comment-reader
-(racketmod class0
-  (require 2htdp/image)
-  (require class0/universe)
+(racketmod
+class0
+(require 2htdp/image)
+(require class0/universe)
 )
 
 The @tt{#lang} line tells Racket to use the @racket[class0] language, and the
