@@ -81,10 +81,12 @@
                     [fields (datum->syntax stx 'fields)]
                     [(the-fld ...)
                      (generate-temporaries (syntax (fld ...)))]
+                    [(the-fld2 ...)
+                     (generate-temporaries (syntax (fld ...)))]
                     [(super-methods ...) (attribute super%.methods)]
                     [(meths ...) #'(super-methods ... <definition>.f ...)]
                     [(inherit-fld ...)
-                     (map reverse (attribute super%.fields))]
+                     (map second (attribute super%.fields))]
                     ;; the real names
                     [(all-field-names ...)
                      (append (map second (attribute super%.fields))
@@ -111,11 +113,15 @@
               (r:inherit-field inherit-fld) ...
                    ;(r:field the-fld) ...
               (r:init cargs ...)
-              (r:define-values (the-fld ...)
-                   (let-syntax ([fields (make-rename-transformer #'r:values)])
-                     cbody))
+              (r:field (the-fld (void)) ...)
+              (r:let-values ([(the-fld2 ... inherit-fld ...)
+                              (let-syntax ([fields (make-rename-transformer #'r:values)])
+                                cbody)])
+                            (void)
+                            (r:set! the-fld the-fld2) ...
+                            (r:super-make-object inherit-fld ...))
               (r:inherit super-methods) ...
-              (r:super-new)
+              #;(r:super-new)
               (r:define/public (fld) the-fld)
               ...
               (splicing-let-syntax

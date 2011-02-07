@@ -60,7 +60,6 @@ Now we can abstract
 
 HERE
 
-
 - dot notation
 
 - interface inheritance
