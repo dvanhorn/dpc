@@ -19,7 +19,7 @@
     (error "Empty TreeDict doesn't contain key" k))
 
   (define/public (set k v)
-    (new td-node% k v this this))
+    (td-node% k v this this))
 
   (define/public (size)
     0)
@@ -46,21 +46,18 @@
 
   (define/public (set k v)
     (cond
-      [(< k (field key)) (new td-node%
-                              (field key)
-                              (field value)
-                              ((field left) . set k v)
-                              (field right))]
-      [(= k (field key)) (new td-node%
-                              (field key)
-                              v
-                              (field left)
-                              (field right))]
-      [(> k (field key)) (new td-node%
-                              (field key)
-                              (field value)
-                              (field left)
-                              ((field right) . set k v))]))
+      [(< k (field key)) (td-node% (field key)
+                                   (field value)
+                                   ((field left) . set k v)
+                                   (field right))]
+      [(= k (field key)) (td-node% (field key)
+                                   v
+                                   (field left)
+                                   (field right))]
+      [(> k (field key)) (td-node% (field key)
+                                   (field value)
+                                   (field left)
+                                   ((field right) . set k v))]))
 
   (define/public (size)
     (+ 1 ((field left) . size) ((field right) . size)))
@@ -74,4 +71,4 @@
 
 ; empty-tree-dict : [TreeDict V]
 (define empty-tree-dict
-  (new td-leaf%))
+  (td-leaf%))
