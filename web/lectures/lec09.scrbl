@@ -29,7 +29,7 @@
 @item{Some students have reported with some problems with installing
 the latest versions of the course software.  Please remember that we
 are using version 5.0.2 of Racket; if you are having trouble with
-some other version, you should switcht to 5.0.2.  If you have some
+some other version, you should switch to 5.0.2.  If you have some
 persistent issue, @emph{please report the problem to us}.  We will
 try to resolve any bugs with our software in a timely fashion.}
 
@@ -45,7 +45,7 @@ conflicts.}
 @item{Exam preparation: we will happily distribute all previous exams
 for this course.  Unfortunately, there have been no previous exams for
 this course.  With that in mind, the best way to prepare for the exams
-is to do the homeworks and study the lecture notes we post on the
+is to do the home-works and study the lecture notes we post on the
 web.}  ]
 
 @section{Canonical forms}
@@ -76,7 +76,7 @@ fractions:
 as representing the same number, namely @racket[1/2], but these are
 different representations of the same information.  The issue with
 fractions is a recurring issue we've seen with information that allows
-for mutliple representations (sets are another example).  
+for multiple representations (sets are another example).  
 
 There are a couple approaches to solving this issue:
 
@@ -88,7 +88,7 @@ There are a couple approaches to solving this issue:
 ]
 
 The first approach basically eliminates the problem of multiple
-representations by picking a unique representation for any given peice
+representations by picking a unique representation for any given piece
 of information.  For example, with fractions, we might choose to
 represent all fractions in lowest terms.  This means any fraction
 admits only a single representation and therefore any fractions which
@@ -96,7 +96,7 @@ are interpreted as "the same" have exactly the same structure.  (This
 approach is not always possible or feasible.)
 
 The second approach requires us to write a program (a function, a
-method, etc.) that determines when two peices of data are interpreted
+method, etc.) that determines when two pieces of data are interpreted
 as representing the same information.  For example, we could write a
 method that converts fractions to numbers and compares them for
 numerical equality; or we simplify the fraction to lowest terms and
@@ -116,7 +116,7 @@ following method:
 )}
 
 This method essentially embodies our interpretation of the
-@racket[fraction%] class of data.  It doesn't help with this issuse:
+@racket[fraction%] class of data.  It doesn't help with this issues:
 
 @codeblock{
   (check-expect (new fraction% 1 2)
@@ -296,7 +296,7 @@ call to the constructor.  We chose the latter.
 Q: Can you call methods on the object being constructed?  
 
 A: No.  What would they do?  Suppose you invoked a message that
-refered to fields of @racket[this] object --- those things just
+referred to fields of @racket[this] object --- those things just
 don't exist yet.
 
 Some languages allow this.  Java for example, will let you invoke
@@ -388,7 +388,7 @@ a denominator in @racket[fraction%], for example.)
 @section{Ordered binary trees}
 
 Now we want to look at a slightly larger program and how we use
-constructors to enforce imporant invariants.  In this section, we want
+constructors to enforce important invariants.  In this section, we want
 to develop a @emph{representation of sorted lists of numbers}, which
 is what we did in the @seclink["lec08"]{last lecture}, but this time
 we're going to represent a sorted list of numbers as an @emph{ordered
@@ -408,9 +408,9 @@ Notice that there is data only at the leaves of the tree and that if
 you traverse the leaves in left-to-right order, you recover the sorted
 list of numbers.  Thus there is an important invariant about this data
 structure: whenever we have an ordered binary tree node, the left
-subtree is sorted and the right subtree is sorted @emph{and} and
-numbers in the left subtree are smaller than or equal to all the
-numbers in the right subtree.
+sub-tree is sorted and the right sub-tree is sorted @emph{and} and
+numbers in the left sub-tree are smaller than or equal to all the
+numbers in the right sub-tree.
 
 Here is our data and class definition for ordered binary trees:
 
@@ -486,9 +486,9 @@ default constructor works:
     (fields a b))
 }}
 
-Why?  Although we know that the left and right subtree are @tt{OBT}s,
+Why?  Although we know that the left and right sub-tree are @tt{OBT}s,
 we know nothing about the relationship @emph{between} the left and
-right subtree, which was an important part of the invariant.  Consider
+right sub-tree, which was an important part of the invariant.  Consider
 for example, the @tt{OBT}s:
 
 @codeblock{
@@ -508,8 +508,8 @@ which is definitely @emph{not} an @tt{OBT}.  (Thus we have broken the
 stated contract on the constructor.)
 
 We could correctly @emph{compute} an @tt{OBT} by determining that, in
-this example, the first given tree needs to be the right subtree and
-the second given tree needs to be the left subtree.  We can make such
+this example, the first given tree needs to be the right sub-tree and
+the second given tree needs to be the left sub-tree.  We can make such
 a determination based on the maximum and minimum numbers in each of
 the given trees, and that suggest the following constructor:
 
@@ -575,7 +575,7 @@ and error:
 But really this again fails to live up to the stated contract since we
 should be able to take any two @tt{OBT}s and construct an @tt{OBT} out
 of them.  We know that if the trees overlap, we can't simple make a
-node with them as subtrees; we have to do something more sophisticated.
+node with them as sub-trees; we have to do something more sophisticated.
 Here's an idea: insert all of the elements of one into the other.
 So long as we make this insertion do the right thing, our constructor
 will succeed in maintaining the invariant properly.
@@ -656,7 +656,7 @@ existing number to determine which side the number should go to:
 }}
 
 In the case of inserting a number into a node, we compare the number
-against the maximum of the left subtree to determine if the number
+against the maximum of the left sub-tree to determine if the number
 should be inserted in the left or right:
 
 @filebox["node%"]{
