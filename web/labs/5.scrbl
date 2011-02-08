@@ -30,22 +30,20 @@ kinds of dictionaries we will build in this lab:
 
 @#reader scribble/comment-reader
 (interaction #:eval the-eval
-  (eval:alts
-    (define d
-      (send (send (send empty-dict set 1 "one") set 2 "two") set 3 "three"))
-    (void))
-  (eval:alts (send d lookup 1)
-             "one")
-  (eval:alts (send d lookup 2)
-             "two")
-  (eval:alts (send (send d set 1 "uno") lookup 1)
-             "uno")
-  (eval:alts (send (send d set 1 "uno") lookup 2)
-             "two")
-  (eval:alts (send d has-key? 4)
-             false)
-  (eval:alts (send d has-value? "two")
-             true)
+(eval:alts (define d (empty-dict #,dot set 1 "one" #,dot set 2 "two" #,dot set 3 "three"))
+           (void))
+(eval:alts (d #,dot lookup 1)
+           "one")
+(eval:alts (d #,dot lookup 2)
+           "two")
+(eval:alts (d #,dot set 1 "uno" #,dot lookup 1)
+           "uno")
+(eval:alts (d #,dot set 1 "uno" #,dot lookup 2)
+           "two")
+(eval:alts (d #,dot has-key? 4)
+           false)
+(eval:alts (d #,dot has-value? "two")
+           true)
 )
 
 @lab:section{An interface for dictionaries}
@@ -108,10 +106,11 @@ How good are your tests?---make sure you pass this one:
 
 @#reader scribble/comment-reader
 (racketblock
-(check-expect
-  (send (send (send (send (ld-empty%) set 1 "one") set 2 "two") set 1 "uno")
-        lookup 1)
-  "uno")
+(check-expect ((ld-empty%) #,dot set 1 "one"
+                           #,dot set 2 "two"
+                           #,dot set 1 "uno"
+                           #,dot lookup 1)
+              "uno")
 )
 
 @exercise{
@@ -150,7 +149,7 @@ What @tt{ListDict} do you get back if you set the same key twice?
 
 @#reader scribble/comment-reader
 (racketblock
-(send (send (ld-empty%) set 1 "one") 1 "uno")
+((ld-empty%) #,dot set 1 "one" #,dot set 1 "uno")
 )
 
 Does your @racket[set] method hunt through the list and remove old mappings for

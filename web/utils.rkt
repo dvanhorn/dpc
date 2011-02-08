@@ -6,6 +6,7 @@
          class-system-filename
          class-system-url
          class-system-latest
+         dot
 	 (rename-out [racket r]))
 (require scribble/base)
 
@@ -117,3 +118,6 @@
 
 (define class-system-latest
   "http://www.ccs.neu.edu/course/cs2510h/class-system-latest.plt")
+
+(define dot
+  (racketidfont "."))
