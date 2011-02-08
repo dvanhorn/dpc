@@ -7,6 +7,14 @@
 
 @title*{Blog}
 
+@section*{Exam 1 room: 110 WVH}
+
+Exam 1 will take place in 110 WVH on Tuesday, 2/15/2011, from 6-PM.
+Note that is @bold{NOT} where lecture is held (that's 108WVH), but it
+is right next door.  So if you mistakenly go to 108 and notice a bunch
+of your peers going in to 110, you should probably go in there with
+them.
+
 @section*{@tt{class2} Released}
 
 @tt{Mon Feb  7 16:00:01 EST 2011}
