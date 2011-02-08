@@ -41,7 +41,7 @@ For example:
 (define-class c%
   (fields x y z)
   
-   ;; works
+  ;; works
   (check-expect ((new c% 1 2 3) . m) 1)
   ;; doesn't work
   (check-expect ((new c% 1 2 3) . m) (field x))
@@ -88,8 +88,8 @@ the implementation of the @r[contains?] method.
 (define-class smt%
   (check-expect ((new smt%) . contains? 5) false)
   (define/public (contains? n)
-    false)
-  )
+    false))
+
 (define-class scons%
   (fields first rest)
   (check-expect ((new scons% 5 (new smt%)) . contains? 5) true)
@@ -202,7 +202,7 @@ more general properties that we can state and check about programs.
 Here's a property about our sorted list library, which we would like
 to be true:
 
-@tt{∀ sls . ∀ n . }@racket[((sls #,(racketidfont ".") insert n) #,(racketidfont ".") contains? n)]
+@tt{∀ sls : ISorted . ∀ n : Number . }@racket[((sls #,(racketidfont ".") insert n) #,(racketidfont ".") contains? n)]
 
 How would we check this?  We can check a few instances with unit
 tests, but this property makes a very strong claim.  If we were
