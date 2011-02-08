@@ -249,7 +249,7 @@ construct an object that does not have this property.
 
 Returning to our @racket[simplify] method; we don't really need it any
 longer.  (We could, if need be, re-write the code to take advantage of
-the invariant and give a correction implementation of
+the invariant and give a correct implementation of
 @racket[simplify] as @racket[(define/public (simplify) this)], since
 all fractions are already simplified.)  Likewise, we no longer need
 the @racket[fract-constructor] function.
@@ -295,15 +295,16 @@ call to the constructor.  We chose the latter.
 
 Q: Can you call methods on the object being constructed?  
 
-A: No.  What would they do?  Suppose you invoked a message that
+A: No.  What would they do?  Suppose you invoked a method that
 referred to fields of @racket[this] object --- those things just
 don't exist yet.
 
 Some languages allow this.  Java for example, will let you invoke
 methods from within constructors and should those methods reference
 fields that are not initialized, bad things happen.  (This is just
-poor language design, and descends from Sir Tony Hoare's "Billion
-Dollar Mistake": the null reference.)
+poor language design, and descends from
+@link["http://en.wikipedia.org/wiki/C._A._R._Hoare"]{Sir Tony Hoare}'s
+"Billion Dollar Mistake": the null reference.)
 
 
 @section{Integrity checking}
@@ -325,7 +326,7 @@ in a constructor.  We will implement a class to represent dates and
 raise an error in case of a situation like the above.
 
 @codeblock{
-  ;; A Date is (new date% Number Number Number).
+  ;; A Date is (date% Number Number Number).
   ;; Interp: Year Month Day.
   ;; Year must be positive.
   ;; Month must be in [1,12].
@@ -377,7 +378,13 @@ one that accepts all the things deemed acceptable in our specification
 	     [else (fields y m d)]))))
 
 @examples[#:eval the-eval
-  (new date% 2011 3 67)]
+  (date% 2011 3 67)]
+
+@margin-note{It is still possible to construct meaningless dates, such
+as February 31, 2011.  However, more stringent validation is just some
+more code away, and since we are more concerned with the
+@emph{concept} of integrity checking than in a robust date library, we
+won't go into the details.}
 
 Thus we can @emph{establish} invariants with computation, or we can
 @emph{reject} inputs that don't have the invariant we want to
@@ -605,8 +612,8 @@ then we can write the constructor as follows:
 ]}
 
 That leaves @racket[insert-tree] to be written.  First let's consider
-the case of insert a @racket[leaf%] into a tree.  If we again rely on
-some wishful thinking and relegate the work to another method that
+the case of inserting a @racket[leaf%] into a tree.  If we again rely
+on some wishful thinking and relegate the work to another method that
 inserts a number into a list, we can easily write @racket[insert-tree]
 for the @racket[leaf%] case:
 
@@ -627,9 +634,10 @@ inventory of what we have available to use), we have:
 ]}
 
 But here we don't really want to insert the left tree into the other
-and the right into the other.  We want to insert the right tree
-into the other, then insert the left tree into @emph{that one}.
-(other permutations of that work, too).  That leads us to:
+and the right into the other.  We want to insert the right tree into
+the other, then insert the left tree into @emph{that one} (other
+permutations of the order of insertions would work, too).  That leads
+us to:
 
 @filebox["node%"]{
 @racketblock[
@@ -651,8 +659,8 @@ existing number to determine which side the number should go to:
 @filebox["leaf%"]{
 @codeblock{
 (define/public (insert m)
-  (node% (leaf% (min n m))
-         (leaf% (max n m))))
+  (node% (leaf% (the-real-min n m))
+         (leaf% (the-real-max n m))))
 }}
 
 In the case of inserting a number into a node, we compare the number
