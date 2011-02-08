@@ -591,7 +591,8 @@ So if we indulge in some wishful thinking and suppose we have a
 then we can write the constructor as follows:
 
 @filebox["node%"]{
-@codeblock{
+@#reader scribble/comment-reader
+@racketblock[
   ;; OBT OBT -> OBT
   (constructor (a b)
     (cond [(<= (b . max) (a . min))
@@ -599,117 +600,73 @@ then we can write the constructor as follows:
           [(<= (a . max) (b . min))
            (fields a b)]
           [else
-           (local [(define t (send a insert-tree b))]
+           (local [(define t (a #,(racketidfont ".") insert-tree b))]
 	     (fields (t . left) (t . right)))]))
+]}
+
+That leaves @racket[insert-tree] to be written.  First let's consider
+the case of insert a @racket[leaf%] into a tree.  If we again rely on
+some wishful thinking and relegate the work to another method that
+inserts a number into a list, we can easily write @racket[insert-tree]
+for the @racket[leaf%] case:
+
+@filebox["leaf%"]{
+@codeblock{
+  (define/public (insert-tree other)
+    (send other insert (field number)))
 }}
 
-That leaves @racket[insert-tree] to be written.
+In the @racket[node%] case, if we first consider the template (the
+inventory of what we have available to use), we have:
+
+@filebox["node%"]{
+@racketblock[
+  (define/public (insert-tree other)
+    ((field left) #,(racketidfont ".") insert-tree other) ... 
+    ((field right) #,(racketidfont ".") insert-tree other) ...)
+]}
+
+But here we don't really want to insert the left tree into the other
+and the right into the other.  We want to insert the right tree
+into the other, then insert the left tree into @emph{that one}.
+(other permutations of that work, too).  That leads us to:
+
+@filebox["node%"]{
+@racketblock[
+  (define/public (insert-tree other)
+    ((field left) #,(racketidfont ".") insert-tree ((field right) #,(racketidfont ".") insert-tree other)))
+]}
+
+We have only a single item remaining on our wish list---we need to
+implement the @racket[insert] method for inserting a single number
+into a tree.
+
+First let's consider the case of inserting a number into a
+@racket[leaf%].  If we have a leaf and we insert a number into it, we
+know we get a node with two leaves.  But where should the inserted
+number go?  One solution is to compare the inserted number against the
+existing number to determine which side the number should go to:
 
 
-
-@internal{
-
-
-1) Take elements out of a binary tree.
-2) Put elements into a binary tree.
-
-Write insert.
-
-Some examples:
-
-(check-expect (x1 . insert 5) (node% (leaf% 5) (leaf% 7)))
-(check-expect (x2 . insert 5) (node% (leaf% 1) (node% (leaf% 2) (leaf% 5))))
-
-Is this the only representation of the latter?
-
-Have to think hard about test cases and how we check that we have the
-right implementation.
-
+@filebox["leaf%"]{
+@codeblock{
 (define/public (insert m)
   (node% (leaf% (min n m))
          (leaf% (max n m))))
+}}
 
-But more complicated then it needs to be.  We can simplify to:
+In the case of inserting a number into a node, we compare the number
+against the maximum of the left subtree to determine if the number
+should be inserted in the left or right:
 
-(define/public (insert m)
-  (node% (leaf% m) this))
+@filebox["node%"]{
+@racketblock[
+  (define/public (insert n)
+    (cond [(> n ((field left) . max))
+           (node% (field left)
+		  ((field right) #,(racketidfont ".") insert n))]
+	  [else
+	   (node% ((field left) #,(racketidfont ".") insert n)
+		  (field right))]))
+]}
 
-Since the node% constructor will arrange things correctly for us.
-
-(define/public (insert n)
-  (cond [(> n ((field left) . max))
-         (node% (field left)
-		((field right) . insert n))]
-        [else
-         (node ((field left) . insert n)
-	       (field right))]))
-
-What if we try this:
-
-(check-expect (x2 . insert 2) (node% (leaf% 1) (node (leaf% 2) (leaf% 2))))
-
-Errors because constructor says trees overlap.
-
-Revise < to <= in the node% constructor.
-
-Still have to extract numbers from a tree.
-
- *
-/ \
-2 4
-
-If we want to extract 2 and get (leaf% 4).
-
-New idea: 
-
-insert-tree : OBT -> OBT
-
-Write some examples:
-
-(check-expect (x2 . insert-tree x1) 
-	      (node% (leaf% 1)  (node% (leaf% 2) (leaf% 7))))
-
-
-Make a change: insert ourselves into the other tree, not the other
-tree into ourselves.
-
-Change purpose statement:
-
-;; insert-tree: insert ...
-
-What does that mean for our example:
-
-(check-expect (x2 . insert-tree x1) 
-	      (node% (leaf% 1)  (node% (leaf% 2) (leaf% 7))))
-
-Insert 1, then inert 2 (same tree as before).
-
-leaf:
-
-(define/public (insert-tree other)
-   (other . insert (field number)))
-
-node:
-
-Think about what we have available in the template:
-
-(define/public (insert-tree other)
-   ((field left) . insert-tree other)
-   ((field left) . insert-tree other)
-   ...)
-
-Neither of these are exactly what we want.  Instead, we want to insert
-*both* the other tree into the left and right.
-
-(define/public (insert-tree other)
-  ((field left) . insert-tree ((field right) . insert-tree other)))
-
-Two things to do to fix this test:
-
-- Change the example
-- Flatten to a list and compare.
-- Construct them in some deterministic structure.
-
-Go back to constructor, not using fields; pull out fields of
-construction.
-}
