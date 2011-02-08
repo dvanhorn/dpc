@@ -18,17 +18,20 @@ class: clean-class copy-doc
 		-v --at-plt --replace \
 		++setup class0 \
 		++setup class1 \
+		++setup class2 \
 		++setup scribblings/main \
 		$(CLASS) \
-		class0/ class1/)
+		class0/ class1/ class2/)
 
 clean-class:
 	find ../class* -name compiled -type d | xargs rm -fr
 	rm -fr ../class-system-*.plt
 
 copy-doc:
+	rm -fr ../class2/scribblings/
 	rm -fr ../class1/scribblings/
 	rm -fr ../class0/scribblings/
+	cp -r ./class/ ../class2/scribblings/
 	cp -r ./class/ ../class1/scribblings/
 	cp -r ./class/ ../class0/scribblings/
 

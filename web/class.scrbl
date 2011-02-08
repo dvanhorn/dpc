@@ -8,6 +8,7 @@
 
 @include-section["class/class0.scrbl"]
 @include-section["class/class1.scrbl"]
+@include-section["class/class2.scrbl"]
 
 The latest class system is:
 
@@ -17,4 +18,5 @@ It can be accessed at either of the following URLs:
 
 @indented{
   @link[class-system-latest]{@class-system-latest}
+
   @link[class-system-url]{@class-system-url}}
