@@ -1,8 +1,11 @@
 #lang class2
+;; =========================================================
+;; Two player distributed Tron
+
 (require class1/universe)
 (require 2htdp/image)
-
-;; Two player distributed Tron.
+(provide serve play mt% final% WAITING MT-SCENE draw-match
+         outcome?)
 
 ;; -> Universe World World
 ;; Play a game locally.
@@ -12,7 +15,7 @@
                       (play LOCALHOST)))
   
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; =========================================================
 ;; Shared
 
 ;; A Trail is a (cons Posn [Listof Posn]).
@@ -25,7 +28,7 @@
 (define GRID-HEIGHT 60)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; =========================================================
 ;; Server
 
 ;; A Universe is one of:   Interp:
@@ -36,12 +39,12 @@
 ;; A Cycle is a (cycle% IWorld Dir Trail)
 ;; Interp: owner, direction, and trail.
 
+(define (serve)
+  (universe (init%)))
+
 ;; Universe -> Bundle
 (define (just u)
   (make-bundle u empty empty))
-
-(define (serve)
-  (universe (init%)))
 
 (define-class init%
   (define/public (tick-rate) 1/2)
@@ -323,7 +326,7 @@
                              (quotient GRID-HEIGHT 2))))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; =========================================================
 ;; Client
 
 ;; A World is one of:
@@ -386,7 +389,7 @@
   (define/public (to-draw)
     (draw-match (field m)))
   
-  ;; KeyEvent -> World
+  ;; KeyEvent -> (U Package World)
   ;; Handle directional keys by sending to server.
   (check-expect ((match% '(() ())) . on-key "up")
                 (make-package (match% '(() ())) "up"))
@@ -469,11 +472,5 @@
                  (second m)
                  (draw-player "orange" 
                               (first m) 
-                              MT-SCENE))))                    
-                           
-                            
-                     
-
-
-
+                              MT-SCENE))))
 
