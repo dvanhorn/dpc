@@ -1,5 +1,5 @@
 #lang scribble/manual
-@title[#:style 'toc]{Designing Programs with Class}
+@title[#:style 'toc #:version "0.1"]{Designing Programs with Class}
 
 @table-of-contents[]
 
