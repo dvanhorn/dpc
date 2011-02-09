@@ -1,4 +1,34 @@
 #lang class2
+;; RUBRIC
+;; ========================================================
+
+;; Problem set 4, Problem 2 (total 50 points)
+
+;; This problem is supposed to be written in class1, but 
+;; the solution is in class2 just for the convenience of
+;; leaving of `new'.
+
+;; This rubric is fairly open-ended because the design is
+;; fairly open-ended.
+
+;; World
+;; -----
+
+;; 10 Points for clear, sensible data definitions for the
+;; state of the world.
+;; Should include some way of modeling:
+;; - initial world (waiting for server to start play)
+;; - world in play
+
+;; For all world classes (in total):
+;; 10 Points for purpose statements
+;; 10 Points for contracts
+;; 10 Points method definitions (code)
+;; 10 Points for tests
+
+;; Students need not do anything interesting with their
+;; computer player.
+
 ;; =========================================================
 ;; Computer Tron
 

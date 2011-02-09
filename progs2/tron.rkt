@@ -1,11 +1,55 @@
 #lang class2
+;; RUBRIC
+;; ========================================================
+
+;; Problem set 4, Problem 1 (total 100 points)
+
+;; This problem is supposed to be written in class1, but 
+;; the solution is in class2 just for the convenience of
+;; leaving of `new'.
+
+;; This rubric is fairly open-ended because the design is
+;; fairly open-ended.
+
+;; Universe
+;; --------
+;; 10 Points for clear, sensible data definitions for the
+;; state of the universe.
+;; Should include some way of modeling:
+;;   - no players (waiting for 2 to join)
+;;   - 1 player (waiting for other to join)
+;;   - 2 players (playing)
+;;
+;; For all universe classes (in total):
+;; 10 Points for purpose statements
+;; 10 Points for contracts
+;; 10 Points method definitions (code)
+;; 10 Points for tests
+
+;; World
+;; -----
+
+;; 10 Points for clear, sensible data definitions for the
+;; state of the world.
+;; Should include some way of modeling:
+;; - initial world (waiting for server to start play)
+;; - world in play
+
+;; For all world classes (in total):
+;; 10 Points for purpose statements
+;; 10 Points for contracts
+;; 10 Points method definitions (code)
+;; 10 Points for tests
+
 ;; =========================================================
 ;; Two player distributed Tron
 
 (require class1/universe)
 (require 2htdp/image)
-(provide serve play mt% final% WAITING MT-SCENE draw-match
-         outcome?)
+(provide serve play 
+         mt% final% 
+         WAITING MT-SCENE 
+         draw-match outcome?)
 
 ;; -> Universe World World
 ;; Play a game locally.
