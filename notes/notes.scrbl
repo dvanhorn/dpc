@@ -14,4 +14,6 @@
 
 @include-section["labnotes.scrbl"]
 
-@;@include-section["../web/class.scrbl"]
+@include-section["class0.scrbl"]
+@include-section["class1.scrbl"]
+@include-section["class2.scrbl"]
