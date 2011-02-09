@@ -4,10 +4,12 @@
                               define-struct
                               or
                               local
+			      check-expect
                               <= < * /))
           (for-label (except-in 2htdp/image color))
           (for-label (only-in 2htdp/universe mouse=?))
           (for-label (except-in class1 
+				check-expect
                                 define-struct
 				first
                                 rest
@@ -1449,5 +1451,6 @@ zombies that are randomly chosen to be either regular or modulo.
  (check-expect (send rls append wls)
 	       (new wlist% (list 2 3 4 2 3 4)))
 )
+
 }]
 
