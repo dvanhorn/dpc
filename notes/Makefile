@@ -1,5 +1,6 @@
 notes.pdf:
-	raco scribble --latex \
+	find ../class* -name compiled -type d | xargs rm -fr	
+	env STUDENTS=1 raco scribble --latex \
 		--prefix dpc-prefix.tex \
 		--style dpc-style.tex notes.scrbl
 	xelatex notes
