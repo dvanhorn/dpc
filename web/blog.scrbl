@@ -7,6 +7,14 @@
 
 @title*{Blog}
 
+@section*{Modules and homeworks}
+
+@tt{Tue Feb  8 22:39:16 EST 2011}
+
+You are free to use modules to structure your assignment solutions as
+you see fit, so long as you have files @tt{1.rkt}, @tt{2.rkt}, etc.,
+for each part of the assignment.
+
 @section*{Exam 1 room: 110 WVH}
 
 @tt{Mon Feb  7 21:35:25 EST 2011}
