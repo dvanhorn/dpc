@@ -1,19 +1,12 @@
 #lang scribble/manual
-@(require "../utils.rkt"
+@(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class1 define-struct ... length))
 	  (for-label 2htdp/image)
 	  (for-label class1/universe))
 
-@title[#:tag "lec07"]{1/31: Delegation}
+@title[#:tag "lec07"]{Delegation}
 
-
-@section[#:tag-prefix "lec07"]{Announcements}
-
-@itemlist[
- @item{You have been assigned a new partner, who you should have
- contacted already.}
-]
 
 @section{New language features}
 

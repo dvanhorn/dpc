@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "../utils.rkt"
+@(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class1 define-struct ... length))
 	  (for-label 2htdp/image)
@@ -14,36 +14,8 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec05"]{1/24: Larger system design: Snakes on a plane}
+@title[#:tag "lec05"]{Larger system design: Snakes on a plane}
 
-@internal{
-NOTES FOR FUTURE VERSIONS OF THIS LECTURE
-
-1) Make sure to get a whole subsystem working first (e.g., can draw
-snakes and "tick" snakes.  Then add death.  Then add eating and
-growth.  Then add mouse handling and changing direction.)
-
-2) Construction should be considered part of the interface.}
-
-
-@section[#:tag-prefix "lec05"]{Announcements}
-@itemlist[
-
-
-@item{Van Horn, Tobin-Hochstadt, and Brown will all be in lovely
-Austin, Texas for the remainder of the week in order to participate in
-the @link["http://www.cse.psu.edu/popl/11/"]{ACM SIGPLAN/SIGACT
-Conference on the Principles of Programming Languages}.
-Tobin-Hochstadt will have limited office hours today and Brown and Van
-Horn will not have office hours this week.  There will be a lecture on
-Thursday, given by Vincent St. Amour, a PhD candidate in the
-Programming Research Lab.  Come prepared with good Canadian jokes.}
-
-@item{Just a reminder: there will be a partner swap next Wednesday
-that will go into effect for assignment 4.  If you would like to
-request a partner, send us email @emph{before} Wednesday.  If we don't
-receive email from you, we will assign you a partner randomly.}
-]
 
 @section[#:tag-prefix "lec05"]{Questions and answers}
 

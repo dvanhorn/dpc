@@ -1,0 +1,29 @@
+\documentclass[10pt]{article}
+\usepackage{sectsty}
+\usepackage{fontspec}
+\usepackage{fancyhdr}
+
+\let\oldtableofcontents=\tableofcontents
+\renewcommand\tableofcontents{
+\newlength\tmpparskip
+\setlength{\tmpparskip}{\parskip}
+\thispagestyle{empty}
+\setlength{\parskip}{2pt}
+\oldtableofcontents
+\setlength{\parskip}{\tmpparskip}
+}
+
+\allsectionsfont{\fontspec{Latin Modern Roman Caps}}
+%\allsectionsfont{\centering\fontspec{Optima Regular}\mdseries}
+%\setromanfont{Baskerville}
+
+\parskip=10pt
+\parindent=0pt
+\partopsep=0pt
+
+% Adjust margins to match HTML width for
+% fixed-width font
+\advance \oddsidemargin by -0.15in
+\advance \evensidemargin by -0.15in
+\advance \textwidth by 0.3in
+

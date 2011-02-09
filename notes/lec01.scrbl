@@ -1,6 +1,6 @@
 #lang scribble/manual
 @(require scribble/eval
-	  "../utils.rkt"
+	  "../web/utils.rkt"
           racket/sandbox
           #;(for-label lang/htdp-intermediate-lambda)
   	  (for-label (only-in lang/htdp-intermediate-lambda define-struct))
@@ -19,30 +19,7 @@
                  (dynamic-require 'htdp/isl/lang/reader 'options))))|#
     the-eval))
 
-@title[#:tag "lec01"]{1/10: Object = structure + functions}
-
-@bold{Outline}
-@itemlist[
- @item{Announcements
-   @itemlist[
-     @item{Course staff introductions.}
-     @item{Basic class mechanics.}
-     @item{On the experimental nature of this course.}
-     @item{The @seclink["assign01"]{first assignment}
-           is due @bold{this} Wednesday.}
-     @item{The @seclink["lab01"]{first lab} is @bold{tonight}.}
-     @item{Partners have already been assigned.  See the @seclink["Blog"]{blog}.
-
-     Make sure to check your CCIS username is correct in the pair
-     assignments on the blog.  Make sure your partner exists.}     
-     @item{Questions?}]}
- @item{Basics of objects
-   @itemlist[
-     @item{New paradigm.  Open your mind and embrace it (or you will be miserable).}
-     @item{Rocket, designed in functional style.}
-     @item{Rocket, designed in object-oriented style.}
-     @item{Landing and take off.}
-     @item{Moon.}]}]
+@title[#:tag "lec01"]{Object = structure + functions}
 
 
 @section{Functional rocket}

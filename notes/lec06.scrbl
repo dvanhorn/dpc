@@ -1,28 +1,11 @@
 #lang scribble/manual
-@(require "../utils.rkt"
+@(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class1 define-struct ... length))
 	  (for-label 2htdp/image)
 	  (for-label class1/universe))
 
-@title[#:tag "lec06"]{1/27: Universe}
-
-@section[#:tag-prefix "lec06"]{Announcements}
-@itemlist[
-
-@item{New partners have been assigned, see the @seclink["Blog"]{blog}
-for pair assignments.}
-
-@item{@seclink["soln03"]{Solutions for assignment 3} are posted.}
-
-@item{@seclink["assign04"]{Assignment 4} is out.}
-
-@item{Reminder: Van Horn won't be available for his office hours, but
-  email the course staff if you need help with something.}
-
-@item{You will need the latest version of the course .plt file for
-  universe to work.}
-]
+@title[#:tag "lec06"]{Universe}
 
 @section{A look at the Universe API}
 

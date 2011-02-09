@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "../utils.rkt"
+@(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class1 define-struct ... length))
 	  (for-label 2htdp/image)
@@ -14,33 +14,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec04"]{1/20: Inheritance and interfaces}
-
-
-@section[#:tag-prefix "lec04"]{Announcements}
-@itemlist[
-
-@item{Solutions to homeworks are going to be made available on the
-course web page.  The solutions to @seclink["soln01"]{assignment 1}
-and @seclink["soln02"]{assignment 2} are already up.  This should not
-be taken as @emph{the one and only true} solution to the assignments;
-they simply represent a single design.}
-
-@item{Assignment 2 was due last night and assignment 3 will be out
-later today and is due Wednesday night.}
-
-@item{Assignment 4 will be with a new partner.  If you would like
-to work with someone, email us your request before next week.}
-
-@item{A new programming language, @racketmodname[class1], has been
-released.  Be sure to download and install the latest @tt{.plt} file.}
-
-@item{Books are in, so be sure to keep up on the reading.  You should
-be reading with an emphasis on the @emph{design concepts} covered in
-the book, not on the particulars of the Java programming language.  We
-will cover Java in class, but until then, you are not responsible for
-knowing how to program in Java (although it is not a bad idea to pick
-it up as you go).}]
+@title[#:tag "lec04"]{Inheritance and interfaces}
 
 @section{Discussion of assignment 2}
 

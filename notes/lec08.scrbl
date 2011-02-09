@@ -1,32 +1,14 @@
 #lang scribble/manual
-@(require "../utils.rkt"
+@(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class1 check-expect define-struct ... length))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
 	  (for-label class1/universe))
 
-@title[#:tag "lec08"]{2/3: Abstraction, Invariants, Testing}
+@title[#:tag "lec08"]{Abstraction, Invariants, Testing}
 
-
-@section[#:tag-prefix "lec08"]{Announcements}
-
-@itemlist[#:style 'ordered
-@item{The @seclink["assign04"]{new homework} is up.  It's hard, so you
-should start early on thinking about it.  In particular, think about
-your data definition design, because choosing appropriate data
-definitions is key to making the problem manageable.}
-]
-
-
-@section{New Language Features}
-
-@subsection{Dot Notation}
-
-The use of @(racketidfont ".") for method calls now works in the
-Interactions window.
-
-@subsection{@r[check-expect] in new places}
+@section{New language features: @r[check-expect] in new places}
 
 It's now possible to use @r[check-expect] in several places that
 didn't work before.  First, it now works inside functions.  The test

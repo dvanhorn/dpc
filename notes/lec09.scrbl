@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "../utils.rkt"
+@(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class1 check-expect define-struct ... length
 				numerator denominator))
@@ -16,37 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec09"]{2/7: Constructors}
-
-
-@section[#:tag-prefix "lec09"]{Announcements}
-
-
-@itemlist[#:style 'ordered
-
-@item{Hope you started on the homework.}
-
-@item{Some students have reported with some problems with installing
-the latest versions of the course software.  Please remember that we
-are using version 5.0.2 of Racket; if you are having trouble with
-some other version, you should switch to 5.0.2.  If you have some
-persistent issue, @emph{please report the problem to us}.  We will
-try to resolve any bugs with our software in a timely fashion.}
-
-@item{A new @tt{.plt} containing the @racketmodname[class2] language
-will be released  later today.}
-
-@item{@bold{Exam 1 is 8 days from today.}  It will be held on
-@bold{Tuesday, 2/15, from 6-9pm.}  You should already be aware of this
-since we posted the exam schedule before classes started and announced
-early in the semester that you should let us know if you have
-conflicts.}
-
-@item{Exam preparation: we will happily distribute all previous exams
-for this course.  Unfortunately, there have been no previous exams for
-this course.  With that in mind, the best way to prepare for the exams
-is to do the home-works and study the lecture notes we post on the
-web.}  ]
+@title[#:tag "lec09"]{Constructors}
 
 @section{Canonical forms}
 

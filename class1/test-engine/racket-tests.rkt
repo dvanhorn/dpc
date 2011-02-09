@@ -144,12 +144,14 @@
 				    #'test-engine))))))))))
 
 (define-for-syntax (check-context?)
+  #t
+  #;
   (let ([c (syntax-local-context)])
     (memq c '(module top-level))))
 
 ;; check-expect
 (define-syntax (check-expect stx)
-  #;(unless (check-context?)
+  (unless (check-context?)
     (raise-syntax-error 'check-expect CHECK-EXPECT-DEFN-STR stx))
   (syntax-case stx ()
     [(_ test actual)
