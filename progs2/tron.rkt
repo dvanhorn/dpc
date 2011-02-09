@@ -33,6 +33,13 @@
 ;; - (wait% IWorld)        - One player, waiting on second
 ;; - (game% Cycle Cycle)   - two player game
 
+;; A Cycle is a (cycle% IWorld Dir Trail)
+;; Interp: owner, direction, and trail.
+
+;; Universe -> Bundle
+(define (just u)
+  (make-bundle u empty empty))
+
 (define (serve)
   (universe (init%)))
 
@@ -41,47 +48,68 @@
   
   ;; IWorld -> Universe
   ;; Wait for second player.
+  (check-expect ((init%) . on-new iworld1)
+                (just (wait% iworld1)))
   (define/public (on-new iw)
-    (make-bundle (wait% iw) empty empty))
+    (just (wait% iw)))
   
   ;; -> Universe
   ;; Continue to wait.
+  (check-expect ((init%) . on-tick) (just (init%)))
   (define/public (on-tick)
-    (make-bundle this empty empty))
+    (just this))
   
   ;; IWorld SExpr -> Universe
   ;; Ignore messages, continue to wait.
+  (check-expect ((init%) . on-msg iworld1 'hi!)
+                (just (init%)))
   (define/public (on-msg iw msg)
-    (make-bundle this empty empty)))
+    (just this)))
 
 (define-class wait%
   (fields w)
   
   ;; IWorld -> Universe
   ;; Let the game begin!
+  (check-expect ((wait% iworld1) . on-new iworld2)
+                (just (init-game iworld1 iworld2)))
   (define/public (on-new iw)
-    (make-bundle (init-game (field w) iw) empty empty))
+    (just (init-game (field w) iw)))
   
   ;; -> Universe
   ;; Continue to wait.
+  (check-expect ((wait% iworld1) . on-tick)
+                (just (wait% iworld1)))
   (define/public (on-tick)
-    (make-bundle this empty empty))
+    (just this))
   
   ;; IWorld SExpr -> Universe
   ;; Ignore messages, continue to wait.
+  (check-expect ((wait% iworld1) . on-msg iworld1 'hi!)
+                (just (wait% iworld1)))
   (define/public (on-msg iw msg)
-    (make-bundle this empty empty)))
+    (just this)))
 
 (define-class game% 
   (fields p1 p2)
   
   ;; IWorld -> Universe
   ;; Ignore new worlds.
+  (check-expect ((game% c1 c2) . on-new iworld1)
+                (just (game% c1 c2)))
   (define/public (on-new iw)
     (make-bundle this empty empty))
   
   ;; -> Universe
   ;; Advance this universe one tick.
+  (check-expect ((game% c1 c2) . on-tick)
+                (make-bundle ((game% c1 c2) . tick)
+                             ((game% c1 c2) . broadcast)
+                             empty))
+  (check-expect ((game% c1 c2) . tick . on-tick)
+                (make-bundle ((game% c1 c2) . tick)
+                             ((game% c1 c2) . tick . end)
+                             empty))
   (define/public (on-tick)
     (cond [(game-over?)
            (make-bundle this (end) empty)]
@@ -90,30 +118,45 @@
   
   ;; IWorld SExpr -> Universe
   ;; Change direction if appropriate.
+  (check-expect ((game% c1 c2) . on-msg iworld1 "up")
+                (just ((game% c1 c2) . dir iworld1 "up")))
+  (check-expect ((game% c1 c2) . on-msg iworld1 "fred")
+                (just (game% c1 c2)))
   (define/public (on-msg iw msg)
     (cond [(dir? msg)
-           (make-bundle (change-dir iw msg) empty empty)]
+           (just (dir iw msg))]
           [else
-           (make-bundle this empty empty)]))
+           (just this)]))
 
   ;; -> Game
   ;; Advance this game one tick.
+  (check-expect ((game% c1 c2) . tick)
+                (game% (c1 . tick) (c2 . tick)))
   (define/public (tick)
     (game% ((field p1) . tick)
            ((field p2) . tick)))
   
   ;; IWorld Dir -> Game
   ;; Change the direction of the given iworld's cycle.
-  (define/public (change-dir iw d)
+  (check-expect ((game% c1 c2) . dir iworld1 "up")
+                (game% (c1 . dir "up") c2))
+  (check-expect ((game% c1 c2) . dir iworld2 "up")
+                (game% c1 (c2 . dir "up")))
+  (define/public (dir iw d)
     (cond [(iworld=? iw ((field p1) . owner))
-           (game% (cycle% iw d ((field p1) . trail))
+           (game% ((field p1) . dir d)
                   (field p2))]
           [(iworld=? iw ((field p2) . owner))
            (game% (field p1)
-                  (cycle% iw d ((field p2) . trail)))]))
+                  ((field p2) . dir d))]))
   
   ;; -> [Listof Mail]
   ;; Broadcast state of game to players.
+  (check-expect ((game% c1 c2) . broadcast)
+                (list (make-mail iworld1 '(((0 0))
+                                           ((1 0))))
+                      (make-mail iworld2 '(((1 0))
+                                           ((0 0))))))
   (define/public (broadcast)
     (list (make-mail ((field p1) . owner)
                      (list ((field p1) . trail)
@@ -124,6 +167,8 @@
   
   ;; -> Boolean
   ;; Is this game over?
+  (check-expect ((game% c1 c2) . game-over?) false)
+  (check-expect ((game% c1 c2) . tick . game-over?) true)
   (define/public (game-over?)
     (local [(define t1 ((field p1) . trail))
             (define t2 ((field p2) . trail))]
@@ -132,6 +177,9 @@
   
   ;; -> [Listof Mail]
   ;; Construct mail notifying win, lose, or draw.
+  (check-expect ((game% c1 c2) . tick . end)
+                (append ((game% c1 c2) . tick . broadcast)
+                        ((game% c1 c2) . tick . end-draw)))
   (define/public (end)
     (append (broadcast)
             (cond [(die? ((field p1) . trail)
@@ -146,52 +194,78 @@
   
   ;; -> [Listof Mail]
   ;; Construct mail notifying draw.
+  (check-expect ((game% c1 c2) . end-draw)
+                (list (c1 . mail 'draw)
+                      (c2 . mail 'draw)))
   (define/public (end-draw)
     (list ((field p1) . mail 'draw)
           ((field p2) . mail 'draw)))
   
   ;; -> [Listof Mail]
   ;; Construct mail notifying P1 win, P2 loss.
+  (check-expect ((game% c1 c2) . end-p1-win)
+                (list (c1 . mail 'win)
+                      (c2 . mail 'lose)))
   (define/public (end-p1-win)
     (list ((field p1) . mail 'win)
           ((field p2) . mail 'lose)))
   
   ;; -> [Listof Mail]
   ;; Construct mail notifying P2 win, P1 loss.
+  (check-expect ((game% c1 c2) . end-p2-win)
+                (list (c1 . mail 'lose)
+                      (c2 . mail 'win)))
   (define/public (end-p2-win)
     (list ((field p1) . mail 'lose)
           ((field p2) . mail 'win))))
-    
-
-;; A Cycle is a (cycle% IWorld Dir Trail)
-;; Interp: owner, direction, and trail.
 
 (define-class cycle%
-  (fields owner dir trail)
+  (fields owner direction trail)
   
   ;; Cycle -> Cycle
   ;; Advance this cycle one tick.
+  (check-expect (c1 . tick)
+                (cycle% iworld1 "right" '((1 0) (0 0))))
   (define/public (tick)
     (cycle% (field owner)
-            (field dir)
+            (field direction)
             (trail-grow (field trail) 
-                        (field dir))))
+                        (field direction))))
   
   ;; Msg -> Mail
   ;; Construct a mail message to the owner of this cycle.
+  (check-expect (c1 . mail "hi!")
+                (make-mail iworld1 "hi!"))
   (define/public (mail msg)
-    (make-mail (field owner) msg)))
+    (make-mail (field owner) msg))
+  
+  ;; Dir -> Cycle
+  ;; Change the direction of this cycle.
+  (check-expect (c1 . dir "up")
+                (cycle% iworld1 "up" '((0 0))))
+  (define/public (dir d)
+    (cycle% (field owner) d (field trail))))
+
+;; For testing
+(define c1 (cycle% iworld1 "right" (list (posn 0 0))))
+(define c2 (cycle% iworld2 "left"  (list (posn 1 0))))
 
 
 ;; A Dir is one of: "up", "down", "left", "right"
 
 ;; Any -> Boolean
+;; Is the given value a direction?
 (check-expect (dir? "a") false)
 (check-expect (dir? "right") true)
 (define (dir? x)
   (member x '("up" "down" "left" "right")))
 
 ;; Trail Dir -> Trail
+;; Grow this light trail in the given direction.
+(check-expect (trail-grow '((0 0)) "right") '((1 0) (0 0)))
+(check-expect (trail-grow '((0 0)) "up")    '((0 1) (0 0)))
+(check-expect (trail-grow '((0 1)) "down")  '((0 0) (0 1)))
+(check-expect (trail-grow '((1 0)) "left")  '((0 0) (1 0)))
 (define (trail-grow t d)
   (cons (cond [(string=? d "up") 
                (posn (posn-x (first t))
@@ -208,11 +282,19 @@
         t))
 
 ;; Trail Trail -> Boolean
+;; Does t1 die by going out of bounds or hitting t2?
+(check-expect (die? '((0 0)) '((1 0))) false)
+(check-expect (die? '((0 0)) '((0 0))) true)
+(check-expect (die? '((-1 0)) '((1 0))) true)
 (define (die? t1 t2)
   (or (out-of-bounds? t1)
       (hit-trail? t1 t2)))
 
 ;; Trail -> Boolean
+;; Is this trail out of bounds?
+(check-expect (out-of-bounds? '((0 0))) false)
+(check-expect (out-of-bounds? '((-1 0))) true)
+(check-expect (out-of-bounds? '((0 -1))) true)
 (define (out-of-bounds? t)
   (local [(define hd (first t))]
     (or (< (posn-x hd) 0)
@@ -221,6 +303,9 @@
         (> (posn-y hd) GRID-HEIGHT))))
 
 ;; Trail Trail -> Boolean
+;; Does the first trail hit the second?
+(check-expect (hit-trail? '((0 0)) '((1 0))) false)
+(check-expect (hit-trail? '((0 0)) '((0 0))) true)
 (define (hit-trail? t1 t2)
   (member (first t1)
           (append (rest t1) t2)))
@@ -241,6 +326,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Client
 
+;; A World is one of:
+;; - (mt%)
+;; - (match% (list Trail Trail))
+;; - (final% Outcome (list Trail Trail))
+
+;; An Outcome is one of: 'win, 'lose, 'draw
+
+;; IP -> World
+(define (play ip)
+  (big-bang (mt% ip)))
+
 (define GRID-SIZE 10)
 (define WIDTH (* GRID-WIDTH GRID-SIZE))
 (define HEIGHT (* GRID-HEIGHT GRID-SIZE))
@@ -248,14 +344,7 @@
 (define MT-SCENE (empty-scene WIDTH HEIGHT))
 (define WAITING 
   (overlay (text "Waiting for Player 2" 20 "black")
-           MT-SCENE))                              
-                        
-;; A World is one of:
-;; - (mt-world%)
-;; - (match% (list Trail Trail))
-;; - (final% Outcome (list Trail Trail))
-
-;; An Outcome is one of: 'win, 'lose, 'draw
+           MT-SCENE))
 
 ;; Any -> Boolean
 (check-expect (outcome? "fred") false)
@@ -263,31 +352,68 @@
 (define (outcome? w)
   (member w '(win lose draw)))
 
-;; IP -> World
-(define (play ip)
-  (big-bang (mt-world% ip)))
-
-(define-class mt-world%
+(define-class mt%
   (fields ip)
+  
+  ;; -> String
+  ;; IP address where world should register.
+  (check-expect ((mt% LOCALHOST) . register) LOCALHOST)
   (define/public (register) (field ip))
+  
+  ;; -> Scene
+  ;; Render this waiting world as a scene.
+  (check-expect ((mt% LOCALHOST) . to-draw) WAITING)
   (define/public (to-draw) WAITING)
+  
+  ;; KeyEvent -> World
+  ;; Ignore key events.
+  (check-expect ((mt% LOCALHOST) . on-key "up")
+                (mt% LOCALHOST))
   (define/public (on-key ke) this)
+  
+  ;; (list Trail Trail) -> World
+  ;; Start playing with given trails.
+  (check-expect ((mt% LOCALHOST) . on-receive '(() ()))
+                (match% '(() ())))
   (define/public (on-receive msg)   
     (match% msg)))
 
 (define-class match%
   (fields m)
+  
+  ;; -> Scene
+  ;; Render this match as a scene.
   (define/public (to-draw)
     (draw-match (field m)))
+  
+  ;; KeyEvent -> World
+  ;; Handle directional keys by sending to server.
+  (check-expect ((match% '(() ())) . on-key "up")
+                (make-package (match% '(() ())) "up"))
+  (check-expect ((match% '(() ())) . on-key "a")
+                (match% '(() ())))
   (define/public (on-key ke)
     (cond [(dir? ke) (make-package this ke)]
           [else this]))
+  
+  ;; (U Outcome (list Trail Trail)) -> World
+  ;; Handle an outcome or new state.
+  (check-expect ((match% '(() ())) . on-receive 'draw)
+                (final% 'draw '(() ())))
+  (check-expect ((match% '(() ())) . on-receive '((()) ()))
+                (match% '((()) ())))                
   (define/public (on-receive msg)
     (cond [(outcome? msg) (final% msg (field m))]
           [else (match% msg)])))
 
 (define-class final%
   (fields outcome last)
+  
+  ;; -> Scene
+  ;; Render this final outcome as a scene.
+  (check-expect ((final% 'draw '(() ())) . to-draw)
+                (overlay (text "TIE" 40 "black")
+                         MT-SCENE))
   (define/public (to-draw)
     (overlay 
      (text (cond
@@ -298,20 +424,44 @@
            "black")
      (draw-match (field last))))
   
+  ;; KeyEvent -> World
+  ;; Ignore key events.
+  (check-expect ((final% 'draw '(() ())) . on-key "down")
+                (final% 'draw '(() ())))                
   (define/public (on-key ke)
     this)
+  
+  ;; SExpr -> World
+  ;; Ignore messages.
+  (check-expect ((final% 'draw '(() ())) . on-receive "hi!")
+                (final% 'draw '(() ())))
   (define/public (on-receive msg)
     this))
                                          
                            
-;; Match -> Scene
+;; (list Trail Trail) -> Scene
+;; Render the given trails as a scene.
+(check-expect (draw-match '(() ())) MT-SCENE)
+(check-expect (draw-match '(((0 0)) ()))
+              (place-image (square GRID-SIZE "solid" "orange")
+                           (* 1/2 GRID-SIZE)
+                           (- HEIGHT (* 1/2 GRID-SIZE))
+                           MT-SCENE))
+(check-expect (draw-match '(() ((0 0))))
+              (place-image (square GRID-SIZE "solid" "blue")
+                           (* 1/2 GRID-SIZE)
+                           (- HEIGHT (* 1/2 GRID-SIZE))
+                           MT-SCENE))
 (define (draw-match m)
   (local [(define (draw-player c trail scn)
             (foldl (λ (p scn)
                      (place-image 
                       (square GRID-SIZE "solid" c)
-                      (* (posn-x p) GRID-SIZE)
-                      (- HEIGHT (* (posn-y p) GRID-SIZE))
+                      (+ (* (posn-x p) GRID-SIZE)
+                         (* 1/2 GRID-SIZE))
+                      (- HEIGHT
+                         (+ (* (posn-y p) GRID-SIZE)
+                            (* 1/2 GRID-SIZE)))
                       scn))
                    scn
                    trail))]
