@@ -71,7 +71,7 @@
                   #:defaults ([(fld 1) null]))
        (~optional (constructor (cargs:id ...)
                    cbody:expr)
-                   #:defaults ([(cargs 1) (generate-temporaries #'(fld ...))]
+                   #:defaults ([(cargs 1) (generate-temporaries #`(fld ... . #,(map second (attribute super%.fields))))]
                                [cbody #`(#,(datum->syntax stx 'fields) cargs ...)]))
        (~or (~var <definition> (member-def (syntax->list #'(fld ...))))
             (~and ce (~or (isl+:check-expect <act> <exp>)

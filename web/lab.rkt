@@ -15,4 +15,4 @@
 (define (lab:section . args)
   ; TODO Report bug: #:style has no effect with section
   ;(apply section #:style "lab-heading" args)
-  (elem (first args) #:style "lab-heading"))
+  (elem (first args) #:style "labheading"))
