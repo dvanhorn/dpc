@@ -2,6 +2,7 @@
 \usepackage{sectsty}
 \usepackage{fontspec}
 \usepackage{fancyhdr}
+\usepackage{amsthm}
 
 \let\oldtableofcontents=\tableofcontents
 \renewcommand\tableofcontents{
@@ -13,7 +14,12 @@
 \setlength{\parskip}{\tmpparskip}
 }
 
-\allsectionsfont{\fontspec{Latin Modern Roman Caps}}
+%\newtheorem*{exercise}{Exercise}
+\newcommand{\labheading}[1]{\bf #1}
+
+\newenvironment{exercise}{}{}
+
+%\allsectionsfont{\fontspec{Latin Modern Roman Caps}}
 %\allsectionsfont{\centering\fontspec{Optima Regular}\mdseries}
 %\setromanfont{Baskerville}
 

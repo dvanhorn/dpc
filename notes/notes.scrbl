@@ -11,3 +11,7 @@
 @include-section["lec07.scrbl"]
 @include-section["lec08.scrbl"]
 @include-section["lec09.scrbl"]
+
+@include-section["labnotes.scrbl"]
+
+@;@include-section["../web/class.scrbl"]
