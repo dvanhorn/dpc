@@ -8,9 +8,6 @@
 ;; columns are represented bottom = first
 ;; A Board is [Listof Column]
 ;; boards are represented leftmost = first
-;; A Game is (game Player Board Posn Wins)
-;; A Wins is (list Number Number) - red wins, black wins
-(define-struct game (next board pos wins))
 
 (define COLS 7)
 (define ROWS 6)
@@ -40,32 +37,51 @@
             (apply above (reverse (map render-cell col))))]
     (apply beside (map render-col board))))
 
-(define-class done-world%
-  (fields message)
-  (define/public (to-draw)
-    (overlay (text (field message) 20 "black")
-             (empty-scene SIZE SIZE)))
-  (define/public (on-mouse m x y) this))
+;; A World is one of
+;; - (start-world%)
+;; - (done-world% String)
+;; - (world% Board Color Boolean)
 
 (define-class start-world%  
   (define/public (register) LOCALHOST)
   (define/public (to-draw)
     (overlay (text "Waiting ..." 20 "black")
              (empty-scene SIZE SIZE)))
+  (check-expect ((start-world%) . on-mouse "m" 0 0) (start-world%))
   (define/public (on-mouse m x y) this)
+  (check-expect ((start-world%) . on-receive "red") (world% empty-board "red" true))
+  (check-expect ((start-world%) . on-receive "black") (world% empty-board "black" false))
   (define/public (on-receive m)
     (world% empty-board m (string=? m "red"))))
 
 (define-class world%
   (fields board color my-turn?)
+  (check-expect ((world% empty-board "black" false) . on-receive "lose") (done-world% "We Lost!"))
+  (check-expect ((world% empty-board "black" false) . on-receive "win") (done-world% "We Won!"))
+  (check-expect ((world% empty-board "black" false) . on-receive empty-board)
+                (world% empty-board "black" true))
+  ;; on-recieve : Message -> World
+  ;; handle messages - either a new board, or "win" or "lose"
   (define/public (on-receive m)
     (cond [(and (string? m) (string=? m "lose")) (done-world% "We Lost!")]
           [(and (string? m) (string=? m "win")) (done-world% "We Won!")]
           [else (world% m (field color) (not (field my-turn?)))]))
+  ;; draw the board
+  ;; -> Scene
   (define/public (to-draw)
     (overlay (above (render (field board))
                     (text (field color) 15 (field color)))
              (empty-scene SIZE SIZE)))
+  ;; Handle mouse events
+  ;; button clicks play in the appropriate column
+  ;; others are ignored
+  (check-expect ((world% empty-board "red" true) . on-mouse 100 100 "button-up")
+                (make-package (world% (play empty-board 1 "red") "red" false)
+                              1))
+  (check-expect ((world% empty-board "red" true) . on-mouse 100 100 "button-down")
+                (world% empty-board "red" true))
+  (check-expect ((world% empty-board "red" true) . on-mouse 0 0 "button-up")
+                (world% empty-board "red" true))
   (define/public (on-mouse x y e)
     (cond [(mouse=? e "button-up")
            (local [(define col (quotient (- x left-margin) (* 2 RADIUS)))]           
@@ -76,19 +92,48 @@
                [else this]))]
           [else this])))
 
+
+(define-class done-world%
+  (fields message)  
+  
+  (check-expect ((done-world% "hi") . to-draw) (overlay (text "hi" 20 "black")
+                                                        (empty-scene SIZE SIZE)))
+  ;; render the message
+  ;; -> Scene
+  (define/public (to-draw)
+    (overlay (text (field message) 20 "black")
+             (empty-scene SIZE SIZE)))
+  
+  (check-expect ((done-world% "hi") . on-mouse "mouse-up" 1 1) (done-world% "hi"))  
+  ;; handle mouse events
+  ;; this is only needed b/c it might be called even if it doesn't exist
+  ;; -> World
+  (define/public (on-mouse m x y) this))
+
 ;; flip-player : Player -> Player
 ;; get the next player
+(check-expect (flip-player "black") "red")
+(check-expect (flip-player "red") "black")
 (define (flip-player pl)
   (cond [(string=? "red" pl) "black"]
         [else "red"]))
 
 (define-class initial-universe%
+  (check-expect ((initial-universe%) . on-msg iworld1 0) (initial-universe%))
   (define/public (on-msg i m) this)
+  (check-expect ((initial-universe%) . on-new iworld1) (make-bundle (universe-one% iworld1) empty empty))
   (define/public (on-new i) (make-bundle (universe-one% i) empty empty)))
 
 (define-class universe-one%
   (fields player)
+  (check-expect ((universe-one% iworld1) . on-msg iworld1 0) (universe-one% iworld1))
+  (check-expect ((universe-one% iworld1) . on-msg iworld2 0) (universe-one% iworld1))
   (define/public (on-msg i m) this)
+  (check-expect ((universe-one% iworld1) . on-new iworld2)
+                (make-bundle (universe% empty-board iworld1 iworld2 "red") 
+                             (list (make-mail iworld1 "red")
+                                   (make-mail iworld2 "black"))
+                             empty))
   (define/public (on-new i)
     (make-bundle (universe% empty-board (field player) i "red")
                  (list (make-mail (field player) "red")
@@ -101,6 +146,7 @@
 (define (list-set l k e)
   (cond [(= k 0) (cons e (rest l))]
         [else (cons (first l) (list-set (rest l) (sub1 k) e))]))
+(check-expect (list-set '(1 2 3) 1 4) '(1 4 3))
 
 ;; play : Board Nat Player -> Board or #f
 ;; player plays on `board' in the `col'th column
@@ -120,8 +166,27 @@
     (cond [(false? new-col) false]
           [else (list-set board col new-col)])))
 
+(check-expect (play empty-board 0 "red")
+              '(("red" #f #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)))
+(check-expect (play (play empty-board 0 "red") 0 "black")
+              '(("red" "black" #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)
+                (#f #f #f #f #f #f)))
+
 (define-class universe%
   (fields board red black next)
+  ;; Color -> IWorld
+  ;; convert a color to the world that plays that color
   (define/public (color->iworld c)
     (cond [(string=? c "red") (field red)]
           [else (field black)]))
@@ -159,6 +224,9 @@
       [(and (not (false? color)) (string=? color (first c))) (loop (rest c) (add1 cnt) color)]
       [else (loop (rest c) 1 (first c))]))
   (loop c 0 false))
+
+(check-expect (winner-col? empty-col) #f)
+(check-expect (winner-col? '(#f #f "red" "red" "red" "red")) #t)
 
 ;; Board -> Board^T
 (define (transpose b) (apply map list b))
@@ -203,6 +271,7 @@
 ;; is there a winner in some sinking diagonal?
 (define (win-sinker? b) (win-riser? (reverse b)))
 
-(launch-many-worlds (big-bang (start-world%))
-                    (big-bang (start-world%))
+(define (go)
+  (launch-many-worlds (big-bang (start-world%))
+                      (big-bang (start-world%)))
                     (universe (initial-universe%)))
