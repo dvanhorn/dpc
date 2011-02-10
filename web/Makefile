@@ -51,6 +51,8 @@ web:
 		++extra fonts/kulminoituva-webfont.woff \
 		++extra $(CLASS) \
 		++extra $(CLASS_LATEST) \
+		++extra ../notes/notes.pdf \
+		++extra ../notes/notes-2up.pdf \
 		++xref-in setup/xref load-collections-xref \
 		--redirect-main http://docs.racket-lang.org/ \
 		--style 2510H.css \

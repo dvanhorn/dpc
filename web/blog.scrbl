@@ -7,6 +7,15 @@
 
 @title*{Blog}
 
+@section*{Notes for Studying}
+
+@tt{Wed Feb  9 19:31:26 EST 2011}
+
+We've produced PDF versions of the course notes so far, as an aid to studying
+for the upcoming exam.  A full page version is @link["notes.pdf"]{here} and a
+shrunken version is @link["notes-2up.pdf"]{here}.  These are long documents, so
+if you print them, please print them double-sided.  
+
 @section*{Modules and homeworks}
 
 @tt{Tue Feb  8 22:39:16 EST 2011}
