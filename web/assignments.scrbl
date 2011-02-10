@@ -13,10 +13,10 @@ Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise no
 @include-section["assignments/assign03.scrbl"]
 @include-section["assignments/assign04.scrbl"]
 @include-section["assignments/assign05.scrbl"]
+@include-section["assignments/assign06.scrbl"]
 
 @internal[
 
-@section[#:tag "assign06"]{2/18: Connect 4 AI (non-standard day)}
 @section[#:tag "assign07"]{2/25: ?? (non-standard day)}
 @section[#:tag "assign08"]{3/02: (Spring break)}
 @section[#:tag "assign09"]{3/09: Graphs?}
