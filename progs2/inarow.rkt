@@ -53,22 +53,25 @@
           [else this]))
   
   (define/public (play n)
-    (local [(define new-board (list-set (field board) n (red%)))
-            (define new-comp (send (field computer) record-player n new-board))]
-      (cond [(player-win? new-board)
-             (done-world% "You Win!" new-comp)]
-            [(tie? new-board)
-             (done-world% "Tie!" new-comp)]
-            [else 
-             (local [(define cpick (send new-comp pick new-board))                     
-                     (define new2-board (list-set new-board cpick (black%)))
-                     (define new2-comp (send new-comp record-self cpick new2-board))]
-               (cond [(computer-win? new2-board)
-                      (done-world% "Computer Win!" new2-comp)]            
-                     [(tie? new2-board)
-                      (done-world% "Tie!" new2-comp)]
-                     [else
-                      (world% new2-board new2-comp)]))]))))
+    (cond [(not ((list-ref (field board) n) . empty?))
+           this]
+          [else
+           (local [(define new-board (list-set (field board) n (red%)))
+                   (define new-comp (send (field computer) record-player n new-board))]
+             (cond [(player-win? new-board)
+                    (done-world% "You Win!" new-comp)]
+                   [(tie? new-board)
+                    (done-world% "Tie!" new-comp)]
+                   [else 
+                    (local [(define cpick (send new-comp pick new-board))                     
+                            (define new2-board (list-set new-board cpick (black%)))
+                            (define new2-comp (send new-comp record-self cpick new2-board))]
+                      (cond [(computer-win? new2-board)
+                             (done-world% "Computer Win!" new2-comp)]            
+                            [(tie? new2-board)
+                             (done-world% "Tie!" new2-comp)]
+                            [else
+                             (world% new2-board new2-comp)]))]))])))
   
 
 
@@ -122,7 +125,7 @@
 
 (check-expect (pick-sym 'yes '(no yes)) 1)
 (check-expect (pick-sym 'no '(no yes)) 0)
-(check-expect (pick-sym 'maybe '(no yes)) 0)
+(check-expect (pick-sym 'maybe '(no yes)) 2)
 
 (define (pick-best b)    
   (cond [(member 'Win b)
@@ -136,11 +139,18 @@
 (check-expect (pick-best '(Unk Lose Unk Win)) 3)
 (check-expect (pick-best '(Unk Lose Unk Lose)) 0)
 
+
 (define-class computer%
+  ;; last-loss: either a board or false
+  ;; last-board: board
+  (fields last-loss last-board)
   ;; remember this board and the move we/they made
   ;; Board Number -> Computer
-  (define/public (record-player b m) this)
-  (define/public (record-self b m) this)
+  (define/public (record-player m b) 
+    (cond [(player-win? b)
+           (computer% (field last-board) b)]
+          [else (computer% (field last-loss) b)]))
+  (define/public (record-self m b) this)
   
   ;; Board -> [Listof (Union 'Win 'Lose 'Full 'Unk)]
   (define/public (evaluate b)
@@ -150,14 +160,14 @@
                     [(not (send (list-ref b n) empty?)) 'Full]
                     [(computer-win? (list-set b n (black%))) 'Win]
                     [(has-player-win? (list-set b n (black%))) 'Lose]
-                    [else 'Unk]))))
-    
-  
+                    [else 'Unk]))))      
   
   
   ;; pick a move
   ;; Board -> Number
   (define/public (pick b)
-    (pick-best (evaluate b))))
+    (cond [(equal? b (field last-loss))
+           (sub1 (- SIZE (pick-best (evaluate (reverse b)))))]
+           [else (pick-best (evaluate b))])))
 
-(big-bang (new world% INITIAL (computer%)))
+(big-bang (new world% INITIAL (computer% false INITIAL)))
