@@ -44,11 +44,14 @@
   (fields board computer)
   (define/public (to-draw)
     (overlay
-     (apply beside (map (λ (e) (send e draw)) (field board)))
+     (foldr beside empty-image (map (λ (e) (send e draw)) (field board)))
      (empty-scene 500 500)))
+  
   (define/public (on-key k)
     (cond [(number? (string->number k)) (play (string->number k))]
-          [(key=? "n" k) (new world% INITIAL (field computer))]))
+          [(key=? "n" k) (new world% INITIAL (field computer))]
+          [else this]))
+  
   (define/public (play n)
     (local [(define new-board (list-set (field board) n (red%)))
             (define new-comp (send (field computer) record-player n new-board))]
@@ -87,6 +90,10 @@
 (define (player-win? b) (win-player? b 0))  
 (define (computer-win? b) (win-computer? b 0))
 
+(define (has-player-win? b)
+  (ormap (λ (n) (and (send (list-ref b n) empty?) (player-win? (list-set b n (red%)))))
+         (build-list SIZE (λ (x) x))))
+
 (define-class done-world%
   (fields status computer)
   (define/public (to-draw)
@@ -108,14 +115,49 @@
      (add1 (first-empty (rest b)))]
     [else false]))
 
+(define (pick-sym s b)
+  (cond [(empty? b) 0]
+        [(symbol=? s (first b)) 0]
+        [else (add1 (pick-sym s (rest b)))]))
+
+(check-expect (pick-sym 'yes '(no yes)) 1)
+(check-expect (pick-sym 'no '(no yes)) 0)
+(check-expect (pick-sym 'maybe '(no yes)) 0)
+
+(define (pick-best b)    
+  (cond [(member 'Win b)
+         (pick-sym 'Win b)]
+        [(member 'Unk b)
+         (pick-sym 'Unk b)]
+        [else
+         (pick-sym 'Lose b)]))
+
+(check-expect (pick-best '(Win Lose Unk)) 0)
+(check-expect (pick-best '(Unk Lose Unk Win)) 3)
+(check-expect (pick-best '(Unk Lose Unk Lose)) 0)
+
 (define-class computer%
-  ;; remember this board and the move we made
+  ;; remember this board and the move we/they made
   ;; Board Number -> Computer
   (define/public (record-player b m) this)
   (define/public (record-self b m) this)
+  
+  ;; Board -> [Listof (Union 'Win 'Lose 'Full 'Unk)]
+  (define/public (evaluate b)
+    (build-list SIZE
+                (λ (n)
+                  (cond 
+                    [(not (send (list-ref b n) empty?)) 'Full]
+                    [(computer-win? (list-set b n (black%))) 'Win]
+                    [(has-player-win? (list-set b n (black%))) 'Lose]
+                    [else 'Unk]))))
+    
+  
+  
+  
   ;; pick a move
   ;; Board -> Number
   (define/public (pick b)
-    (first-empty b)))
+    (pick-best (evaluate b))))
 
 (big-bang (new world% INITIAL (computer%)))
