@@ -29,3 +29,16 @@
 @item{Next assignment due in 2 weeks.}
 @item{The exam is in 110, not 108.}
 @item{Study for the exam.}]
+
+@section{The 3-In-A-Row Game}
+
+@section{Indexed Views on Data}
+
+@section{State Transition Patterns}
+
+@section{Designing a Computer Player}
+
+@subsection{A simple player}
+@subsection{Evaluating positions}
+@subsection{Picking a move}
+@subsection{Remembering the past}
