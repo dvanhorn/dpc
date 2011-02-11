@@ -37,13 +37,47 @@
             (apply above (reverse (map render-cell col))))]
     (apply beside (map render-col board))))
 
+(check-expect (render empty-board)
+              (apply above
+                     (build-list ROWS (λ (i)
+                                        (apply beside
+                                               (build-list COLS
+                                                           (λ (j)
+                                                             (circle RADIUS "outline" "black"))))))))
+
+(check-expect (render '(("red" #f #f #f #f #f)
+                        ("black" #f #f #f #f #f)
+                        (#f #f #f #f #f #f)
+                        (#f #f #f #f #f #f)
+                        (#f #f #f #f #f #f)
+                        (#f #f #f #f #f #f)
+                        (#f #f #f #f #f #f)))
+              (above
+               (apply above
+                      (build-list (sub1 ROWS)
+                                  (λ (i)
+                                    (apply beside
+                                           (build-list COLS
+                                                       (λ (j)
+                                                         (circle RADIUS "outline" "black")))))))
+               (beside (circle RADIUS "solid" "red")
+                       (circle RADIUS "solid" "black")
+                       (apply beside
+                              (build-list (- COLS 2)
+                                          (λ (j)
+                                            (circle RADIUS "outline" "black")))))))
+
 ;; A World is one of
 ;; - (start-world%)
 ;; - (done-world% String)
 ;; - (world% Board Color Boolean)
 
 (define-class start-world%  
+  (check-expect ((start-world%) . register) LOCALHOST)
   (define/public (register) LOCALHOST)
+  (check-expect ((start-world%) . to-draw)
+                (overlay (text "Waiting ..." 20 "black")
+                         (empty-scene SIZE SIZE)))
   (define/public (to-draw)
     (overlay (text "Waiting ..." 20 "black")
              (empty-scene SIZE SIZE)))
@@ -68,6 +102,10 @@
           [else (world% m (field color) (not (field my-turn?)))]))
   ;; draw the board
   ;; -> Scene
+  (check-expect ((world% empty-board "black" false) . to-draw)
+                (overlay (above (render empty-board)
+                                (text "black" 15 "black"))
+                         (empty-scene SIZE SIZE)))
   (define/public (to-draw)
     (overlay (above (render (field board))
                     (text (field color) 15 (field color)))
@@ -174,6 +212,10 @@
                 (#f #f #f #f #f #f)
                 (#f #f #f #f #f #f)
                 (#f #f #f #f #f #f)))
+
+(check-expect (play '(("red" "red")
+                      ("black" "black")) 0 "red")
+              false)
 (check-expect (play (play empty-board 0 "red") 0 "black")
               '(("red" "black" #f #f #f #f)
                 (#f #f #f #f #f #f)
@@ -183,6 +225,8 @@
                 (#f #f #f #f #f #f)
                 (#f #f #f #f #f #f)))
 
+
+
 (define-class universe%
   (fields board red black next)
   ;; Color -> IWorld
@@ -190,17 +234,46 @@
   (define/public (color->iworld c)
     (cond [(string=? c "red") (field red)]
           [else (field black)]))
+  (check-expect (exu . color->iworld "red") iworld1)
   ;; winner? : Game -> Boolean
   ;; has someone won the game?
   (define/public (winner? b)
     (or (win-cols? b) (win-rows? b) (win-riser? b) (win-sinker? b)))
   (define/public (on-new i) this)
+  (check-expect (exu . on-new iworld2) exu)
+  (check-expect (exu . on-msg iworld1 0)
+                (make-bundle
+                 (universe% (play empty-board 0 "red")
+                            iworld1 iworld2
+                            "black")
+                 (list (make-mail iworld2 (play empty-board 0 "red")))
+                 empty))
+  (check-expect ((universe% '(("red")) iworld1 iworld2 "red") . on-msg iworld1 0)
+                (make-bundle (universe% '(("red")) iworld1 iworld2 "red") empty empty))
+  (check-expect ((universe% '(("red" "red" "red" #f #f #f)
+                              ( #f #f #f #f #f #f)
+                              ( #f #f #f #f #f #f)
+                              ( #f #f #f #f #f #f)
+                              ( #f #f #f #f #f #f)
+                              ( #f #f #f #f #f #f)
+                              ( #f #f #f #f #f #f)) iworld1 iworld2 "red") . on-msg iworld1 0)
+                (make-bundle (universe% '(("red" "red" "red" "red" #f #f)
+                                          ( #f #f #f #f #f #f)
+                                          ( #f #f #f #f #f #f)
+                                          ( #f #f #f #f #f #f)
+                                          ( #f #f #f #f #f #f)
+                                          ( #f #f #f #f #f #f)
+                                          ( #f #f #f #f #f #f)) iworld1 iworld2 "black") 
+                             (list (make-mail iworld1 "win")
+                                   (make-mail iworld2 "lose"))
+                             empty))
+  
   (define/public (on-msg i m)
     (cond [(iworld=? i (color->iworld (field next)))
            (local [(define bnew (play (field board) m (field next)))]
              (cond [(false? bnew) (make-bundle this empty empty)]
                    [(winner? bnew)
-                    (make-bundle this
+                    (make-bundle (universe% bnew (field red) (field black) (flip-player (field next)))
                                  (list (make-mail (color->iworld (field next)) "win")
                                        (make-mail (color->iworld (flip-player (field next))) "lose"))
                                  empty)]
@@ -210,6 +283,7 @@
                                             (flip-player (field next)))
                                  (list (make-mail (color->iworld (flip-player (field next))) bnew))
                                  empty)]))])))
+(define exu (universe% empty-board iworld1 iworld2 "red"))
 
 ;; stuff for winning:
 
@@ -233,17 +307,21 @@
 
 ;; cons to the end of a list
 (define (snoc v l) (append l (list v)))
+(check-expect (snoc 1 '(2 3)) '(2 3 1))
 
 (define (take l i)
   (cond [(empty? l) l]
         [(= 0 i) empty]
         [else (cons (first l)
                     (take (rest l) (sub1 i)))]))
-
+(check-expect (take '(1 2 3) 1) '(1))
+(check-expect (take '() 1) '())
 (define (drop l i)
   (cond [(empty? l) l]
         [(= 0 i) l]
         [else (drop (rest l) (sub1 i))]))
+(check-expect (drop '(1 2 3) 1) '(2 3))
+(check-expect (drop '() 1) '())
 
 ;; shift the view of column up i squares
 ;; this imagines an infinite board padded w/ #f
@@ -271,7 +349,8 @@
 ;; is there a winner in some sinking diagonal?
 (define (win-sinker? b) (win-riser? (reverse b)))
 
-(define (go)
-  (launch-many-worlds (big-bang (start-world%))
-                      (big-bang (start-world%)))
+(check-expect ((universe% empty-board iworld1 iworld2 "red") . winner? empty-board) false)
+
+(launch-many-worlds (big-bang (start-world%))
+                    (big-bang (start-world%))
                     (universe (initial-universe%)))
