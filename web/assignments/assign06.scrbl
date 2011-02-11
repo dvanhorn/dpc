@@ -3,7 +3,7 @@
 	  "../unnumbered.rkt"
           (for-label class1))
 
-@title[#:tag "assign05"]{2/23: Intelligent Connect 4}
+@title[#:tag "assign06"]{2/23: Intelligent Connect 4}
 
 Due: 2/23 (In @bold{2} weeks).
 
