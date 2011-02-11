@@ -2,6 +2,37 @@
 (require 2htdp/image class2/universe)
 
 
+;;> TOTAL: 175 Points
+
+;;> Problem 1: Total 120 points
+;;> Play the solution to Problem 1.
+
+;;> Runs: 10 points
+;;> Can win with Rows/Columns/Rising Diagonals/Sinking Diagonals: 5 Points each
+;;> Prevents cheating/misplaying: 10 points
+
+;;> Overall Data Defintions: 20 points (for the board, columns, cells, etc)
+;;> Data Defs for World/Universe classes: 10 points each
+
+;;> Tests for Client: 10 points
+;;> Tests for Server: 10 points
+;;> Tests for Winning conditions/helpers: 10 points
+
+;;> General Implementation: 20 points (take off as you see fit)
+
+;;> Problem 2: Total 55 points
+;;> Play problem 2, runs: 10 points
+;;> Possible to win in all the appropriate ways: 10 points (total)
+;;> Uses appropriate constants: 5 points
+;;> Change to 4x4 with 3-in-a-row to win. 
+;;>    Still runs: 5 points
+;;>    Works properly: 15 points
+;;> Change to 8x7 with 5-in-a-row to win
+;;>    Still runs: 5 points
+;;>    Works properly: 5 points
+
+
+
 ;; A Player is one of "red" or "black"
 ;; A Cell is one of Player or #f
 ;; A Column is [Listof Cell]
@@ -331,6 +362,10 @@
     [(< i 0) (append (make-list (abs i) #f) (take c (+ ROWS i)))]
     [(= i 0) c]
     [else (append (drop c i) (make-list i #f))]))
+(check-expect (adjust-column '("red" "red" "red" "red" "red" "red") 2)
+              '("red" "red" "red" "red" #f #f))
+(check-expect (adjust-column '("red" "red" "red" "red" "red" "red") -2)
+              '(#f #f "red" "red" "red" "red"))
 
 ;; Board -> Board^T
 ;; produces a board where diagonals go across
@@ -339,18 +374,63 @@
     (map (λ (i c) (adjust-column c i))
          (build-list COLS (λ (i) (- i small)))
          b)))
+(check-expect (diagonalize empty-board) empty-board)
+
+(check-expect (diagonalize '(("red" "black" "red" "red"  "red" "red")
+                             ("black" "red" "red" "red"  "red" "red")
+                             ("black" "red" "black" "red" "red" "red")
+                             ("black" "red" "red" "red"  "red" "red")
+                             ("black" "red" "red" "red"  "red" "red")
+                             ("black" "red" "red" "red"  "red" "red")
+                             ("black" "red" "red" "red"  "red" "red")))
+              '((#f #f #f "red" "black" "red")
+                (#f #f "black" "red" "red" "red")
+                (#f "black" "red" "black" "red" "red")
+                ("black" "red" "red" "red" "red" "red")
+                ("red" "red" "red" "red" "red" #f)
+                ("red" "red" "red" "red" #f #f)
+                ("red" "red" "red" #f #f #f)))
 
 ;; is there a winner in some column?
 (define (win-cols? b) (ormap winner-col? b))
+(check-expect (win-cols? empty-board) false)
+(check-expect (win-cols? '(("red" "red" "red" "red")
+                           ("black" "red" "red" "red")
+                           ("black" "red" "black" "red")
+                           ("black" "red" "red" "red")))
+              true)
 ;; is there a winner in some row?
 (define (win-rows? b) (win-cols? (transpose b)))
+(check-expect (win-rows? empty-board) false)
+(check-expect (win-rows? '(("red" "black" "red" "red")
+                           ("black" "red" "red" "red")
+                           ("black" "red" "black" "red")
+                           ("black" "red" "red" "red")))
+              true)
 ;; is there a winner in some rising diagonal
 (define (win-riser? b) (win-rows? (diagonalize b)))
+(check-expect (win-riser? empty-board) false)
 ;; is there a winner in some sinking diagonal?
 (define (win-sinker? b) (win-riser? (reverse b)))
+(check-expect (win-sinker? empty-board) false)
+(check-expect (win-riser? '(("red" "black" "red" "red"  "red" "red")
+                            ("black" "red" "red" "red"  "red" "red")
+                            ("black" "red" "black" "red" "red" "red")
+                            ("black" "red" "red" "red"  "red" "red")
+                            ("black" "red" "red" "red"  "red" "red")
+                            ("black" "red" "red" "red"  "red" "red")
+                            ("black" "red" "red" "red"  "red" "red"))) true)
+(check-expect (win-sinker? '(("red" "black" "red" "red"  "red" "red")
+                             ("black" "red" "red" "red"  "red" "red")
+                             ("black" "red" "black" "red" "red" "red")
+                             ("black" "red" "red" "red"  "red" "red")
+                             ("black" "red" "red" "red"  "red" "red")
+                             ("black" "red" "red" "red"  "red" "red")
+                             ("black" "red" "red" "red"  "red" "red"))) true)
 
 (check-expect ((universe% empty-board iworld1 iworld2 "red") . winner? empty-board) false)
 
-(launch-many-worlds (big-bang (start-world%))
-                    (big-bang (start-world%))
-                    (universe (initial-universe%)))
+(define (go)
+  (launch-many-worlds (big-bang (start-world%))
+                      (big-bang (start-world%))
+                      (universe (initial-universe%))))
