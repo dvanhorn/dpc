@@ -1,0 +1,636 @@
+% You must \input this file into a file the has previously
+% defined the \ifrubric conditional.
+
+\documentclass[12pt]{article}                   % -*- latex -*-
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{./exam}
+\usepackage{type1cm} % We are using scalable fonts. Really.
+\usepackage{alltt,times,comment,amsmath}
+\usepackage{ct} % tight CM font for \tt
+\newexercise{exercise}{Exercise}[subsection]
+
+\makeatletter
+\newcommand{\ie}{\mbox{\emph{i.e.}}}    % \mbox keeps the last period from
+\newcommand{\Ie}{\mbox{\emph{I.e.}}}    % looking like an end-of-sentence.
+\newcommand{\etc}{\emph{etc.}}
+
+\newcommand{\itum}[1]{\item{\bf #1}\\*}
+
+\newcommand{\var}[1]{\textrm{\textit{#1}}}
+
+\newenvironment{inset}
+ {\bgroup\parskip=1ex plus 1ex\begin{list}{}%
+        {\topsep=0pt\rightmargin\leftmargin}%
+        \item[]}%
+ {\end{list}\leavevmode\egroup\global\@ignoretrue}
+
+\newenvironment{insetverb}%
+  {\begin{inset}\begin{verbatim}}%
+  {\end{verbatim}\end{end}}%
+
+\def\pts#1{\marginpar{\footnotesize \raggedright  \fbox{#1 {\sc Points}}}}
+%\def\pts#1{\relax}
+
+\ifrubric
+\newenvironment{solution}{}{}
+\else
+\excludecomment{solution}
+\fi
+\newexercise{problem}{Problem}
+
+\newcommand\code[1]{\texttt{#1}}
+
+% Works in math mode; all special chars remain special; cheaper than \cd.
+% Will not be correct size in super and subscripts, though.
+\newcommand{\ex}[1]{\mbox{\ttt #1}} 
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\vspace*{-1.5cm}
+\ifrubric
+\centerline{\Large CSU2510H Exam 1 Rubric -- Spring 2011}
+
+\else
+\centerline{\Large CSU2510H Exam 1 -- Spring 2011}
+
+\vspace{0.5cm}
+
+\begin{center}
+\begin{tabular}{l@{\qquad}l}
+Name:                        & \rule{174pt}{1pt} \\[.5cm]
+Student Id (last 4 digits):  & \rule{174pt}{1pt} \\[.5cm]
+Section (morning, honors or afternoon):           & \rule{174pt}{1pt} \\[.5cm]
+\end{tabular}
+\end{center}
+
+\noindent\begin{minipage}{7cm}\sloppy
+\begin{itemize}
+\item Write down the answers in the space provided.
+
+\item You may use the usual primitives and expression forms, including those
+suggested in hints; for everything else, define it.
+
+\item You may write {\tt {\slshape c} $\rightarrow$ {\slshape e}} in place of
+  {\tt (check-expect {\slshape c e})} to save time writing. 
+  You may also write the Greek letter $\lambda$ 
+  instead of \code{lambda}, to save writing.
+
+%% DVH: This info is already in the table.
+% \item You may obtain a maximum of 55 points: 50 for the first six
+% problems; and five extra-credit points for the final problem.
+
+\item Some basic test taking advice: Before you start answering
+any problems, read \emph{every} problem, so your brain can be thinking
+about the harder problems in background while you knock off the easy ones.
+\end{itemize}
+
+\bigskip
+
+\emph{Good luck!}
+\end{minipage}\hfil\begin{minipage}[t]{6cm}
+\rule{1cm}{0pt}\begin{tabular}{|c|l|@{/}r|}
+\hline
+{\bf Problem} & Points & out of \\ \hline
+1 & & 16\\ \hline
+2 & & 13\\ \hline
+3 & &  8\\ \hline
+4 & &  6\\ \hline
+5 & & 13\\ \hline
+Extra & & 6\\ \hline
+{\bf Total} & & 62 \\ \hline
+{\bf Base}  & \multicolumn{2}{l|}{{\bf 56}} \\ \hline
+\end{tabular}
+\end{minipage}
+
+\vfill\thispagestyle{empty}
+\newpage
+
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent
+{\bf Going Postal}
+
+The Programming Research Lab (PRL) at Northeastern, which includes the
+2500 professors and many of your TAs, was invited for a field
+trip to Google's lab in Kendall Square today.  Russ Cox, the guy who
+led the design and implementation of Google Code Search, asked the
+PRL team to come have lunch, meet with some engineers, and pitch their
+new project: a next generation webmail program the PRL hopes will
+replace GMail.
+
+Unfortunately, on the night before the visit, many of the PRL team
+were preoccupied writing an exam for the intro to programming course.
+As a consequence, they ran out of time to finish their prototype of
+the ``NUPostal'' mail system.  (If only they had started earlier!)
+Not wanting to miss the chance to write the successor to one of the
+world's most widely used web applications, or a free lunch, the PRL
+decided to show Russ and the Google engineers their data definitions
+and describe the design, but explained they'd have to send in the
+actual program later.  Russ liked the data definitions and agreed to
+let the PRL team submit their program later; but the enginners would
+need to start reviewing the program no later than 9 P.M.~that night.
+As Russ walked the group back to the red line, he said NUPostal could
+go live as early at 2 A.M., assuming the program was well designed.
+
+Excited by the prospect, the PRL team came back to Northeastern, but
+quickly realized there was no way they could finish their NUPostal
+program \emph{and} administer the exam.  But then, in a moment of
+inspired deliberation on how to get out of this pickle, it came to them:
+let's have you do it!  (Twice!)
+
+The next two problems ask you to develop key components of the
+NUPostal system: once with structural recursion, and once with loop functions.
+
+\newpage
+\begin{problem}\pts{16}
+\noindent Here are the data definitions pitched to Google:
+\begin{verbatim}
+     ;; A MailBox is a [Listof Email].
+
+     ;; An Email is a (make-email Address String String).
+     (define-struct email (from subject body))
+
+     ;; An Address is a Symbol. For example, 'wizwoz@foobar.com
+\end{verbatim}
+
+\smallskip
+
+\noindent
+\textit{Important}: For this problem, you \textit{must} use the
+design recipe for structural recursion (in particular, you should
+\emph{not} use loop functions; for that, see problem 2).
+
+\begin{itemize}
+\item[A)\;] Design the program \texttt{emails-from} that, given a
+  mailbox and an email address, computes the list of emails that are
+  from the given address in the mailbox.
+
+\item[B)\;] Design the program \texttt{subjects} that
+computes the list of email subjects in a given mailbox.
+
+\item[C)\;] Design the program \texttt{total-size} that computes
+  the total size of a given mailbox in terms of the length of all the
+  email bodies in it.
+  Again, do \emph{not} include the size of the from address or the subject
+    line in your total---just the message bodies.
+
+\end{itemize}
+
+\newpage
+\ifrubric\else
+[Here is some more space for the previous problem.]
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
+
+\begin{solution}
+\begin{verbatim}
+;; ** A)
+;; emails-from : [Listof Email] Symbol -> [Listof Email]    [1pt]
+;; Return the emails in the list from the given address     [1pt]
+(define (emails-from loe addr)
+  (cond [(empty? loe) empty]                     ;  [1pt]
+        [(symbol=? addr (email-from (first loe)));  [1pt]
+         (cons (first loe)
+               (emails-from (rest loe) addr))]   ;  [1pt]
+        [else
+         (emails-from (rest loe) addr)]))        ;  [1pt]
+
+(define e1 (make-email 'teacher@neu.com "Hello" "That's it"))
+(define e2 (make-email 'bob@builder.com "Bonjour" "C'est tout"))
+
+(check-expect (emails-from empty 'bob@builder.com) empty)
+(check-expect (emails-from (list e1) 'bob@builder.com)
+              empty)
+(check-expect (emails-from (list e1 e2) 'bob@builder.com)
+              (list e2))
+
+;; ** B)
+;; subjects : [Listof Email] -> [Listof String]   [1pt]
+;; Return a list of all the Email subjects        [1pt]
+(define (subjects loe)
+  (cond [(empty? loe) empty]                   ;  [1pt]
+        [else
+         (cons (email-subject (first loe))     ;  [1pt]
+               (subjects (rest loe)))]))       ;  [1pt]
+
+(check-expect (subjects empty) empty)
+(check-expect (subjects (list e1))
+              (list "Hello"))
+(check-expect (subjects (list e1 e2))
+              (list "Hello" "Bonjour"))
+
+;; ** C)
+;; total-size : [Listof Email] -> Number               [1pt]
+;; Return the total size of the email bodies           [1pt]
+(define (total-size loe)
+  (cond [(empty? loe) 0]                            ;  [1pt]
+        [else
+         (+ (string-length (email-body (first loe)));  [1pt]
+            (total-size (rest loe)))]))             ;  [1pt]
+
+(check-expect (total-size empty) 0)
+(check-expect (total-size (list e1)) 9)
+(check-expect (total-size (list e1 e2)) 19)
+\end{verbatim}
+\end{solution}
+\end{problem}
+\ifrubric\bigskip\else
+\newpage
+\fi
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{problem}\pts{13}
+ 
+  The programs of the previous problem, if developed with the design
+  recipe for structural recursion, should follow patterns abstracted
+  by one of the loop functions.
+  For each of the programs you wrote, re-write it using a loop function.
+  In each case, \emph{one} loop function should suffice.
+
+Since you have already written the contract and purpose statement
+(right? it is Google policy, after all) you \textit{only} need to
+write the function definitions.
+
+\begin{itemize}
+\item[A)\;] Write \texttt{emails-from} using a loop function.
+
+\item[B)\;] Write \texttt{subjects} using a loop function.
+
+\item[C)\;] Write \texttt{total-size} using a loop function.
+\end{itemize}
+
+\ifrubric\else
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
+
+\begin{solution}
+\begin{verbatim}
+;; ** A)
+(define (emails-from loe addr)
+  (filter                             ; [1pt]
+   (lambda (e)                        ; [1pts]
+     (symbol=? (email-from e) addr))  ; [2pts]
+   loe))
+
+(define e1 (make-email 'teacher@neu.com "Hello" "That's it"))
+(define e2 (make-email 'bob@builder.com "Bonjour" "C'est tout"))
+
+;; ** B)
+(define (subjects loe)
+  (map                   ; [1pt]
+   email-subject         ; [2pt]
+   loe))
+
+;; ** C)
+(define (total-size loe)
+  (foldr                 ; [1pt]
+   (lambda (e tot)       ; [2pt]
+     (+ (string-length   ; [2pt]
+         (email-body e)) tot))
+   0                     ; [1pt]
+   loe))
+\end{verbatim}
+\end{solution}
+\end{problem}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{problem} \pts{8}
+
+  Design a function, \texttt{weaver}, that weaves two lists into a
+  single list by alternating their elements.  Make sure you give it a
+  general contract.
+
+\bigskip
+
+\noindent Here are some tests/examples to further explain:
+
+\begin{verbatim}
+    (check-expect (weaver empty (list 1)) (list 1))
+    (check-expect (weaver (list "Hi" "Lo") empty) (list "Hi" "Lo"))
+    (check-expect (weaver (list 1 2) (list 3 4))
+                  (list 1 3 2 4))
+    (check-expect (weaver (list 'R 'C 'R) (list 'A 'E))
+                  (list 'R 'A 'C 'E 'R))
+\end{verbatim}
+
+\begin{solution}
+\begin{verbatim}
+;; weaver : [Listof X] [Listof X] -> [Listof X]     [1pt]
+;; Weave two lists in alternating order             [1pt]
+(define (weaver l1 l2)
+  (cond [(empty? l1) l2]                            [1pt]
+        [(empty? l2) l1]                            [1pt]
+        [else (cons (first l1)                      [2pts]
+                    (cons (first l2)
+                          (weaver (rest l1)
+                                  (rest l2))))]))   [2pts]
+
+;; Alternatively...
+(define (weaver l1 l2)
+  (cond [(empty? l1) l2]
+        [else (cons (first l1)
+                    (weaver l2 (rest l1)))]))
+\end{verbatim}
+\end{solution}
+
+\end{problem}
+
+\ifrubric\bigskip\else
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{problem} \pts{6}
+
+Here is a definition of a function, \texttt{do-while}, that does
+something.  Study the definition, and give it a general contract.
+
+\begin{verbatim}
+    (define (do-while ys go what)
+      (cond [(empty? ys) empty]
+            [(not (go (first ys))) empty]
+            [else
+              (cons (what (first ys))
+                    (do-while (rest ys) go what))]))
+\end{verbatim}
+
+\begin{solution}
+\begin{verbatim}
+  do-while: [Listof Y] [Y -> Boolean] [Y -> Z] -> [Listof Z]
+\end{verbatim}
+\end{solution}
+\end{problem}
+
+\ifrubric\bigskip\else
+\newpage
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{problem} \pts{13}
+You've seen lists built with \code{cons} throughout the semester,
+where elements are added onto the \textit{front} of a list.  Less well
+known are \code{snoc} lists, where elements are added onto the
+\emph{end} of a list.
+
+\begin{verbatim}
+    ;; A [SnocListof X] is one of:
+    ;;  - empty
+    ;;  - (make-snoc [SnocListof X] X)
+    (define-struct snoc (front last))
+\end{verbatim}
+
+\noindent For instance, we would represent the list \texttt{'(1 2 3)}
+as:
+
+\begin{verbatim}
+    (make-snoc (make-snoc (make-snoc empty 1) 2) 3)
+\end{verbatim}
+
+
+\noindent A new social-media/messaging company, Blather,
+uses this data format
+extensively, and wants to be able to use the familiar loop functions,
+even with their backwards lists.
+
+Help them by designing the abstract loop function,
+\texttt{snoc-filter}, which takes a predicate and a
+\texttt{[SnocListof X]} and returns a \code{snoc} list that contains
+only the elements for which the predicate returns \texttt{true}.
+
+\bigskip
+
+\noindent Here's a couple examples/tests to clarify:
+\begin{verbatim}
+    (define slst (make-snoc (make-snoc (make-snoc empty 1) 2) 3))
+    (check-expect (snoc-filter odd? slst)
+                  (make-snoc (make-snoc empty 1) 3))
+    (check-expect (snoc-filter even? sl)
+                  (make-snoc empty 2))
+\end{verbatim}
+
+
+
+\begin{solution}
+\begin{verbatim}
+;; snoc-filter : [X -> Boolean] [SnocListof X] -> [SnocListof X]  [3pts]
+;; Filter out all the elements for which pred? returns false      [1pt]
+(define (snoc-filter pred? slox)
+  (cond [(empty? slox) empty]                                     [1pt]
+        [(pred? (snoc-last slox))                                 [1pts]
+         (make-snoc (snoc-filter pred? (snoc-front slox))         [3pts]
+                    (snoc-last slox))]
+        [else (snoc-filter pred? (snoc-front slox))]))            [2pts]
+
+;; Examples/Tests 2pts if at least 2...
+(define sl (make-snoc (make-snoc (make-snoc empty 1) 2) 3))
+(check-expect (snoc-filter odd? empty) empty)
+(check-expect (snoc-filter odd? sl)
+              (make-snoc (make-snoc empty 1) 3))
+(check-expect (snoc-filter even? sl)
+              (make-snoc empty 2))
+\end{verbatim}
+\end{solution}
+\end{problem}
+
+\ifrubric\bigskip\else
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{problem} \pts{14}
+
+%Generative recursion.
+
+%\begin{solution}
+%\begin{verbatim}
+%\end{verbatim}
+%\end{solution}
+%\end{problem}
+
+%\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{problem}\pts{6}
+\textbf{(Extra credit)}
+
+Shivers and Van Horn have been acting suspicious lately, and Chadwick
+suspects that they've been planning something behind his back.  He
+noticed that they've been passing ``\textit{secret}'' messages.  And
+the message format? Of course they're using lists of \code{Number}s!
+He's intercepted a few of their messages, and thinks that the secret
+code is based on binary trees of \code{String}s.
+
+\bigskip\noindent
+Here's his data-definition:
+
+\begin{verbatim}
+    ;; A CodeTree is one of
+    ;;  - String
+    ;;  - (make-node CodeTree CodeTree)
+    (define-struct node (zero one))
+\end{verbatim}
+
+\noindent The idea is to encode each letter of the message as a
+\code{Number} that represents a path from the root of a
+\code{CodeTree} to a \code{String} at a leaf, where going to the left
+(\code{zero}) means the number is even, and going right (\code{one})
+means the number is odd.
+
+\noindent For example, here's a tree that encodes \code{"a"} as the
+number \code{0}, and \code{"b"} as the number \code{1}:
+\begin{verbatim}
+    (make-node "a" "b")
+\end{verbatim}
+
+\noindent Of course, Shivers and Van Horn are smart, so they've
+encoded using a \textit{recursive} structure in order to have more
+than just 2 letters. For instance, the following tree encodes
+\code{"a"} as \code{0}, \code{"b"} as \code{2}, \code{"c"} as
+\code{1}, and \code{"d"} as \code{3}:
+
+\begin{verbatim}
+    (make-node (make-node "a" "b")
+               (make-node "c" "d"))
+\end{verbatim}
+
+\noindent Note that (i) the deeper the tree, the longer the numbers,
+(ii) the encodings of \code{"a"} and \code{"b"} are the ones from
+before multiplied by \code{2}, and (iii) the encodings of \code{"c"} and
+\code{"d"} can be seen as (\code{1+0}) and (\code{1+2}) respectively.
+
+\bigskip\noindent \textbf{Your task}: write a function,
+\code{message}, that accepts a \code{[Listof Number]} and a
+\code{CodeTree}, and returns the corresponding decoded message.
+\textit{Hint}: it's helpful to design a function \code{decode} that
+decodes a single \code{Number} into its corresponding \code{String},
+given a \code{CodeTree}.
+
+\bigskip\noindent The next page contains some helpful tests/examples
+for both functions.
+\newpage
+\begin{verbatim}
+    (define t-1 (make-node "m" "o"))
+    (define t-2 (make-node (make-node "w" "t")
+                           (make-node "e" "s")))
+
+    (check-expect (decode 0 t-1) "m")
+    (check-expect (decode 0 t-2) "w")
+    (check-expect (decode 3 t-2) "s")
+
+    (check-expect (message '(0 1 0) t-1) "mom")
+    (check-expect (message '(0 1 1) t-1) "moo")
+    (check-expect (message '(3 0 1 1 2) t-2) "sweet")
+    (check-expect (message '(2 0 1 1 2) t-2) "tweet")
+
+    (check-expect (message '(0 7 3 1 6 2 0 5)
+                           (make-node
+                            (make-node "c" (make-node "i" "w"))
+                            (make-node (make-node "d" "k")
+                                       (make-node "a" "h"))))
+                  "chadwick")
+\end{verbatim}
+
+\begin{solution}
+\begin{verbatim}
+;; decode : Number CodeTree -> String
+(define (decode n tree)
+  (cond [(string? tree) tree]
+        [(even? n)
+         (decode (/ n 2) (node-zero tree))]
+        [else
+          (decode (/ (sub1 n) 2) (node-one tree))]))
+
+;; message : [Listof Number] CodeTree -> String
+(define (message lon tree)
+  (foldr string-append ""
+         (map (lambda (n) (decode n tree)) lon)))
+\end{verbatim}
+\end{solution}
+\end{problem}
+
+%% EXTRA CREDIT BACKUP
+\begin{comment}\pts{6}
+\textbf{(Extra credit)}
+
+One of the Mathematics professors here at NU (he/she asked to remain
+anonymous) has come up with a different representation for numbers,
+which he/she has patented under the name, \textit{Digit-ized
+  Numbers}\texttrademark.  His/her brilliant idea is to represent
+numbers as a \code{[Listof Number]} of the individual digits in some
+\textit{base}.
+
+\bigskip
+
+\noindent For example, the number \code{123} is represented in
+\textit{digit-ized} base \code{10} as:
+\begin{verbatim}
+      (list 1 2 3)
+\end{verbatim}
+But it can be represented in \textit{digit-ized} base \code{5} as:
+\begin{verbatim}
+      (list 4 4 3)
+\end{verbatim}
+
+\bigskip
+
+\noindent Design the function \code{digitize} that takes two numbers,
+\code{n} and \code{base}, and converts \code{n} into the
+\textit{digit-ized} representation in the given \code{base}.  Here are
+a few more clarifying tests/examples.
+
+\begin{verbatim}
+      (check-expect (digitize 0 10) (list 0))
+      (check-expect (digitize 1 2) (list 1))
+      (check-expect (digitize 6 2) (list 1 1 0))
+      (check-expect (digitize 413 10) (list 4 1 3))
+      (check-expect (digitize 16 5) (list 3 1))
+\end{verbatim}
+
+
+\begin{solution}
+\begin{verbatim}
+;; digitize : Number Number -> [Listof Number]
+;; Regular recursion + reverse
+(define (digitize n base)
+  (local [(define (digi m)
+            (cond [(= m 0) empty]
+                  [else (cons (remainder m base)
+                              (digi (quotient m base)))]))]    
+    (cond [(= n 0) (list 0)]
+          [else (reverse (digi n))])))
+
+;; digitize : Number Number -> [Listof Number]
+;; Accumulator version
+(define (digitize.ac n base)
+  (local [(define (digi m acc)
+            (cond [(= m 0) acc]
+                  [else (digi (quotient m base)
+                              (cons (remainder m base) acc))]))]
+    (cond [(= n 0) (list 0)]
+          [else (digi n empty)])))
+\end{verbatim}
+\end{solution}
+\end{comment}
+
+\ifrubric\bigskip\else
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
+
+\end{document}
+
+
