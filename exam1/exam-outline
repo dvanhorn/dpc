@@ -1,4 +1,6 @@
-* Numeric Ranges
+
+
+* Numeric Ranges (Sam)
 
  - Design and develop a representation for half-open intervals of REAL
    numbers (lo,hi]
@@ -7,7 +9,7 @@
  - add a union method to both variants.  You will need to adjust your
    data defintion.  
 
-* Shapes and Bounding Boxes
+* Shapes and Bounding Boxes (DVH)
 
  - We give them class defs for Shapes (Circle, Rectangle)
  - They develop a `bounding-box-area' method
@@ -16,14 +18,14 @@
  - Add a new variant (Square), which should support all the method of
    the interface.
 
-* Objects as functions
+* Objects as functions (DVH)
   - We give them the [IFun X Y] interface, with method apply : X -> Y
   - they implement the general unary wrapper
   - instantiate the wrapper for add1 and sub1
   - Then develop the compose method : [IFun Y Z] -> [IFun X Z]
   - example: add1 o sub1 = id
 
-* Queue with invariants
+* Queue with invariants (Sam)
   - We describe the queue built from two lists, with the spec for
   enq/deq/head.
   - They implement enq/deq/head, maintaingin/exploiting the invariant
@@ -32,7 +34,7 @@
   - implement constructor which takes two lists, maintains invariant,
   errors if both empty
 
-* Dictionaries and properties
+* Dictionaries and properties (DVH)
   - We give a dictionary interface/impl
   - state informally the insert/lookup property
   - they write a predicate which checks the property, and tests that
