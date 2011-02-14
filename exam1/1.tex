@@ -230,6 +230,100 @@ include, and the $)$ means exclude.
 \newpage
 \fi
 
+\begin{problem}\pts{??}
+
+Here are data, class, and interface definitions for Shapes:
+\begin{verbatim}
+;; A Shape is one of:
+;; - (rect% Number Number)
+;; - (circ% Number)
+;; implements:
+;; Compute the area of the smallest bounding box for this shape.
+;; bounding-box-area : -> Number
+
+(define-class rect%
+  (fields width height))
+
+(define-class circ%
+  (fields radius))
+\end{verbatim}
+%
+Here are some examples of how \code{bounding-box-area} should work:
+\begin{verbatim}
+(check-expect ((rect% 3 4) . bounding-box-area) 12)
+(check-expect ((circ% 1.5) . bounding-box-area)  9)
+\end{verbatim}
+
+
+\begin{enumerate}
+\item Develop the \code{bounding-box-area} method for the
+  \code{rect\%} and \code{circ\%} class.
+
+\item Develop a super class of \code{rect\%} and \code{circ\%} and
+  lift the \code{bounding-box-area} method to the superclass.  Extend
+  the shape interface as needed, but implement any methods you add.
+
+\item Develop a new variant of a Shape, a Square, which should support
+  all of the methods of the interface.
+\end{enumerate}
+
+\begin{solution}
+\begin{verbatim}
+;; Part 1
+(define-class rect% 
+  (fields width height)
+  (define/public (bounding-box-area)
+    (* (field width) (field height))))
+  
+(define-class circ% 
+  (fields radius)
+  (define/public (bounding-box-area)
+    (sqr (* 2 (field radius)))))
+
+;; Part 2
+
+;; implements:
+;; width : -> Number
+;; height : -> Number
+;; Compute the {width,height} of this shape.
+
+(define-class shape% 
+  (define/public (bounding-box-area)
+    (* (this . width) (this . height))))
+
+(define-class rect% 
+  (super shape%)
+  (fields width height))
+  
+(define-class circ% 
+  (super shape%)
+  (fields radius)
+  (define/public (width)
+    (* 2 (field radius)))
+  (define/public (height)
+    (width)))
+
+;; Part 3
+    
+(define-class square%
+  (super shape%)
+  (fields width)
+  (define/public (height)
+    (width)))
+
+(check-expect ((square% 5) . bounding-box-area) 25)
+\end{verbatim}
+\end{solution}
+
+\newpage
+\ifrubric\else
+[Here is some more space for the previous problem.]
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
+
+\end{problem}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{problem}\pts{13}
