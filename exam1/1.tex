@@ -111,14 +111,14 @@ about the harder problems in background while you knock off the easy ones.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\noindent
-{\bf Home on the Range}
+% \noindent
+% {\bf Home on the Range}
 
-Come up with funny story here.
+% Come up with funny story here.
 
 
 
-\newpage
+% \newpage
 \begin{problem}\pts{16}
 \noindent 
 
@@ -131,30 +131,26 @@ includes all of the numbers between $3$ and $4.7$, including $3$ but
 range, but $5$ is not.  In the notation used here, the $[$ means
 include, and the $)$ means exclude.
 
-\begin{verbatim}
-    ;; A Range is (new range% Number Number)
+% \begin{verbatim}
+%     ;; A Range is (new range% Number Number)
 
-    ;; Interp: represents the range between `lo' and `hi'
-    ;;         including `lo', but *not* including `hi'
+%     ;; Interp: represents the range between `lo' and `hi'
+%     ;;         including `lo', but *not* including `hi'
 
-    ;; and implements:
+%     ;; and implements:
 
-    ;; - in-range? : Number -> Boolean
-    ;; determine if the given number is in this range
-
-    ;; - overlap? : Range -> Boolean 
-    ;; determine if the given range overlaps with this range
-\end{verbatim}
+%     ;; - in-range? : Number -> Boolean
+%     ;; determine if the given number is in this range
+% \end{verbatim}
 
 \smallskip
 
 \noindent
 \begin{itemize}
-\item[A)\;] Design a representation for ranges, along with
-  \texttt{in-range?} and \texttt{overlap?} methods.
-  The \texttt{in-range?} method determines if a number is in the range, and
-  \texttt{overlap?} determines if a range shares \emph{any} numbers in
-  common with another range.
+\item[A)\;] Design a representation for ranges, along with the
+  \texttt{in-range?} method, which determines if a number is in the
+  range.  For example, the range $[3,7.2)$ includes the numbers $3$
+  and $5.0137$, but not the numbers $-17$ or $7.2$.
 
 \item[B)\;] Extend the data definition and implementation of ranges to
   include ranges that \emph{exclude} the low end of the range and
@@ -394,10 +390,71 @@ Virtual Line for its launch later this semester:
 \end{itemize}
 
 \begin{solution}
+\begin{verbatim}
+;; invariant: front is empty IFF queue is empty
+;; A [Queue X] is (queue% [Listof X] [Listof X])
+
+(define-class queue%
+  (fields front back)
+  ;; Add element to the back
+  ;; X -> [Queue X]
+  ;; add it to the front IFF the front is empty
+  ;; (otherwise invariant is violated)
+  (define/public (enqueue i)
+    (cond [(empty? (field front))
+           (queue% (list i) empty)]
+          [else
+           (queue% (field front) (cons i (field back)))]))
+  ;; get the first element
+  ;;  -> X
+  ;; assumes this queue is non-empty
+  ;; uses the invariant
+  (define/public (head)
+    (first (field front)))
+  ;; drop the first element
+  ;;  -> [Queue X]
+  ;; assumes this queue is non-empty
+  (define/public (dequeue)
+    (cond 
+      ;; maintain the invariant -- don't let `front' be empty
+      [(empty? (rest (field front)))
+       (queue% (reverse (field back)) empty)]
+      ;; otherwise, simple
+      [else (queue% (rest (field front)) (field back))]))
+  ;; is this queue empty?
+  ;; emp? : -> Boolean
+  ;; uses the invariant
+  (define/public (emp?)
+    (empty? (field front)))
+  ;; convert the queue to a list
+  ;; -> [Listof X] 
+  (define/public (to-list)
+    (append (field front)
+            (reverse (field back)))))
+
+(define q (queue% '(1 2 3) empty))
+(define eq (queue% empty empty))
+
+(check-expect (q . emp?) false)
+(check-expect (q . head) 1)
+(check-expect (eq . emp?) true)
+(check-expect (eq . enqueue 1) (queue% '(1) '()))
+(check-expect (eq . enqueue 1 . dequeue) eq)
+(check-expect (q . enqueue 5) (queue% '(1 2 3) '(5)))
+(check-expect (q . enqueue 5 . dequeue) (queue% '(2 3) '(5)))
+
+(check-expect (q . to-list) '(1 2 3))
+(check-expect (q . enqueue 5 . to-list) '(1 2 3 5))
+(check-expect (q . enqueue 5 . dequeue . to-list) '(2 3 5))
+\end{verbatim}
 \end{solution}
 \end{problem}
 
-\ifrubric\bigskip\else
+\newpage
+\ifrubric\else
+[Here is some more space for the previous problem.]
+\newpage
+[Here is some more space for the previous problem.]
 \newpage
 \fi
 
