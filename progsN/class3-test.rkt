@@ -14,3 +14,19 @@ a
 
 a
 
+(define-class author%
+  (fields name books)
+  (constructor (n) (fields n empty))
+  (define/public (register b)
+    (set-field! books (cons b (field books)))))
+(define-class book%
+  (fields author title)
+  (constructor (a t)
+               (fields a t)
+               (send a register this)))
+
+(define mf (author% "Matthias"))
+mf
+(define htdp (book% mf "HtDP"))
+htdp mf
+

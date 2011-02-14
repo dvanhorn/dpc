@@ -77,9 +77,10 @@
        (~optional (fields (~var fld (member-name null)) ...)
                   #:defaults ([(fld 1) null]))
        (~optional (constructor (cargs:id ...)
-                   cbody:expr)
+                   cbody:expr cextra-body:expr ...)
                    #:defaults ([(cargs 1) (generate-temporaries #`(fld ... . #,(map second (attribute super%.fields))))]
-                               [cbody #`(#,(datum->syntax stx 'fields) cargs ...)]))
+                               [cbody #`(#,(datum->syntax stx 'fields) cargs ...)]
+                               [(cextra-body 1) null]))
        (~or (~var <definition> (member-def (syntax->list #'(fld ...))))
             (~and ce (~or (isl+:check-expect <act> <exp>)
                           (isl+:check-within <act> <exp> <rng>)
@@ -91,6 +92,7 @@
      #:with -class% (datum->syntax #f (syntax-e #'class%))
      (with-syntax* ([field (datum->syntax stx 'field)]
                     [set-field! (datum->syntax stx 'set-field!)]
+                    [fake-this (datum->syntax stx 'this)]
                     [fields (datum->syntax stx 'fields)]
                     [(the-fld ...)
                      (generate-temporaries (syntax (fld ...)))]
@@ -128,13 +130,19 @@
               (r:init cargs ...)
               (r:field (the-fld (void)) ...)
               (r:let-values ([(the-fld2 ... inherit-fld ...)
-                              (let-syntax ([fields (make-rename-transformer #'wrap)])
-				(let ([v cbody])
-				  (if (field-wrapper? v)
-				      (apply values (field-wrapper-vals v))
-				      (error 
-				       'class% 
-				       "constructor must use `fields' to produce result"))))])
+                              (let-syntax ([fields (make-rename-transformer #'wrap)]
+                                           [fake-this
+                                            (λ (stx)
+                                              (raise-syntax-error 
+                                               #f 
+                                               "`this' may not be used before initialization"
+                                               stx))])
+                                (let ([v cbody])
+                                  (if (field-wrapper? v)
+                                      (apply values (field-wrapper-vals v))
+                                      (error 
+                                       'class% 
+                                       "constructor must use `fields' to produce result"))))])
                             (r:set! the-fld the-fld2) ...
                             (r:super-make-object inherit-fld ...))
               (r:inherit super-methods) ...
@@ -177,7 +185,8 @@
                (over (custom-display p) (custom-write p))
 	       
                <definition>
-               ...))))))]))
+               ...
+               (begin cextra-body ...)))))))]))
 
 (define-syntax (new stx)
   (syntax-parse stx
