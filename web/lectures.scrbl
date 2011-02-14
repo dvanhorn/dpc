@@ -35,10 +35,10 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 @include-section["lectures/lec07.scrbl"]
 @include-section["lectures/lec08.scrbl"]
 @include-section["lectures/lec09.scrbl"]
+@include-section["lectures/lec10.scrbl"]
+@include-section["lectures/lec11.scrbl"]
 
-@;section[#:tag "lec09"]{2/07: Generative recursion and accumulators}
-@section[#:tag "lec10"]{2/10: Modules}
-@section[#:tag "lec11"]{2/14: Indexed data}
+
 @section[#:tag "lec12"]{2/17: Intermezzo: Java}
 @section[#:tag "lec13"]{2/21: Holiday (Presidents Day)}
 
