@@ -1,5 +1,5 @@
 #lang class3
-(require (only-in racket random))
+(require (only-in racket random begin void))
 (require class1/universe)
 (require 2htdp/image)
 
@@ -54,33 +54,13 @@
 ;
 
 (define-class ball%
-  (fields z v a radius color left right)
-
-  (constructor (z v a radius color)
-    (fields z v a radius color 'none 'none)
-    (this . left!  this)
-    (this . right! this))
-
-  (define/public (left! b)
-    (set-field! left b))
-
-  (define/public (right! b)
-    (set-field! right b))
-
-  (define/public (links)
-    (list (field left) (field right)))
+  (fields z v a radius)
 
   (define/public (speed)
     (magnitude (field v)))
 
   (define/public (draw)
-    (circle (field radius) "solid" (field color)))
-
-  (define/public (tick)
-    (begin
-      (set-field! z (+ (field z) (* TICK-RATE (field v))))
-      (set-field! v (+ (field v) (* TICK-RATE (field a))))
-      (this . contain)))
+    (circle (field radius) "solid" (this . color)))
 
   (define/public (distance-to that)
     (magnitude (- (this . z) (that . z))))
@@ -128,47 +108,6 @@
       (set-field! v (conjugate (field v)))
       this))
 
-  (define/public (merge that)
-    (if (this . stronger? that)
-      (that . mimic this)
-      (this . mimic that)))
-
-  (define/public (stronger? that)
-    (flip (/ (this . speed)
-             (+ (this . speed) (that . speed)))))
-
-  (define/public (mimic b)
-    (begin
-      (this . unlink)
-      (this . link b)
-      (set-field! color (b . color))
-      this))
-
-  (define/public (link that)
-    (let ([r (this . rightmost)]
-          [l (that . leftmost)])
-      (begin
-        (r . right! l)
-        (l . left! r))))
-
-  (define/public (unlink)
-    (begin
-      (this . left  . right! (this . right))
-      (this . right . left!  (this . left))
-      (this . left!  this)
-      (this . right! this)))
-
-  (define/public (click z)
-    (begin
-      (this . die)
-      this))
-
-  (define/public (die)
-    (begin
-      (set-field! color "black")
-      (map (λ (b) (b . die)) (field links))
-      this))
-
   (define/public (line-from b i)
     (let* ([Δ (* 1/2 (- (field z) (b . z)))]
            [w (+ (b . z) Δ)])
@@ -177,9 +116,138 @@
                   (y-of (b . z))
                   (x-of w)
                   (y-of w)
-                  (field color))))
+                  (this . color))))
 
   )
+
+;
+; LiveBall
+;
+
+(define-class live-ball%
+  (super ball%)
+  (fields left right color)
+
+  (constructor (z-)
+    (fields 'none 'none
+            (random-color)
+            z- (random-v) 0
+            (random-radius))
+    (this . left!  this)
+    (this . right! this))
+
+  (define/public (left! b)
+    (set-field! left b))
+
+  (define/public (right! b)
+    (set-field! right b))
+
+  (define/public (links)
+    (list (field left) (field right)))
+
+  (define/public (tick)
+    (if (this . should-die?)
+      (dying-ball% (field z) (field v) (field a) (field radius))
+      (begin
+        (set-field! z (+ (field z) (* TICK-RATE (field v))))
+        (set-field! v (+ (field v) (* TICK-RATE (field a))))
+        (this . contain))))
+
+  (define/public (friends? that)
+    (equal? (this . color) (that . color)))
+
+  (define/public (friend that)
+    (if (and (that . friendly?)
+             (not (this . friends? that)))
+      (local [(define old-this-left  (this . left))
+              (define old-that-right (that . right))]
+        (begin
+          (this . left!  that)
+          (that . right! this)
+          (send old-this-left  right! old-that-right) ; FIXME .
+          (send old-that-right left!  old-this-left)
+          (this . mimic that)))
+      (void)))
+
+  (define/public (mimic that)
+    (if (not (this . friends? that))
+      (begin
+        (set-field! color (that . color))
+        ((field right) . mimic that))
+      (void)))
+
+  (define/public (click z)
+    (this . die))
+
+  (define/public (die)
+    (if (not (this . should-die?))
+      (begin
+        (set-field! color "black")
+        ((field left) . die))
+      (void)))
+
+  (define/public (should-die?)
+    (equal? "black" (this . color)))
+
+  (define/public (friendly?)
+    true)
+
+  (define/public (dead?)
+    false)
+
+  )
+
+;
+; DyingBall
+;
+
+(define-class dying-ball%
+  (super ball%)
+  (fields life)
+
+  (constructor (z- v- a- radius-)
+    (fields 1 z- v- a- radius-))
+
+  (define/public (color)
+    (local [(define gray (round (* 255 (- 1 (field life)))))]
+      (make-color gray gray gray)))
+
+  (define/public (tick)
+    (if (> (field life) .01)
+      (begin
+        (set-field! life (* .9 (field life)))
+        this)
+      (dead-ball%)))
+
+  (define/public (click)
+    (void))
+
+  (define/public (links)
+    empty)
+
+  (define/public (friend that)
+    (void))
+
+  (define/public (friendly?)
+    false)
+
+  (define/public (dead?)
+    false)
+
+  )
+
+;
+; DeadBall
+;
+
+(define-class dead-ball%
+
+  (define/public (dead?)
+    true)
+
+  )
+
+; TODO Remove acceleration -----------------------------------------------------
 
 (define (random-z)
   (random-complex-within MIN-Z MAX-Z))
@@ -187,10 +255,11 @@
 (define (random-v)
   (random-complex-within (- MAX-V) MAX-V))
 
+(define (random-radius)
+  (random-between 10 20))
+
 (define (random-ball-at z)
-  (new ball%
-       z (random-v) 0
-       20 (random-color)))
+  (new live-ball% z))
 
 (define (random-ball)
   (random-ball-at (random-z)))
@@ -218,10 +287,12 @@
 
   (define/public (on-tick)
     (begin
-      (set-field! balls (map (λ (r) (r . tick)) (field balls)))
+      (set-field! balls (filter (λ (b) (not (b . dead?)))
+                                (map (λ (b) (b . tick))
+                                     (field balls))))
       (map-pairs (λ (a b)
                    (if (a . overlaps? b)
-                     (a . merge b)
+                     (a . friend b)
                      (void)))
                  (pairs (field balls)))
       this))
@@ -245,17 +316,15 @@
 
   (define/public (on-key k)
     (cond
-      [(key=? k "q") (this . stop-with this)]
-      [(key=? k "n") (this . spawn)]
+      [(key=? k "q") (stop-with this)]
+      [(key=? k "n") (begin (this . spawn) this)]
       [else          this]))
 
   (define/public (spawn)
     (this . spawn-at (random-z)))
 
   (define/public (spawn-at z)
-    (begin
-      (set-field! balls (cons (random-ball-at z) (field balls)))
-      this))
+    (set-field! balls (cons (random-ball-at z) (field balls))))
 
   )
 
