@@ -61,7 +61,7 @@
 \begin{tabular}{l@{\qquad}l}
 Name:                        & \rule{174pt}{1pt} \\[.5cm]
 Student Id (last 4 digits):  & \rule{174pt}{1pt} \\[.5cm]
-Section (morning, honors or afternoon):           & \rule{174pt}{1pt} \\[.5cm]
+%Section (morning, honors or afternoon):           & \rule{174pt}{1pt} \\[.5cm]
 \end{tabular}
 \end{center}
 
@@ -93,12 +93,12 @@ about the harder problems in background while you knock off the easy ones.
 \rule{1cm}{0pt}\begin{tabular}{|c|l|@{/}r|}
 \hline
 {\bf Problem} & Points & out of \\ \hline
-1 & & 16\\ \hline
-2 & & 13\\ \hline
-3 & &  8\\ \hline
-4 & &  6\\ \hline
-5 & & 13\\ \hline
-Extra & & 6\\ \hline
+1 & & ??\\ \hline
+2 & & ??\\ \hline
+3 & & ??\\ \hline
+4 & & ??\\ \hline
+5 & & ??\\ \hline
+%Extra & & 6\\ \hline
 {\bf Total} & & 62 \\ \hline
 {\bf Base}  & \multicolumn{2}{l|}{{\bf 56}} \\ \hline
 \end{tabular}
@@ -112,71 +112,61 @@ Extra & & 6\\ \hline
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \noindent
-{\bf Going Postal}
+{\bf Home on the Range}
 
-The Programming Research Lab (PRL) at Northeastern, which includes the
-2500 professors and many of your TAs, was invited for a field
-trip to Google's lab in Kendall Square today.  Russ Cox, the guy who
-led the design and implementation of Google Code Search, asked the
-PRL team to come have lunch, meet with some engineers, and pitch their
-new project: a next generation webmail program the PRL hopes will
-replace GMail.
+Come up with funny story here.
 
-Unfortunately, on the night before the visit, many of the PRL team
-were preoccupied writing an exam for the intro to programming course.
-As a consequence, they ran out of time to finish their prototype of
-the ``NUPostal'' mail system.  (If only they had started earlier!)
-Not wanting to miss the chance to write the successor to one of the
-world's most widely used web applications, or a free lunch, the PRL
-decided to show Russ and the Google engineers their data definitions
-and describe the design, but explained they'd have to send in the
-actual program later.  Russ liked the data definitions and agreed to
-let the PRL team submit their program later; but the enginners would
-need to start reviewing the program no later than 9 P.M.~that night.
-As Russ walked the group back to the red line, he said NUPostal could
-go live as early at 2 A.M., assuming the program was well designed.
 
-Excited by the prospect, the PRL team came back to Northeastern, but
-quickly realized there was no way they could finish their NUPostal
-program \emph{and} administer the exam.  But then, in a moment of
-inspired deliberation on how to get out of this pickle, it came to them:
-let's have you do it!  (Twice!)
-
-The next two problems ask you to develop key components of the
-NUPostal system: once with structural recursion, and once with loop functions.
 
 \newpage
 \begin{problem}\pts{16}
-\noindent Here are the data definitions pitched to Google:
+\noindent 
+
+A \emph{range} represents a set of numbers between two endpoints.  To
+start with, you only need to consider ranges that \emph{include} the
+smaller endpoint, and \emph{exclude} the larger endpoint---such ranges
+are called \emph{half-open}.  For example, the range $[3,4.7)$
+includes all of the numbers between $3$ and $4.7$, including $3$ but
+\emph{not} including $4.7$. So $4$ and $3.0000001$ are both in the
+range, but $5$ is not.  In the notation used here, the $[$ means
+include, and the $)$ means exclude.
+
 \begin{verbatim}
-     ;; A MailBox is a [Listof Email].
+    ;; A Range is (new range% Number Number)
 
-     ;; An Email is a (make-email Address String String).
-     (define-struct email (from subject body))
+    ;; Interp: represents the range between `lo' and `hi'
+    ;;         including `lo', but *not* including `hi'
 
-     ;; An Address is a Symbol. For example, 'wizwoz@foobar.com
+    ;; and implements:
+
+    ;; - in-range? : Number -> Boolean
+    ;; determine if the given number is in this range
+
+    ;; - overlap? : Range -> Boolean 
+    ;; determine if the given range overlaps with this range
 \end{verbatim}
 
 \smallskip
 
 \noindent
-\textit{Important}: For this problem, you \textit{must} use the
-design recipe for structural recursion (in particular, you should
-\emph{not} use loop functions; for that, see problem 2).
-
 \begin{itemize}
-\item[A)\;] Design the program \texttt{emails-from} that, given a
-  mailbox and an email address, computes the list of emails that are
-  from the given address in the mailbox.
+\item[A)\;] Design a representation for ranges, along with
+  \texttt{in-range?} and \texttt{overlap?} methods.
+  The \texttt{in-range?} method determines if a number is in the range, and
+  \texttt{overlap?} determines if a range shares \emph{any} numbers in
+  common with another range.
 
-\item[B)\;] Design the program \texttt{subjects} that
-computes the list of email subjects in a given mailbox.
+\item[B)\;] Extend the data definition and implementation of ranges to
+  include ranges that \emph{exclude} the low end of the range and
+  \emph{include} the high end.  These ranges are written $(lo,hi]$.  
 
-\item[C)\;] Design the program \texttt{total-size} that computes
-  the total size of a given mailbox in terms of the length of all the
-  email bodies in it.
-  Again, do \emph{not} include the size of the from address or the subject
-    line in your total---just the message bodies.
+\item[C)\;] Add a \texttt{union} method to the interface for ranges,
+  and to all of the classes that implement the interface for ranges.
+  This method consumes a second range, and produces a new range including
+  everything that was in \emph{either} range. 
+
+  You will likely need to extend your data defintion for ranges to
+  support this method.  
 
 \end{itemize}
 
@@ -354,22 +344,56 @@ write the function definitions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{problem} \pts{6}
 
-Here is a definition of a function, \texttt{do-while}, that does
-something.  Study the definition, and give it a general contract.
+The Northeastern University Registrar is instituting a new
+course registration system, in which each student will wait in a
+``Virtual Line'' until every student ahead of them has registered.  In
+order to provide maximal waiting efficenciy, you have been tasked with
+implementing a \emph{queue} data structure, designed as follows.  
 
-\begin{verbatim}
-    (define (do-while ys go what)
-      (cond [(empty? ys) empty]
-            [(not (go (first ys))) empty]
-            [else
-              (cons (what (first ys))
-                    (do-while (rest ys) go what))]))
-\end{verbatim}
+Each queue will be represented using two lists, the \emph{front} and
+\emph{back} of the queue.  All of the elements in the front come
+before the elements in the back, but the back is represented in
+\emph{reverse order}.  
+
+Queues support four basic operations:
+\begin{itemize}
+\item \texttt{head} produces the first element in the queue,
+\item \texttt{dequeue} produces a queue without the first element,
+\item \texttt{enqueue} adds a new element on to the \emph{end} of the
+  queue,
+\item \texttt{emp?} determines if the queue is empty.
+\end{itemize}
+The \texttt{head} and \texttt{dequeue} operations require that the
+queue be non-empty when they are used---these operations do not need
+to check for an empty queue.
+
+Further, the Registrar's office has just learned about invariants, and
+insists on maintaining the following invariant about all of their
+queues:  
+\begin{indent}
+  if the front of the queue is empty, the whole queue must also be empty.
+\end{indent} 
+
+The Registrar's office has given you three tasks to prepare their
+Virtual Line for its launch later this semester:
+
+\begin{itemize}
+\item Design and implement the queue data structure to the Registrar's
+  specifcations.  You must maintain the invariant stated above, and
+  you should take advantage of the invariant when implementing the
+  operations.
+\item Unfortunately, when testing the queue, the Registrar has
+  discovered that some queues with the same elementes in the same
+  order can be represented in multiple ways.  Give two examples of
+  this, and implement a \texttt{to-list} operation which produces the
+  elements in a list, in the appropriate order.  In your tests, you
+  should show how this addresses the problem.
+\item The Registrar has a problem with careless data entry.  Design
+  and implement a constructor for queues which, given two input lists
+  of elements, ensures that the invariant is maintained.  
+\end{itemize}
 
 \begin{solution}
-\begin{verbatim}
-  do-while: [Listof Y] [Y -> Boolean] [Y -> Z] -> [Listof Z]
-\end{verbatim}
 \end{solution}
 \end{problem}
 
