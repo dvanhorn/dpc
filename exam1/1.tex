@@ -230,6 +230,7 @@ include, and the $)$ means exclude.
 \newpage
 \fi
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{problem}\pts{??}
 
 Here are data, class, and interface definitions for Shapes:
@@ -313,6 +314,86 @@ Here are some examples of how \code{bounding-box-area} should work:
 
 (check-expect ((square% 5) . bounding-box-area) 25)
 \end{verbatim}
+\end{solution}
+
+\newpage
+\ifrubric\else
+[Here is some more space for the previous problem.]
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
+
+\end{problem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{problem}\pts{??}
+
+One perspective that unifies the paradigms of programming with
+functions and programming with objects is to view a ``function'' as an
+object that understands a method called \code{apply}.  With that in
+mind, we can define an interface for functions-as-objects:
+
+\begin{verbatim}
+;; A [IFun X Y] implements:
+;; apply : X -> Y
+;; Apply this function to the given input.
+\end{verbatim}
+
+Here we are representing a \code{X -> Y} function as an object that
+has an \code{apply} method that consumes an \code{X} and produces a
+\code{Y}.
+
+\begin{enumerate}
+\item Design a class that wraps a real function with contract \code{(X
+  -> Y)} to implement \code{[IFun X Y]}.
+
+\item Using your wrapper class, construct the objects representing the
+  ``add 1'' function and ``sub 1'' function.
+
+\item Another useful operations on functions is composition.  Here is
+  the interface for a \code{compose} method that composes two functions
+  represented as objects:
+
+\begin{verbatim}
+;; [IFun X Y] also implements:
+;; compose : [IFun Y Z] -> [IFun X Z]
+;; Produce a function that applies this function to its input, 
+;; then applies the given function to that result.
+\end{verbatim}
+
+For example, if \code{addone} and \code{subone} refer to the objects
+you constructed in part 2, the following check should succeed:
+
+\begin{verbatim}
+(check-expect ((addone . compose subone) . apply 5) 5)
+(check-expect ((addone . compose addone) . apply 5) 7)
+\end{verbatim}
+
+Implement the \code{compose} method for your wrapper class.
+\end{enumerate}
+
+\begin{solution}
+
+\begin{verbatim}
+;; Part 1
+(define-class fun%
+  (fields f)
+  (define/public (apply x)
+    ((field f) x)))
+
+;; Part 2
+(define addone (fun% add1))
+(define subone (fun% sub1))
+
+;; Part 3
+(define-class fun%
+  (fields f)
+  (define/public (compose g)
+    (fun% (lambda (x)
+            (g . apply (apply x))))))
+\end{verbatim}
+
 \end{solution}
 
 \newpage
