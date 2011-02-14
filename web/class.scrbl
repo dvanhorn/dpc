@@ -9,6 +9,7 @@
 @include-section["class/class0.scrbl"]
 @include-section["class/class1.scrbl"]
 @include-section["class/class2.scrbl"]
+@include-section["class/class3.scrbl"]
 
 The latest class system is:
 

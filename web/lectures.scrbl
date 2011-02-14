@@ -21,7 +21,7 @@
 In this section, you'll find notes and code from 
 each lecture.
 
-@local-table-of-contents[]
+@local-table-of-contents[#:style 'immediate-only]
 
 @include-section["lectures/lec01.scrbl"]
 @include-section["lectures/lec02.scrbl"]
