@@ -248,8 +248,8 @@ Here are data, class, and interface definitions for Shapes:
 ;; - (rect% Number Number)
 ;; - (circ% Number)
 ;; implements:
-;; Compute the area of the smallest bounding box for this shape.
 ;; bba : -> Number     (short for "bounding-box-area")
+;; Compute the area of the smallest bounding box for this shape.
 
 (define-class rect%
   (fields width height))
@@ -270,7 +270,7 @@ Here are some examples of how \code{bounding-box-area} should work:
   \code{rect\%} and \code{circ\%} class.
 
 \item Design a super class of \code{rect\%} and \code{circ\%} and
-  lift the \code{bba} method to the superclass.  Extend
+  lift the \code{bba} method to the super class.  Extend
   the shape interface as needed, but implement any methods you add.
 
 \item Design a new variant of a Shape, Square, which should support
@@ -571,14 +571,14 @@ associate natural numbers to strings.
 ;; implements:
 ;;
 ;; has-key? : Nat -> Boolean
-;; Does the given key exist?
+;; Does this dict. have the given key?
 ;;
 ;; lookup : Nat -> String
-;; The value mapped to by the given key
-;; Assumption: the key exists
+;; Produce the value associated with the given key in this dict.
+;; Assume: the key exists in this dict.
 ;;
 ;; set : Nat String -> Dict
-;; Set the given key-value mapping
+;; Associate the given key to the given value in this dict.
 
 (define-class ld-empty%
   (define/public (has-key? k) false)
@@ -616,9 +616,9 @@ we expect this to be true for \emph{any} key-value pair, not just
 
 Now consider a generalization of the ``set/lookup'' property which
 says that if we set \emph{two} keys to \emph{two} values then look
-them up, we get back the original values.  For example, for any given
-dictionary, if we associate \code{1} with \code{"Fred"} and \code{2}
-with \code{"Wilma"}; then looking up \code{1} will produce
+each of them up, we should get back the original values.  For example, for
+any given dictionary, if we associate \code{1} with \code{"Fred"} and
+\code{2} with \code{"Wilma"}; then looking up \code{1} will produce
 \code{"Fred"} and looking up \code{2} will produce \code{"Wilma\"}.
 More generally, we expect this to be true for any two key-value pairs.
 
