@@ -101,14 +101,14 @@ about the harder problems in background while you knock off the easy ones.
 \rule{1cm}{0pt}\begin{tabular}{|c|l|@{/}r|}
 \hline
 {\bf Problem} & Points & out of \\ \hline
-1 & & ??\\ \hline
+1 & & 17\\ \hline
 2 & & ??\\ \hline
 3 & & ??\\ \hline
-4 & & ??\\ \hline
+4 & & 21\\ \hline
 5 & & ??\\ \hline
-%Extra & & 6\\ \hline
-{\bf Total} & & 62 \\ \hline
-{\bf Base}  & \multicolumn{2}{l|}{{\bf 56}} \\ \hline
+%Extra & & \\ \hline
+{\bf Total} & & ?? \\ \hline
+%{\bf Base}  & \multicolumn{2}{l|}{{\bf 56}} \\ \hline
 \end{tabular}
 \end{minipage}
 
@@ -127,7 +127,7 @@ about the harder problems in background while you knock off the easy ones.
 
 
 % \newpage
-\begin{problem}\pts{16} % same as on the previous exam :)
+\begin{problem}\pts{17} % same as on the previous exam :)
 
 A \emph{range} represents a set of numbers between two endpoints.  To
 start with, you only need to consider ranges that \emph{include} the
@@ -173,60 +173,63 @@ include, and the $)$ means exclude.
 
 \begin{solution}
 \begin{verbatim}
+;; Part 1:
+
 ;; A Range is one of
 ;; - (new range% Number Number)                         [1pt]
 ;; Interp: represents the range between `lo' and `hi'
 ;;         including `lo', but *not* including `hi'
-
-;; - (new hi-range% Number Number)                      [1pt]
-;; Interp: represents the range between `lo' and `hi'
-;;         including `hi', but *not* including `lo'
-
-;; - (new union-range% Range Range)                     [1pt]
-;; Interp: including all the numbers in both ranges
-
-
 ;; and implements IRange:
 
 ;; The IRange interface includes:
 ;; - in-range? : Number -> Boolean                      [1pt]
 ;; determine if the given number is in this range
+;; - union : Range -> Range                             [1pt]
+;; produce the range containing this and the given range
 
 (define-class range%                                    [1pt]
   (fields lo hi)
   (check-expect ((range% 0 1) . in-range? 0) true)      [1pt]
-  (check-expect ((range% 0 1) . in-range? 0.5) true)
   (check-expect ((range% 0 1) . in-range? 1) false)
-  (check-expect ((range% 0 1) . in-range? 2) false)
-  (check-expect ((range% 0 1) . in-range? -2) false)
   (define/public (in-range? n)                          [2pt]
     (and (>= n (field lo)) (< n (field hi))))
     
-  ;; Point is for all the union methods together
-  (define/public (union r)                              [1pt]
+  (define/public (union r)
     (union-range% this r)))
+
+;; Part 2:
+
+;; A Range is also:
+;; - (new hi-range% Number Number)                      [1pt]
+;; Interp: represents the range between `lo' and `hi'
+;;         including `hi', but *not* including `lo'
+
 
 (define-class hi-range%                                 [1pt]
   (fields lo hi)
   (check-expect ((hi-range% 0 1) . in-range? 0) false)  [1pt]
   (check-expect ((hi-range% 0 1) . in-range? 0.5) true)
   (check-expect ((hi-range% 0 1) . in-range? 1) true)
-  (check-expect ((hi-range% 0 1) . in-range? 2) false)
-  (check-expect ((hi-range% 0 1) . in-range? -2) false)
   (define/public (in-range? n)                          [1pt]
     (and (> n (field lo)) (<= n (field hi))))
     
   (define/public (union r)
     (union-range% this r)))
 
+;; Part 3:
 
+;; A Range is also:
+;; - (new union-range% Range Range)                     [1pt]
+;; Interp: including all the numbers in both ranges
 
 (define-class union-range%                              [1pt]
   (fields left right)
   (define/public (in-range? n)                          [2pt]
     (or ((field left) . in-range? n)
         ((field right) . in-range? n)))
-  (define/public (union r)
+
+  ;; Point is for all the union methods together
+  (define/public (union r)                              [1pt]
     (union-range% this r)))
 
 (define r1 (range% 0 1))
@@ -239,13 +242,13 @@ include, and the $)$ means exclude.
 
 ;; testing all the union methods                        [1pt]
 (check-expect (r1 . union r2 . in-range? 1) true)
-(check-expect (r1 . union r2 . in-range? 0) true)
+(check-expect (r2 . union r1 . in-range? 0) true)
 \end{verbatim}
 \end{solution}
 \end{problem}
-\ifrubric\bigskip\else
+%\ifrubric\bigskip\else
 \newpage
-\fi
+%\fi
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{problem}\pts{??}
@@ -425,7 +428,7 @@ Implement the \code{compose} method for your wrapper class.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{problem} \pts{6}
+\begin{problem} \pts{21}
 
 The Northeastern University Registrar is instituting a new course
 registration system, in which each student will wait in a ``Virtual
@@ -499,61 +502,89 @@ Virtual Line for its launch later this semester:
 
 \begin{solution}
 \begin{verbatim}
+;; Part 1:
 ;; invariant: front is empty IFF queue is empty
-;; A [Queue X] is (queue% [Listof X] [Listof X])
+;; A [Queue X] is (queue% [Listof X] [Listof X])           [1pt]
+;; and implements [IQ X]
 
-(define-class queue%
+(define-class queue%                                       [1pt]
   (fields front back)
   ;; Add element to the back
   ;; X -> [Queue X]
   ;; add it to the front IFF the front is empty
   ;; (otherwise invariant is violated)
+  (check-expect (eq . enqueue 1) (queue% '(1) '()))        [1pt]
+  (check-expect (q . enqueue 5) (queue% '(1 2 3) '(5)))
   (define/public (enqueue i)
-    (cond [(empty? (field front))
+    (cond [(empty? (field front))                          [2pt]
            (queue% (list i) empty)]
           [else
-           (queue% (field front) (cons i (field back)))]))
+           (queue% (field front) (cons i (field back)))])) [2pt]
   ;; get the first element
   ;;  -> X
   ;; assumes this queue is non-empty
   ;; uses the invariant
-  (define/public (head)
+  (check-expect (q . head) 1)                              [1pt]
+  (define/public (head)                                    
     (first (field front)))
   ;; drop the first element
   ;;  -> [Queue X]
   ;; assumes this queue is non-empty
+  (check-expect (eq . enqueue 1 . dequeue) eq)             [1pt]
+  (check-expect (q . enqueue 5 . dequeue) (queue% '(2 3) '(5)))
   (define/public (dequeue)
     (cond 
       ;; maintain the invariant -- don't let `front' be empty
-      [(empty? (rest (field front)))
+      [(empty? (rest (field front)))                       [3pt]
        (queue% (reverse (field back)) empty)]
       ;; otherwise, simple
-      [else (queue% (rest (field front)) (field back))]))
+      [else (queue% (rest (field front)) (field back))]))  [2pt]
   ;; is this queue empty?
   ;; emp? : -> Boolean
   ;; uses the invariant
+  (check-expect (q . emp?) false)                          [1pt]
+  (check-expect (eq . emp?) true)
   (define/public (emp?)
     (empty? (field front)))
-  ;; convert the queue to a list
+
+;; Part 2:
+
+;; Examples:                                               [1pt]
+(queue% (list 1) (list 6)) vs (queue% (list 1 6) empty)
+(queue% (list 1 8 12) (list 6)) vs (queue% (list 1 8) (list 12 6))
+
+  ;; convert the queue to a list                           [1pt]
   ;; -> [Listof X] 
-  (define/public (to-list)
+  ;; turn examples above into tests:                       [1pt]
+  (check-expect ((queue% (list 1) (list 6)) . to-list)
+		((queue% (list 1 6) empty) . to-list))
+  (check-expect ((queue% (list 1 8 12) (list 6)) . to-list)
+		((queue% (list 1 8) (list 12 6)) . to-list))
+  (check-expect (q . to-list) '(1 2 3))                    
+  (check-expect (q . enqueue 5 . to-list) '(1 2 3 5))   
+  (check-expect (q . enqueue 5 . dequeue . to-list) '(2 3 5))
+  (define/public (to-list)                                 [1pt]
     (append (field front)
             (reverse (field back)))))
 
 (define q (queue% '(1 2 3) empty))
 (define eq (queue% empty empty))
 
-(check-expect (q . emp?) false)
-(check-expect (q . head) 1)
-(check-expect (eq . emp?) true)
-(check-expect (eq . enqueue 1) (queue% '(1) '()))
-(check-expect (eq . enqueue 1 . dequeue) eq)
-(check-expect (q . enqueue 5) (queue% '(1 2 3) '(5)))
-(check-expect (q . enqueue 5 . dequeue) (queue% '(2 3) '(5)))
+;; Part 3:                                                 [2pt]
+;; several good possibilities (others are possible)
+(constructor (f b)
+  (fields (append f (reverse b)) empty))
 
-(check-expect (q . to-list) '(1 2 3))
-(check-expect (q . enqueue 5 . to-list) '(1 2 3 5))
-(check-expect (q . enqueue 5 . dequeue . to-list) '(2 3 5))
+(constructor (f b)
+  (cond [(empty? f) 
+	 (fields (append f (reverse b)) empty)]
+	[else (fields f b)]))
+
+(constructor (f b)
+  (cond [(and (empty? f) (empty? b)) (fields f b)]
+	[(empty? f) (fields (reverse b) empty)]
+	[else (fields f b)]))
+
 \end{verbatim}
 \end{solution}
 \end{problem}
