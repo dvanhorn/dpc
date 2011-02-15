@@ -1,5 +1,5 @@
 #lang scribble/manual
-@require["../utils.rkt" (for-label class2)]
+@require[(for-label class2)]
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -16,7 +16,7 @@
 Imports all the modules named @racket[module-name]s.}
 
 @defform[(provide id ...)]{
-Makes all of the @r[id]s available to other modules.}
+Makes all of the @racket[id]s available to other modules.}
 
 
 @defform/subs[#:literals (fields constructor implements define/public define/private super)
@@ -48,15 +48,15 @@ interfaces using @racket[(implements interface-name ...)].
 When a class definition declares a super class, it inherits all of the
 super class's fields and methods.  
 
-If no @r[constructor-spec] is provided, the default constructor simply
+If no @racket[constructor-spec] is provided, the default constructor simply
 accepts as many  arguments as the class has fields, and initializes
 them in positional order, with subclass arguments before superclass
 arguments.  
 
-If a @r[constructor-spec] is provided, then constructing the object
-takes as many arguments as the @r[constructor-spec] has @r[args].  The
-provided values are bound to the @r[args], and the @r[body] of the
-constructor is run.  The constructor must use the @r[fields] form to
+If a @racket[constructor-spec] is provided, then constructing the object
+takes as many arguments as the @racket[constructor-spec] has @racket[args].  The
+provided values are bound to the @racket[args], and the @racket[body] of the
+constructor is run.  The constructor must use the @racket[fields] form to
 produce values to use to initialize the fields of the object.  
 
 The constructor for the class takes

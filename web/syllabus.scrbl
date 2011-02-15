@@ -66,8 +66,10 @@ This syllabus will evolve throughout the semester so check it often.
    (append (list "HtDC: Ch. 1, 2, 10."
 		 "HtDC: Ch. 3, 4, 5."
 		 "HtDC: Ch. 6, 11, 12."
-		 "Universe docs.")
-	   (make-list 11 "??")))	 
+		 "Universe docs."
+		 "HtDC: Sec. 20."
+		 "HtDP: Part VII.")
+	   (make-list 9 "??")))	 
 
 @(tabular (apply list 
                  (list "" "Lectures " "Readings " "Lab " "Assignment")
