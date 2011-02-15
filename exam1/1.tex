@@ -127,7 +127,7 @@ about the harder problems in background while you knock off the easy ones.
 
 
 % \newpage
-\begin{problem}\pts{16}
+\begin{problem}\pts{16} % same as on the previous exam :)
 
 A \emph{range} represents a set of numbers between two endpoints.  To
 start with, you only need to consider ranges that \emph{include} the
@@ -137,18 +137,6 @@ includes all of the numbers between $3$ and $4.7$, including $3$ but
 \emph{not} including $4.7$. So $4$ and $3.0000001$ are both in the
 range, but $5$ is not.  In the notation used here, the $[$ means
 include, and the $)$ means exclude.
-
-% \begin{verbatim}
-%     ;; A Range is (new range% Number Number)
-
-%     ;; Interp: represents the range between `lo' and `hi'
-%     ;;         including `lo', but *not* including `hi'
-
-%     ;; and implements:
-
-%     ;; - in-range? : Number -> Boolean
-%     ;; determine if the given number is in this range
-% \end{verbatim}
 
 \smallskip
 
@@ -185,53 +173,73 @@ include, and the $)$ means exclude.
 
 \begin{solution}
 \begin{verbatim}
-;; ** A)
-;; emails-from : [Listof Email] Symbol -> [Listof Email]    [1pt]
-;; Return the emails in the list from the given address     [1pt]
-(define (emails-from loe addr)
-  (cond [(empty? loe) empty]                     ;  [1pt]
-        [(symbol=? addr (email-from (first loe)));  [1pt]
-         (cons (first loe)
-               (emails-from (rest loe) addr))]   ;  [1pt]
-        [else
-         (emails-from (rest loe) addr)]))        ;  [1pt]
+;; A Range is one of
+;; - (new range% Number Number)                         [1pt]
+;; Interp: represents the range between `lo' and `hi'
+;;         including `lo', but *not* including `hi'
 
-(define e1 (make-email 'teacher@neu.com "Hello" "That's it"))
-(define e2 (make-email 'bob@builder.com "Bonjour" "C'est tout"))
+;; - (new hi-range% Number Number)                      [1pt]
+;; Interp: represents the range between `lo' and `hi'
+;;         including `hi', but *not* including `lo'
 
-(check-expect (emails-from empty 'bob@builder.com) empty)
-(check-expect (emails-from (list e1) 'bob@builder.com)
-              empty)
-(check-expect (emails-from (list e1 e2) 'bob@builder.com)
-              (list e2))
+;; - (new union-range% Range Range)                     [1pt]
+;; Interp: including all the numbers in both ranges
 
-;; ** B)
-;; subjects : [Listof Email] -> [Listof String]   [1pt]
-;; Return a list of all the Email subjects        [1pt]
-(define (subjects loe)
-  (cond [(empty? loe) empty]                   ;  [1pt]
-        [else
-         (cons (email-subject (first loe))     ;  [1pt]
-               (subjects (rest loe)))]))       ;  [1pt]
 
-(check-expect (subjects empty) empty)
-(check-expect (subjects (list e1))
-              (list "Hello"))
-(check-expect (subjects (list e1 e2))
-              (list "Hello" "Bonjour"))
+;; and implements IRange:
 
-;; ** C)
-;; total-size : [Listof Email] -> Number               [1pt]
-;; Return the total size of the email bodies           [1pt]
-(define (total-size loe)
-  (cond [(empty? loe) 0]                            ;  [1pt]
-        [else
-         (+ (string-length (email-body (first loe)));  [1pt]
-            (total-size (rest loe)))]))             ;  [1pt]
+;; The IRange interface includes:
+;; - in-range? : Number -> Boolean                      [1pt]
+;; determine if the given number is in this range
 
-(check-expect (total-size empty) 0)
-(check-expect (total-size (list e1)) 9)
-(check-expect (total-size (list e1 e2)) 19)
+(define-class range%                                    [1pt]
+  (fields lo hi)
+  (check-expect ((range% 0 1) . in-range? 0) true)      [1pt]
+  (check-expect ((range% 0 1) . in-range? 0.5) true)
+  (check-expect ((range% 0 1) . in-range? 1) false)
+  (check-expect ((range% 0 1) . in-range? 2) false)
+  (check-expect ((range% 0 1) . in-range? -2) false)
+  (define/public (in-range? n)                          [2pt]
+    (and (>= n (field lo)) (< n (field hi))))
+    
+  ;; Point is for all the union methods together
+  (define/public (union r)                              [1pt]
+    (union-range% this r)))
+
+(define-class hi-range%                                 [1pt]
+  (fields lo hi)
+  (check-expect ((hi-range% 0 1) . in-range? 0) false)  [1pt]
+  (check-expect ((hi-range% 0 1) . in-range? 0.5) true)
+  (check-expect ((hi-range% 0 1) . in-range? 1) true)
+  (check-expect ((hi-range% 0 1) . in-range? 2) false)
+  (check-expect ((hi-range% 0 1) . in-range? -2) false)
+  (define/public (in-range? n)                          [1pt]
+    (and (> n (field lo)) (<= n (field hi))))
+    
+  (define/public (union r)
+    (union-range% this r)))
+
+
+
+(define-class union-range%                              [1pt]
+  (fields left right)
+  (define/public (in-range? n)                          [2pt]
+    (or ((field left) . in-range? n)
+        ((field right) . in-range? n)))
+  (define/public (union r)
+    (union-range% this r)))
+
+(define r1 (range% 0 1))
+(define r2 (hi-range% 0 1))
+(define r3 (range% 2 4))
+
+;; union + in-range? test                               [1pt]
+(check-expect (r1 . union r2 . union r3 . in-range? 3) 
+              true)
+
+;; testing all the union methods                        [1pt]
+(check-expect (r1 . union r2 . in-range? 1) true)
+(check-expect (r1 . union r2 . in-range? 0) true)
 \end{verbatim}
 \end{solution}
 \end{problem}
