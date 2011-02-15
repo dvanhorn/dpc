@@ -69,13 +69,21 @@ Student Id (last 4 digits):  & \rule{174pt}{1pt} \\[.5cm]
 \begin{itemize}
 \item Write down the answers in the space provided.
 
-\item You may use the usual primitives and expression forms, including those
-suggested in hints; for everything else, define it.
+\item You may use the usual primitives and expression forms of any of
+  the \code{class} languages; for everything else, define it.
 
-\item You may write {\tt {\slshape c} $\rightarrow$ {\slshape e}} in place of
-  {\tt (check-expect {\slshape c e})} to save time writing. 
-  You may also write the Greek letter $\lambda$ 
-  instead of \code{lambda}, to save writing.
+\item You may write {\tt {\slshape c} $\rightarrow$ {\slshape e}} for
+  {\tt (check-expect {\slshape c e})} and $\lambda$ for
+  \code{lambda} to save time writing.
+
+\item To add a method to an existing class definition, you
+  may write just the method and indicate the appropriate class name
+  rather than re-write the entire class definition.
+
+\item If an interface is given to you, you do not need to repeat the
+  contract and purpose statements in your implementations.  Likewise,
+  you do not need to repeat any test cases given to you, but you
+  should add tests wherever appropriate.
 
 %% DVH: This info is already in the table.
 % \item You may obtain a maximum of 55 points: 50 for the first six
@@ -120,11 +128,10 @@ about the harder problems in background while you knock off the easy ones.
 
 % \newpage
 \begin{problem}\pts{16}
-\noindent 
 
 A \emph{range} represents a set of numbers between two endpoints.  To
 start with, you only need to consider ranges that \emph{include} the
-smaller endpoint, and \emph{exclude} the larger endpoint---such ranges
+smaller endpoint and \emph{exclude} the larger endpoint---such ranges
 are called \emph{half-open}.  For example, the range $[3,4.7)$
 includes all of the numbers between $3$ and $4.7$, including $3$ but
 \emph{not} including $4.7$. So $4$ and $3.0000001$ are both in the
@@ -147,23 +154,25 @@ include, and the $)$ means exclude.
 
 \noindent
 \begin{enumerate}
-\item Design a representation for ranges, along with the
+\item Design a representation for ranges and implement the
   \texttt{in-range?} method, which determines if a number is in the
   range.  For example, the range $[3,7.2)$ includes the numbers $3$
   and $5.0137$, but not the numbers $-17$ or $7.2$.
 
 \item Extend the data definition and implementation of ranges to
-  include ranges that \emph{exclude} the low end of the range and
-  \emph{include} the high end.  These ranges are written $(lo,hi]$.  
+  represent ranges that \emph{exclude} the low end of the range and
+  \emph{include} the high end, written $(lo,hi]$.  
 
-\item Add a \texttt{union} method to the interface for ranges,
-  and to all of the classes that implement the interface for ranges.
-  This method consumes a second range, and produces a new range including
-  everything that was in \emph{either} range. 
+\item Add a \texttt{union} method to the interface for ranges and
+  implement it in all range classes.  This method should consume a
+  range and produces a new range that includes all the numbers in this
+  range \emph{and} all the numbers in the given range.
 
-  You will likely need to extend your data definition for ranges to
-  support this method.  
+  You may extend your data definition for ranges to
+  support this method.
 
+  You may apply the abstraction recipe, but you are not required to do
+  so; you will not be marked down for duplicated code on this problem.
 \end{enumerate}
 
 \newpage
@@ -240,7 +249,7 @@ Here are data, class, and interface definitions for Shapes:
 ;; - (circ% Number)
 ;; implements:
 ;; Compute the area of the smallest bounding box for this shape.
-;; bounding-box-area : -> Number
+;; bba : -> Number     (short for "bounding-box-area")
 
 (define-class rect%
   (fields width height))
@@ -251,20 +260,20 @@ Here are data, class, and interface definitions for Shapes:
 %
 Here are some examples of how \code{bounding-box-area} should work:
 \begin{verbatim}
-(check-expect ((rect% 3 4) . bounding-box-area) 12)
-(check-expect ((circ% 1.5) . bounding-box-area)  9)
+(check-expect ((rect% 3 4) . bba) 12)
+(check-expect ((circ% 1.5) . bba)  9)
 \end{verbatim}
 
 
 \begin{enumerate}
-\item Develop the \code{bounding-box-area} method for the
+\item Design the \code{bba} method for the
   \code{rect\%} and \code{circ\%} class.
 
-\item Develop a super class of \code{rect\%} and \code{circ\%} and
-  lift the \code{bounding-box-area} method to the superclass.  Extend
+\item Design a super class of \code{rect\%} and \code{circ\%} and
+  lift the \code{bba} method to the superclass.  Extend
   the shape interface as needed, but implement any methods you add.
 
-\item Develop a new variant of a Shape, a Square, which should support
+\item Design a new variant of a Shape, Square, which should support
   all of the methods of the interface.
 \end{enumerate}
 
