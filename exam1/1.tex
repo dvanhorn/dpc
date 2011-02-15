@@ -107,9 +107,9 @@ about the harder problems in background while you knock off the easy ones.
 2 & & 18\\ \hline
 3 & & 12\\ \hline
 4 & & 21\\ \hline
-5 & & 18\\ \hline
+5 & & 15\\ \hline
 %Extra & & \\ \hline
-{\bf Total} & & 86 \\ \hline
+{\bf Total} & & 83 \\ \hline
 %{\bf Base}  & \multicolumn{2}{l|}{{\bf 56}} \\ \hline
 \end{tabular}
 \end{minipage}
@@ -599,7 +599,7 @@ Virtual Line for its launch later this semester:
 \fi
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{problem} \pts{18}
+\begin{problem} \pts{15}
 %
 Here is a simple interface and implementation for dictionaries that
 associate natural numbers to strings.
@@ -685,7 +685,7 @@ pairs.
 \begin{solution}
 \begin{verbatim}
 ;; Part 1 
-;; Dict Nat String -> Boolean            [5pt]
+;; Dict Nat String -> Boolean            [4pt]
 (define (set/lookup d k v)
   (string=? (d . set k v . lookup k) v))
 
@@ -693,7 +693,7 @@ pairs.
 (check-expect (set/lookup (ld-empty%) 1 "Fred") true)
 
 ;; Part 2
-;; Dict Nat String Nat String -> Boolean   [5pt]
+;; Dict Nat String Nat String -> Boolean   [4pt]
 (define (double-set/lookup d k1 v1 k2 v2)
   (and (string=? (d . set k1 v1 . set k2 v2 . lookup k1) v1)
        (string=? (d . set k1 v1 . set k2 v2 . lookup k2) v2)))
@@ -701,7 +701,7 @@ pairs.
 ;; [2pt]
 (check-expect (double-set/lookup (ld-empty%) 1 "Fred" 2 "Wilma") true)
 
-;; Part 3  [4pt]
+;; Part 3  [3pt]
 ;; Counter-example:
 (check-expect (double-set/lookup (ld-empty%) 1 "Fred" 1 "Wilma") true)
 \end{verbatim}
