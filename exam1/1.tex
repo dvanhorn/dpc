@@ -65,10 +65,8 @@ Student Id (last 4 digits):  & \rule{174pt}{1pt} \\[.5cm]
 \end{tabular}
 \end{center}
 
-\noindent\begin{minipage}{7cm}\sloppy
+\noindent\begin{minipage}{8cm}\sloppy
 \begin{itemize}
-\item Write down the answers in the space provided.
-
 \item You may use the usual primitives and expression forms of any of
   the \code{class} languages; for everything else, define it.
 
@@ -79,6 +77,10 @@ Student Id (last 4 digits):  & \rule{174pt}{1pt} \\[.5cm]
 \item To add a method to an existing class definition, you
   may write just the method and indicate the appropriate class name
   rather than re-write the entire class definition.
+
+\item We expect data \emph{and} interface definitions
+  (although interfaces may be defined in comments rather than
+  with \code{define-interface}).
 
 \item If an interface is given to you, you do not need to repeat the
   contract and purpose statements in your implementations.  Likewise,
@@ -102,12 +104,12 @@ about the harder problems in background while you knock off the easy ones.
 \hline
 {\bf Problem} & Points & out of \\ \hline
 1 & & 17\\ \hline
-2 & & 20\\ \hline
+2 & & 18\\ \hline
 3 & & 12\\ \hline
 4 & & 21\\ \hline
 5 & & 18\\ \hline
 %Extra & & \\ \hline
-{\bf Total} & & 88 \\ \hline
+{\bf Total} & & 86 \\ \hline
 %{\bf Base}  & \multicolumn{2}{l|}{{\bf 56}} \\ \hline
 \end{tabular}
 \end{minipage}
@@ -292,12 +294,12 @@ Here are some examples of how \code{bounding-box-area} should work:
 \begin{verbatim}
 ;; Part 1 [6pt]
 (define-class rect% 
-  (fields width height)                [1pt]
+  (fields width height)                
   (define/public (bba)                 [2pt]
     (* (field width) (field height))))
   
 (define-class circ% 
-  (fields radius)                      [1pt] 
+  (fields radius)                      
   (define/public (bba)                 [2pt]
     (sqr (* 2 (field radius)))))
 
