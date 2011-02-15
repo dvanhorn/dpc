@@ -406,111 +406,6 @@ Implement the \code{compose} method for your wrapper class.
 
 \end{problem}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{problem}\pts{13}
- 
-  The programs of the previous problem, if developed with the design
-  recipe for structural recursion, should follow patterns abstracted
-  by one of the loop functions.
-  For each of the programs you wrote, re-write it using a loop function.
-  In each case, \emph{one} loop function should suffice.
-
-Since you have already written the contract and purpose statement
-(right? it is Google policy, after all) you \textit{only} need to
-write the function definitions.
-
-\begin{itemize}
-\item[A)\;] Write \texttt{emails-from} using a loop function.
-
-\item[B)\;] Write \texttt{subjects} using a loop function.
-
-\item[C)\;] Write \texttt{total-size} using a loop function.
-\end{itemize}
-
-\ifrubric\else
-\newpage
-[Here is some more space for the previous problem.]
-\newpage
-\fi
-
-\begin{solution}
-\begin{verbatim}
-;; ** A)
-(define (emails-from loe addr)
-  (filter                             ; [1pt]
-   (lambda (e)                        ; [1pts]
-     (symbol=? (email-from e) addr))  ; [2pts]
-   loe))
-
-(define e1 (make-email 'teacher@neu.com "Hello" "That's it"))
-(define e2 (make-email 'bob@builder.com "Bonjour" "C'est tout"))
-
-;; ** B)
-(define (subjects loe)
-  (map                   ; [1pt]
-   email-subject         ; [2pt]
-   loe))
-
-;; ** C)
-(define (total-size loe)
-  (foldr                 ; [1pt]
-   (lambda (e tot)       ; [2pt]
-     (+ (string-length   ; [2pt]
-         (email-body e)) tot))
-   0                     ; [1pt]
-   loe))
-\end{verbatim}
-\end{solution}
-\end{problem}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{problem} \pts{8}
-
-  Design a function, \texttt{weaver}, that weaves two lists into a
-  single list by alternating their elements.  Make sure you give it a
-  general contract.
-
-\bigskip
-
-\noindent Here are some tests/examples to further explain:
-
-\begin{verbatim}
-    (check-expect (weaver empty (list 1)) (list 1))
-    (check-expect (weaver (list "Hi" "Lo") empty) (list "Hi" "Lo"))
-    (check-expect (weaver (list 1 2) (list 3 4))
-                  (list 1 3 2 4))
-    (check-expect (weaver (list 'R 'C 'R) (list 'A 'E))
-                  (list 'R 'A 'C 'E 'R))
-\end{verbatim}
-
-\begin{solution}
-\begin{verbatim}
-;; weaver : [Listof X] [Listof X] -> [Listof X]     [1pt]
-;; Weave two lists in alternating order             [1pt]
-(define (weaver l1 l2)
-  (cond [(empty? l1) l2]                            [1pt]
-        [(empty? l2) l1]                            [1pt]
-        [else (cons (first l1)                      [2pts]
-                    (cons (first l2)
-                          (weaver (rest l1)
-                                  (rest l2))))]))   [2pts]
-
-;; Alternatively...
-(define (weaver l1 l2)
-  (cond [(empty? l1) l2]
-        [else (cons (first l1)
-                    (weaver l2 (rest l1)))]))
-\end{verbatim}
-\end{solution}
-
-\end{problem}
-
-\ifrubric\bigskip\else
-\newpage
-[Here is some more space for the previous problem.]
-\newpage
-\fi
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{problem} \pts{6}
@@ -637,10 +532,109 @@ Virtual Line for its launch later this semester:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{problem} \pts{??}
+%
+Here is a simple interface and implementation for dictionaries that
+associate natural numbers to strings.
 
-[Dictionary problem]
+\begin{verbatim}
+;; A Dict is one of:
+;;  - (ld-empty%)
+;;  - (ld-cons% Nat String Dict)
+;; implements:
+;;
+;; has-key? : Nat -> Boolean
+;; Does the given key exist?
+;;
+;; lookup : Nat -> String
+;; The value mapped to by the given key
+;; Assumption: the key exists
+;;
+;; set : Nat String -> Dict
+;; Set the given key-value mapping
 
+(define-class ld-empty%
+  (define/public (has-key? k) false)
+
+  (define/public (set k v)
+    (ld-cons% k v this)))
+
+(define-class ld-cons%
+  (fields key val rest)
+
+  (define/public (has-key? k)
+    (cond [(= (field key) k) true]
+          [else ((field rest) . has-key? k)]))
+
+  (define/public (lookup k)
+    (cond [(= (field key) k) (field val)]
+          [else ((field rest) . lookup k)]))
+
+  (define/public (set k v)
+    (ld-cons% k v this)))
+\end{verbatim}
+
+The dictionary data structure has some important properties, one of
+which is that if we associate a value with a key and then look up that
+key, we expect to get back the value we associated.  For example, for
+any given dictionary, if we associate \code{1} with \code{"Fred"},
+then look up \code{1}, we should get \code{"Fred"}.  More generally,
+we expect this to be true for \emph{any} key-value pair, not just
+\code{1} and \code{"Fred"}.
+
+\begin{enumerate}
+\item Codify the general ``set/lookup'' property, described above, as
+  a predicate.  Write a successful test in terms of that predicate.
+\end{enumerate}
+
+Now consider a generalization of the ``set/lookup'' property which
+says that if we set \emph{two} keys to \emph{two} values then look
+them up, we get back the original values.  For example, for any given
+dictionary, if we associate \code{1} with \code{"Fred"} and \code{2}
+with \code{"Wilma"}; then looking up \code{1} will produce
+\code{"Fred"} and looking up \code{2} will produce \code{"Wilma\"}.
+More generally, we expect this to be true for any two key-value pairs.
+
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item Codify the general ``double-set/lookup'' property as a
+  predicate.  Write a successful test in terms of that predicate.
+
+\item Does this property hold for all dictionaries and keys-value
+  pairs?  If so, why?  If not, write a counter-example, i.e.~write a
+  failing test in terms of the predicate you gave in part 2.
+\end{enumerate}
+
+\ifrubric\else
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
 \end{problem}
+
+\begin{solution}
+\begin{verbatim}
+;; Part 1
+;; Dict Nat String -> Boolean
+(define (set/lookup d k v)
+  (string=? (d . set k v . lookup k) v))
+
+(check-expect (set/lookup (ld-empty%) 1 "Fred") true)
+
+;; Part 2
+;; Dict Nat String Nat String -> Boolean
+(define (double-set/lookup d k1 v1 k2 v2)
+  (and (string=? (d . set k1 v1 . set k2 v2 . lookup k1) v1)
+       (string=? (d . set k1 v1 . set k2 v2 . lookup k2) v2)))
+
+(check-expect (double-set/lookup (ld-empty%) 1 "Fred" 2 "Wilma") true)
+
+;; Part 3
+;; Counter-example:
+(check-expect (double-set/lookup (ld-empty%) 1 "Fred" 1 "Wilma") true)
+\end{verbatim}
+\end{solution}
 
 \end{document}
 
