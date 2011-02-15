@@ -371,7 +371,7 @@ has an \code{apply} method that consumes an \code{X} and produces a
 \item Using your wrapper class, construct the objects representing the
   ``add 1'' function and ``sub 1'' function.
 
-\item Another useful operations on functions is composition.  Here is
+\item Another useful operation on functions is composition.  Here is
   the interface for a \code{compose} method that composes two functions
   represented as objects:
 
@@ -576,8 +576,7 @@ Virtual Line for its launch later this semester:
   (fields (append f (reverse b)) empty))
 
 (constructor (f b)
-  (cond [(empty? f) 
-	 (fields (append f (reverse b)) empty)]
+  (cond [(empty? f) (fields (reverse b) empty)]
 	[else (fields f b)]))
 
 (constructor (f b)
