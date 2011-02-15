@@ -459,11 +459,13 @@ Here is the interface for queues:
 ;; Assume: this queue is not empty.
 ;;
 ;; deq : -> [IQ X]      (Short for "dequeue")
-;; Produces a queue without the first element.
+;; Produces a new queue like this queue, but without 
+;; this queue's first element.
 ;; Assume: this queue is not empty.
 ;;
 ;; enq : X -> [IQ X]    (Short for "enqueue")
-;; Add given element to the END of this queue.
+;; Produce new queue with given element added 
+;; to the END of this queue.
 ;;
 ;; emp? : -> Boolean
 ;; Is this queue empty?
