@@ -11,11 +11,9 @@
 @include-section["labs/3.scrbl"]
 @include-section["labs/4.scrbl"]
 @include-section["labs/5.scrbl"]
+@include-section["labs/6.scrbl"]
 
 @internal{
-Partner switch for homework due on 2/16.
-
-@section[#:tag "lab06"]{2/14}
 @section[#:tag "lab07"]{2/21: No lab (Presidents Day)}
 @section[#:tag "lab08"]{2/28: No lab (Spring break)}
 @section[#:tag "lab09"]{3/7}
