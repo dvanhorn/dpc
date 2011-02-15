@@ -146,17 +146,17 @@ include, and the $)$ means exclude.
 \smallskip
 
 \noindent
-\begin{itemize}
-\item[A)\;] Design a representation for ranges, along with the
+\begin{enumerate}
+\item Design a representation for ranges, along with the
   \texttt{in-range?} method, which determines if a number is in the
   range.  For example, the range $[3,7.2)$ includes the numbers $3$
   and $5.0137$, but not the numbers $-17$ or $7.2$.
 
-\item[B)\;] Extend the data definition and implementation of ranges to
+\item Extend the data definition and implementation of ranges to
   include ranges that \emph{exclude} the low end of the range and
   \emph{include} the high end.  These ranges are written $(lo,hi]$.  
 
-\item[C)\;] Add a \texttt{union} method to the interface for ranges,
+\item Add a \texttt{union} method to the interface for ranges,
   and to all of the classes that implement the interface for ranges.
   This method consumes a second range, and produces a new range including
   everything that was in \emph{either} range. 
@@ -164,7 +164,7 @@ include, and the $)$ means exclude.
   You will likely need to extend your data definition for ranges to
   support this method.  
 
-\end{itemize}
+\end{enumerate}
 
 \newpage
 \ifrubric\else
@@ -410,32 +410,50 @@ Implement the \code{compose} method for your wrapper class.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{problem} \pts{6}
 
-The Northeastern University Registrar is instituting a new
-course registration system, in which each student will wait in a
-``Virtual Line'' until every student ahead of them has registered.  In
-order to provide maximal waiting efficiency, you have been tasked with
-implementing a \emph{queue} data structure, designed as follows.  
+The Northeastern University Registrar is instituting a new course
+registration system, in which each student will wait in a ``Virtual
+Line'' until every student ahead of them has registered.  A simple way
+to represent a line (also known as a \emph{queue}) is by using a list.
+But this representation makes it slow to add somebody to the end of
+the line (or to take somebody off the front of the line, depending on
+whether the front of the list represents the front or rear of the
+line).  
 
-Each queue will be represented using two lists, the \emph{front} and
-\emph{back} of the queue.  All of the elements in the front come
-before the elements in the back, but the back is represented in
-\emph{reverse order}.  
+In order to provide maximal waiting efficiency, you have been tasked
+with implementing a representation that uses \emph{two} lists!  The
+key idea of this fancy representation is that one list will represent
+some portion of the front of the line, while the other will represent
+the remainder of the line \emph{in reverse order}.  So if you're the
+first element of the first list, you are at the head of the line.  On
+the other hand, if you're the first element of the second list, you
+are the very last person in line.
 
-Queues support four basic operations:
-\begin{itemize}
-\item \texttt{head} produces the first element in the queue,
-\item \texttt{dequeue} produces a queue without the first element,
-\item \texttt{enqueue} adds a new element on to the \emph{end} of the
-  queue,
-\item \texttt{emp?} determines if the queue is empty.
-\end{itemize}
-The \texttt{head} and \texttt{dequeue} operations require that the
-queue be non-empty when they are used---these operations do not need
-to check for an empty queue.
+Here is the interface for queues:
+\begin{verbatim}
+;; A [IQ X] implements:
+;;
+;; head : -> X
+;; Produce the element at the head of this queue.
+;; Assume: this queue is not empty.
+;;
+;; deq : -> [IQ X]      (Short for "dequeue")
+;; Produces a queue without the first element.
+;; Assume: this queue is not empty.
+;;
+;; enq : X -> [IQ X]    (Short for "enqueue")
+;; Add given element to the END of this queue.
+;;
+;; emp? : -> Boolean
+;; Is this queue empty?
+\end{verbatim}
 
-Further, the Registrar's office has just learned about invariants, and
-insists on maintaining the following invariant about all of their
-queues:  
+The \code{head} and \code{deq} operations require that the queue be
+non-empty when they are used, but this can be assumed and these
+operations do not need to check for an empty queue.
+
+Further, the Registrar's office has just learned about
+\emph{invariants}, and insists on maintaining the following invariant
+about all of their queues:
 
 \begin{quote}
   {\it if the front of the queue is empty, the whole queue must also be empty.}
@@ -446,15 +464,16 @@ The Registrar's office has given you three tasks to prepare their
 Virtual Line for its launch later this semester:
 
 \begin{enumerate}
-\item Design and implement the queue data structure to the Registrar's
+\item Design an implementation of the queue data structure to the Registrar's
   specifications.  You must maintain the invariant stated above, and
   you should take advantage of the invariant when implementing the
   operations.
 \item Unfortunately, when testing the queue, the Registrar has
-  discovered that some queues with the same elements in the same
-  order can be represented in multiple ways.  Give two examples of
-  this, and implement a \texttt{to-list} operation which produces the
-  elements in a list, in the appropriate order.  In your tests, you
+  discovered that some queues with the same elements in the same order
+  can be represented in multiple ways.  Give an example of two
+  different representations of the same queue.  Implement a
+  \code{to-list} operation which produces a list of elements going in
+  order from the front of the rear of the queue. In your tests, you
   should show how this addresses the problem.
 \item The Registrar has a problem with careless data entry.  Design
   and implement a constructor for queues which, given two input lists
