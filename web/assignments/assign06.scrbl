@@ -3,9 +3,9 @@
 	  "../unnumbered.rkt"
           (for-label class1))
 
-@title[#:tag "assign06"]{2/23: Intelligent Connect 4}
+@title[#:tag "assign06"]{2/25: Intelligent Connect 4}
 
-Due: 2/23 (In @bold{2} weeks).
+Due: 2/25 (In @bold{2} weeks).
 
 In this assignment, you will write an intelligent computer player for Connect
 4, using the techniques we've seen in class. 

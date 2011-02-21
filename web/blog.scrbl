@@ -7,7 +7,32 @@
 
 @title*{Blog}
 
+@section*{Assignment 6 pushed back}
+
+@tt{Mon Feb 21 15:38:28 EST 2011}
+
+We have decided to push back the due date on
+@seclink["assign06"]{assignment 6} to Friday 2/25.  This will give us a
+chance to talk more about the artificial intelligence design in class
+on Thursday.  Please come prepared with questions.
+
+In the meantime, we suggest you design an unintelligent connect four
+player that always plays the first available move it can find.  This
+will make your life easier as you try to design a smarter player.
+
+@section*{How to Design Classes PDF released}
+
+@tt{Mon Feb 21 15:37:20 EST 2011}
+
+The authors of @emph{How to Design Classes} have decided to release
+the draft version of the book as a PDF
+@link["http://www.ccs.neu.edu/home/matthias/htdc.html"]{available on
+the web}.
+
+
 @section*{Exam Results}
+
+@tt{Wed Feb 16 15:37:20 EST 2011}}
 
 There were 84 possible points on the exam.
 
