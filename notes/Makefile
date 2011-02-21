@@ -1,4 +1,4 @@
-notes.pdf:
+all:
 	find ../class* -name compiled -type d | xargs rm -fr	
 	env STUDENTS=1 raco scribble --latex \
 		--prefix dpc-prefix.tex \

@@ -65,82 +65,156 @@ However, when we try our a few more examples, we see this:
 (send c m)
 (send c m)]
 
-Wrong answer!
+Of course, this is the wrong answer.  We shouldn't be surprised, since
+nothing has changed about @r[c]---in fact, nothing ever happens to
+@r[c], and only one @r[counter%] instance is produced in this
+program.  
+In order to give @r[m] the ability to remember things, we will need to
+do something to get a different @r[counter%].
 
-@verbatim|{
-We want to give `m' the ability to remember things.
+One possibility is to change @r[m] to produce both the desired result
+@emph{and} a new counter.
 
-We could change `m' to produce both the result and a new counter.
-
+@interaction[#:eval the-eval
 (define-struct r (n new-counter))
 
-(define/public (m)
-  (make-r
-   (add1 (field called))
-   (counter% (add1 (field called)))))
+(define-class counter%
+  (fields called)
+  (define/public (m)
+    (make-r
+     (add1 (field called))
+     (counter% (add1 (field called))))))
+(define c (counter% 0))
 
-(c . m)
+(send c m)
 
-(define d (r-new-counter (c . m)))
+(define d (r-new-counter (send c m)))
 d
-(d . m)
+(send d m)]
 
-But:
+So far, so good---we can get a new @r[counter%], and when we use that
+new value, we get the right answer.  However, we haven't solved the
+problem yet:
 
-(c . m)  still produces the same answer.
+@interaction[#:eval the-eval 
+(send c m)]
 
-THis is one of the important design principles of this class, and
-Fundies 1, up until this point.  If you call a function or method with
-the same inputs, you get the same result.  Always!
+This is the same answer that we had before, and not the desired one.
 
-But that make it very hard to implement `m', because `m's spec
-violates this assumption.
+In fact, this behavior is the result of one of the important design
+principles of this class, and of Fundies 1, up until this point.  If
+you call a function or method with the same inputs, you get the same
+result.  Always!
 
-Previously, we've always had this be true:
+Unfortunately, that make it impossible to implement @r[m], because @r[m]s spec
+violates this assumption---if you call it, it is required to produce a
+@emph{different} result from the last time it was called.
 
+Previously, we've always been able to rely on this test passing,
+regardless of what you put in @r[E]
+
+@racketblock[
 (check-expect E E)
+]
 
-Exceptions:
-* (random 5)
-* User input
+Actually, it turns out that there have been a few exceptions to this rule:
+@itemlist[
+@item{@racket[(random 5)]}
+@item{User input, such as in @r[big-bang]}]
 
-But now we are proposing a much more fundament violation.  
+Now, however, we are proposing a much more fundament violation of this
+principle. 
 
-One (non)-solution: accumulators.
+Before we violate the principle, though, let's look at one more
+possible idea:  accumulators.
 
-We could add an acummulator to m, which is the previous number of
-times we've been called. But that's a pretty boring function---it's
-just add1.  
+We could add an acummulator to @r[m], which is the previous number of
+times we've been called. We've used this solution before to create
+functions and methods that remember previous information.  In this
+case, though, accumulators are a non-solution.  If we add an
+accumulator to @r[m] to indicate what we're remembering, we get this
+method:
 
-** Solution: changing the object
+@filebox[@r[counter%]]{
+@racketblock[
+(define/public (m accum) (add1 accum))]}
 
-Swith to class3.  
+But that's a pretty boring method---it's just a wrapper around
+@r[add1].  And it's not a solution to our problem: instead of the
+@r[counter%] class or the @r[m] method remembering the number of
+times we've called @r[m], we have to remember it ourselves, and
+provide it as input every time we call @r[m].  
 
-Now we have the `set-field!' form.
 
-We can change our defintion to 
+@section{Solution: changing the object}
 
+To truly solve our problem, and implement @r[m], we need new language
+support.  This support is provided in @racketmodname[class3].
+
+The @racketmodname[class3] language provides the new @r[set-field!]
+form, which is used like this:
+
+@racketblock[
+(set-field! f new-value)
+]
+
+This @emph{changes} the value of the field named @r[f] in @r[this]
+object to whatever @r[new-value] is.  
+
+We can now revise our defintion of @r[m] to 
+
+@filebox[@tt{counter%}
+@racketblock[
 (define/public (m)
   (begin
    (set-field! called (add1 (field called)))
-   (add1 (field called))))
+   (add1 (field called))))]]
 
-`set-field!' doesn't produce something new, instead it changes the
-field named called to something new.  
+Note that @r[set-field!] @emph{doesn't produce} a new version of the field,
+instead it @emph{changes} the field named @r[called] to something new.
 
-How does this work in a purely function language?  See the `make-r'
-version.
+@margin-note{Question: How would we do something like this in a purely
+		       functional language? 
 
-How does `begin' work?  It evaluates each expression in turn, throws
-all the non-last expressions away.  Then it does the last part, and
+		       Answer: We would do something similar to the
+@r[make-r] approach presented above.  In
+@link["http://haskell.org"]{Haskell}, this approach is frequently
+used.}
+
+
+We've also introduced one more language feature in
+@racketmodname[class3]: @r[begin].  The @r[begin] form works by
+evaluating each expression in turn, throwing away the result of every
+expression except that last one.  Then it does the last part, and
 produces that result.
 
-Do we have begin0?  No.
+@margin-note{Question: Do we have @r[begin0]?  
 
-Can we do begin-like things without begin?  Yes, use local.  
+Answer: No.}
 
-What happens if we return the result of `set-field!'?  It produces
-nothing.  Some discussion of `void' here.
+Unlike @r[set-field!], @r[begin] doesn't add any new capability to the
+language.  For example, we can simulate @r[begin] using @r[local].
+For example:
+
+@racketblock[
+(local [(define dummy (set-field! called (add1 (field called))))]
+  (add1 (field called)))
+]
+
+This is very verbose, and requires creating new variables like
+@r[dummy] that are never used.  Therefore, @r[begin] is a useful
+addition to our language, now that we work with expressions like
+@r[set-field!] that don't produce any useful results.  
+
+@margin-note{@bold{A brief discussion of }@r[void]
+
+What happens if we return the result of @r[set-field!]?  It produces
+nothing---DrRacket doesn't print anything at all.
+
+However, there's no way for DrRacket to truly have nothing at all, so
+it has an internal value called @r[void].  This value doesn't have any
+uses, though, and you shouldn't ever see it.}
+
 
 Now Expressions do two things:
  - produce a result (everything does this)
@@ -148,6 +222,7 @@ Now Expressions do two things:
 
 Now we write effect statements.  Have to write them for every
 method/function that has an effect.
+@verbatim|{
 
 @codeblock{
 ;; m : -> Number
@@ -242,7 +317,7 @@ y
 (dvh . pay)
 y ;; now different
 
-The differece is that `x' is the name of a number, and numbers don't
+The differece is that @r[x] is the name of a number, and numbers don't
 change, but y is the name of an account, and accounts change over
 time.  
 
@@ -302,8 +377,8 @@ But:
 > htdp
 > mf
 
-Question: Does `htdp' contain a copy of matthias, or are they all the
-same matthias?  Answer: always the same, because we use the name `mf',
+Question: Does @r[htdp] contain a copy of matthias, or are they all the
+same matthias?  Answer: always the same, because we use the name @r[mf],
 we didn't construct a new one.  
 
 Let's add a new method for modifying the author after a book is
@@ -329,6 +404,6 @@ But every times we construct a book with an author, we want to use
   (fields t a)
   (a . add-book this))
 
-In the first expression, we *cannot* use `this', and we must produce
-the result using `fields'.  Later, we can use `this', and we get the
+In the first expression, we *cannot* use @r[this], and we must produce
+the result using @r[fields].  Later, we can use @r[this], and we get the
 desired result.  }|
