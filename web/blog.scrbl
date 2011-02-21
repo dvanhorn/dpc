@@ -7,6 +7,28 @@
 
 @title*{Blog}
 
+@section*{Exam Results}
+
+There were 84 possible points on the exam.
+
+The average is 64.8, with a standard deviation of 13.7.
+
+The quartiles are:
+
+@verbatim{Low: 20
+25%: 59.5
+50%: 70
+75%: 75
+High: 83}
+
+@section*{On the Exam}
+
+@tt{Mon Feb 14 15:10:03 EST 2011}
+
+The material from today's lecture on mutation will @emph{not} be
+covered on tomorrow's exam.  All other topics from lectures, labs, and
+homeworks are fair game.
+
 @section*{Notes for Studying}
 
 @tt{Wed Feb  9 19:31:26 EST 2011}

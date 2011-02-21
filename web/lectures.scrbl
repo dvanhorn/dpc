@@ -36,16 +36,14 @@ There is no lecture on 1/17 since it is Martin Luther King, Jr. Day.
 @include-section["lectures/lec08.scrbl"]
 @include-section["lectures/lec09.scrbl"]
 @include-section["lectures/lec10.scrbl"]
-@;include-section["lectures/lec11.scrbl"]
+@include-section["lectures/lec11.scrbl"]
+@include-section["lectures/lec12.scrbl"]
 
-@section[#:tag "lec11"]{2/14: Mutation}
-
-@section[#:tag "lec12"]{2/17: Intermezzo: Java}
 @section[#:tag "lec13"]{2/21: Holiday (Presidents Day)}
 
 There is no lecture on 2/21 since it is Presidents Day.
 
-@section[#:tag "lec14"]{2/24: ??}
+@section[#:tag "lec14"]{2/24: Intermezzo: Java}
 @section[#:tag "lec15"]{2/28: Holiday (Spring break)}
 
 There is no lecture on 2/28 since it is during Spring break.

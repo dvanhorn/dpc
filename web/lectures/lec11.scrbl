@@ -16,41 +16,58 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec10"]{2/14: Mutation}
+@title[#:tag "lec11"]{2/14: Mutation}
 
-I want to design a class, counter%, which has a method called m.
+We want to design a class, @r[counter%], with the following interface
 
-m : -> Number
-the number of times m has been called
+@codeblock{
+;; m : -> Number
+;; Produce the number of times `m' has been called
+}
+
+Now let's try to implement this class.  
 
 @racketblock[
 (define-class counter%
   (fields called)
   (define/public (m)
     #, @(elem "hmmm")))
+]
 
+Unfortunately, it's not immediately clear what to put in the body of
+@r[m]. We can understand our task better by writing examples.  
 
 @racketblock[
  (check-expect (send (counter% 0) m) 1)
+ (check-expect (send (counter% 4) m) 5)
 ]
 
-This suggests the implementation:
+This suggests the following implementation implementation:
 
+@filebox[@tt{counter%}]{
 @racketblock[
  (define/public (m)
    (add1 (field called)))
-]
+]}
 
-Now our tests passed.
+Now our all of our tests pass.
 
-But:
+@(the-eval '(begin
+	      (define-class counter%
+		(fields called)
+		(define/public (m) (add1 (field called))))
+	      ))
 
+However, when we try our a few more examples, we see this:
+
+@interaction[#:eval the-eval
 (define c (counter% 0))
-(c . m)
-(c . m)
+(send c m)
+(send c m)]
 
 Wrong answer!
 
+@verbatim|{
 We want to give `m' the ability to remember things.
 
 We could change `m' to produce both the result and a new counter.
@@ -314,4 +331,4 @@ But every times we construct a book with an author, we want to use
 
 In the first expression, we *cannot* use `this', and we must produce
 the result using `fields'.  Later, we can use `this', and we get the
-desired result.  
+desired result.  }|
