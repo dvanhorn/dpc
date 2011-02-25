@@ -15,7 +15,7 @@
          (all-from-out lang/htdp-intermediate-lambda)
 	 quote
          #%module-begin |.| (rename-out [my-app #%app])
-         define test require provide define-struct
+         define test require provide define-struct begin
          all-defined-out only-in all-from-out except-in
          (except-out (all-from-out "../class1/test-engine/racket-tests.rkt")
                      test))
