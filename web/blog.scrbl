@@ -7,6 +7,12 @@
 
 @title*{Blog}
 
+@section*{No Dan this week}
+
+@tt{Sun Mar  6 16:35:35 EST 2011}
+
+Dan will not hold office hours this week.
+
 @section*{Assignment 6 pushed back}
 
 @tt{Mon Feb 21 15:38:28 EST 2011}
