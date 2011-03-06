@@ -21,6 +21,8 @@
 
 @title[#:tag "lab04"]{1/31: Universe}
 
+@; TODO Elaborate or rewrite
+
 @exercise{
   Is your class system up to date? It changes week to week---in the last few
   hours we even fixed some bugs with dot notation.
