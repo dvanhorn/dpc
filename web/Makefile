@@ -56,6 +56,7 @@ web:
 		++extra $(CLASS_LATEST) \
 		++extra ../notes/notes.pdf \
 		++extra ../notes/notes-2up.pdf \
+		++extra labs/9/class3-html.plt \
 		++xref-in setup/xref load-collections-xref \
 		--redirect-main http://docs.racket-lang.org/ \
 		--style 2510H.css \
