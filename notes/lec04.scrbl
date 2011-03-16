@@ -408,10 +408,6 @@ still construct @racket[leaf%]s as before, but the arguments to the
 @racket[node%] constructor are changed: it takes the left subtree, the
 right subtree, and @emph{then} the number at that node:
 
-@margin-note{It's an unfortunate consequence of our documentation tool that
-the value is not printed in the same order it is constructed.
-For now, we hope you can just see through the confusion.}
-
 @(the-eval
   '(module n class1
      (provide bt% node% leaf%)

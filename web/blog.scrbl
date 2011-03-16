@@ -7,6 +7,34 @@
 
 @title*{Blog}
 
+@section*{New homework partners}
+
+@tt{Mon Mar 14 23:09:46 EDT 2011}
+
+In effect immediately.  Let us know @bold{now} if there is a problem.
+
+@verbatim{
+pair 036: laplante, chiner
+pair 037: mmitlin, fungi
+pair 038: dcorbett, aldwin
+pair 039: forrest, jccoates
+pair 040: jgramm, wconlon
+pair 041: lindeman, florence
+pair 042: dmsilva, rpless
+pair 043: tswartz, naraghi
+pair 044: demaior, pfurtado
+pair 045: mcarroll, robbyk
+pair 046: ngoldman, petey3
+pair 047: mcoppola, kardon
+pair 048: wjhsie, ekelly
+pair 049: gressen, maxgoren
+pair 050: schwarta, fnimick
+pair 051: gierb, hfried7, morehd
+pair 052: markefus, romelusw
+}
+
+
+
 @section*{No Dan this week}
 
 @tt{Sun Mar  6 16:35:35 EST 2011}

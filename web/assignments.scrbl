@@ -4,7 +4,8 @@
 
 @title*[#:style 'toc]{Assignments}
 
-Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise noted.
+Assignment are due on a weekly basis, Wednesday at midnight, unless
+otherwise noted.
 
 @local-table-of-contents[]
 
@@ -14,11 +15,10 @@ Assignment are due on a weekly basis, Wednesday at midnight, unless otherwise no
 @include-section["assignments/assign04.scrbl"]
 @include-section["assignments/assign05.scrbl"]
 @include-section["assignments/assign06.scrbl"]
+@include-section["assignments/assign07.scrbl"]
 
 @internal[
 
-@section[#:tag "assign07"]{2/25: ?? (non-standard day)}
-@section[#:tag "assign08"]{3/02: (Spring break)}
 @section[#:tag "assign09"]{3/09: Graphs?}
 @section[#:tag "assign10"]{3/16: Stable Marriage}
 @section[#:tag "assign11"]{3/23: Proj Dev 1}
