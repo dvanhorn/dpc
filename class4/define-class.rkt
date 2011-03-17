@@ -207,3 +207,7 @@
     [(_ cls:cls-name . args)
      #'(r:make-object cls.real-name . args)]))
 
+(define-syntax (instanceof stx)
+  (syntax-parse stx
+    [(_ e:expr cls:cls-name)
+     #'(r:is-a? e cls.real-name)]))
