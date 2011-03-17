@@ -28,8 +28,7 @@
 
 (define-syntax object% (class-name #'r:object% null null))
 
-(define-syntax (super stx) 
-  (raise-syntax-error #f "can only be used inside define-class" stx))
+(define-syntax super (make-rename-transformer #'r:super))
 (define-syntax (constructor stx) 
   (raise-syntax-error #f "can only be used inside define-class" stx))
 (define-syntax (implements stx)
@@ -58,7 +57,12 @@
     #:literals (define/public define/private define/override)
     (pattern ((~or define/public) 
               ((~var f (member-name names)) x:id ...) e:expr)
-             #:with def #'(define (f x ...) e)))
+             
+             #:with def (with-syntax ([super (datum->syntax #'e 'super)])
+                          #'(define (f x ...) (let-syntax ([super (syntax-parser
+                                                                   [(_ args (... ...))
+                                                                    #'(r:super f args (... ...))])])
+                                                e)))))
   
   (syntax-parse stx #:literals (super implements fields constructor
                                       isl+:check-expect 
@@ -93,6 +97,8 @@
      #:with -class% (datum->syntax #f (syntax-e #'class%))
      (with-syntax* ([field (datum->syntax stx 'field)]
                     [set-field! (datum->syntax stx 'set-field!)]
+                    [fake-super (datum->syntax stx 'super)]
+
                     [fake-this (datum->syntax stx 'this)]
                     [fields (datum->syntax stx 'fields)]
                     [(the-fld ...)
