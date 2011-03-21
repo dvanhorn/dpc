@@ -60,9 +60,9 @@ There is no lecture on 3/3 since it is during Spring break.
 @;@section[#:tag "lec18"]{3/10: Stateful objects (1)}
 @include-section["lectures/lec19.scrbl"]
 @include-section["lectures/lec20.scrbl"]
+@include-section["lectures/lec21.scrbl"]
 @;@section[#:tag "lec19"]{3/14: Stateful objects (2)}
 @;@section[#:tag "lec20"]{3/17: Abstracting with mixins}
-@section[#:tag "lec21"]{3/21: Implementing OO}
 
 @racketblock[
   @code:comment{Estimate the derivative of the given function.}
