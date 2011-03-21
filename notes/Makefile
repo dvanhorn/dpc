@@ -4,4 +4,4 @@ all:
 		--prefix dpc-prefix.tex \
 		--style dpc-style.tex notes.scrbl
 	xelatex notes
-	pdfnup --nup '2x1' notes.pdf -o notes-2up.pdf
+	pdfnup --nup '2x1' notes.pdf --outfile notes-2up.pdf

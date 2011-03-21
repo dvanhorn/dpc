@@ -2,8 +2,8 @@
 
 @(require scribble/eval
           racket/sandbox
-          "../unnumbered.rkt"
-          "../utils.rkt"
+          "../web/unnumbered.rkt"
+          "../web/utils.rkt"
           (for-label (except-in class0 define-struct)
                      2htdp/image
                      (only-in lang/htdp-intermediate-lambda define-struct)
