@@ -7,6 +7,14 @@
 
 @title*{Blog}
 
+@section*{Updated lecture notes}
+
+@tt{Mon Mar 21 15:15:05 EDT 2011}
+
+The @link["notes.pdf"]{lecture notes}
+(@link["notes-2up.pdf"]{condensed version}) have been updated to
+reflect the most recent lectures.
+
 @section*{New homework partners}
 
 @tt{Mon Mar 14 23:09:46 EDT 2011}
