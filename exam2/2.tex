@@ -121,49 +121,29 @@ about the harder problems in background while you knock off the easy ones.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% \noindent
-% {\bf Home on the Range}
 
-% Come up with funny story here.
+\begin{problem}\pts{19}
 
+The Programming Research Lab has been acquiring some new decorative
+objects, in the form of rectangles and rectangular solids.
+Unfortunately, they've all come unpainted, and now the graduate
+students have to paint them.  Dan has been trying to calculate how
+much this will cost, and he's enlisted you to help.  
 
+First, some basic facts.  Rectangles have an area which is the width
+times height, and must be painted on both sides.  Rectangular solids
+have a surface area which is the sum of the areas of all of the
+sides, or $2 (w \cdot d + d \cdot h + w \cdot h)$. Red paint costs 2
+dollars per square foot, and blue paint costs 5 dollars per square
+foot.  
+%
+Each decorative object has a color, and the appropriate dimensions,
+measured as an integer number of feet.  
 
-% \newpage
-\begin{problem}\pts{17} % same as on the previous exam :)
-
-A \emph{range} represents a set of numbers between two endpoints.  To
-start with, you only need to consider ranges that \emph{include} the
-smaller endpoint and \emph{exclude} the larger endpoint---such ranges
-are called \emph{half-open}.  For example, the range $[3,4.7)$
-includes all of the numbers between $3$ and $4.7$, including $3$ but
-\emph{not} including $4.7$. So $4$ and $3.0000001$ are both in the
-range, but $5$ is not.  In the notation used here, the $[$ means
-include, and the $)$ means exclude.
-
-\smallskip
-
-\noindent
-\begin{enumerate}
-\item Design a representation for ranges and implement the
-  \texttt{in-range?} method, which determines if a number is in the
-  range.  For example, the range $[3,7.2)$ includes the numbers $3$
-  and $5.0137$, but not the numbers $-17$ or $7.2$.
-
-\item Extend the data definition and implementation of ranges to
-  represent ranges that \emph{exclude} the low end of the range and
-  \emph{include} the high end, written $(lo,hi]$.  
-
-\item Add a \texttt{union} method to the interface for ranges and
-  implement it in all range classes.  This method should consume a
-  range and produces a new range that includes all the numbers in this
-  range \emph{and} all the numbers in the given range.
-
-  You may extend your data definition for ranges to
-  support this method.
-
-  You may apply the abstraction recipe, but you are not required to do
-  so; you will not be marked down for duplicated code on this problem.
-\end{enumerate}
+Design a representation for these decorative objects, and implement
+the {\tt expense} method.  You should use \emph{overriding} to avoid
+repeating code---in particular, you should only have one version of
+the {\tt expense} method.
 
 \newpage
 \ifrubric\else
@@ -175,76 +155,150 @@ include, and the $)$ means exclude.
 
 \begin{solution}
 \begin{verbatim}
-;; Part 1:
 
-;; A Range is one of
-;; - (new range% Number Number)                         [1pt]
-;; Interp: represents the range between `lo' and `hi'
-;;         including `lo', but *not* including `hi'
-;; and implements IRange:
+;; A Rect is (rect% Number Number)           [+1]
+;; an implements
+;; expense : -> Number                       [+2]
+;; how much will it cost to paint this?
+;; area : -> Number                          [+2]
+;; how much surface area does this have
+(define-class rect%
+  (fields w h color)
+  (define/public (expense)                   [+3]
+    (cond [(string=? (field color) "blue") (* 5 (area))]
+	  [else (* 2 (area))]))
+  (define/public (area) (* (w) (h) 2)))      [+1]
 
-;; The IRange interface includes:
-;; - in-range? : Number -> Boolean                      [1pt]
-;; determine if the given number is in this range
-;; - union : Range -> Range                             [1pt]
-;; produce the range containing this and the given range
+(check-expect ((rect% 10 10 "blue") . area) 200)   [+2]
+(check-expect ((rect% 10 10 "red") . expense) 400)
 
-(define-class range%                                    [1pt]
-  (fields lo hi)
-  (check-expect ((range% 0 1) . in-range? 0) true)      [1pt]
-  (check-expect ((range% 0 1) . in-range? 1) false)
-  (define/public (in-range? n)                          [2pt]
-    (and (>= n (field lo)) (< n (field hi))))
-    
-  (define/public (union r)
-    (union-range% this r)))
+;; A 3DRect is (3drect% Number Number Number String) [+1]
+;; and extends Rect                                  [+1]
+(define-class 3drect%
+  (super rect%)                                      [+1]
+  (fields d)                                         [+1]
+  ;; overriding
+  (define/public (area)                              [+2]
+    (* 2 (+ (* (w) (h))
+	    (* (h) (d))
+	    (* (w) (d))))))
 
-;; Part 2:
-
-;; A Range is also:
-;; - (new hi-range% Number Number)                      [1pt]
-;; Interp: represents the range between `lo' and `hi'
-;;         including `hi', but *not* including `lo'
+(check-expect ((3drect% 3 10 10 "red") . area) 320)   [+2]
+(check-expect ((3drect% 3 10 10 "blue") . expense) 1600)
 
 
-(define-class hi-range%                                 [1pt]
-  (fields lo hi)
-  (check-expect ((hi-range% 0 1) . in-range? 0) false)  [1pt]
-  (check-expect ((hi-range% 0 1) . in-range? 0.5) true)
-  (check-expect ((hi-range% 0 1) . in-range? 1) true)
-  (define/public (in-range? n)                          [1pt]
-    (and (> n (field lo)) (<= n (field hi))))
-    
-  (define/public (union r)
-    (union-range% this r)))
+\end{verbatim}
+\end{solution}
+\end{problem}
+%\ifrubric\bigskip\else
+\newpage
+%\fi
 
-;; Part 3:
 
-;; A Range is also:
-;; - (new union-range% Range Range)                     [1pt]
-;; Interp: including all the numbers in both ranges
 
-(define-class union-range%                              [1pt]
-  (fields left right)
-  (define/public (in-range? n)                          [2pt]
-    (or ((field left) . in-range? n)
-        ((field right) . in-range? n)))
+% \newpage
+\begin{problem}\pts{22}
 
-  ;; Point is for all the union methods together
-  (define/public (union r)                              [1pt]
-    (union-range% this r)))
+Tobin-Hochstadt and Van Horn have both been traveling a lot recently,
+so they've decided to develop software to manage their trips.  Since
+they're busy with writing the exam, they've asked you to help them
+out. 
 
-(define r1 (range% 0 1))
-(define r2 (hi-range% 0 1))
-(define r3 (range% 2 4))
+Additionally, since they want their program to be as verbose as
+possible, they've asked you to write it in Java.  
 
-;; union + in-range? test                               [1pt]
-(check-expect (r1 . union r2 . union r3 . in-range? 3) 
-              true)
+\begin{enumerate}
+\item
+Initially, they've settled on the following kinds of data to represent
+trips.  A {\tt Trip} is either a {\tt PlaneFlight}, with an airline
+and a distance (in miles), or a {\tt Connection}, composed of two trips.  
 
-;; testing all the union methods                        [1pt]
-(check-expect (r1 . union r2 . in-range? 1) true)
-(check-expect (r2 . union r1 . in-range? 0) true)
+Write a data definition for trips, and implement the {\tt howLong}
+method, which computes the total time of the trip (in minutes),
+assuming that airplanes fly at 10 miles per minute.
+
+\item
+Van Horn has discovered that getting around New England is easier if
+you take the train, even though it takes 2 minutes to go 1 mile.  Add a new representation for this new kind of
+trip, which should have a distance and an indication of whether the trip
+is on the Acela, in which case the train goes twice as fast (1 minute
+per mile).
+
+\item Tobin-Hochstadt also likes to take the train, but unfortunately,
+  he's been taking the commuter rail instead, which goes as fast as
+  regular trains but is always half an hour late.  Add to your data
+  definition of trains a representation for commuter rail trips.  
+\end{enumerate}
+
+All of your implementations must, of course, support the {\tt howLong}
+method.    
+
+\newpage
+\ifrubric\else
+[Here is some more space for the previous problem.]
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
+
+\begin{solution}
+\begin{verbatim}
+interface Trip {                       //[+1]
+    // how many minutes will this trip take? 
+    public Integer howLong();          //[+1]
+}
+
+class PlaneFlight implements Trip {      [+1]
+    Integer miles;                       [+2]
+    String airline;
+    PlaneFlight(Integer m, String s)     [+1]
+         { miles = m; airline = s; }   
+    public Integer howLong()             [+1]
+      { return miles/10; }
+}
+
+class Connection implements Trip {   [+1]
+    Trip first;                      [+2]
+    Trip second;
+    Connection(Trip t1, Trip t2) { first = t1; second = t2; }   [+1]
+    public Integer howLong() { return first.howLong() + second.howLong(); } [+2]
+}
+
+// part 2
+
+class TrainTrip implements Trip {  [+1]
+    Integer miles;                 [+1]
+    Boolean acela;
+    TrainTrip(Integer m, Boolean a) { miles = m; acela = a; } [+1]
+    public Integer howLong() { 
+	if (acela) {
+	    return miles;           [+1]
+	}
+	else {
+	    return miles * 2;       [+1]
+	}
+    }
+}
+
+// Two possible solutions for part 3
+
+class CommuterRail extends TrainTrip {   [+1]
+    CommuterRail(Integer m) { super(m,false); } [+1]
+    public Integer howLong() {                [+2]
+	return miles * 2 + 30; // or super() + 30
+    }
+}
+
+// or 
+
+class CommuterRail implements Trip {  [+1]
+    Integer miles;
+    CommuterRail(Integer m) { miles = m; }   [+1]
+    public Integer howLong() { 
+	return miles * 2 + 30;            [+2]
+    }
+}
+
 \end{verbatim}
 \end{solution}
 \end{problem}
@@ -253,88 +307,110 @@ include, and the $)$ means exclude.
 %\fi
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{problem}\pts{18}
+\begin{problem}\pts{20}
 
-Here are data, class, and interface definitions for Shapes:
+Here are data, class, and interface definitions for Complex Numbers:
+
 \begin{verbatim}
-;; A Shape is one of:
-;; - (rect% Number Number)
-;; - (circ% Number)
-;; implements:
-;; bba : -> Number     (short for "bounding-box-area")
-;; Compute the area of the smallest bounding box for this shape.
+;; A Complex is (cplx% Number Number)
+;; dist : -> Number
+;; How far is this point from the origin.
+;; =? : Complex -> Boolean     (short for "bounding-box-area")
+;; Determine if this Complex is the same as the given one
 
-(define-class rect%
-  (fields width height))
+(define-class cplx%
+  (fields real imag)
+  (define/public (dist)
+    (sqrt (+ (sqr (real)) (sqr (imag)))))
+  (define/public (=? that) 
+    (and (= (real) (that . real))
+         (= (imag) (that . img)))))
 
-(define-class circ%
-  (fields radius))
 \end{verbatim}
-%
-Here are some examples of how \code{bounding-box-area} should work:
-\begin{verbatim}
-(check-expect ((rect% 3 4) . bba) 12)
-(check-expect ((circ% 1.5) . bba)  9)
-\end{verbatim}
-
 
 \begin{enumerate}
-\item Design the \code{bba} method for the
-  \code{rect\%} and \code{circ\%} class.
+\item Design a {\tt UPair} data definition for an unordered pair of
+  {\tt Complex}, with an {\tt =?}  method.  Because these are
+  unordered pairs, 
 
-\item Design a super class of \code{rect\%} and \code{circ\%} and
-  lift the \code{bba} method to the super class.  Extend
-  the shape interface as needed, but implement any methods you add.
+\begin{verbatim}
+ ((upair% (cplx% 1 1) (cplx% 2 2)) . =?
+  (upair% (cplx% 2 2) (cplx% 1 1)))
+\end{verbatim}
 
-\item Design a new variant of a Shape, Square, which should support
-  all of the methods of the interface.
+should produce {\tt \#t}.
+
+\item Revise your data, class, and interface definitions so that your
+  unordered pairs can store any kind of data, not just {\tt Posn}s.
+
+\item Since {\tt UPair} is unordered, switching the two components of
+  a pair should produce a pair that's equal to the original one.
+  Define a predicate that expresses this property, and use it to state
+  two test cases.
+
 \end{enumerate}
 
+
+
+
 \begin{solution}
-\begin{verbatim}
-;; Part 1 [6pt]
-(define-class rect% 
-  (fields width height)                
-  (define/public (bba)                 [2pt]
-    (* (field width) (field height))))
-  
-(define-class circ% 
-  (fields radius)                      
-  (define/public (bba)                 [2pt]
-    (sqr (* 2 (field radius)))))
+\begin{verbatim} 
 
-;; Part 2 [10pt]
+;; Part 1
+;; A UPair is (upair% Posn Posn) [+1]
+(define-class upair%
+  (fields left right)            [+1]
+  ;; =? : UPair -> Boolean       [+1]
+  ;; compare this with p         [+1]
+  (define/public (=? p)          [+3]
+    (or (and ((left)  . =? (p . left))
+	     ((right) . =? (p . right)))
+	(and ((left)  . =? (p . right))
+	     ((right) . =? (p . left))))))
 
-;; implements:
-;; width : -> Number                         [1pt]
-;; height : -> Number
-;; Compute the {width,height} of this shape. [1pt]
+(define p1 (cplx% 1 2))
+(define p2 (cplx% 2 1))
+(define u1 (upair% p1 p2))
+(define u2 (upair% p2 p1))
+(define u3 (upair% p2 p2))
+(check-expect (u1 . =? u2) true)             [+2]
+(check-expect (u1 . =? u3) false)
 
-(define-class shape% 
-  (define/public (bounding-box-area)
-    (* (this . width) (this . height))))     [3pt]
+;; Part 2
+;; A [UPair X] is (upair% X X)               [+2]
+;; where X implements                        [+2]
+;; =? : X -> Boolean
 
-(define-class rect% 
-  (super shape%)                             [1pt]
-  (fields width height))                     [1pt]
-  
-(define-class circ% 
-  (super shape%)                             [1pt]
-  (fields radius)
-  (define/public (width)                     [1pt]
-    (* 2 (field radius)))
-  (define/public (height)                    [1pt]
-    (width)))
+;; for not changing the code                 [+1]
 
-;; Part 3 [4pt]
-    
-(define-class square%
-  (super shape%)                             [1pt]
-  (fields width)                             [1pt]
-  (define/public (height)                    [1pt]
-    (width)))
+(define-class upair%
+  (fields left right)
+  ;; =? : UPair -> Boolean
+  ;; compare this with p
+  (define/public (=? p)
+    (or (and ((left)  . =? (p . left))
+	     ((right) . =? (p . right)))
+	(and ((left)  . =? (p . right))
+	     ((right) . =? (p . left))))))
 
-(check-expect ((square% 5) . bba) 25)        [1pt]
+(define p1 (cplx% 1 2))
+(define p2 (cplx% 2 1))
+(define u1 (upair% p1 p2))
+(define u2 (upair% p2 p1))
+(define u3 (upair% p2 p2))
+(check-expect (u1 . =? u2) true)
+(check-expect (u1 . =? u3) false)
+
+;; Part 3
+
+;; swap-prop : [UPair X] -> Boolean                [+1]
+;; check if this pair is equal to itself when swapped
+(define (swap-prop up)                             [+3]
+  (up . =? (upair% (up . right) (up . left))))
+
+(check-expect (swap-prop (upair% (cplx% 1 2) (cplx% 2 1))) true) [+2]
+(check-expect (swap-prop (upair% (cplx% 1 1) (cplx% 1 1))) true)
+
 \end{verbatim}
 \end{solution}
 
