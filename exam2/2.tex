@@ -50,10 +50,10 @@
 \begin{document}
 \vspace*{-1.5cm}
 \ifrubric
-\centerline{\Large CSU2510H Exam 1 Rubric -- Spring 2011}
+\centerline{\Large CSU2510H Exam 2 Rubric -- Spring 2011}
 
 \else
-\centerline{\Large CSU2510H Exam 1 -- Spring 2011}
+\centerline{\Large CSU2510H Exam 2 -- Spring 2011}
 
 \vspace{0.5cm}
 
@@ -68,11 +68,11 @@ Student Id (last 4 digits):  & \rule{174pt}{1pt} \\[.5cm]
 \noindent\begin{minipage}{8cm}\sloppy
 \begin{itemize}
 \item You may use the usual primitives and expression forms of any of
-  the \code{class} languages; for everything else, define it.
+  the \code{class} languages or \code{Java}; for everything else,
+  define it.
 
 \item You may write {\tt {\slshape c} $\rightarrow$ {\slshape e}} for
-  {\tt (check-expect {\slshape c e})} and $\lambda$ for
-  \code{lambda} to save time writing.
+  tests in both \code{class} \textbf{and Java} programs.
 
 \item To add a method to an existing class definition, you
   may write just the method and indicate the appropriate class name
@@ -103,13 +103,13 @@ about the harder problems in background while you knock off the easy ones.
 \rule{1cm}{0pt}\begin{tabular}{|c|l|@{/}r|}
 \hline
 {\bf Problem} & Points & out of \\ \hline
-1 & & 17\\ \hline
-2 & & 18\\ \hline
-3 & & 12\\ \hline
-4 & & 21\\ \hline
-5 & & 15\\ \hline
+1 & & 18\\ \hline
+2 & & 19\\ \hline
+3 & & 22\\ \hline
+4 & & 20\\ \hline
+5 & & 11\\ \hline
 %Extra & & \\ \hline
-{\bf Total} & & 83 \\ \hline
+{\bf Total} & & 90 \\ \hline
 %{\bf Base}  & \multicolumn{2}{l|}{{\bf 56}} \\ \hline
 \end{tabular}
 \end{minipage}
@@ -120,7 +120,142 @@ about the harder problems in background while you knock off the easy ones.
 \fi
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{problem}\pts{18}
 
+You've just been hired by Adobe to write their next generatation PDF
+rendering engine.  As your first task, you've been assigned to write
+an \emph{outline viewer} that displays the overall structure of a
+document.  A document can consist of any number of sections, and a
+section has a title and any number of subsections, and a subsection
+has a title and any number of subsubsection, and so on.
+
+\begin{enumerate}
+\item Design a representation of documents that can handle
+documents like this:
+\begin{verbatim}
+   1. OO = struct + fun
+   1.1. Rocket
+   1.2. Moon
+   2. Design
+   2.1. Announce
+   2.1.1. Assign
+   3. End
+\end{verbatim}
+
+Note that the section numbers are \emph{NOT} part of the document!
+
+\begin{solution}
+\begin{verbatim}
+;; A Sec is one of:               [5pt]
+;; - (mt-sec%)
+;; - (cons-sec% String Sec Sec)
+;; A Doc is a Sec.
+(define-class mt-sec%)  
+(define-class cons-sec% 
+  (fields title sub next))
+\end{verbatim}
+\end{solution}
+
+\newpage
+\item Using your design, give the representation of the document in
+  part 1.
+
+\begin{solution}
+\begin{verbatim}
+(cons-sec% "OO = struct + fun"       [5pt]
+           (cons-sec% "Rocket" 
+                      (mt-sec%)
+                      (cons-sec% "Moon" 
+                                 (mt-sec%)
+                                 (mt-sec%)))
+           (cons-sec% "Design"
+                      (cons-sec% "Announce"
+                                 (cons-sec% "Assign" 
+                                            (mt-sec%) 
+                                            (mt-sec%))
+                                 (mt-sec%))
+                      (cons-sec% "End" 
+                                 (mt-sec%) 
+                                 (mt-sec%))))
+\end{verbatim}
+\end{solution}
+
+\newpage
+\item Design a method \verb|outline| that produces a list of strings,
+  which are the sectional headings in order \emph{and with section
+    numbers}.
+
+In other words, if \verb|d| represents the document in part 1,
+\verb|outline| should produce the following:
+\begin{verbatim}
+> (d . outline)
+'("1. OO = struct + fun"
+  "1.1. Rocket"
+  "1.2. Moon"
+  "2. Design"
+  "2.1. Announce"
+  "2.1.1. Assign"
+  "3. End")
+\end{verbatim}
+\end{enumerate}
+
+\begin{solution}
+\begin{verbatim}
+;; Number -> String                [8pt]
+;; Purpose: 5 => "5."
+(define (sec-str n)
+  (string-append (number->string n) "."))
+
+;; Sec implements:
+;; Produce outline view of document.
+;; outline : -> [Listof String]
+
+;; Produce headings of document with section numbers.
+;; Assume: n is the current sectional number.
+;; headings : Number -> [Listof String]
+
+;; mt-sec%
+  (define/public (headings n) empty)
+  (define/public (outline) empty))
+
+;; con-sec%
+  (define/public (outline)
+    (headings 1))
+    
+  (define/public (headings n)
+    (cons (string-append (sec-str n) " " (field title))
+          (append (map (λ (s) (string-append (sec-str n) s))
+                       ((field sub) . headings 1))
+                  ((field next) . headings (add1 n))))))
+
+(check-expect ((mt%) . outline) empty)
+(check-expect ((cons-sec% "A" (mt%) (mt%)) . outline)
+              '("1. A"))
+
+(check-expect ((cons-sec% "A" 
+                          (mt-sec%) 
+                          (cons-sec% "B" 
+                                     (mt-sec%) 
+                                     (mt-sec%))) 
+               . outline)
+              '("1. A" "2. B"))
+
+(check-expect ((cons-sec% "A" 
+                          (cons-sec% "B" 
+                                     (mt-sec%) 
+                                     (mt-sec%))
+                          (mt-sec%))
+               . outline)
+              '("1. A" "1.1. B"))
+\end{verbatim}
+\end{solution}
+
+\end{problem}
+
+\newpage
+[Here is some more space for the previous problem.]
+
+\newpage
 
 \begin{problem}\pts{19}
 
@@ -133,7 +268,7 @@ much this will cost, and he's enlisted you to help.
 First, some basic facts.  Rectangles have an area which is the width
 times height, and must be painted on both sides.  Rectangular solids
 have a surface area which is the sum of the areas of all of the
-sides, or $2 (w \cdot d + d \cdot h + w \cdot h)$. Red paint costs 2
+sides, or $2 \cdot (w \cdot d + d \cdot h + w \cdot h)$. Red paint costs 2
 dollars per square foot, and blue paint costs 5 dollars per square
 foot.  
 %
@@ -147,8 +282,6 @@ the {\tt expense} method.
 
 \newpage
 \ifrubric\else
-[Here is some more space for the previous problem.]
-\newpage
 [Here is some more space for the previous problem.]
 \newpage
 \fi
@@ -206,6 +339,9 @@ out.
 
 Additionally, since they want their program to be as verbose as
 possible, they've asked you to write it in Java.  
+%
+In each of the following implementations, you must support the
+\verb|howLong| method.
 
 \begin{enumerate}
 \item
@@ -217,6 +353,7 @@ Write a data definition for trips, and implement the {\tt howLong}
 method, which computes the total time of the trip (in minutes),
 assuming that airplanes fly at 10 miles per minute.
 
+\newpage
 \item
 Van Horn has discovered that getting around New England is easier if
 you take the train, even though it takes 2 minutes to go 1 mile.  Add a new representation for this new kind of
@@ -224,14 +361,13 @@ trip, which should have a distance and an indication of whether the trip
 is on the Acela, in which case the train goes twice as fast (1 minute
 per mile).
 
+\newpage
 \item Tobin-Hochstadt also likes to take the train, but unfortunately,
   he's been taking the commuter rail instead, which goes as fast as
   regular trains but is always half an hour late.  Add to your data
   definition of trains a representation for commuter rail trips.  
 \end{enumerate}
 
-All of your implementations must, of course, support the {\tt howLong}
-method.    
 
 \newpage
 \ifrubric\else
@@ -315,7 +451,7 @@ Here are data, class, and interface definitions for Complex Numbers:
 ;; A Complex is (cplx% Number Number)
 ;; dist : -> Number
 ;; How far is this point from the origin.
-;; =? : Complex -> Boolean     (short for "bounding-box-area")
+;; =? : Complex -> Boolean
 ;; Determine if this Complex is the same as the given one
 
 (define-class cplx%
@@ -340,9 +476,12 @@ Here are data, class, and interface definitions for Complex Numbers:
 
 should produce {\tt \#t}.
 
+\newpage
 \item Revise your data, class, and interface definitions so that your
-  unordered pairs can store any kind of data, not just {\tt Posn}s.
+  unordered pairs can store other kinds of data, not just {\tt
+    Complex}es.  Make your solution as general as possible, but no more.
 
+\newpage
 \item Since {\tt UPair} is unordered, switching the two components of
   a pair should produce a pair that's equal to the original one.
   Define a predicate that expresses this property, and use it to state
@@ -414,376 +553,123 @@ should produce {\tt \#t}.
 \end{verbatim}
 \end{solution}
 
-\newpage
-\ifrubric\else
-[Here is some more space for the previous problem.]
-\newpage
-[Here is some more space for the previous problem.]
-\newpage
-\fi
 
 \end{problem}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{problem}\pts{12}
+\newpage
+\begin{problem}\pts{11}
 
-One perspective that unifies the paradigms of programming with
-functions and programming with objects is to view a ``function'' as an
-object that understands a method called \code{apply}.  With that in
-mind, we can define an interface for functions-as-objects:
+Here's an implementation of lists that supports visitors:
 
 \begin{verbatim}
-;; A [IFun X Y] implements:
+;; A [Listof X] is one of
+;; - (mt%)
+;; - (cons% X [Listof X])
+;;
+;; and implements:
+;;
+;; Accept the visitor and visit this list's data.
+;; visit : [IListVisitor X Y] -> Y 
+
+(define-class mt%
+  (define/public (visit v)
+    (v . mt)))
+
+(define-class cons%
+  (fields first rest)
+  (define/public (visit v)
+    (v . cons (field first) 
+              ((field rest) . visit v))))
+\end{verbatim}
+%
+The \verb|[IListVisitor X Y]| interface represents a computation over
+a \verb|[Listof X]| that produces a \verb|Y|:
+\begin{verbatim}
+;; An [IListofVisitor X Y] implements:
+
+;; Visit an empty list
+;; mt : -> Y
+
+;; Visit a cons list
+;; cons : X Y -> Y
+\end{verbatim}
+
+\newpage
+\begin{enumerate}
+
+\item Design a class that implements
+  \verb|[IListVisitor Number Number]| that sums a list of numbers.
+
+\begin{solution}
+\begin{verbatim}
+;; [5pt]
+;; A Sum is a (sum%), implements [IListVisitor Number Number]
+(define-class sum%
+  (implements list-visitor<%>)
+  ;; Sum an empty list
+  ;; -> Number
+  (define/public (mt) 0)
+  ;; Sum a cons list
+  ;; Number Number -> Number
+  (define/public (cons first rest)
+    (+ first rest)))
+
+(check-expect ((mt%) . visit (sum%)) 0)
+(check-expect ((cons% 5 (cons% 7 (mt%))) . visit (sum%)) 12)
+\end{verbatim}
+\end{solution}
+
+\newpage
+
+\item Recall our previous discussion of functions-as-objects, which relied on an interface for objects representing functions:
+
+\begin{verbatim}
+;; An [IFun X Y] implements:
+
+;; Apply this function to given argument.
 ;; apply : X -> Y
-;; Apply this function to the given input.
 \end{verbatim}
 
-Here we are representing a \code{X -> Y} function as an object that
-has an \code{apply} method that consumes an \code{X} and produces a
-\code{Y}.
+Design a class \verb|map%| that implements
+\verb|[IListVisitor [Listof X] [Listof Y]]|.
 
-\begin{enumerate}
-\item Design a class that wraps a real function with contract \code{(X
-  -> Y)} to implement \code{[IFun X Y]}.
-
-\item Using your wrapper class, construct the objects representing the
-  ``add 1'' function and ``sub 1'' function.
-
-\item Another useful operation on functions is composition.  Here is
-  the interface for a \code{compose} method that composes two functions
-  represented as objects:
+For example, here is a use of the \verb|map%| visitor that maps the
+representation of an add1 function over a list of numbers.
 
 \begin{verbatim}
-;; [IFun X Y] also implements:
-;; compose : [IFun Y Z] -> [IFun X Z]
-;; Produce a function that applies this function to its input, 
-;; then applies the given function to that result.
+;; An Add1 is a (add1%), implements [IFun Number Number].
+(define-class add1%
+  (define/public (apply x) (add1 x)))
+
+> ((cons% 1 (cons% 2 (cons% 3 (mt%)))) . visit (map% (add1%)))
+(cons% 2 (cons% 3 (cons% 4 (mt%)))) 
 \end{verbatim}
-
-For example, if \code{addone} and \code{subone} refer to the objects
-you constructed in part 2, the following check should succeed:
-
-\begin{verbatim}
-(check-expect ((addone . compose subone) . apply 5) 5)
-(check-expect ((addone . compose addone) . apply 5) 7)
-\end{verbatim}
-
-Implement the \code{compose} method for your wrapper class.
-\end{enumerate}
 
 \begin{solution}
-
 \begin{verbatim}
-;; Part 1 [5pt]
-(define-class fun%
-  (fields f)
-  (define/public (apply x)
-    ((field f) x)))
-
-;; Part 2 [2pt]
-(define addone (fun% add1))
-(define subone (fun% sub1))
-
-;; Part 3 [5pt]
-(define-class fun%
-  (fields f)
-  (define/public (compose g)
-    (fun% (lambda (x)
-            (g . apply (apply x))))))
+;; [6pt]
+;; A Map is a (map% [IFun X Y])                    ;[1pt] 
+;; implements [IListVisitor [Listof X] [Listof Y]] 
+(define-class map%
+  (fields f)                                       ;[1pt] 
+  ;; Map an empty list.
+  ;; -> [Listof Y]
+  (define/public (visit-mt) (mt%))                 ;[1pt] 
+  ;; Map a cons list.
+  ;; X [Listof Y] -> [Listof Y]
+  (define/public (visit-cons first rest)           ;[1pt] 
+    (cons% (f . apply first) rest)))               ;[2pt] 
 \end{verbatim}
-
 \end{solution}
 
+\end{enumerate}
+
 \newpage
-\ifrubric\else
 [Here is some more space for the previous problem.]
-\newpage
-[Here is some more space for the previous problem.]
-\newpage
-\fi
 
 \end{problem}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{problem} \pts{21}
-
-The Northeastern University Registrar is instituting a new course
-registration system, in which each student will wait in a ``Virtual
-Line'' until every student ahead of them has registered.  A simple way
-to represent a line (also known as a \emph{queue}) is by using a list.
-But this representation makes it slow to add somebody to the end of
-the line (or to take somebody off the front of the line, depending on
-whether the front of the list represents the front or rear of the
-line).  
-
-In order to provide maximal waiting efficiency, you have been tasked
-with implementing a representation that uses \emph{two} lists!  The
-key idea of this fancy representation is that one list will represent
-some portion of the front of the line, while the other will represent
-the remainder of the line \emph{in reverse order}.  So if you're the
-first element of the first list, you are at the head of the line.  On
-the other hand, if you're the first element of the second list, you
-are the very last person in line.
-%
-Here is the interface for queues:
-\begin{verbatim}
-;; A [IQ X] implements:
-;;
-;; head : -> X
-;; Produce the element at the head of this queue.
-;; Assume: this queue is not empty.
-;;
-;; deq : -> [IQ X]      (Short for "dequeue")
-;; Produces a new queue like this queue, but without 
-;; this queue's first element.
-;; Assume: this queue is not empty.
-;;
-;; enq : X -> [IQ X]    (Short for "enqueue")
-;; Produce new queue with given element added to the
-;; END of this queue.
-;;
-;; emp? : -> Boolean
-;; Is this queue empty?
-\end{verbatim}
-
-The \code{head} and \code{deq} operations require that the queue be
-non-empty when they are used, but this can be assumed and these
-operations do not need to check for an empty queue.
-
-Further, the Registrar's office has just learned about
-\emph{invariants}, and insists on maintaining the following invariant
-about all of their queues:
-
-\begin{quote}
-  {\it if the front of the queue is empty, the whole queue must also be empty.}
-\end{quote} 
-
-\noindent
-The Registrar's office has given you three tasks to prepare their
-Virtual Line for its launch later this semester:
-
-\begin{enumerate}
-\item Design an implementation of the queue data structure to the Registrar's
-  specifications.  You must maintain the invariant stated above, and
-  you should take advantage of the invariant when implementing the
-  operations.
-\item Unfortunately, when testing the queue, the Registrar has
-  discovered that some queues with the same elements in the same order
-  can be represented in multiple ways.  Give an example of two
-  different representations of the same queue.  Implement a
-  \code{to-list} operation which produces a list of elements going in
-  order from the front to the rear of the queue. In your tests, you
-  should show how this addresses the problem.
-\item The Registrar has a problem with careless data entry.  Design
-  and implement a constructor for queues which, given two input lists
-  of elements, ensures that the invariant is maintained.  
-\end{enumerate}
-
-\begin{solution}
-\begin{verbatim}
-;; Part 1:
-;; invariant: front is empty IFF queue is empty
-;; A [Queue X] is (queue% [Listof X] [Listof X])           [1pt]
-;; and implements [IQ X]
-
-(define-class queue%                                       [1pt]
-  (fields front back)
-  ;; Add element to the back
-  ;; X -> [Queue X]
-  ;; add it to the front IFF the front is empty
-  ;; (otherwise invariant is violated)
-  (check-expect (eq . enqueue 1) (queue% '(1) '()))        [1pt]
-  (check-expect (q . enqueue 5) (queue% '(1 2 3) '(5)))
-  (define/public (enqueue i)
-    (cond [(empty? (field front))                          [2pt]
-           (queue% (list i) empty)]
-          [else
-           (queue% (field front) (cons i (field back)))])) [2pt]
-  ;; get the first element
-  ;;  -> X
-  ;; assumes this queue is non-empty
-  ;; uses the invariant
-  (check-expect (q . head) 1)                              [1pt]
-  (define/public (head)                                    
-    (first (field front)))
-  ;; drop the first element
-  ;;  -> [Queue X]
-  ;; assumes this queue is non-empty
-  (check-expect (eq . enqueue 1 . dequeue) eq)             [1pt]
-  (check-expect (q . enqueue 5 . dequeue) (queue% '(2 3) '(5)))
-  (define/public (dequeue)
-    (cond 
-      ;; maintain the invariant -- don't let `front' be empty
-      [(empty? (rest (field front)))                       [3pt]
-       (queue% (reverse (field back)) empty)]
-      ;; otherwise, simple
-      [else (queue% (rest (field front)) (field back))]))  [2pt]
-  ;; is this queue empty?
-  ;; emp? : -> Boolean
-  ;; uses the invariant
-  (check-expect (q . emp?) false)                          [1pt]
-  (check-expect (eq . emp?) true)
-  (define/public (emp?)
-    (empty? (field front)))
-
-;; Part 2:
-
-;; Examples:                                               [1pt]
-(queue% (list 1) (list 6)) vs (queue% (list 1 6) empty)
-(queue% (list 1 8 12) (list 6)) vs (queue% (list 1 8) (list 12 6))
-
-  ;; convert the queue to a list                           [1pt]
-  ;; -> [Listof X] 
-  ;; turn examples above into tests:                       [1pt]
-  (check-expect ((queue% (list 1) (list 6)) . to-list)
-		((queue% (list 1 6) empty) . to-list))
-  (check-expect ((queue% (list 1 8 12) (list 6)) . to-list)
-		((queue% (list 1 8) (list 12 6)) . to-list))
-  (check-expect (q . to-list) '(1 2 3))                    
-  (check-expect (q . enqueue 5 . to-list) '(1 2 3 5))   
-  (check-expect (q . enqueue 5 . dequeue . to-list) '(2 3 5))
-  (define/public (to-list)                                 [1pt]
-    (append (field front)
-            (reverse (field back)))))
-
-(define q (queue% '(1 2 3) empty))
-(define eq (queue% empty empty))
-
-;; Part 3:                                                 [2pt]
-;; several good possibilities (others are possible)
-(constructor (f b)
-  (fields (append f (reverse b)) empty))
-
-(constructor (f b)
-  (cond [(empty? f) (fields (reverse b) empty)]
-	[else (fields f b)]))
-
-(constructor (f b)
-  (cond [(and (empty? f) (empty? b)) (fields f b)]
-	[(empty? f) (fields (reverse b) empty)]
-	[else (fields f b)]))
-
-\end{verbatim}
-\end{solution}
-\end{problem}
-
-\newpage
-\ifrubric\else
-[Here is some more space for the previous problem.]
-\newpage
-[Here is some more space for the previous problem.]
-\newpage
-\fi
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{problem} \pts{15}
-%
-Here is a simple interface and implementation for dictionaries that
-associate natural numbers to strings.
-
-\begin{verbatim}
-;; A Dict is one of:
-;;  - (ld-empty%)
-;;  - (ld-cons% Nat String Dict)
-;; implements:
-;;
-;; has-key? : Nat -> Boolean
-;; Does this dict. have the given key?
-;;
-;; lookup : Nat -> String
-;; Produce the value associated with the given key in this dict.
-;; Assume: the key exists in this dict.
-;;
-;; set : Nat String -> Dict
-;; Associate the given key to the given value in this dict.
-
-(define-class ld-empty%
-  (define/public (has-key? k) false)
-
-  (define/public (set k v)
-    (ld-cons% k v this)))
-
-(define-class ld-cons%
-  (fields key val rest)
-
-  (define/public (has-key? k)
-    (cond [(= (field key) k) true]
-          [else ((field rest) . has-key? k)]))
-
-  (define/public (lookup k)
-    (cond [(= (field key) k) (field val)]
-          [else ((field rest) . lookup k)]))
-
-  (define/public (set k v)
-    (ld-cons% k v this)))
-\end{verbatim}
-
-The dictionary data structure has some important properties, one of
-which is that if we associate a value with a key and then look up that
-key, we expect to get back the value we associated.  For example, for
-any given dictionary, if we associate \code{1} with \code{"Fred"},
-then look up \code{1}, we should get \code{"Fred"}.  More generally,
-we expect this to be true for \emph{any} key-value pair, not just
-\code{1} and \code{"Fred"}.
-
-\begin{enumerate}
-\item Codify the general ``set/lookup'' property, described above, as
-  a predicate.  Write a successful test in terms of that predicate.
-\end{enumerate}
-
-Now consider a generalization of the ``set/lookup'' property which
-says that if we set \emph{two} keys to \emph{two} values then look
-each of them up, we should get back the original values.  For example, for
-any given dictionary, if we associate \code{1} with \code{"Fred"} and
-\code{2} with \code{"Wilma"}; then looking up \code{1} will produce
-\code{"Fred"} and looking up \code{2} will produce \code{"Wilma\"}.
-More generally, we can state this as a property for any two key-value
-pairs. 
-
-\begin{enumerate}
-\setcounter{enumi}{1}
-\item Codify the general ``double-set/lookup'' property as a
-  predicate.  Write a successful test in terms of that predicate.
-
-\item Does this property hold for all dictionaries and keys-value
-  pairs?  If so, why?  If not, write a counter-example, i.e.~write a
-  failing test in terms of the predicate you gave in part 2.
-\end{enumerate}
-
-\ifrubric\else
-\newpage
-[Here is some more space for the previous problem.]
-\newpage
-[Here is some more space for the previous problem.]
-\newpage
-\fi
-\end{problem}
-
-\begin{solution}
-\begin{verbatim}
-;; Part 1 
-;; Dict Nat String -> Boolean            [4pt]
-(define (set/lookup d k v)
-  (string=? (d . set k v . lookup k) v))
-
-;; [2pt]
-(check-expect (set/lookup (ld-empty%) 1 "Fred") true)
-
-;; Part 2
-;; Dict Nat String Nat String -> Boolean   [4pt]
-(define (double-set/lookup d k1 v1 k2 v2)
-  (and (string=? (d . set k1 v1 . set k2 v2 . lookup k1) v1)
-       (string=? (d . set k1 v1 . set k2 v2 . lookup k2) v2)))
-
-;; [2pt]
-(check-expect (double-set/lookup (ld-empty%) 1 "Fred" 2 "Wilma") true)
-
-;; Part 3  [3pt]
-;; Counter-example:
-(check-expect (double-set/lookup (ld-empty%) 1 "Fred" 1 "Wilma") true)
-\end{verbatim}
-\end{solution}
 
 \end{document}
 

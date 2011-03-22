@@ -1,0 +1,34 @@
+
+\def\newexercise#1{\@ifnextchar[{\@oexx{#1}}{\@nexx{#1}}}
+\def\@nexx#1#2{%
+\@ifnextchar[{\@xnexx{#1}{#2}}{\@ynexx{#1}{#2}}}
+\def\@xnexx#1#2[#3]{\expandafter\@ifdefinable\csname #1\endcsname
+{\@definecounter{#1}\@newctr{#1}[#3]%
+\expandafter\xdef\csname the#1\endcsname{\expandafter\noexpand
+  \csname the#3\endcsname \@exxcountersep \@exxcounter{#1}}%
+\global\@namedef{#1}{%
+  \@exx{#1}{#2}}\global\@namedef{end#1}{\@endexercise}}}
+\def\@ynexx#1#2{\expandafter\@ifdefinable\csname #1\endcsname
+{\@definecounter{#1}%
+\expandafter\xdef\csname the#1\endcsname{\@exxcounter{#1}}%
+\global\@namedef{#1}{%
+  \@exx{#1}{#2}}\global\@namedef{end#1}{\@endexercise}}}
+\def\@oexx#1[#2]#3{%
+  \@ifundefined{c@#2}{\@nocounterr{#2}}%
+  {\expandafter\@ifdefinable\csname #1\endcsname
+  {\global\@namedef{the#1}{\@nameuse{the#2}}%
+\global\@namedef{#1}{\@exx{#2}{#3}}%
+\global\@namedef{end#1}{\@endexercise}}}}
+\def\@exx#1#2{\refstepcounter
+    {#1}\@ifnextchar[{\@yexx{#1}{#2}}{\@xexx{#1}{#2}}}
+\def\@xexx#1#2{\@beginexercise{#2}{\csname the#1\endcsname}\ignorespaces}
+\def\@yexx#1#2[#3]{\@opargbeginexercise{#2}{\csname
+       the#1\endcsname}{#3}\ignorespaces}
+\def\@exxcounter#1{\noexpand\arabic{#1}}
+\def\@exxcountersep{.}
+\def\@beginexercise#1#2{\trivlist
+   \item[\hskip \labelsep{\bfseries #1\ #2}]}
+\def\@opargbeginexercise#1#2#3{\trivlist
+      \item[\hskip \labelsep{\bfseries #1\ #2\ (#3)}]}
+\def\@endexercise{\endtrivlist}
+
