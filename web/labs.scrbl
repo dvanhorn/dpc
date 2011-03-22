@@ -17,9 +17,9 @@
 @section[#:tag "lab08"]{2/28: No lab (Spring break)}
 @include-section["labs/9.scrbl"]
 @include-section["labs/10.scrbl"]
+@include-section["labs/11.scrbl"]
 
 @internal{
-@section[#:tag "lab11"]{3/21}
 @section[#:tag "lab12"]{3/28}
 @section[#:tag "lab13"]{4/4}
 @section[#:tag "lab14"]{4/11}

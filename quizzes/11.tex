@@ -1,0 +1,46 @@
+\documentclass{article}
+
+\usepackage{slatex}
+
+\pagestyle{empty}
+\setlength{\parindent}{0mm}
+
+\begin{document}
+\section*{Lab Quiz 11}
+
+\bigskip
+\bigskip
+Name: \underline{\hspace*{4in}}
+
+\bigskip
+\setlength{\parskip}{8pt}
+
+\begin{schemedisplay}
+  (define one
+    (lambda (msg)
+      (cond
+        [(symbol=? msg 'name)
+         "I am one!"]
+        [else
+         (two msg)])))
+
+  (define two
+    (lambda (msg)
+      (cond
+        [(symbol=? msg 'name)
+         "I am two!"]
+        [else
+         "Unknown message: "])))
+\end{schemedisplay}
+
+\bigskip
+Circle the true statement:
+\bigskip
+
+~~~~~~~~~~~~ Object \scheme{one} inherits from object \scheme{two}
+
+\medskip
+
+~~~~~~~~~~~~ Object \scheme{two} inherits from object \scheme{one}
+
+\end{document}

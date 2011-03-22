@@ -117,7 +117,7 @@ and that html attributes support a dictionary-like lookup interface:
   the optional method @racket[visit-a] to specialize its behavior on @tt{a}
   elements.
 
-  Your @racket[link-scraper%] visitor should implement @tt{[HtmlElement X]} for
+  Your @racket[link-scraper%] visitor should implement @tt{[HtmlVisitor X]} for
   some @tt{X}---what would be a good choice of @tt{X}?
 }
 
