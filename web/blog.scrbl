@@ -7,6 +7,13 @@
 
 @title*{Blog}
 
+@section*{Dan's office hours before the exam}
+
+@tt{Mon Mar 21 21:29:53 EDT 2011}
+
+Dan's office hours will be shifted earlier to 3:30--5:30 this week to give
+everyone time to meditate before the exam at 6:00.
+
 @section*{Updated lecture notes}
 
 @tt{Mon Mar 21 15:15:05 EDT 2011}
