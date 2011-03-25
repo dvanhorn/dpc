@@ -201,30 +201,30 @@ In other words, if \verb|d| represents the document in part 1,
 
 \begin{solution}
 \begin{verbatim}
-;; Number -> String                [8pt]
-;; Purpose: 5 => "5."
-(define (sec-str n)
-  (string-append (number->string n) "."))
+  ;; Number -> String                [8pt]
+  ;; Purpose: 5 => "5."
+  (define (sec-str n)
+    (string-append (number->string n) "."))
 
-;; Sec implements:
-;; Produce outline view of document.
-;; outline : -> [Listof String]
+  ;; Sec implements:
+  ;; Produce outline view of document.
+  ;; outline : -> [Listof String]
 
-;; Produce headings of document with section numbers.
-;; Assume: n is the current sectional number.
-;; headings : Number -> [Listof String]
+  ;; Produce headings of document with section numbers.
+  ;; Assume: n is the current sectional number.
+  ;; headings : Number -> [Listof String]
 
-;; mt-sec%
+  ;; mt-sec%
   (define/public (headings n) empty)
   (define/public (outline) empty))
 
-;; con-sec%
+  ;; con-sec%
   (define/public (outline)
     (headings 1))
     
   (define/public (headings n)
     (cons (string-append (sec-str n) " " (field title))
-          (append (map (λ (s) (string-append (sec-str n) s))
+          (append (map (lambda (s) (string-append (sec-str n) s))
                        ((field sub) . headings 1))
                   ((field next) . headings (add1 n))))))
 
@@ -252,8 +252,10 @@ In other words, if \verb|d| represents the document in part 1,
 
 \end{problem}
 
+\ifrubric\else
 \newpage
 [Here is some more space for the previous problem.]
+\fi 
 
 \newpage
 
@@ -280,8 +282,8 @@ the {\tt expense} method.  You should use \emph{overriding} to avoid
 repeating code---in particular, you should only have one version of
 the {\tt expense} method.
 
-\newpage
 \ifrubric\else
+\newpage
 [Here is some more space for the previous problem.]
 \newpage
 \fi
@@ -353,30 +355,6 @@ Write a data definition for trips, and implement the {\tt howLong}
 method, which computes the total time of the trip (in minutes),
 assuming that airplanes fly at 10 miles per minute.
 
-\newpage
-\item
-Van Horn has discovered that getting around New England is easier if
-you take the train, even though it takes 2 minutes to go 1 mile.  Add a new representation for this new kind of
-trip, which should have a distance and an indication of whether the trip
-is on the Acela, in which case the train goes twice as fast (1 minute
-per mile).
-
-\newpage
-\item Tobin-Hochstadt also likes to take the train, but unfortunately,
-  he's been taking the commuter rail instead, which goes as fast as
-  regular trains but is always half an hour late.  Add to your data
-  definition of trains a representation for commuter rail trips.  
-\end{enumerate}
-
-
-\newpage
-\ifrubric\else
-[Here is some more space for the previous problem.]
-\newpage
-[Here is some more space for the previous problem.]
-\newpage
-\fi
-
 \begin{solution}
 \begin{verbatim}
 interface Trip {                       //[+1]
@@ -396,12 +374,27 @@ class PlaneFlight implements Trip {      [+1]
 class Connection implements Trip {   [+1]
     Trip first;                      [+2]
     Trip second;
-    Connection(Trip t1, Trip t2) { first = t1; second = t2; }   [+1]
-    public Integer howLong() { return first.howLong() + second.howLong(); } [+2]
+    Connection(Trip t1, Trip t2) {     [+1]
+        first = t1; 
+        second = t2; 
+    }
+    public Integer howLong() {                     [+2]
+        return first.howLong() + second.howLong(); 
+    }
 }
+\end{verbatim}
+\end{solution}
 
-// part 2
+\newpage
+\item
+Van Horn has discovered that getting around New England is easier if
+you take the train, even though it takes 2 minutes to go 1 mile.  Add a new representation for this new kind of
+trip, which should have a distance and an indication of whether the trip
+is on the Acela, in which case the train goes twice as fast (1 minute
+per mile).
 
+\begin{solution}
+\begin{verbatim}
 class TrainTrip implements Trip {  [+1]
     Integer miles;                 [+1]
     Boolean acela;
@@ -416,8 +409,34 @@ class TrainTrip implements Trip {  [+1]
     }
 }
 
-// Two possible solutions for part 3
+// Another possibility:
 
+class RegTrainTrip implements Trip {
+  Integer miles;
+  RegTrainTrip(Integer miles) { this.miles = miles; }
+  public Integer howLong() {
+      return this.miles * 2;
+  }
+}
+
+class AcelaTrainTrip implements Trip {
+  Integer miles;  
+  AcelaTrainTrip(Integer miles) { this.miles = miles; }
+  public Integer howLong() {
+      return this.miles;
+  }
+}
+\end{verbatim}
+\end{solution}
+
+\newpage
+\item Tobin-Hochstadt also likes to take the train, but unfortunately,
+  he's been taking the commuter rail instead, which goes as fast as
+  regular trains but is always half an hour late.  Add to your data
+  definition of trains a representation for commuter rail trips.  
+
+\begin{solution}
+\begin{verbatim}
 class CommuterRail extends TrainTrip {   [+1]
     CommuterRail(Integer m) { super(m,false); } [+1]
     public Integer howLong() {                [+2]
@@ -435,8 +454,25 @@ class CommuterRail implements Trip {  [+1]
     }
 }
 
+// or
+
+class CommuterRail extends RegTrainTrip {
+   public Integer howLong() {
+       return super() + 30;
+   }
+}
 \end{verbatim}
 \end{solution}
+
+\end{enumerate}
+
+\newpage
+\ifrubric\else
+[Here is some more space for the previous problem.]
+\newpage
+[Here is some more space for the previous problem.]
+\newpage
+\fi
 \end{problem}
 %\ifrubric\bigskip\else
 \newpage
@@ -476,22 +512,6 @@ Here are data, class, and interface definitions for Complex Numbers:
 
 should produce {\tt \#t}.
 
-\newpage
-\item Revise your data, class, and interface definitions so that your
-  unordered pairs can store other kinds of data, not just {\tt
-    Complex}es.  Make your solution as general as possible, but no more.
-
-\newpage
-\item Since {\tt UPair} is unordered, switching the two components of
-  a pair should produce a pair that's equal to the original one.
-  Define a predicate that expresses this property, and use it to state
-  two test cases.
-
-\end{enumerate}
-
-
-
-
 \begin{solution}
 \begin{verbatim} 
 
@@ -514,8 +534,16 @@ should produce {\tt \#t}.
 (define u3 (upair% p2 p2))
 (check-expect (u1 . =? u2) true)             [+2]
 (check-expect (u1 . =? u3) false)
+\end{verbatim}
+\end{solution}
 
-;; Part 2
+\newpage
+\item Revise your data, class, and interface definitions so that your
+  unordered pairs can store other kinds of data, not just {\tt
+    Complex}es.  Make your solution as general as possible, but no more.
+
+\begin{solution}
+\begin{verbatim}
 ;; A [UPair X] is (upair% X X)               [+2]
 ;; where X implements                        [+2]
 ;; =? : X -> Boolean
@@ -539,7 +567,17 @@ should produce {\tt \#t}.
 (define u3 (upair% p2 p2))
 (check-expect (u1 . =? u2) true)
 (check-expect (u1 . =? u3) false)
+\end{verbatim}
+\end{solution}
 
+\newpage
+\item Since {\tt UPair} is unordered, switching the two components of
+  a pair should produce a pair that's equal to the original one.
+  Define a predicate that expresses this property, and use it to state
+  two test cases.
+
+\begin{solution}
+\begin{verbatim}
 ;; Part 3
 
 ;; swap-prop : [UPair X] -> Boolean                [+1]
@@ -553,7 +591,7 @@ should produce {\tt \#t}.
 \end{verbatim}
 \end{solution}
 
-
+\end{enumerate}
 \end{problem}
 
 \newpage
@@ -585,7 +623,7 @@ Here's an implementation of lists that supports visitors:
 The \verb|[IListVisitor X Y]| interface represents a computation over
 a \verb|[Listof X]| that produces a \verb|Y|:
 \begin{verbatim}
-;; An [IListofVisitor X Y] implements:
+;; An [IListVisitor X Y] implements:
 
 ;; Visit an empty list
 ;; mt : -> Y
@@ -605,7 +643,6 @@ a \verb|[Listof X]| that produces a \verb|Y|:
 ;; [5pt]
 ;; A Sum is a (sum%), implements [IListVisitor Number Number]
 (define-class sum%
-  (implements list-visitor<%>)
   ;; Sum an empty list
   ;; -> Number
   (define/public (mt) 0)
@@ -649,7 +686,7 @@ representation of an add1 function over a list of numbers.
 \begin{verbatim}
 ;; [6pt]
 ;; A Map is a (map% [IFun X Y])                    ;[1pt] 
-;; implements [IListVisitor [Listof X] [Listof Y]] 
+;; implements [IListVisitor X [Listof Y]] 
 (define-class map%
   (fields f)                                       ;[1pt] 
   ;; Map an empty list.
@@ -664,9 +701,10 @@ representation of an add1 function over a list of numbers.
 
 \end{enumerate}
 
-\newpage
+\ifrubric\else
 [Here is some more space for the previous problem.]
-
+\newpage
+\fi
 \end{problem}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
