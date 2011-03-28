@@ -192,11 +192,17 @@
                                                               stx 
                                                               #'arg)))]))])
                              (void)
-                             (over (custom-write p) 
-                                   (fprintf p "(object:~a" (if 'nm 'nm 'class%))
-                                   (for ([i (list all-field-internals ...)])
+                             (over (internal-write p)                                   
+                                   (for ([i (list field-internals ...)])
                                      (fprintf p " ~v" i))
+                                   #,(if (free-identifier=? #'super% #'top-class)
+                                         #'(void)
+                                         #'(r:super internal-write p)))
+                             (over (custom-write p)
+                                   (fprintf p "(object:~a" (if 'nm 'nm 'class%))
+                                   (internal-write p)
                                    (fprintf p ")"))
+                             
                              (over (custom-display p) (custom-write p))
                              
                              (public meths/new) ...

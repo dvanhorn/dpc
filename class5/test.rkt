@@ -25,3 +25,23 @@
 ;; - add bounding box
 ;; - add ordering methods based on comparator
 ;; - door examples/fish examples
+
+
+
+(define-interface none<%> [])
+
+(define (two-mixin %)
+ (class (super % none<%>)
+   (fields d)))
+
+(define one%
+ (two-mixin
+  (class
+      (fields a b c))))
+
+(define o (one% 'd 'a 'b 'c))
+(o . a) ; 'a
+(o . b) ; 'b
+(o . c) ; 'c
+(o . d) ; 'd
+o       ; (object:class% 'd)
