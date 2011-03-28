@@ -11,8 +11,11 @@
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
                      unstable/syntax
-                     "define-class-helper.rkt"))
+                     "define-class-helper.rkt")
+         "define-class-helper.rkt")
 (require (prefix-in r: racket))
+
+(define top-class (make-class-wrapper r:object%))
 
 ;; for field construction
 (define-struct field-wrapper (vals))
@@ -31,6 +34,8 @@
 (define-syntax super (make-rename-transformer #'r:super))
 (define-syntax (constructor stx) 
   (raise-syntax-error #f "can only be used inside define-class" stx))
+(define-syntax (name stx) 
+  (raise-syntax-error #f "can only be used inside define-class" stx))
 (define-syntax (implements stx)
   (raise-syntax-error #f "can only be used inside define-class" stx))
 
@@ -43,8 +48,8 @@
                                                    (list #'meths ...)))
               (define -ifc (interface (super-ifc.real-name ...) meths ... fields ...)))]))
 
-(define-syntax-rule (define-class name . body)
-  (define name (class . body)))
+(define-syntax-rule (define-class nm . body)
+  (define nm (class (name nm) . body)))
 
 (define-syntax (class stx)
   (define-syntax-class (member-name names)
@@ -67,15 +72,16 @@
                                                                     #'(r:super f args (... ...))])])
                                                 e)))))
   
-  (syntax-parse stx #:literals (super implements fields constructor
+  (syntax-parse stx #:literals (super implements fields constructor name
                                       isl+:check-expect 
                                       isl+:check-within
                                       isl+:check-error
                                       isl+:check-member-of
                                       isl+:check-range)
     [(class
+       (~optional (name nm:id) #:defaults ([nm #'#f]))
        (~optional (super super%:expr super-ifc%:ifc-name)
-                  #:defaults ([super% #'r:object%]
+                  #:defaults ([super% #'top-class]
                               [(super-ifc%.fields 1) null]
                               [(super-ifc%.field-internals 1) null]
                               [(super-ifc%.methods 1) null]))
@@ -86,7 +92,7 @@
        (~optional (constructor (cargs:id ...)
                    cbody:expr cextra-body:expr ...)
                    #:defaults ([(cargs 1) (generate-temporaries #`(fld ... super-ifc%.fields ...))]
-                               [cbody #`(#,(datum->syntax stx 'fields) cargs ...)]
+                               [cbody #`(#,(syntax-local-introduce (datum->syntax #f 'fields)) cargs ...)]
                                [(cextra-body 1) null]))
        (~or (~var <definition> (member-def (syntax->list #'(fld ...))))
             (~and ce (~or (isl+:check-expect <act> <exp>)
@@ -97,111 +103,113 @@
                           (isl+:check-range <act> <lo> <hi>))))
        ...)
      ;#:with -class% (datum->syntax #f (syntax-e #'class%))
-     (with-syntax* ([field (datum->syntax stx 'field)]
-                    [set-field! (datum->syntax stx 'set-field!)]
-                    [fake-super (datum->syntax stx 'super)]
+     (with-syntax* ([field (syntax-local-introduce (datum->syntax #f 'field))]
+                    [set-field! (syntax-local-introduce (datum->syntax #f 'set-field!))]
+                    [fake-super (syntax-local-introduce (datum->syntax #f 'super))]
 
-                    [fake-this (datum->syntax stx 'this)]
-                    [fields (datum->syntax stx 'fields)]
+                    [fake-this (syntax-local-introduce (datum->syntax #f 'this))]
+                    [fields (syntax-local-introduce (datum->syntax #f 'fields))]
                     [(all-flds ...) #'(fld ... super-ifc%.fields ...)]
                     [(field-internals ...) (for/list ([f (syntax->list #'(fld ...))])
                                              (format-id f "_~a" f))]
-                    [(super-methods/inherit ...) (for/list ([m (attribute super-ifc%.methods)]
-                                                            #:when (not (memf (λ (e) (free-identifier=? m e))
+                    [(all-field-internals ...) #'(field-internals ... super-ifc%.field-internals ...)]
+                    [(super-methods/inherit ...) (for/list ([m (syntax->list #'(super-ifc%.methods ... super-ifc%.fields ...))]
+                                                            #:when (not (memf (λ (e) (eq? (syntax-e m) (syntax-e e)))
                                                                               (syntax->list #'(<definition>.f ...)))))
                                                    m)]
-                    [(super-methods/over ...) (for/list ([m (attribute super-ifc%.methods)]
-                                                            #:when (memf (λ (e) (free-identifier=? m e))
+                    [(super-methods/over ...) (for/list ([m (syntax->list #'(super-ifc%.methods ... super-ifc%.fields ...))]
+                                                            #:when (memf (λ (e) (eq? (syntax-e m) (syntax-e e)))
                                                                          (syntax->list #'(<definition>.f ...))))
                                                    m)]
                     [(meths/new ...) (for/list ([m (syntax->list #'(<definition>.f ...))]
-                                                #:when (not (memf (λ (e) (free-identifier=? m e))
+                                                #:when (not (memf (λ (e) (eq? (syntax-e m) (syntax-e e)))
                                                                   (syntax->list #'(super-methods/over ...)))))
                                                    m)]
                     [(meths ...) #'(super-methods/inherit ... super-methods/over ... <definition>.f ...)]
-                    [over (if (free-identifier=? #'super% #'r:object%)
+                    [over (if (free-identifier=? #'super% #'top-class)
                               #'r:define/public ;; don't override if we're the top class
                               #'r:define/override)])
-       (quasisyntax
+       (quasisyntax/loc stx
         (begin
           ce ...
           #;(define-syntax class% (class-name #'-class% 
                                             (list (list #'all-flds #'all-field-names) ...)
                                             (list #'meths ...)))
-          (r:class/derived #,stx (#f super% 
-                                     ((interface* () ([prop:custom-print-quotable 'never]))
-                                      r:writable<%> i%.real-name ...) #f)
-              (r:inspect #f)
-              
-              (r:inherit-field super-ifc%.field-internals) ...
-              
-              (r:init cargs ...)
-              (r:field (field-internals (void)) ...)
-              (r:let-values ([(fld ... super-ifc%.fields ...)
-                              (let-syntax ([fields (make-rename-transformer #'wrap)]
-                                           [fake-this
-                                            (λ (stx)
-                                              (raise-syntax-error 
-                                               #f 
-                                               "`this' may not be used before initialization"
-                                               stx))])
-                                (let ([v cbody])
-                                  (if (field-wrapper? v)
-                                      (apply values (field-wrapper-vals v))
-                                      (error 
-                                       'class% 
-                                       "constructor must use `fields' to produce result"))))])
-                            (r:set! field-internals fields) ...
-                            (r:super-make-object super-ifc%.fields ...))
-              (r:inherit super-methods/inherit) ...
-              (r:override super-methods/over) ...              
-              (r:define/public (fld) field-internals) ...
-	      (splicing-let-syntax
-	       ([set-field!
-		 (λ (stx)
-                    (syntax-parse stx
-                      [(_ arg expr)
-                       (let ([r (memq (λ (id) (eq? (syntax-e id) (syntax-e #'arg)))
-                                      (syntax->list #'(all-flds ...)))])
-                         (if r
-                             (with-syntax ([rs (format-id arg "_~a" arg)])
-                               (syntax/loc stx (set! rs expr)))
-                             (raise-syntax-error #f 
-                                                 "no field by that name" 
-                                                 stx 
-                                                 #'arg)))]))]
-                [field 
-                  (λ (stx)
-                    (syntax-parse stx
-                      [(_ arg) 
-                       (let ([r (memq (λ (id) (eq? (syntax-e id) (syntax-e #'arg)))
-                                      (syntax->list #'(all-flds ...)))])
-                         (if r
-                             (with-syntax ([rs (format-id arg "_~a" arg)])
-                               (syntax/loc stx rs))
-                             (raise-syntax-error #f 
-                                                 "no field by that name" 
-                                                 stx 
-                                                 #'arg)))]))])
-               (void)
-               (over (custom-write p) 
-                (fprintf p "(object:~a" 'class%)
-                (for ([i (list all-flds ...)])
-                  (fprintf p " ~v" i))
-                (fprintf p ")"))
-               (over (custom-display p) (custom-write p))
-	       
-               (public meths/new) ...
-               <definition>.def
-               ...
-               (begin cextra-body ...))))))]))
+          (make-class-wrapper
+           (r:class/derived #,stx (nm (class-wrapper-val super%)
+                                      ((interface* () ([prop:custom-print-quotable 'never]))
+                                       r:writable<%> i%.real-name ...) #f)
+                            (r:inspect #f)
+                            
+                            (r:inherit-field super-ifc%.field-internals) ...
+                            
+                            (r:init cargs ...)
+                            (r:field (field-internals (void)) ...)
+                            (r:let-values ([(fld ... super-ifc%.fields ...)
+                                            (let-syntax ([fields (make-rename-transformer #'wrap)]
+                                                         [fake-this
+                                                          (λ (stx)
+                                                            (raise-syntax-error 
+                                                             #f 
+                                                             "`this' may not be used before initialization"
+                                                             stx))])
+                                              (let ([v cbody])
+                                                (if (field-wrapper? v)
+                                                    (apply values (field-wrapper-vals v))
+                                                    (error 
+                                                     'class% 
+                                                     "constructor must use `fields' to produce result"))))])
+                                          (r:set! field-internals fld) ...
+                                          (r:super-make-object super-ifc%.fields ...))
+                            (r:inherit super-methods/inherit) ...
+                            (r:override super-methods/over) ...              
+                            (r:define/public (fld) field-internals) ...
+                            (splicing-let-syntax
+                             ([set-field!
+                               (λ (stx)
+                                 (syntax-parse stx
+                                   [(_ arg expr)
+                                    (let ([r (memf (λ (id) (eq? (syntax-e id) (syntax-e #'arg)))
+                                                   (syntax->list #'(all-flds ...)))])
+                                      (if r
+                                          (with-syntax ([rs (format-id #'arg "_~a" #'arg)])
+                                            (syntax/loc stx (set! rs expr)))
+                                          (raise-syntax-error #f 
+                                                              "no field by that name" 
+                                                              stx 
+                                                              #'arg)))]))]
+                              [field 
+                               (λ (stx)
+                                 (syntax-parse stx
+                                   [(_ arg) 
+                                    (let ([r (memf (λ (id) (eq? (syntax-e id) (syntax-e #'arg)))
+                                                   (syntax->list #'(all-flds ...)))])
+                                      (if r
+                                          (with-syntax ([rs (format-id #'arg "_~a" #'arg)])
+                                            (syntax/loc stx rs))
+                                          (raise-syntax-error #f 
+                                                              "no field by that name" 
+                                                              stx 
+                                                              #'arg)))]))])
+                             (void)
+                             (over (custom-write p) 
+                                   (fprintf p "(object:~a" (if 'nm 'nm 'class%))
+                                   (for ([i (list all-field-internals ...)])
+                                     (fprintf p " ~v" i))
+                                   (fprintf p ")"))
+                             (over (custom-display p) (custom-write p))
+                             
+                             (public meths/new) ...
+                             <definition>.def
+                             ...
+                             (begin cextra-body ...)))))))]))
 
 (define-syntax (new stx)
   (syntax-parse stx
     [(_ cls:expr . args)
-     #'(r:make-object cls . args)]))
+     #'(r:make-object (class-wrapper-val cls) . args)]))
 
 (define-syntax (instanceof stx)
   (syntax-parse stx
     [(_ e:expr cls:expr)
-     #'(r:is-a? e cls)]))
+     #'(r:is-a? e (class-wrapper-val cls))]))

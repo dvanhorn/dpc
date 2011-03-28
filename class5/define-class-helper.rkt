@@ -41,9 +41,17 @@
            (interface-name? (attribute v))
            "expected an interface name"
            #:with real-name (class-name-id (attribute v))
-           #:with (fields ...) (class-name-flds (attribute v))
+           #:with (fields ...) (map syntax-local-introduce (class-name-flds (attribute v)))
            #:with (field-internals ...) (for/list ([f (class-name-flds (attribute v))])
-                                         (format-id f "_~a" f))
+                                          (format-id f "_~a" f))
            #:with (methods ...) (map syntax-local-introduce (class-name-methods (attribute v)))
            ))
+
+(define-struct class-wrapper (val)
+  #:property prop:custom-write
+  (λ (v p w?)
+    (if w? 
+        (write (class-wrapper-val v) p)
+        (print (class-wrapper-val v) p)))
+  #:property prop:procedure (λ (v . args) (apply make-object (class-wrapper-val v) args)))
 
