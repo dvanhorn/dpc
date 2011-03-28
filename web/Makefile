@@ -64,6 +64,7 @@ web:
 		++extra ../notes/notes-2up.pdf \
 		++extra labs/9/class3-html.plt \
 		++extra labs/11/class4-blobs.plt \
+		++extra labs/12/source-sink.rkt \
 		++xref-in setup/xref load-collections-xref \
 		--redirect-main http://docs.racket-lang.org/ \
 		--style 2510H.css \
