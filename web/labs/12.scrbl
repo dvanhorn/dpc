@@ -28,7 +28,7 @@
 
 @exercise{
   We will want to add and remove @tt{Projectile}s over time. Add two methods,
-  @racket[add-projectil!] @tt{: Projectile -> Void} and
+  @racket[add-projectile!] @tt{: Projectile -> Void} and
   @racket[remove-projectile!] @tt{: Projectile -> Void} to @tt{World}. Use
   intensional equality (@racket[eq?]) to decide which @tt{Projectile} to remove.
 }

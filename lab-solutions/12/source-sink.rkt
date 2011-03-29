@@ -149,7 +149,7 @@
      (define/public (draw)
        (circle (radius) "solid" (color))))))
 
-; A Sink is a (sink% Mass Location Velocity Acceleration)
+; A Sink is a (sink% Location Velocity Acceleration Mass)
 ; and implements Point
 (define sink%
   ((compose point-mixin)
@@ -171,7 +171,7 @@
      (define/public (draw)
        (circle (radius) "solid" (color))))))
 
-; A Projectile is a (projectile% Location Velocity Acceleration)
+; A Projectile is a (projectile% Location Velocity Acceleration Mass)
 ; and implements Point
 (define projectile%
   ((compose point-mixin)
