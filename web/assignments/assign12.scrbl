@@ -3,7 +3,7 @@
 	  "../unnumbered.rkt"
           (for-label class1))
 
-@title[#:tag "assign12"]{Final Project, Parts 1 & 2 (4/6)}
+@title[#:tag "assign12"]{4/6: Final Project, Parts 1 & 2}
 
 The final project in the class is to implement a distributed,
 multi-player version of the Dice Wars game, with an intelligent
@@ -12,9 +12,10 @@ midnight.
 
 To start with, you should try
 @link["http://www.gamedesign.jp/flash/dice/dice.html"]{playing the game} to get
-a feel for how it works.
-The rules are described
-@link["http://jayisgames.com/archives/2006/06/dice_wars.php"]{here}.  
+a feel for how it works.  The rules are described
+@link["http://jayisgames.com/archives/2006/06/dice_wars.php"]{here}, and some
+interesting discussion can be found
+@link["http://www.metafilter.com/53521/Dice-War-is-Six-Sided-Hell"]{here}.
 
 The basic idea is as follows:  
 @itemlist[
@@ -50,7 +51,7 @@ randomly distributed among your regions that don't already have 10 dice.}
 win.} 
 ]
 
-To begin with, you can choose one of two tasks to develop the game.  
+To begin with, you can choose @bold{one} of two tasks to develop the game.  
 
 @itemlist[#:style 'ordered
 @item{Implement a Universe server which accepts messages from clients to manage
