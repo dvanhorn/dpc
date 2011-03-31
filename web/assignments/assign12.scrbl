@@ -3,10 +3,12 @@
 	  "../unnumbered.rkt"
           (for-label class1))
 
-@title[#:tag "assign12"]{Final Project, Parts 1 & 2}
+@title[#:tag "assign12"]{Final Project, Parts 1 & 2 (4/6)}
 
-The final project in the class is to implement a distributed, multi-player
-version of the Dice Wars game, with an intelligent computer player.
+The final project in the class is to implement a distributed,
+multi-player version of the Dice Wars game, with an intelligent
+computer player.  The first part of the project is due April 6, at
+midnight.
 
 To start with, you should try
 @link["http://www.gamedesign.jp/flash/dice/dice.html"]{playing the game} to get
