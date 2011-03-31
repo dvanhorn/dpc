@@ -65,45 +65,80 @@ the others play, and generally displays the game state.}
 ]
 
 Whichever you choose, you will have to determine how to test your system in the
-absence of the other half (or implement some portion of the other half).  
+absence of the other half (or implement some portion of the other half). 
 
-@;{
+In class, we designed both the data definition for representing game states on
+the server, and the communication protocol for messages between clients and
+servers.  The defintion of the server data is useful, and we suggest that you
+use it.  The defintion of the protocol is mandatory---you @emph{must} follow it
+so that your programs work with others.
 
-Design:
+@section{Data Defintion}
 
-Board = (board% [Listof Player] [Listof Region])
+@verbatim|{
+A World is (world% [Listof Player] [Listof Region] [Listof Player])
+Interp: The first list is the current players, in the order that they take their
+turn.
+The second list is the regions on the board.  The order must be maintained.
+The third list is the players that are only observing.
 
-Region = (region%
-	  [Listof Idx]
-	  Player
-	  NumDice)
+A Region is (region% [Listof Number] Player Number)
+Interp: the first list is the neighbor regions, as indexes into the list of
+regions in the World.  The Number is the quantity of dice.
 
-Player = (player% Number Name WorldID) ;; worldid only on server
+A Player is (player% Number Name IWorld)
+The Number is the player number that the server uses to identify the player.
+The Name is an arbitrary String.
+The IWorld is the world that this player controls.
+}|
 
-State serialization
-SerialBoard =
-([Listof SerialPlayer]
- [Listof SerialRegion])
+To serialize worlds, we change the data definition as follows:
 
-SerialPlayer = (Number Name)
+@verbatim|{
+A SerialBoard is
+(List [Listof SerialPlayer]
+      [Listof SerialRegion])
+There is no need to send the list of observers.
 
-SerialRegion = ([Listof Number] SerialPlayer Number)
+A SerialRegion is (List [Listof Number] SerialPlayer Number)
 
-Player Msg:
---------------
+A SerialPlayer is (List Number String)
+IWorlds are not useful off of the server.
+}|
 
-'pass
-'(attack Idx Idx)
+@section{Protocol}
 
-Server Msg:
---------------
-'turn
-'illegal ;; attack involved illegal squares
-'error ;; message had wrong syntax or was out of turn
-'(attack Idx Num ;; region, roll
-	 Idx Num ;; region, roll
-	 State) ;; the new state
-'(start State ;; the initial board state
-        BoardRep) ;; A representation of the board squares
+@subsection{Player Messages}
 
-}
+@itemlist[
+@item{@r['done] indicates that the player is done with their turn.}
+@item{@r['(attack Number Number)] indicates that the player wishes to have the
+Region indicated by the first number attack the Region indicated by the second
+Number.}
+@item{@r['(name String) indicates that the player should be known by the
+indicated name.]}]
+
+@subsection{Server Messages}
+
+@itemlist[
+@item{@r['turn] indicates that the player that receives the message should take
+their turn.}
+@item{@r['illegal] indicates the the player sent an @r[attack] message that
+involved incorrect regions.}
+@item{@r['error] indicates the the player sent a message out of turn, or the
+message was ill-formed.}
+@item{@r['(attack Number Roll Number Roll SerialBoard)] represents an attack
+that happened on the board (not necessarily by the player that receives the
+message).  The first number is the attacking region, the second number is the
+defending region.  The Rolls are the dice rolls of the two regions.  The
+SerialBoard is the new board state.  A @r[Roll] is a @r[[Listof Number]], with
+each number between 1 and 6.}
+@item{@r['(new-state SerialBoard)] indicates a state update for any other
+reason, such as new dice allocation.}
+@item{@r['(start Number SerialBoard BoardRep)] tells the recieving player that
+the game is starting, that they are the player indicated by the given number,
+that the board is as described by SerialBoard, and that the board layout may be
+drawn as BoardRep.}
+]
+
+A definition for @r[BoardRep], along with examples, will be provided very soon.
