@@ -63,3 +63,44 @@ the others play, and generally displays the game state.}
 
 Whichever you choose, you will have to determine how to test your system in the
 absence of the other half (or implement some portion of the other half).  
+
+@;{
+
+Design:
+
+Board = (board% [Listof Player] [Listof Region])
+
+Region = (region%
+	  [Listof Idx]
+	  Player
+	  NumDice)
+
+Player = (player% Number Name WorldID) ;; worldid only on server
+
+State serialization
+SerialBoard =
+([Listof SerialPlayer]
+ [Listof SerialRegion])
+
+SerialPlayer = (Number Name)
+
+SerialRegion = ([Listof Number] SerialPlayer Number)
+
+Player Msg:
+--------------
+
+'pass
+'(attack Idx Idx)
+
+Server Msg:
+--------------
+'turn
+'illegal ;; attack involved illegal squares
+'error ;; message had wrong syntax or was out of turn
+'(attack Idx Num ;; region, roll
+	 Idx Num ;; region, roll
+	 State) ;; the new state
+'(start State ;; the initial board state
+        BoardRep) ;; A representation of the board squares
+
+}
