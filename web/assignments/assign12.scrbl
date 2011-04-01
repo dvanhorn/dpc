@@ -141,4 +141,33 @@ that the board is as described by SerialBoard, and that the board layout may be
 drawn as BoardRep.}
 ]
 
-A definition for @r[BoardRep], along with examples, will be provided very soon.
+Here is a data definition for @r[BoardRep] and a simple example of a
+two-player board:
+
+@verbatim{
+(define WIDTH 7)
+(define HEIGHT 5)
+;; A BPosn is a (list [0,WIDTH) [0,HEIGHT))
+
+;; A BoardRep is a [Listof (list Number [Listof BPosn])]
+
+;; Interp: a BoardRep is a list of territories, where each 
+;; territory is owned by a player (indicated by number) 
+;; and consists of a set of continguous board positions.
+
+;; Invariants:
+;; - Each list of positions is disjoint from the other lists.
+;; - Each list of positions is contiguous.
+;; - Each list of positions consists of distinct elements.
+;; - All of territories are contiguous.
+
+(define sample-board
+  '((1 ((0 2) (0 3) (1 2) (1 3)))
+    (2 ((0 0) (0 1)))
+    (2 ((1 4) (2 4) (2 3)))
+    (1 ((2 0) (3 0) (4 0) (5 0) (5 1)))
+    (1 ((1 1) (2 1) (2 2) (3 2)))
+    (2 ((3 3) (4 3) (4 2) (5 2) (6 2)))
+    (2 ((6 0) (6 1)))
+    (1 ((4 4) (5 4) (5 3) (6 4) (6 3)))))
+}

@@ -55,34 +55,11 @@ There is no lecture on 3/3 since it is during Spring break.
 @include-section["lectures/lec15.scrbl"]
 @include-section["lectures/lec16.scrbl"]
 
-
-@;@section[#:tag "lec17"]{3/07: Circular data; Methods for circular data}
-@;@section[#:tag "lec18"]{3/10: Stateful objects (1)}
 @include-section["lectures/lec19.scrbl"]
 @include-section["lectures/lec20.scrbl"]
 @include-section["lectures/lec21.scrbl"]
-@;@section[#:tag "lec19"]{3/14: Stateful objects (2)}
-@;@section[#:tag "lec20"]{3/17: Abstracting with mixins}
-
-@racketblock[
-  @code:comment{Estimate the derivative of the given function.}
-  @code:comment{[Number -> Number] -> [Number -> Number]}]
-@defs+int[#:eval the-eval
- ((check-expect ((deriv sqr) 5) 10)
-  (check-within ((deriv sin) 5) (cos 5) ε)
-  (check-within ((deriv cos) 5) (- (sin 5)) ε)
-  
-  (define ε #e0.000001)
-  (define (deriv f)
-    (λ (x)
-      (/ (- (f (+ x ε))
-            (f (- x ε)))
-         (* 2 ε)))))
- 
- ((deriv sin) 5)]
-
-@section[#:tag "lec22"]{3/24: Traversals}
-@section[#:tag "lec23"]{3/28: Visitors}
+@include-section["lectures/lec22.scrbl"]
+@include-section["lectures/lec23.scrbl"]
 @section[#:tag "lec24"]{3/31: Object equality: principles}
 @section[#:tag "lec25"]{4/04: Object equality: practice}
 @section[#:tag "lec26"]{4/07: Intermezzo: Ruby}
