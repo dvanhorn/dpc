@@ -10,6 +10,8 @@
 @include-section["class/class1.scrbl"]
 @include-section["class/class2.scrbl"]
 @include-section["class/class3.scrbl"]
+@include-section["class/class4.scrbl"]
+@include-section["class/class5.scrbl"]
 
 The latest class system is:
 
