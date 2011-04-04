@@ -60,8 +60,8 @@ There is no lecture on 3/3 since it is during Spring break.
 @include-section["lectures/lec21.scrbl"]
 @include-section["lectures/lec22.scrbl"]
 @include-section["lectures/lec23.scrbl"]
-@section[#:tag "lec24"]{3/31: Object equality: principles}
-@section[#:tag "lec25"]{4/04: Object equality: practice}
+@section[#:tag "lec24"]{3/31: Project Intro}
+@include-section["lectures/lec25.scrbl"]
 @section[#:tag "lec26"]{4/07: Intermezzo: Ruby}
 @section[#:tag "lec27"]{4/11: Random and stress testing}
 @section[#:tag "lec28"]{4/14: Implementing OO}
