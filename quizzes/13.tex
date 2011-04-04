@@ -1,0 +1,46 @@
+\documentclass{article}
+
+\usepackage{slatex}
+
+\pagestyle{empty}
+\setlength{\parindent}{0mm}
+
+\begin{document}
+\section*{Lab Quiz 13}
+
+\bigskip
+\bigskip
+Name: \underline{\hspace*{4in}}
+
+\bigskip
+\setlength{\parskip}{8pt}
+
+\begin{schemedisplay}
+  (define-interface empty<%> [])
+
+  (define (yes-mixin %)
+    (class
+      (super % empty<%>)
+      (define (lunch?)
+        "Yes!")))
+
+  (define (no-mixin %)
+    (class
+      (super % empty<%>)
+      (define (lunch?)
+        "No, thanks.")))
+
+  (define (dunno-mixin %)
+    (class
+      (super % empty<%>)
+      (define (lunch?)
+        (string-append "Uhh... " (super)))))
+
+  (define dude (new (dunno-mixin (yes-mixin (dunno-mixin (no-mixin (class)))))))
+  (dude . lunch?)
+\end{schemedisplay}
+
+\bigskip
+What is the result of the above program?
+
+\end{document}
