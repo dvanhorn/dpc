@@ -16,27 +16,34 @@ Name: \underline{\hspace*{4in}}
 \setlength{\parskip}{8pt}
 
 \begin{schemedisplay}
-  (define-interface empty<%> [])
+  (define-interface lunch<%> [lunch?])
 
   (define (yes-mixin %)
     (class
-      (super % empty<%>)
-      (define (lunch?)
+      (super % lunch<%>)
+      (define/public (lunch?)
         "Yes!")))
 
   (define (no-mixin %)
     (class
-      (super % empty<%>)
-      (define (lunch?)
+      (super % lunch<%>)
+      (define/public (lunch?)
         "No, thanks.")))
 
   (define (dunno-mixin %)
     (class
-      (super % empty<%>)
-      (define (lunch?)
+      (super % lunch<%>)
+      (define/public (lunch?)
         (string-append "Uhh... " (super)))))
 
-  (define dude (new (dunno-mixin (yes-mixin (dunno-mixin (no-mixin (class)))))))
+  (define dude
+    (new (dunno-mixin
+           (yes-mixin
+             (dunno-mixin
+               (no-mixin
+                 (class
+                   (define/public (lunch?)
+                     "What?"))))))))
   (dude . lunch?)
 \end{schemedisplay}
 
