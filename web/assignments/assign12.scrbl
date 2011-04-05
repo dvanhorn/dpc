@@ -76,7 +76,7 @@ so that your programs work with others.
 @section{Data Defintion}
 
 @verbatim|{
-A World is (world% [Listof Player] [Listof Region] [Listof Player])
+A Board is (board% [Listof Player] [Listof Region] [Listof Player])
 Interp: The first list is the current players, in the order that they take their
 turn.
 The second list is the regions on the board.  The order must be maintained.
@@ -84,7 +84,7 @@ The third list is the players that are only observing.
 
 A Region is (region% [Listof Number] Player Number)
 Interp: the first list is the neighbor regions, as indexes into the list of
-regions in the World.  The Number is the quantity of dice.
+regions in the Board.  The Number is the quantity of dice.
 
 A Player is (player% Number Name IWorld)
 The Number is the player number that the server uses to identify the player.
@@ -92,7 +92,7 @@ The Name is an arbitrary String.
 The IWorld is the world that this player controls.
 }|
 
-To serialize worlds, we change the data definition as follows:
+To serialize boards, we change the data definition as follows:
 
 @verbatim|{
 A SerialBoard is
