@@ -175,7 +175,7 @@
     (overlay (text (field message) 20 "black")
              (empty-scene SIZE SIZE)))
   
-  (define/public (on-recieve m)
+  (define/public (on-receive m)
     (world% empty-board m (string=? m "red")))
   
   (check-expect ((done-world% "hi") . on-mouse "mouse-up" 1 1) (done-world% "hi"))  
@@ -193,6 +193,7 @@
         [else "red"]))
 
 (define-class initial-universe%
+  (define/public (tick-rate) 1)
   (define/public (on-tick) (make-bundle this empty empty))
   (check-expect ((initial-universe%) . on-msg iworld1 0) (initial-universe%))
   (define/public (on-msg i m) this)
@@ -268,6 +269,13 @@
 (define (winner? b)
   (or (win-cols? b) (win-rows? b) (win-riser? b) (win-sinker? b)))
 
+;; Is this column full?
+(define (full? col)
+  (not (member #f col)))
+
+(define (all-full? b)
+  (andmap full? b))
+
 (define-class universe%
   (fields board red black next red-wins black-wins)
   ;; Color -> IWorld
@@ -294,13 +302,7 @@
                               ( #f #f #f #f #f #f)
                               ( #f #f #f #f #f #f)
                               ( #f #f #f #f #f #f)) iworld1 iworld2 "red" 0 0) . on-msg iworld1 0)
-                (make-bundle (universe% '(("red" "red" "red" "red" #f #f)
-                                          ( #f #f #f #f #f #f)
-                                          ( #f #f #f #f #f #f)
-                                          ( #f #f #f #f #f #f)
-                                          ( #f #f #f #f #f #f)
-                                          ( #f #f #f #f #f #f)
-                                          ( #f #f #f #f #f #f)) iworld1 iworld2 "black" 1 0) 
+                (make-bundle (done-universe% iworld1 iworld2 1 0) 
                              (list (make-mail iworld1 "win")
                                    (make-mail iworld2 "lose"))
                              empty))
@@ -310,33 +312,45 @@
   (define/public (on-msg i m)
     (cond [(iworld=? i (color->iworld (field next)))
            (local [(define bnew (play (field board) m (field next)))]
-             (cond [(false? bnew) (make-bundle this empty empty)]
-                   [(winner? bnew)
-                    (make-bundle (done-universe% (field red) (field black)
-                                                 (if (string=? (next) "red")
-                                                     (add1 (red-wins))
-                                                     (red-wins))
-                                                 (if (string=? (next) "black")
-                                                     (add1 (black-wins))
-                                                     (black-wins)))
-                                 (list (make-mail (color->iworld (field next)) "win")
-                                       (make-mail (color->iworld (flip-player (field next))) "lose"))
-                                 empty)]
-                   [else 
-                    (make-bundle (universe% bnew
-                                            (field red) (field black)
-                                            (flip-player (field next))
-                                            (red-wins) (black-wins))
-                                 (list (make-mail (color->iworld (flip-player (field next))) bnew))
-                                 empty)]))])))
+             (cond 
+               ;; ignore illegal moves
+               [(false? bnew) (make-bundle this empty empty)]
+               ;; tie
+               [(all-full? bnew)
+                (make-bundle (done-universe% (field red) (field black)
+                                             (red-wins) (black-wins))
+                             (list (make-mail (color->iworld (field next)) "tie")
+                                   (make-mail (color->iworld (flip-player (field next))) "tie"))
+                             empty)]
+               ;; win
+               [(winner? bnew)
+                (make-bundle (done-universe% (field red) (field black)
+                                             (if (string=? (next) "red")
+                                                 (add1 (red-wins))
+                                                 (red-wins))
+                                             (if (string=? (next) "black")
+                                                 (add1 (black-wins))
+                                                 (black-wins)))
+                             (list (make-mail (color->iworld (field next)) "win")
+                                   (make-mail (color->iworld (flip-player (field next))) "lose"))
+                             empty)]
+               ;; otherwise, just keep going
+               [else 
+                (make-bundle (universe% bnew
+                                        (field red) (field black)
+                                        (flip-player (field next))
+                                        (red-wins) (black-wins))
+                             (list (make-mail (color->iworld (flip-player (field next))) bnew))
+                             empty)]))])))
 (define exu (universe% empty-board iworld1 iworld2 "red" 0 0))
 
 (define-class done-universe%
   (fields red black red-wins black-wins)
-  (define/public (on-tick m)
-    (make-bundle (universe% empty-board (red) (black) "red" (red-wins) (black-wins))
-                 (list (make-mail (red) "red")
-                       (make-mail (black) "black")))))
+  (define/public (on-tick)
+    (make-bundle (universe% empty-board (black) (red) "red" (black-wins) (red-wins))
+                 (list (make-mail (black) "red")
+                       (make-mail (red) "black"))
+                 empty)))
 
 ;; stuff for winning:
 
