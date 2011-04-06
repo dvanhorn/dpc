@@ -1,5 +1,27 @@
 #lang class3
 
+;;> RUBRIC
+;;> TOTAL: 120 points
+
+;;> Running: 50 points total
+
+;;> Run the program -- it runs: 10 points
+;;> You can play multiple games in a session: 10 points
+;;> Computer players successfully play against each other repeatedly: 10 points
+;;> Computer players are/can be made random: 5 points
+;;> Computer players learn successfully: 15 points
+
+;;> Code portion: 60
+
+;;> Data defintions: 15 points
+;;> Contracts/purpose statements: 10 points
+;;> Code: 15 points
+;;> Tests: 10 points
+;;> Overall design (at your discretion): 10 points
+
+;;> Analysis: 10 points
+;;> Must have some reasonable discussion of who wins and why.
+
 (require "connect4-universe.rkt" class3/universe 2htdp/image)
 
 ;; Computer Player Worlds
@@ -145,6 +167,6 @@
           [else (sworld% empty-board m (memory) false false (score) (random))])))
 
 (define (go2)  
-  (launch-many-worlds (big-bang (start-sworld% false))
-                      (big-bang (start-world%))
+  (launch-many-worlds (big-bang (start-sworld% true))
+                      (big-bang (start-sworld% true))
                       (universe (initial-universe%))))
