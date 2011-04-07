@@ -62,9 +62,9 @@ There is no lecture on 3/3 since it is during Spring break.
 @include-section["lectures/lec23.scrbl"]
 @section[#:tag "lec24"]{3/31: Project Intro}
 @include-section["lectures/lec25.scrbl"]
-@section[#:tag "lec26"]{4/07: Intermezzo: Ruby}
-@section[#:tag "lec27"]{4/11: Random and stress testing}
-@section[#:tag "lec28"]{4/14: Implementing OO}
+@include-section["lectures/lec26.scrbl"]
+@section[#:tag "lec27"]{4/11: Ruby}
+@section[#:tag "lec28"]{4/14: TBD}
 @section[#:tag "lec29"]{4/18: Holiday (Patriots Day)}
 
 There is no lecture on 4/18 since it is Patriots Day.
