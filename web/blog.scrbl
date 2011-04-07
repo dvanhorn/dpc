@@ -7,6 +7,13 @@
 
 @title*{Blog}
 
+@section*{Final Assignment Up}
+
+@tt{Thu Apr  7 17:10:53 EDT 2011}
+
+The @seclink["assign13"]{final assignment} is now up.  Information about the
+final exam tournament will be up soon.
+
 @section*{Dan's office hours before the exam}
 
 @tt{Mon Mar 21 21:29:53 EDT 2011}
