@@ -20,8 +20,5 @@
 @include-section["labs/11.scrbl"]
 @include-section["labs/12.scrbl"]
 @include-section["labs/13.scrbl"]
-
-@internal{
-@section[#:tag "lab14"]{4/11}
+@include-section["labs/14.scrbl"]
 @section[#:tag "lab15"]{4/18: No lab (Patriots Day)}
-}
