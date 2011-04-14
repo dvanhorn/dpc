@@ -7,6 +7,13 @@
 
 @title*{Blog}
 
+@section*{Final Exam Time}
+
+@tt{Thu Apr 14 11:09:15 EDT 2011}
+
+The final exam/tournament will be on Monday, April 25, from 1-3 PM, in Snell
+033 (in the basement).
+
 @section*{Final Assignment Up}
 
 @tt{Thu Apr  7 17:10:53 EDT 2011}
