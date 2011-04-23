@@ -2,6 +2,8 @@
 (require class5/universe 2htdp/image)
 (require (except-in racket #%app))
 
+;; BUG  : allocating dice to both players.
+
 (define WIDTH 7)
 (define HEIGHT 5)
 
@@ -82,7 +84,8 @@
               (list 0 1 2 3 5))
   
 
-(define (random-dice)
+(define (random-dice) 0
+  #;
   (add1 (random MAXDICE)))
 
 (define (list-set l k v)
@@ -91,6 +94,33 @@
           (drop l (add1 k))))
 (check-expect (list-set '(1 2 3) 0 4) '(4 2 3))
 (check-expect (list-set '(1 2 3) 2 4) '(1 2 4))
+
+;; [Listof Region] Player -> Number
+(define (largest-connected rs p)
+  
+  ;; [Set Number] -> [Set Number]
+  (define (add-all-neighbors rset)
+    (apply set-union rset
+           (set-map rset
+                    (λ (r) ; Number
+                      (apply set (filter (λ (i) (equal? ((list-ref rs i) . player) p))
+                                         ((list-ref rs r) . neighbors)))))))
+  
+  ;; [Listof [Set Number]] [Listof [Set Number]] -> Number
+  (define (loop ls old)
+    (cond [(equal? ls old)
+           (apply max (map set-count ls))]
+          [else
+           (loop (map add-all-neighbors ls) ls)])) 
+  
+  (loop (for/list ([(r i) (in-indexed rs)]
+                   #:when (equal? (r . player) p))
+          (set i))
+        empty))
+
+
+
+  
 
 
 ;; A SerialBoard is
@@ -112,6 +142,36 @@
   
   (define/public (get-region i)
     (list-ref (regions) i))
+  
+  ;; -> [Listof Region]
+  (define/public (our-regions)
+    (filter (λ (r) (equal? (r . player) (current-player))) (regions)))
+  
+  ;; -> Board
+  (define/public (allocate-dice)    
+    (random-dice (largest-connected (regions) (current-player))))
+    
+  ;; -> Boolean
+  (define/public (all-full?)
+    (andmap (λ (r) (= MAXDICE (r . dice))) 
+            (our-regions)))
+  
+  ;; Number -> Board
+  ;; Termination argument: probably.
+  (define/public (random-dice n)
+    (cond [(zero? n) this]
+          [(all-full?) this]
+          [else
+           (let* ((i (random (length (regions))))
+                  (r (list-ref (regions) i)))
+             (cond [(= MAXDICE (r . dice)) (random-dice n)]
+                   [else
+                    ((board% (players)
+                            (list-set (regions)
+                                      i
+                                      (r . set-dice (add1 (r . dice))))
+                            (observers)) . random-dice (sub1 n))]))]))
+                       
   
   (define/public (do-attack src-idx dst-idx)
     (let ()
@@ -141,15 +201,17 @@
 (define-class attack-result%
   (fields offense defense new-board))
 
-
+;; IWorld Number -> Player
 (define (make-player iw n)
   (player% iw (format "Player ~a" n) n))
 
+;; A Player is a (player% IWorld String Number).
 (define-class player%
   (fields iworld name number)
   (define/public (serialize)
     (list (number) (name))))
 
+;; BoardRep [Hash Number Player] -> [Listof Region]
 (define (make-regions sb ps)
   (for/list ([(r i) (in-indexed sb)])
     (region% (adjacent-regions i sb) 
@@ -224,6 +286,7 @@
          (next-turn)]
         [(turn (list 'attack (? integer? src) (? integer? dst)))
          (attack src dst)]
+        ;[(list 'name name) ...] ;; has to update the board too         
         [_ (make-bundle this
                         (list (make-mail iw 'error))
                         empty)])))
@@ -247,13 +310,14 @@
                           (list (make-mail (cur . iworld) 'illegal))
                           empty)])))
   
+  ;; -> [Bundle Playing]
   (define/public (next-turn)
-    ;; allocate dice
     (let ()
-      (define new-board ((board) . rotate-players))
+      (define new-board ((board) . allocate-dice . rotate-players))
       (define next (new-board . current-player))
-      (make-bundle (playing% (players) new-board)
-                   (append (broadcast-state) 
+      (define new-playing (playing% (players) new-board))
+      (make-bundle new-playing
+                   (append (new-playing . broadcast-state)
                            (list (make-mail (next . iworld) 'turn)))
                    empty)))
   
@@ -276,12 +340,13 @@
 (define (number->color n)
   (if (= n 1) "red" "blue"))
 
-(define (draw-region r scn)
+(define (draw-region r-idx dice r scn)
   (match r
     [(list player-num (list (list x y) ...))
      (foldl           
       (λ (x y scn)
-        (place-image (square SCALE 'solid (number->color player-num))
+        (place-image (overlay (text (format "(~a ~a)" r-idx dice) 20 "black")
+                              (square SCALE 'solid (number->color player-num)))
                      (+ (* x SCALE) (* 1/2 SCALE))
                      (+ (* y SCALE) (* 1/2 SCALE))
                      scn))
@@ -289,26 +354,53 @@
       x
       y)]))
 
+
+;; A DP is a (dumb-player [U False Number] SerialBoard BoardRep).
 (define-class dumb-player
-  (fields sboard board)
+  (fields number sboard board)
   
-  (define/public (register) LOCALHOST)
-  
+  (define/public (register) LOCALHOST)  
+    
   (define/public (on-key ke)
     (cond [(key=? ke "d") (make-package this 'done)]
           [else this]))
   
-  (define/public (to-draw) 
-    (foldl draw-region (empty-scene (* SCALE WIDTH) (* SCALE HEIGHT)) (board)))
+  (define/public (to-draw)
+    (cond [(boolean? (number))
+           (above (text "Player" 40 "black")
+                  (empty-scene (* SCALE WIDTH) (* SCALE HEIGHT)))]
+          [else
+           (above (text (format "Player ~a" (number)) 40 (number->color (number)))
+                  (foldl draw-region (empty-scene (* SCALE WIDTH) (* SCALE HEIGHT))
+                         (build-list (length (board)) (λ (i) i))
+                         (map third (second (sboard)))
+                         (map list
+                              (map (compose first second)
+                                   (second (sboard)))
+                              (board))))]))
   
   (define/public (on-receive msg)
     (match msg
-      [(list 'start n sb b) (dumb-player sb b)]
+      [(list 'start n sb b)
+       (dumb-player n sb
+                    (map second b))]
+      [(list 'new-state sb)
+       (dumb-player (number) sb (board))]
       [_ this])))
     
 
+(define p1 (player% iworld1 "David" 1))
+(define p2 (player% iworld2 "Sam" 2))
+(define b1                   
+  (board% (list p1 p2)
+          (make-regions sample-board (hash 1 p1 2 p2))
+          empty))
+
+(check-expect (largest-connected (b1 . regions) p1) 3)
+(check-expect (largest-connected (b1 . regions) p2) 3)
+
+
 (define (go)
   (launch-many-worlds (universe (start% 2))
-                      (big-bang (dumb-player false empty))
-                      ;(big-bang (dumb-player))
-                      (big-bang (dumb-player false empty))))
+                      (big-bang (dumb-player false false empty))
+                      (big-bang (dumb-player false false empty))))
