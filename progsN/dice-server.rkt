@@ -34,8 +34,23 @@
     (1 ((4 4) (5 4) (5 3) (6 4) (6 3)))))
 
 
-(define (random-sample-board)
-  (for/list ([r sample-board])
+(define (transpose b dx dy)
+  (for/list ([r b])
+    (list (first r) 
+          (for/list ([p (second r)])
+            (list (+ (first p) dx)
+                  (+ (second p) dy))))))
+
+(define big-board
+  (append sample-board 
+          (transpose sample-board WIDTH 0)
+          (transpose sample-board 0 HEIGHT)
+          (transpose sample-board WIDTH HEIGHT)))
+          
+
+
+(define (random-board b)
+  (for/list ([r b])
     (list (add1 (random 2)) (second r))))
 
 ;; Coord -> Boolean
@@ -256,7 +271,7 @@
   (fields num-players players)
   (define/public (on-new iw)
     (cond [(= 1 (num-players)) 
-           (let* ((br (random-sample-board))
+           (let* ((br (random-board big-board))
                   (ps (hash-set (players) iw (make-player iw (num-players))))
                   (n->p (for/hash ([(iw p) ps])
                           (values (p . number) p)))                                   
@@ -372,7 +387,7 @@
     [(list player-num (list (list x y) ...))
      (foldl           
       (λ (x y scn)
-        (place-image (overlay (text (format "(~a ~a)" r-idx dice) 20 "black")
+        (place-image (overlay (text (format "(~a ~a)" r-idx dice) 10 "black")
                               (square SCALE 'solid (number->color player-num)))
                      (+ (* x SCALE) (* 1/2 SCALE))
                      (+ (* y SCALE) (* 1/2 SCALE))
@@ -425,10 +440,10 @@
   (define/public (to-draw)
     (cond [(boolean? (number))
            (above (text "Player" 40 "black")
-                  (empty-scene (* SCALE WIDTH) (* SCALE HEIGHT)))]
+                  (empty-scene (* SCALE 2 WIDTH) (* SCALE 2 HEIGHT)))]
           [else
            (above (text (format "Player ~a" (number)) 40 (number->color (number)))
-                  (foldl draw-region (empty-scene (* SCALE WIDTH) (* SCALE HEIGHT))
+                  (foldl draw-region (empty-scene (* SCALE 2 WIDTH) (* SCALE 2 HEIGHT))
                          (build-list (length (board)) (λ (i) i))
                          (map third (second (sboard)))
                          (map list
