@@ -34,6 +34,10 @@
     (1 ((4 4) (5 4) (5 3) (6 4) (6 3)))))
 
 
+(define (random-sample-board)
+  (for/list ([r sample-board])
+    (list (add1 (random 2)) (second r))))
+
 ;; Coord -> Boolean
 (define (valid-coord? p)
   (match p
@@ -84,8 +88,7 @@
               (list 0 1 2 3 5))
   
 
-(define (random-dice) 0
-  #;
+(define (random-dice) 
   (add1 (random MAXDICE)))
 
 (define (list-set l k v)
@@ -109,7 +112,7 @@
   ;; [Listof [Set Number]] [Listof [Set Number]] -> Number
   (define (loop ls old)
     (cond [(equal? ls old)
-           (apply max (map set-count ls))]
+           (apply max 0 (map set-count ls))]
           [else
            (loop (map add-all-neighbors ls) ls)])) 
   
@@ -156,22 +159,30 @@
     (andmap (λ (r) (= MAXDICE (r . dice))) 
             (our-regions)))
   
+  ;; -> [Listof [List Number Region]]
+  (define/public (our-regions-indexes)
+    (for/list ([(r i) (in-indexed (regions))]
+               #:when (equal? (r . player) (current-player)))
+      (list i r)))
+  
   ;; Number -> Board
   ;; Termination argument: probably.
   (define/public (random-dice n)
     (cond [(zero? n) this]
           [(all-full?) this]
           [else
-           (let* ((i (random (length (regions))))
-                  (r (list-ref (regions) i)))
+           (let* ((i+r (list-ref (our-regions-indexes)
+                                 (random (length (our-regions-indexes)))))
+                  (i (first i+r))
+                  (r (second i+r)))                  
              (cond [(= MAXDICE (r . dice)) (random-dice n)]
                    [else
                     ((board% (players)
-                            (list-set (regions)
-                                      i
-                                      (r . set-dice (add1 (r . dice))))
-                            (observers)) . random-dice (sub1 n))]))]))
-                       
+                             (list-set (regions)
+                                       i
+                                       (r . set-dice (add1 (r . dice))))
+                             (observers)) . random-dice (sub1 n))]))]))
+  
   
   (define/public (do-attack src-idx dst-idx)
     (let ()
@@ -184,9 +195,9 @@
        (board% 
         (players)             
         (cond [(> (apply + src-roll) (apply + dst-roll))
-               (list-set (list-set (regions) src-idx (src . set-dice 1)
-                                   dst-idx
-                                   (dst . set-player+dice (src . player) (sub1 (src . dice)))))]
+               (list-set (list-set (regions) src-idx (src . set-dice 1))
+                         dst-idx
+                         (dst . set-player+dice (src . player) (sub1 (src . dice))))]
               [else (list-set (regions)
                               src-idx
                               (src . set-dice 1))])
@@ -209,7 +220,10 @@
 (define-class player%
   (fields iworld name number)
   (define/public (serialize)
-    (list (number) (name))))
+    (list (number) (name)))
+  
+  (define/public (set-name n)
+    (player% (iworld) n (number))))
 
 ;; BoardRep [Hash Number Player] -> [Listof Region]
 (define (make-regions sb ps)
@@ -242,17 +256,18 @@
   (fields num-players players)
   (define/public (on-new iw)
     (cond [(= 1 (num-players)) 
-           (let* ((ps (hash-set (players) iw (make-player iw (num-players))))
+           (let* ((br (random-sample-board))
+                  (ps (hash-set (players) iw (make-player iw (num-players))))
                   (n->p (for/hash ([(iw p) ps])
                           (values (p . number) p)))                                   
                   (b  (board% (hash-values ps) 
-                              (make-regions sample-board n->p)
+                              (make-regions br n->p)
                               empty))                  
                   (ms (for/list ([(iw p) ps])
                         (make-mail iw (list 'start 
                                             (p . number) 
                                             (b . serialize)
-                                            sample-board))))
+                                            br))))
                   (t (for/first ([(iw p) ps])
                        (make-mail iw 'turn))))
              
@@ -266,7 +281,7 @@
   (define/public (on-msg iw msg) 
     (match msg
       [(list 'name name) 
-       (waiting% (num-players) (hash-set (players) iw (player% iw name)))]
+       (waiting% (num-players) (hash-set (players) iw ((hash-ref (players) iw) . set-name name)))]
       [_ this])))
 
 
@@ -274,6 +289,11 @@
 (define-class playing%
   (fields players board)
   (define/public (on-new iw) this)
+  
+  (define/public (valid-index? n)
+    (and (integer? n)
+         (<= 0 n (sub1 (length ((board) . regions))))))
+  
   (define/public (on-msg iw msg)
     (let ()
       (define-match-expander turn
@@ -284,27 +304,34 @@
       (match msg
         [(turn 'done)
          (next-turn)]
-        [(turn (list 'attack (? integer? src) (? integer? dst)))
+        [(turn (list 'attack (? valid-index? src) (? valid-index? dst)))
          (attack src dst)]
         ;[(list 'name name) ...] ;; has to update the board too         
         [_ (make-bundle this
                         (list (make-mail iw 'error))
                         empty)])))
   
+  ;; Number Number -> [Bundle Playing]
+  ;; Given region indices.
   (define/public (attack src dst)
     (let ()
       (define cur ((board) . current-player))
       (define src-r ((board) . get-region src))
       (define dst-r ((board) . get-region dst))
-      (cond [(and src-r dst-r (equal? cur (src-r . player)) (< 1 (src-r . dice)))
+      (cond [(and src-r dst-r 
+                  (equal? cur (src-r . player)) 
+                  (< 1 (src-r . dice))
+                  (not (equal? cur (dst-r . player)))
+                  (member dst (src-r . neighbors)))
              (let ([result ((board) . do-attack src dst)])
                (make-bundle (playing% (players)
-                                     (result . new-board))
+                                      (result . new-board))
                             (for/list ([(iw p) (players)])
                               (make-mail iw
                                        `(attack ,src ,(result . offense) 
-                                                ,dst (result . defense) 
-                                                ,(result . new-board . serialize))))))]
+                                                ,dst ,(result . defense) 
+                                                ,(result . new-board . serialize))))
+                            empty))]
             [else 
              (make-bundle this
                           (list (make-mail (cur . iworld) 'illegal))
@@ -353,16 +380,46 @@
       scn
       x
       y)]))
+  
 
+
+(require redex)
+(define-language L
+  (good-msg done (attack number number))
+  (msg done (attack number number) (name string))
+  (close-msg msg (attack any ...) (name any ...)))
+  
+
+(define-metafunction L
+  [(improve (attack number_0 number_1))
+   (attack ,(random 8)
+           ,(random 8))]
+  [(improve any) any])
+
+  
+(define-metafunction L  
+  [(no-hole hole) 'not-a-hole]
+  [(no-hole (any ...)) ((no-hole any) ...)]
+  [(no-hole any) any])
+
+
+  
+
+(define-interface player<%>
+  (on-key on-receive)
+  (number sboard board))
 
 ;; A DP is a (dumb-player [U False Number] SerialBoard BoardRep).
 (define-class dumb-player
+  (implements player<%>)
   (fields number sboard board)
   
   (define/public (register) LOCALHOST)  
     
   (define/public (on-key ke)
     (cond [(key=? ke "d") (make-package this 'done)]
+          [(string->number ke) => (λ (n)
+                                    (second-number-player n (number) (sboard) (board)))]
           [else this]))
   
   (define/public (to-draw)
@@ -386,8 +443,40 @@
                     (map second b))]
       [(list 'new-state sb)
        (dumb-player (number) sb (board))]
+      [(list 'attack _ _ _ _ sb)
+       (dumb-player (number) sb (board))]
       [_ this])))
+
+(define-class second-number-player
+  (super dumb-player player<%>)
+  (fields first-number)
+  
+  (define/public (on-key ke)
+    (cond [(key=? ke "a") (dumb-player (number) (sboard) (board))]
+          [(string->number ke) => (λ (n)
+                                    (make-package (dumb-player (number) (sboard) (board))
+                                                  `(attack ,(first-number) ,n)))]
+          [else this])))
     
+(define-class gen-player
+  (super dumb-player player<%>)
+  (fields f)
+  (define/public (tick-rate) 1/20)
+  
+  (define/public (on-receive msg)
+    (match msg
+      [(list 'start n sb b)
+       (gen-player (f) n sb
+                   (map second b))]
+      [(list 'new-state sb)
+       (gen-player (f) (number) sb (board))]
+      [(list 'attack _ _ _ _ sb)
+       (gen-player (f) (number) sb (board))]
+      [_ this]))
+  
+  (define/public (on-tick)
+    (make-package this (term (improve (no-hole ,((f) 6)))))))
+
 
 (define p1 (player% iworld1 "David" 1))
 (define p2 (player% iworld2 "Sam" 2))
@@ -399,6 +488,12 @@
 (check-expect (largest-connected (b1 . regions) p1) 3)
 (check-expect (largest-connected (b1 . regions) p2) 3)
 
+(define (fuck-the-server f)
+  (launch-many-worlds (universe (start% 2))
+                      (big-bang (gen-player f false false empty))
+                      (big-bang (gen-player f false false empty))))
+
+(fuck-the-server (generate-term L good-msg))
 
 (define (go)
   (launch-many-worlds (universe (start% 2))
