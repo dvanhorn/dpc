@@ -9,6 +9,8 @@
 
 (define MAXDICE 10)
 
+(define BIG-BOARD? false)
+
 ;; A BPosn is a (list [0,WIDTH) [0,HEIGHT))
 
 ;; A BoardRep is a [Listof (list Number [Listof BPosn])]
@@ -271,7 +273,7 @@
   (fields num-players players)
   (define/public (on-new iw)
     (cond [(= 1 (num-players)) 
-           (let* ((br (random-board big-board))
+           (let* ((br (random-board (if BIG-BOARD? big-board sample-board)))
                   (ps (hash-set (players) iw (make-player iw (num-players))))
                   (n->p (for/hash ([(iw p) ps])
                           (values (p . number) p)))                                   
@@ -421,8 +423,9 @@
   
 
 (define-interface player<%>
-  (on-key on-receive)
+  (on-key on-receive name)
   (number sboard board))
+    
 
 ;; A DP is a (dumb-player [U False Number] SerialBoard BoardRep).
 (define-class dumb-player
@@ -437,12 +440,14 @@
                                     (second-number-player n (number) (sboard) (board)))]
           [else this]))
   
+  (define/public (name) "Dumb")
+  
   (define/public (to-draw)
     (cond [(boolean? (number))
-           (above (text "Player" 40 "black")
+           (above (text (format "~a" (name)) 40 "black")
                   (empty-scene (* SCALE 2 WIDTH) (* SCALE 2 HEIGHT)))]
           [else
-           (above (text (format "Player ~a" (number)) 40 (number->color (number)))
+           (above (text (format "Player ~a ~a" (name) (number)) 40 (number->color (number)))
                   (foldl draw-region (empty-scene (* SCALE 2 WIDTH) (* SCALE 2 HEIGHT))
                          (build-list (length (board)) (λ (i) i))
                          (map third (second (sboard)))
@@ -462,6 +467,50 @@
        (dumb-player (number) sb (board))]
       [_ this])))
 
+(define-class better-player
+  (super dumb-player player<%>)
+  (fields turn?)
+  
+  (define/public (name) "Better")
+  
+  (define/public (on-receive msg)
+    (match msg
+      ['turn (better-player true (number) (sboard) (board))]
+      [(list 'start n sb b)
+       (better-player false n sb (map second b))]
+      [(list 'new-state sb)
+       (better-player (turn?) (number) sb (board))]
+      [(list 'attack _ _ _ _ sb)
+       (better-player (turn?) (number) sb (board))]
+      [_ this]))
+  
+  
+  (define/public (our-regions) 
+    (for/list ([(r i) (in-indexed (second (sboard)))]
+               #:when (= (number) (first (second r))))
+      i))
+  
+  (define/public (their-regions) 
+    (for/list ([(r i) (in-indexed (second (sboard)))]
+               #:when (not (= (number) (first (second r)))))
+      i))
+  
+  (define/public (random-move)
+    (let ((ours (our-regions))
+          (theirs (their-regions)))
+      
+      (if (or (empty? ours)
+              (empty? theirs))
+          'done
+          (list 'attack 
+                (list-ref ours (random (length ours)))
+                (list-ref theirs (random (length theirs)))))))                                
+                
+  (define/public (on-tick)
+    (if (turn?)        
+        (make-package this (if (zero? (random 2)) 'done (random-move)))
+        this)))
+
 (define-class second-number-player
   (super dumb-player player<%>)
   (fields first-number)
@@ -477,6 +526,8 @@
   (super dumb-player player<%>)
   (fields f)
   (define/public (tick-rate) 1/20)
+  
+  (define/public (name) "Random")
   
   (define/public (on-receive msg)
     (match msg
@@ -508,9 +559,18 @@
                       (big-bang (gen-player f false false empty))
                       (big-bang (gen-player f false false empty))))
 
-(fuck-the-server (generate-term L good-msg))
+;(fuck-the-server (generate-term L good-msg))
 
 (define (go)
   (launch-many-worlds (universe (start% 2))
                       (big-bang (dumb-player false false empty))
                       (big-bang (dumb-player false false empty))))
+
+
+(define (launch/player)
+  (launch-many-worlds (universe (start% 2))
+                      (big-bang (gen-player (generate-term L good-msg) false false empty))))
+
+(launch-many-worlds (universe (start% 2))
+                    (big-bang (better-player false false false empty))
+                    (big-bang (better-player false false false empty)))
