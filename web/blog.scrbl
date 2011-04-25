@@ -7,6 +7,19 @@
 
 @title*{Blog}
 
+@section*{Tournament Results}
+
+@tt{Mon Apr 25 15:45:06 EDT 2011}
+
+The final tournament was held today, with Matthew Mitlin and Eduardo Fungardio
+defeating Rose DeMaio and Paul Furtado in the best-of-five final round.  
+
+The bracket-picking contest was also won by Matthew Mitlin with 12 of 15 matched
+correctly predicted, with Mark Mayers coming in second with 11.
+
+Thanks to all the competitors for a fun time in the Snell Basement.
+
+
 @section*{Final Exam Time}
 
 @tt{Thu Apr 14 11:09:15 EDT 2011}
