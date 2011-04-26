@@ -11,8 +11,8 @@
 
 @tt{Mon Apr 25 15:45:06 EDT 2011}
 
-The final tournament was held today, with Matthew Mitlin and Eduardo Fungardio
-defeating Rose DeMaio and Paul Furtado in the best-of-five final round.  
+The final tournament was held today, with Matthew Mitlin and Eduardo Fungairino
+defeating Rose DeMaio and Paul Furtado in the best-of-five final round.
 
 The bracket-picking contest was also won by Matthew Mitlin with 12 of 15 matched
 correctly predicted, with Mark Mayers coming in second with 11.

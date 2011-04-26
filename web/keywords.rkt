@@ -1,9 +1,17 @@
 #lang racket
 
 (require srfi/1
+         #;
          (only-in unstable/text text<?))
 
 (provide (all-defined-out))
+
+(define (text->string v)
+  (if (keyword? v)
+      (keyword->string v)
+      v))
+
+(define (text<? one two) (string<? (text->string one) (text->string two)))
 
 ;
 ; Using keywords
