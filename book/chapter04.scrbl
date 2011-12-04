@@ -97,35 +97,6 @@ than it is to create Boolean values other than @racket[true] and
 future requirements.  If you think it's possible that there might be
 some other kind of zombie down the road, the union design will be less
 painful to extend and maintain.}
-
-@item{Q: The @racket[define-interface] mechanism is a way of enforcing
-that a class implements a certain set of method names, but is there a
-way of enforcing things like the number of arguments one of these
-methods must accept?
-
-A: There are no linguistic mechanisms, but there are
-@emph{meta}-linguistic mechanisms.  This is no different than our
-approach last semester to enforcing things like the number of
-arguments a function accepts.  Our approach has been to write down
-contracts and purpose statements, which specify these things, and unit
-tests, which check that we've followed the specification.  Our
-language does not enforce these specifications, but that is really
-just a detail of the particulars of the languages we've been using.
-Even though contracts are not a language feature (in the languages
-we've used so far), they are an important concept for organizing
-software components.
-
-It is important to keep in mind that an interface is more than a set
-of method names.  Think of this analogously to structures:
-@racket[define-struct] gives you a mechanism for defining structures,
-but a structure does not a data definition make.  We now have
-@racket[define-interface], but an interface is more than a set of
-method names; it is a set of method names with contracts and purpose
-statements.  Only the method name part is enforced, but the concept of
-an interface is what's important.  It is a useful tool for organizing
-and developing software components.  @emph{Even if we didn't have
-@racket[define-interface], interfaces would be a useful conceptual
-tool for writing programs}.}
 ]
 
 @section{Information in the Snake Game}

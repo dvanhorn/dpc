@@ -485,13 +485,18 @@ class0
                  (/ WIDTH 3) 
                  (field moon-height)
                  (place-image ROCKET
-                              (/ WIDTH 2) (- HEIGHT (field height))
+                              (/ WIDTH 2) 
+                              (- HEIGHT (field height))
                               MT-SCENE))))
 
 (check-expect (send (new world% 0 1 100) to-draw)
               (place-image MOON
-                           (/ WIDTH 3) 100
-                           (place-image ROCKET (/ WIDTH 2) HEIGHT MT-SCENE)))
+                           (/ WIDTH 3) 
+                           100
+                           (place-image ROCKET 
+                                        (/ WIDTH 2) 
+                                        HEIGHT 
+                                        MT-SCENE)))
 
 (check-expect (send (new world% 0 1 100) on-tick)
               (new world% 1 1 105))
