@@ -38,11 +38,11 @@ Unfortunately, it's not immediately clear what to put in the body of
 @r[m]. We can understand our task better by writing examples.  
 
 @racketblock[
- (check-expect (send (counter% 0) m) 1)
- (check-expect (send (counter% 4) m) 5)
+ (check-expect ((counter% 0) #,(racketidfont ".") m) 1)
+ (check-expect ((counter% 4) #,(racketidfont ".") m) 5)
 ]
 
-This suggests the following implementation implementation:
+This suggests the following implementation:
 
 @filebox[@tt{counter%}]{
 @racketblock[
@@ -63,7 +63,8 @@ However, when we try our a few more examples, we see this:
 @interaction[#:eval the-eval
 (define c (counter% 0))
 (send c m)
-(send c m)]
+(send c m)
+]
 
 Of course, this is the wrong answer.  We shouldn't be surprised, since
 nothing has changed about @r[c]---in fact, nothing ever happens to
@@ -146,7 +147,7 @@ times we've called @r[m], we have to remember it ourselves, and
 provide it as input every time we call @r[m].  
 
 
-@section{Solution: changing the object}
+@section{Ch-Ch-Ch-Ch-Changes}
 
 To truly solve our problem, and implement @r[m], we need new language
 support.  This support is provided in @racketmodname[class3].
@@ -166,9 +167,8 @@ We can now revise our defintion of @r[m] to
 @filebox[@tt{counter%}
 @racketblock[
 (define/public (m)
-  (begin
-   (set-field! called (add1 (field called)))
-   (add1 (field called))))]]
+  (begin (set-field! called (add1 (field called)))
+	 (add1 (field called))))]]
 
 Note that @r[set-field!] @emph{doesn't produce} a new version of the field,
 instead it @emph{changes} the field named @r[called] to something new.
@@ -222,28 +222,27 @@ Now Expressions do two things:
 
 Now we write effect statements.  Have to write them for every
 method/function that has an effect.
-@verbatim|{
 
-@codeblock{
+@filebox[@r[counter%]]{
+@#reader scribble/comment-reader
+(racketblock
 ;; m : -> Number
 ;; Produce the number of times m has been called
 ;; Effect : increment the called field
 (define/public (m)
-  (begin
-   (set-field! called (add1 (field called)))
-   (add1 (field called))))
-}
+  (begin (set-field! called (add1 (field called)))
+         (add1 (field called))))
+)}
 
 We've lost a lot of reasoning power but gained expressiveness.
 
 What have I really gained, though?
 
-Bank accounts.
-
 Imagine that you're modeling bank financial systems.  You want to
 deposit money into the account, and then the money should be there
 afterwards.  
 
+@codeblock{
 ;; An Account is (account% Number)
 (define-class account%
   (fields amt)
@@ -251,6 +250,7 @@ afterwards.
   ;; Number -> Account
   (define/public (deposit n)
     (account% (+ (field amt) n))))
+}
 
 But this doesn't model bank accounts properly.  
 
@@ -258,18 +258,21 @@ I deposit, my valentine deposits, I deposit -- whoops!
 
 New version:
 
+@codeblock{
 ;; An Account is (account% Number)
 (define-class account%
   (fields amt)
   
-  ;; Number -> 
+  ;; Number -> Void
   ;; Effect: increases the field amt by n
   ;; Purpose: add money to this account
   (define/public (deposit n)
     (set-field! amt (+ (field amt) n))))
-
+}
 Note that we don't need to produce any result at all.  
 
+
+@codeblock{
 ;; A Person is (person% String Account Number)
 (define-class person%
   (fields name bank paycheck)
@@ -278,7 +281,33 @@ Note that we don't need to produce any result at all.
   ;; Effect: changes the the bank account amt
   (define/public (pay)
     (send (field bank) deposit (field paycheck))))
+}
 
+@(the-eval
+  '(module a class3
+     (provide account% person%)
+     ;; An Account is (account% Number)
+     (define-class account%
+       (fields amt)
+  
+       ;; Number -> 
+       ;; Effect: increases the field amt by n
+       ;; Purpose: add money to this account
+       (define/public (deposit n)
+	 (set-field! amt (+ (field amt) n))))
+
+     ;; A Person is (person% String Account Number)
+     (define-class person%
+       (fields name bank paycheck)
+       ;; -> Void
+       ;; Deposit the appropriate amount
+       ;; Effect: changes the the bank account amt
+       (define/public (pay)
+	 (send (field bank) deposit (field paycheck))))))
+
+@(the-eval '(require 'a))
+
+@interaction[#:eval the-eval
 (define dvh-acct (account% 0))
 (define dvh (person% "DVH" dvh-acct 150))
 (define sweetie (person% "Sweetie" dvh-acct 3000))
@@ -287,49 +316,61 @@ Note that we don't need to produce any result at all.
 dvh-acct
 (send sweetie pay)
 dvh-acct
+]
 
-Note that we CANNOT replace dvh-acct with (account% 0) -- we'd get
-totally different results.  
+
+Note that we @emph{cannot} replace @r[dvh-acct] with @r[(account% 0)]
+-- we'd get totally different results.
 
 Now equality is much more subtle -- intensional equality vs
 extensional equality. Same fork example.  
 
 What if we do:
-
+@#reader scribble/comment-reader
+(interaction #:eval the-eval
 (define new-acct dvh-acct)
 (define p (person% "Fred" new-acct 400))
-(p . pay)
-dvh-acct ;; updated
+(send p pay)
+;; updated
+dvh-acct 
+)
 
 What if we create new account% with 0?  Then the effects are not
 shared.  
 
 What if we do:
-(define x (dvh-acct . amt))
+@#reader scribble/comment-reader
+(interaction #:eval the-eval
+(define x (send dvh-acct amt))
 x
-(dvh . pay)
-x ;; still the same
+(send dvh pay)
+;; still the same
+x 
+)
 
 What if we do
-
-(define y (dvh . bank))
+@#reader scribble/comment-reader
+(interaction #:eval the-eval
+(define y (send dvh bank))
 y
-(dvh . pay)
-y ;; now different
+(send dvh pay)
+;; now different
+y
+)
 
 The differece is that @r[x] is the name of a number, and numbers don't
 change, but y is the name of an account, and accounts change over
 time.  
 
 Objects can change, but other things do not change.  Structures and
-lists can point to objects that change, but the structures and lists
+lists can contain objects that change, but the structures and lists
 themselves do not change, the object they point to are the same
 objects.  
 
 Testing is hard with mutation.  Give an example in the notes.  
 
 
-Circular Data:
+@section{Circular Data}
 
 Books & Authors
 
@@ -342,25 +383,25 @@ name : String
 books : [Listof Book]
 
 As data def:
+@codeblock{
+;; A Book is (book% String Author)
+;; An Author is (author% String [Listof Book])
+}
 
-A Book is (book% String Author)
-An Author is (author% String [Listof Book])
+Can we make an @tt{Author}?
+@codeblock{
+(author% "Rose" empty)
+(book% "Reign of Roquet" (author% "Rose" empty))
+}
 
-Can we make an author?
-
-(author% "DVH" empty)
-(book% "I Love Flow Analysis" (author% "DVH" empty)
-
-But this is wrong: DVH has written a book, but the author object
-doesn't know about it.  
-
-Picture of HTDP/Matthias that is hard to capture in the notes.  
+But this is wrong: the Rose has written a book, but the author object
+doesn't know about it.
 
 Do we need books to know the author? Yes.
 
 We've seen this before with graph structure.  We represented graphs as
 association lists, using symbolic names. 
-
+@codeblock{
 ;; A Book is (book% String Author)
 (define-class book%
   (fields title author))
@@ -369,41 +410,142 @@ association lists, using symbolic names.
 (define-class author%
   (fields name books))
 
-(define mf (author% "MF" empty))
-(define htdp (book% "The Blue Book" mf))
-
+(define rose  (author% "Rose" empty))
+(define reign (book% "Reign of Roquet" rose))
+}
 But:
+@codeblock{
+reign
+rose
+}
 
-> htdp
-> mf
-
-Question: Does @r[htdp] contain a copy of matthias, or are they all the
-same matthias?  Answer: always the same, because we use the name @r[mf],
-we didn't construct a new one.  
+Question: Does @r[reign] contain a copy of @r[rose], or are they all
+the same @r[rose]?  Answer: always the same, because we use the name
+@r[rose], we didn't construct a new one.
 
 Let's add a new method for modifying the author after a book is
 written:
-
+@codeblock{
 (define/public (add-book b)
   (set-field! books (cons b (field books))))
+}
 
 Now we change our example:
+@codeblock{
+(define rose  (author% "Rose" empty))
+(define reign (book% "Reign of Roquet" rose))
+(send rose add-book reign)
+}
 
-(define mf (author% "MF" empty))
-(define htdp (book% "The Blue Book" mf))
-(mf . add-book htdp)
+@(the-eval
+   '(module b class3
+      (provide book% author% rose reign)
+      ;; A Book is (book% String Author)
+      (define-class book%
+	(fields title author))
+      
+      ;; An Author is (author% String [Listof Book])
+      (define-class author%
+	(fields name books)
+	(define/public (add-book b)
+	  (set-field! books (cons b (field books)))))
+
+      
+      (define rose  (author% "Rose" empty))
+      (define reign (book% "Reign of Roquet" rose))
+      (send rose add-book reign)))
+
+@(the-eval '(require 'b))
 
 How does it print? 
+
+@interaction[#:eval the-eval
+rose
+reign
+]
 
 See graph-style printing.
 
 But every times we construct a book with an author, we want to use
-`add-book'.  So, let's use the constructor.  
+@r[add-book].  So, let's use the constructor.  
 
+@codeblock{
 (constructor (t a)
   (fields t a)
-  (a . add-book this))
+  (send a add-book this))
+}
 
-In the first expression, we *cannot* use @r[this], and we must produce
+In the first expression, we @emph{cannot} use @r[this], and we must produce
 the result using @r[fields].  Later, we can use @r[this], and we get the
-desired result.  }|
+desired result. 
+
+@section{Yet another kind of equality}
+
+Mutation exposes yet another sense in which two things may be consider
+@emph{"the same"}: two things are the same if mutating one mutates the
+other.
+
+@section{Back-channels}
+
+Up until this point, computations communicate by consuming arguments
+and producing values.  Mutation enables more channels of communication
+between computations via @emph{shared} mutable data.
+
+As an example, recall our counter world program from @secref{counter}:
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Counter is a (counter-world% Natural)
+  (define-class counter-world%
+    (fields n)
+    ...
+    ;; on-tick : -> Counter
+    (define/public (on-tick)
+      (new counter-world% (add1 (field n)))))
+  
+  (big-bang (new counter-world% 0))
+)
+
+To illustrate how mutable data provides alternative channels of
+communication, let's develop a variant of the program that
+communicates the state of the world through an implicit stateful
+back-channel.
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Counter is a (counter-world% Natural)
+  (define-class counter-world%
+     (fields n)
+     ...
+     ;; on-tick : -> Counter
+     (define/public (on-tick)
+       (begin (set-field! n (add1 (field n)))
+              this)))
+
+  (big-bang (new counter-world% 0))
+)
+
+Notice how the new @r[on-tick] method doesn't produce a new
+@r[counter-world%] object with an incremented counter; instead it
+@emph{mutates} its own counter and returns its (mutilated) self.
+
+You'll find that this program appears to behave just like the old
+version, but backchannels open up new forms of interaction (and
+interference) that may not be intended.  For example, can you predict
+what thise program will do?
+
+@#reader scribble/comment-reader
+(racketblock
+(launch-many-worlds (big-bang (new counter-world% 0))
+                    (big-bang (new counter-world% 0)))
+)
+
+How about this (seemingly equivalent) one?
+
+@#reader scribble/comment-reader
+(racketblock
+(define w (new counter-world% 0))
+(launch-many-worlds (big-bang w)
+                    (big-bang w))
+)
+

@@ -55,7 +55,7 @@ The world component is the new world just like the event handler's
 produced for single world programs.  The s-expression component is a
 message that is sent to the universe.
 
-@section{Simple universe example}
+@section[#:tag "counter"]{Simple universe example}
 
 As a simple example, let's look at a world program that counts up and
 sends messages to a universe server as it counts.  In this simple

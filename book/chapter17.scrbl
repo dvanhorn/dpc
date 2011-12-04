@@ -2,16 +2,6 @@
 
 @title[#:tag "lec21"]{Under the Hood: Implementing OO}
 
-@section[#:tag "lec21-announce"]{Announcements}
-
-@itemlist[
-@item{Homework due Friday}
-@item{Exam 2, 110 WVH, 6-9pm}
-@item{Dan is holding Sam's office hours today}
-@item{We are compiling class notes for the exam just like last time.
-  Notes will be up later today.}
-]
-
 @section{Pulling back the veil from object-oriented programming}
 
 We will implement OO in ISL+lambda.
