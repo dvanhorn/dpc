@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@title[#:tag "lec21"]{3/21: Under the Hood: Implementing OO}
+@title[#:tag "lec21"]{Under the Hood: Implementing OO}
 
 @section[#:tag "lec21-announce"]{Announcements}
 

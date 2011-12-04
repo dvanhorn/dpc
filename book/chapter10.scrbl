@@ -16,7 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec11"]{2/14: Mutation}
+@title[#:tag "lec11"]{Mutation}
 
 We want to design a class, @r[counter%], with the following interface
 

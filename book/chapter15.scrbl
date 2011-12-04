@@ -16,15 +16,8 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec19"]{3/14: Equality}
+@title[#:tag "lec19"]{Equality}
 
-@section[#:tag "lec19-announce"]{Announcements}
-
-@itemlist[
-@item{Exam 2 is in 8 days, 3/22.  Room to be announced soon.}
-@item{Next homework will be out tonight, due on Wed 3/23.}
-@item{We will switch homework partners today, send your preferences by 5 pm.}
-]
 
 @section{Equality}
 

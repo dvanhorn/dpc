@@ -16,7 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec14"]{2/24: Visitors}
+@title[#:tag "lec14"]{Visitors}
 
 Here is a high-level outline of what we covered in class today. Below is the
 code we wrote. These notes will be fleshed out soon---we're posting them in this

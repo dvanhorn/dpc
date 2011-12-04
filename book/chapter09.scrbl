@@ -16,21 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec10"]{2/10: Being Smart}
-
-
-@section[#:tag-prefix "lec10"]{Announcements}
-
-
-@itemlist[#:style 'ordered
-
-@item{There will be no practice exam.}
-@item{PDF Course notes are posted.}
-@item{Next assignment due in 2 weeks.}
-@item{The exam is in 110, not 108.}
-@item{Study for the exam.}
-@item{Follow directions; including this one.}
-]
+@title[#:tag "lec10"]{Being Smart}
 
 @section{The 3-In-A-Row Game}
 

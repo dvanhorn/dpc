@@ -16,7 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec17"]{3/7: Java}
+@title[#:tag "lec17"]{Java}
 
 @section{EWD's rules for science}
 
