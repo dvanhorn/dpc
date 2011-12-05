@@ -75,7 +75,7 @@ compare them structurally.
 Along the lines of the second approach, let's consider adding the
 following method:
 
-@filebox["fraction%"]{
+@filebox[@r[fraction%]]{
 @#reader scribble/comment-reader
 (racketblock
   ;; to-number : -> Number
@@ -104,7 +104,7 @@ interpretation function:
 But what if we wanted to go down the second route?  We could define a
 method that computes a fraction in lowest terms:
 
-@filebox["fraction%"]{
+@filebox[@r[fraction%]]{
 @#reader scribble/comment-reader
 (racketblock
   ;; simplify : -> Fraction
@@ -116,7 +116,7 @@ method that computes a fraction in lowest terms:
 We can use the @racket[gcd] function to compute the greatest common
 denominator of the terms:
 
-@filebox["fraction%"]{
+@filebox[@r[fraction%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (simplify)
@@ -174,7 +174,7 @@ bump the language level up to @racket[class2].
 All @racket[class1] programs continue to work in @racket[class2].  The
 main difference is that we now the ability to write @emph{constructors}.
 
-@filebox["fraction%"]{
+@filebox[@r[fraction%]]{
 @codeblock{
   (constructor (n d)
     ;;...some expression that uses the fields form to return values
@@ -313,7 +313,7 @@ satisfies the specification we've given in the data definition.
 
 The simplest way to satisfy the specification is with this constructor:
 
-@filebox["date%"]{
+@filebox[@r[date%]]{
 @codeblock{
   (constructor (y m d)
     (error "I didn't like this date!"))
@@ -329,7 +329,7 @@ We'd like to do better by accepting more legitimate dates.  Here is
 one that accepts all the things deemed acceptable in our specification
 (this is both "sound" and "complete"):
 
-@filebox["date%"]{
+@filebox[@r[date%]]{
 @codeblock{
   (constructor (y m d)
     (cond [(<= y 0) (error "year was negative or zero")]
@@ -456,7 +456,7 @@ given @tt{OBT}s must have the property.
 But now this assumption is not sufficient to guarantee that the
 default constructor works:
 
-@filebox["node%"]{
+@filebox[@r[node%]]{
 @codeblock{
   ;; OBT OBT -> OBT
   (constructor (a b)
@@ -490,7 +490,7 @@ the second given tree needs to be the left sub-tree.  We can make such
 a determination based on the maximum and minimum numbers in each of
 the given trees, and that suggest the following constructor:
 
-@filebox["node%"]{
+@filebox[@r[node%]]{
 @codeblock{
   ;; OBT OBT -> OBT
   (constructor (a b)
@@ -505,7 +505,7 @@ the given trees, and that suggest the following constructor:
 The @racket[max] and @racket[min] methods are easily dismissed from
 our wish list:
 
-@filebox["leaf%"]{
+@filebox[@r[leaf%]]{
 @codeblock{
 (define/public (min)
   (field n))
@@ -513,7 +513,7 @@ our wish list:
   (field n))
 }}
 
-@filebox["node%"]{
+@filebox[@r[node%]]{
 @codeblock{
 (define/public (min)
   ((field left) . min))
@@ -537,7 +537,7 @@ wrong.  This case is the @racket[else] clause of our constructor.
 What should we do?  One solution is just to reject this case and raise
 and error:
 
-@filebox["node%"]{
+@filebox[@r[node%]]{
 @codeblock{
   ;; OBT OBT -> OBT
   (constructor (a b)
@@ -567,7 +567,7 @@ So if we indulge in some wishful thinking and suppose we have a
 
 then we can write the constructor as follows:
 
-@filebox["node%"]{
+@filebox[@r[node%]]{
 @#reader scribble/comment-reader
 @racketblock[
   ;; OBT OBT -> OBT
@@ -587,7 +587,7 @@ on some wishful thinking and relegate the work to another method that
 inserts a number into a list, we can easily write @racket[insert-tree]
 for the @racket[leaf%] case:
 
-@filebox["leaf%"]{
+@filebox[@r[leaf%]]{
 @codeblock{
   (define/public (insert-tree other)
     (send other insert (field number)))
@@ -596,7 +596,7 @@ for the @racket[leaf%] case:
 In the @racket[node%] case, if we first consider the template (the
 inventory of what we have available to use), we have:
 
-@filebox["node%"]{
+@filebox[@r[node%]]{
 @racketblock[
   (define/public (insert-tree other)
     ((field left) #,(racketidfont ".") insert-tree other) ... 
@@ -609,7 +609,7 @@ the other, then insert the left tree into @emph{that one} (other
 permutations of the order of insertions would work, too).  That leads
 us to:
 
-@filebox["node%"]{
+@filebox[@r[node%]]{
 @racketblock[
   (define/public (insert-tree other)
     ((field left) #,(racketidfont ".") insert-tree ((field right) #,(racketidfont ".") insert-tree other)))
@@ -626,7 +626,7 @@ number go?  One solution is to compare the inserted number against the
 existing number to determine which side the number should go to:
 
 
-@filebox["leaf%"]{
+@filebox[@r[leaf%]]{
 @codeblock{
 (define/public (insert m)
   (node% (leaf% (the-real-min n m))
@@ -637,7 +637,7 @@ In the case of inserting a number into a node, we compare the number
 against the maximum of the left sub-tree to determine if the number
 should be inserted in the left or right:
 
-@filebox["node%"]{
+@filebox[@r[node%]]{
 @racketblock[
   (define/public (insert n)
     (cond [(> n ((field left) . max))

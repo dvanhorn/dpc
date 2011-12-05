@@ -44,7 +44,7 @@ Unfortunately, it's not immediately clear what to put in the body of
 
 This suggests the following implementation:
 
-@filebox[@tt{counter%}]{
+@filebox[@r[counter%]]{
 @racketblock[
  (define/public (m)
    (add1 (field called)))
@@ -164,11 +164,11 @@ object to whatever @r[new-value] is.
 
 We can now revise our defintion of @r[m] to 
 
-@filebox[@tt{counter%}
+@filebox[@r[counter%]]{
 @racketblock[
 (define/public (m)
   (begin (set-field! called (add1 (field called)))
-	 (add1 (field called))))]]
+	 (add1 (field called))))]}
 
 Note that @r[set-field!] @emph{doesn't produce} a new version of the field,
 instead it @emph{changes} the field named @r[called] to something new.

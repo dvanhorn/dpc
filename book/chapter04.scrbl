@@ -464,7 +464,7 @@ This satisfies part of our implementation right off the bat: we get an
   (check-expect (send (new seg% 0 0) same-pos? (new seg% 1 0)) false)
 )
 
-@filebox["seg%"]{
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (same-pos? c)
@@ -484,7 +484,7 @@ And now @racket[draw]:
                              MT-SCENE))
 )
 
-@filebox["seg%"]{
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (draw scn)
@@ -506,7 +506,7 @@ And now @racket[move]:
   (check-expect (send (new seg% 0 0) move "right") (new seg%  1  0))
 )
 
-@filebox["seg%"]{
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (move d)
@@ -531,7 +531,7 @@ And now @racket[on-board?]:
   (check-expect (send (new seg% 0 HEIGHT) on-board?) false)
 )
 
-@filebox["seg%"]{
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (on-board?)
@@ -548,7 +548,7 @@ And finally, the @racket[x-px] and @racket[y-px] methods:
   (check-expect (send (new seg% 0 0) y-px) (- HEIGHT-PX (* 1/2 SIZE)))
 )
 
-@filebox["seg%"]{
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (x-px)
@@ -698,7 +698,7 @@ dropping the last element of the list of segments:
                 (new snake% "right" (list (new seg% 1 0))))
 )
 
-@filebox["snake%"]{
+@filebox[@r[snake%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (move)
@@ -736,7 +736,7 @@ element is dropped from the segments list:
 					  (new seg% 0 0))))
 )
 
-@filebox["snake%"]{
+@filebox[@r[snake%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (grow)
@@ -755,7 +755,7 @@ Now let's write the @racket[turn] method:
                 (new snake% "up" (list (new seg% 0 0))))
 )
 
-@filebox["snake%"]{
+@filebox[@r[snake%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (turn d)
@@ -771,7 +771,7 @@ And finally, @racket[draw]:
 		(send (new seg% 0 0) draw MT-SCENE))
 )
 
-@filebox["snake%"]{
+@filebox[@r[snake%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (draw scn)

@@ -71,7 +71,7 @@ Problem 3)}
 
 Course staff solution for regular zombie game:
 
-@filebox["world%"]{
+@filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
  (define/public (teleport)
@@ -89,7 +89,7 @@ This has a significant bug: it always produces a plain
 
 Bug (pair0MN):
 
-@filebox["modulo-player%"]{
+@filebox[@r[modulo-player%]]{
 @#reader scribble/comment-reader
 (racketblock
  (define/public (teleport)
@@ -106,7 +106,7 @@ the @tt{modulo-player%} file, so there's an easy fix.
 
 Lack of abstraction (pair0PQ):
 
-@filebox["modulo-player%"]{
+@filebox[@r[modulo-player%]]{
 @#reader scribble/comment-reader
 (racketblock
  ;; warp : Real Real -> ModuloPlayer
@@ -119,7 +119,7 @@ Lack of abstraction (pair0PQ):
 )
 }
 
-@filebox["player%"]{
+@filebox[@r[player%]]{
 @#reader scribble/comment-reader
 (racketblock
  ;; warp : Real Real -> Player

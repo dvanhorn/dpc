@@ -102,7 +102,7 @@ therefore can't possibly be equal to any element in the list.
 
 Now we can implement the remaining methods from the interface. First, @r[insert]
 
-@filebox["smt%"]{
+@filebox[@r[smt%]]{
 @racketblock[
 (check-expect ((new smt%) #,(racketidfont ".") insert 5) 
 	      (new scons% 5 (new smt%)))
@@ -110,7 +110,7 @@ Now we can implement the remaining methods from the interface. First, @r[insert]
   (new scons% n (new smt%)))
 ]}
 
-@filebox["scons%"]{
+@filebox[@r[scons%]]{
 @racketblock[
 (check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") insert 7)
 	      (new scons% 5 (new scons% 7 (new smt%))))
@@ -133,7 +133,7 @@ Next, the @racket[max] method.
 We don't have to do anything for the empty list, because we have a 
 precondition that we can only call @r[max] when the list is non-empty.
 
-@filebox["scons%"]{
+@filebox[@r[scons%]]{
 @racketblock[
 (define real-max max)
 (check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") max) 5)
@@ -146,13 +146,13 @@ precondition that we can only call @r[max] when the list is non-empty.
 Again, this implementation relies on our data structure invariant.  To
 make this work, though, we need to implement @r[empty?].
 
-@filebox["smt%"]{
+@filebox[@r[smt%]]{
 @racketblock[
 (check-expect ((new smt%) #,(racketidfont ".") empty?) true)
 (define/public (empty?) true)
 ]}
 
-@filebox["scons%"]{
+@filebox[@r[scons%]]{
 @racketblock[
 (check-expect ((new scons% 1 (new smt%)) #,(racketidfont ".") empty?) false)
 (define/public (empty?) false)
@@ -160,14 +160,14 @@ make this work, though, we need to implement @r[empty?].
 
 The final two methods are similar.  Again, we don't implement @r[min]
 in @r[smt%], because of the precondition in the interface.  
-@filebox["smt%"]{
+@filebox[@r[smt%]]{
 @racketblock[
 (code:comment "no min method")
 (define/public (->list) empty)
 ]
 }
 
-@filebox["scons%"]{
+@filebox[@r[scons%]]{
 @racketblock[
 (define/public (min) (field first))
 (define/public (->list)
@@ -325,7 +325,7 @@ them.  They start with @tt{#lang classN} and cover a whole file.
 Here's the module implementing our sorted list, which we save in a
 file called @tt{"sorted-list.rkt"}.  
 
-@filebox["sorted-list.rkt"]{
+@filebox[@r[sorted-list.rkt]]{
 @codeblock{
 #lang class1
 

@@ -97,7 +97,7 @@ the IP address of the server.  (Since we're going to run the universe
 and world on the same computer, we will use @racket[LOCALHOST] which
 is bound to the address of our computer.)
 
-@filebox["world%"]{
+@filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (register) LOCALHOST)
@@ -205,7 +205,7 @@ it ticks by sending it's current count as a message.
 
 That requires changing our on-tick method from:
 
-@filebox["world%"]{
+@filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (on-tick)
@@ -215,7 +215,7 @@ That requires changing our on-tick method from:
 
 to one that constructs a package:
 
-@filebox["world%"]{
+@filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (on-tick)
@@ -238,7 +238,7 @@ implementing the @racket[on-receive] method, which will update the
 world state appropriately and the @racket[on-tick] method will do no
 computation, but only communication:
 
-@filebox["world%"]{
+@filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (on-tick)
@@ -260,7 +260,7 @@ so we need to consider the data definition for mail:
 This constructs a message that will be sent to the world represented
 by the IWorld value consisting of the S-Exp value.
 
-@filebox["universe%"]{
+@filebox[@r[universe%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define/public (on-msg iw m)
