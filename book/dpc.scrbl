@@ -28,6 +28,7 @@ students we had the privilege of teaching in Spring 2011.
 @include-section["chapter04.scrbl"]
 @include-section["chapter05.scrbl"]
 @include-section["chapter06.scrbl"]
+@include-section["chapter06a.scrbl"]
 @include-section["chapter07.scrbl"]
 @include-section["chapter08.scrbl"]
 @include-section["chapter09.scrbl"]
