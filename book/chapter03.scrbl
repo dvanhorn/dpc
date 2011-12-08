@@ -1,15 +1,15 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class1 define-struct ... length))
+          (for-label (except-in class/1 define-struct ... length))
 	  (for-label 2htdp/image)
-	  (for-label class1/universe))
+	  (for-label class/1/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class1))
+    (the-eval '(require class/1))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
@@ -24,7 +24,7 @@ code is the fact that the two implementations of @racket[double] are
 identical:
 @#reader scribble/comment-reader
 (racketmod
-  class0
+  class/0
   ;; A BT is one of:
   ;; - (new leaf% Number)
   ;; - (new node% Number BT BT)
@@ -50,7 +50,7 @@ something like this:
 
 @#reader scribble/comment-reader
 (racketmod
- class0
+ class/0
  ;; A BT is one of:
  ;; - (make-leaf Number)
  ;; - (make-node Number BT BT) 
@@ -129,13 +129,13 @@ without actually writing it twice:
 
 To accomodate this new feature---@emph{inheritance}---we need to
 adjust our programming language.  We'll now program in
-@racketmodname[class1], which is a superset of
-@racketmodname[class0]---all @racketmodname[class0] programs are
-@racketmodname[class1] programs, but not vice versa.  The key
+@racketmodname[class/1], which is a superset of
+@racketmodname[class/0]---all @racketmodname[class/0] programs are
+@racketmodname[class/1] programs, but not vice versa.  The key
 difference is the addition of the @racket[(super _class-name)] form.
 
 @(the-eval
-  '(module m class1
+  '(module m class/1
      (provide bt% node% leaf%)
      (define-class bt%
        ;; -> BT
@@ -249,7 +249,7 @@ still construct @racket[leaf%]s as before, but the arguments to the
 right subtree, and @emph{then} the number at that node:
 
 @(the-eval
-  '(module n class1
+  '(module n class/1
      (provide bt% node% leaf%)
      (define-class bt%
        (fields number)
@@ -432,7 +432,7 @@ the scene at the appropriate position:
 )
 
 @(the-eval
-  '(module p class1
+  '(module p class/1
      (provide circ% rect%)
      (require 2htdp/image)
 
@@ -534,7 +534,7 @@ We arrive at the folllowing final code:
 
 @#reader scribble/comment-reader
 (racketmod
- class1
+ class/1
  (require 2htdp/image)
 
  ;; A Shape is one of:

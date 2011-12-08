@@ -1,10 +1,10 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class1 check-expect define-struct ... length))
+          (for-label (except-in class/1 check-expect define-struct ... length))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class1/universe))
+	  (for-label class/1/universe))
 
 @title[#:tag "lec08"]{Abstraction, Invariants, Testing}
 
@@ -19,7 +19,7 @@ refer to @r[this].
 
 For example:
 @codeblock{
-#lang class1
+#lang class/1
 (define-class c%
   (fields x y z)
   
@@ -43,7 +43,7 @@ expressions that do computation.
 Here's an interface for a sorted list of numbers.
 
 @codeblock{
-#lang class1
+#lang class/1
 ;; An ISorted implements
 ;; insert : Number -> Sorted
 ;; contains? : Number -> Boolean
@@ -63,7 +63,7 @@ We can simply adopt the recursive union style that we've already seen
 for implementing lists.  Here we see the basic defintion as well as
 the implementation of the @r[contains?] method.
 @codeblock{
-#lang class1
+#lang class/1
 ;; A Sorted is one of
 ;; - (new smt%)
 ;; - (new scons% Number Sorted)
@@ -320,14 +320,14 @@ simple specification to allow other modules to see parts of the
 implementation (but not all of it).
 
 Modules in our languages are very simple---you've already written
-them.  They start with @tt{#lang classN} and cover a whole file.
+them.  They start with @tt{#lang class/N} and cover a whole file.
 
 Here's the module implementing our sorted list, which we save in a
 file called @tt{"sorted-list.rkt"}.  
 
 @filebox[@r[sorted-list.rkt]]{
 @codeblock{
-#lang class1
+#lang class/1
 
 ;; ... all of the rest of the code ...
 
@@ -345,7 +345,7 @@ can see is the @r[smt] value.  To add new elements, the rest of the
 world has to use the @r[insert] method.  
 
 @racketmod[
-class1
+class/1
 (require "sorted-list.rkt")
 
 (smt #,(racketidfont ".") insert 4)

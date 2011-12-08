@@ -3,13 +3,13 @@
 	  "utils.rkt"
           racket/sandbox
   	  (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class0 define-struct ...))
-	  (for-label class0/universe))
+          (for-label (except-in class/0 define-struct ...))
+	  (for-label class/0/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     ;(the-eval '(require lang/htdp-intermediate-lambda))
-    (the-eval '(require class0))
+    (the-eval '(require class/0))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
@@ -62,7 +62,7 @@ ones on Huntington Avenue with a finite set of symbols, as we did in
 Fundies I:
 
 @codeblock[#:keep-lang-line? #f]{
-#lang class0
+#lang class/0
 ;; A Light is one of:
 ;; - 'Red
 ;; - 'Green
@@ -109,7 +109,7 @@ implementation of the @racket[next] method, producing the appropriate
 
 @#reader scribble/comment-reader
 (racketmod
-  class0
+  class/0
   ;; A Light is one of:
   ;; - (new red%)
   ;; - (new green%)
@@ -165,7 +165,7 @@ How would we represent this with classes and objects?
 
 @#reader scribble/comment-reader
 (racketmod
-class0
+class/0
 ;; A BT is one of:
 ;; - (new leaf% Number)
 ;; - (new node% Number BT BT)
@@ -290,7 +290,7 @@ this in a subsequent class.}
 The full @tt{BT} code is now:
 @#reader scribble/comment-reader
 (racketmod
-class0
+class/0
 ;; A BT is one of:
 ;; - (new leaf% Number)
 ;; - (new node% Number BT BT)
@@ -376,9 +376,9 @@ You can play the game by running:
 
 @#reader scribble/comment-reader
 (racketmod
-class0
-(require class0/zombie)
-(require class0/universe)
+class/0
+(require class/0/zombie)
+(require class/0/universe)
 (big-bang zombie!)
 )
 

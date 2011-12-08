@@ -1,17 +1,17 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class4 check-expect define-struct ... length
+          (for-label (except-in class/4 check-expect define-struct ... length
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class4/universe))
+	  (for-label class/4/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class2))
+    (the-eval '(require class/2))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
     the-eval))

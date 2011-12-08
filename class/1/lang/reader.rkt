@@ -1,7 +1,7 @@
 #lang s-exp syntax/module-reader
-class1
+class/1
 
-#:language-info '#(class1/language-info get-info #f)
+#:language-info '#(class/1/language-info get-info #f)
 
 #:read 
 (λ args

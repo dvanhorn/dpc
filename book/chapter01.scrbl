@@ -4,13 +4,13 @@
           racket/sandbox
           #;(for-label lang/htdp-intermediate-lambda)
   	  (for-label (only-in lang/htdp-intermediate-lambda define-struct))
-          (for-label (except-in class0 define-struct))
-	  (for-label class0/universe))
+          (for-label (except-in class/0 define-struct))
+	  (for-label class/0/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     ;(the-eval '(require lang/htdp-intermediate-lambda))
-    (the-eval '(require class0))
+    (the-eval '(require class/0))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
     #|(call-in-sandbox-context 
@@ -32,7 +32,7 @@ program to launch a rocket, written in the Beginner Student Language:
 (require 2htdp/universe)
 
 @code:comment{Use the rocket key to insert the rocket here.}
-(define ROCKET (bitmap class0/rocket.png))
+(define ROCKET (bitmap class/0/rocket.png))
 
 (define WIDTH 100)
 (define HEIGHT 300)
@@ -64,7 +64,7 @@ It's a shortcoming of our documentation system that we can't define
 @racket[ROCKET] to be the rocket image directly, but as you can see
 this did the right thing:
 
-@(the-eval '(define ROCKET (bitmap class0/rocket.png)))
+@(the-eval '(define ROCKET (bitmap class/0/rocket.png)))
 @(the-eval '(define WIDTH 100))
 @(the-eval '(define HEIGHT 300))
 @(the-eval '(define MT-SCENE (empty-scene WIDTH HEIGHT)))
@@ -108,7 +108,7 @@ be using BSL and friends.  Instead, select
 "Use the language declared in the source" option and add the following
 to the top of your program:
 
-@racketmod[class0]
+@racketmod[class/0]
 
 The way to define a class is with @racket[define-class]:
 @racketblock[
@@ -258,7 +258,7 @@ OO-style @racket[big-bang], add the following to the top of your
 program:
 
 @racketblock[
-(require class0/universe)]
+(require class/0/universe)]
 
 In the functional setting, we had to explicitly give a piece of data
 representing the state of the initial world and list which functions
@@ -281,12 +281,12 @@ So to launch our rocket, we simply do the following:
 Our complete program is:
 
 @racketmod[
-class0
+class/0
 (require 2htdp/image)
-(require class0/universe)
+(require class/0/universe)
 
 @code:comment{Use the rocket key to insert the rocket here.}
-(define ROCKET (bitmap class0/rocket.png))
+(define ROCKET (bitmap class/0/rocket.png))
 
 (define WIDTH 100)
 (define HEIGHT 300)
@@ -400,11 +400,11 @@ Giving us an overall program of:
 
 @#reader scribble/comment-reader
 (racketmod
-class0
+class/0
 (require 2htdp/image)
-(require class0/universe)
+(require class/0/universe)
 
-(define ROCKET (bitmap class0/rocket.png))
+(define ROCKET (bitmap class/0/rocket.png))
 
 (define WIDTH 100)
 (define HEIGHT 300)
@@ -453,11 +453,11 @@ Here is a complete program that includes an orbiting moon:
 
 @#reader scribble/comment-reader
 (racketmod
-class0
+class/0
 (require 2htdp/image)
-(require class0/universe)
+(require class/0/universe)
 
-(define ROCKET (bitmap class0/rocket.png))
+(define ROCKET (bitmap class/0/rocket.png))
 (define MOON (circle 20 "solid" "blue"))
 
 (define WIDTH 300)
@@ -562,7 +562,7 @@ class0
  
         @(begin0 
            "" 
-           (the-eval '(require class0))
+           (the-eval '(require class/0))
            (the-eval 
             `(begin 
                (define-struct cpx (real imag))

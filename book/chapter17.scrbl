@@ -1,4 +1,11 @@
 #lang scribble/manual
+@(require "../web/utils.rkt"
+          (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
+          (for-label (except-in class/4 check-expect define-struct ... length
+				numerator denominator))
+	  (for-label 2htdp/image)
+	  (for-label (only-in test-engine/racket-tests check-expect))
+	  (for-label class/4/universe))
 
 @title[#:tag "lec21"]{Under the Hood: Implementing OO}
 
@@ -24,7 +31,7 @@ we've done, and would be similar to structure and functions.
 
 We could use functions to represents objects.
 
-We could write an interpreter for class1 in ISL+.
+We could write an interpreter for @r[class/1] in ISL+.
 
 We are going to start out by using functions to represent objects.
 Ask yourself:  WHAT IS AN OBJECT?
@@ -376,7 +383,7 @@ What about this?
     this))
 }|
 
-Let's redefine area to use.  So in class1 we might write (sqr (this
+Let's redefine area to use.  So in @r[class/1] we might write (sqr (this
 . side)).  We'll if we pick our names better, it should become
 obvious.
 

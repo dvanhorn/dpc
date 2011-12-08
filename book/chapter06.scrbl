@@ -1,9 +1,9 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class1 define-struct ... length))
+          (for-label (except-in class/1 define-struct ... length))
 	  (for-label 2htdp/image)
-	  (for-label class1/universe))
+	  (for-label class/1/universe))
 
 @title[#:tag "lec07"]{Delegation}
 
@@ -19,7 +19,7 @@ the @r[foo%] class promises to implement the methods specified in
 
 @#reader scribble/comment-reader
 (racketmod
-  class1
+  class/1
   (define-interface baz<%> (blah))
   (define-interface foo<%> (blah))
   (define-interface bar<%> 
@@ -36,7 +36,7 @@ the @r[foo%] class promises to implement the methods specified in
 @subsection{Dot notation}
 
 To make programming with objects more convenient, we've added new
-syntax to @racketmodname[class1] to support method calls.  In
+syntax to @racketmodname[class/1] to support method calls.  In
 particular, the following now sends method @r[x] to object @r[o] with
 argument @r[arg]:
 
@@ -63,7 +63,7 @@ This is equivalent to
 ]
 
 Although in lecture this didn't work in the interactions window, it
-now works everywhere that you use @racketmodname[class1]. 
+now works everywhere that you use @racketmodname[class/1]. 
 
 
 @section{Constructor design issue in modulo zombie (Assignment 3,
@@ -165,7 +165,7 @@ And this method to the @racket[modulo-player%] class:
 Here's an example of the technique in full.  We start with these classes:
 
 @codeblock{
-#lang class1
+#lang class/1
 (define-class s%
   (fields x y))
 
@@ -189,7 +189,7 @@ we can abstract @racket[origin] to the superclass @racket[s%], since
 it becomes identical in both classes, avoiding the code duplication.
 
 @codeblock{
-#lang class1
+#lang class/1
 (define-class s%
   (fields x y)
   (send this make 0 0))
@@ -482,12 +482,12 @@ superclass.
 However, can we still abstract common code without @emph{either} of these
 mechanisms?  Yes.  
 
-Consider the @racketmodname[class0], @emph{without} helper functions.  We can
+Consider the @racketmodname[class/0], @emph{without} helper functions.  We can
 write a binary tree class like this:
 
 @#reader scribble/comment-reader
 (racketmod
-  class0
+  class/0
   ;; A BT is one of:
   ;; - (new leaf% Number)
   ;; - (new node% Number BT BT)

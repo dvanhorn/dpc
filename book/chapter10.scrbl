@@ -1,17 +1,17 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class1 check-expect define-struct ... length
+          (for-label (except-in class/1 check-expect define-struct ... length
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class1/universe))
+	  (for-label class/1/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class2))
+    (the-eval '(require class/2))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
@@ -150,9 +150,9 @@ provide it as input every time we call @r[m].
 @section{Ch-Ch-Ch-Ch-Changes}
 
 To truly solve our problem, and implement @r[m], we need new language
-support.  This support is provided in @racketmodname[class3].
+support.  This support is provided in @racketmodname[class/3].
 
-The @racketmodname[class3] language provides the new @r[set-field!]
+The @racketmodname[class/3] language provides the new @r[set-field!]
 form, which is used like this:
 
 @racketblock[
@@ -183,7 +183,7 @@ used.}
 
 
 We've also introduced one more language feature in
-@racketmodname[class3]: @r[begin].  The @r[begin] form works by
+@racketmodname[class/3]: @r[begin].  The @r[begin] form works by
 evaluating each expression in turn, throwing away the result of every
 expression except that last one.  Then it does the last part, and
 produces that result.
@@ -284,7 +284,7 @@ Note that we don't need to produce any result at all.
 }
 
 @(the-eval
-  '(module a class3
+  '(module a class/3
      (provide account% person%)
      ;; An Account is (account% Number)
      (define-class account%
@@ -438,7 +438,7 @@ Now we change our example:
 }
 
 @(the-eval
-   '(module b class3
+   '(module b class/3
       (provide book% author% rose reign)
       ;; A Book is (book% String Author)
       (define-class book%

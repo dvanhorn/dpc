@@ -1,17 +1,17 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class1 check-expect define-struct ... length
+          (for-label (except-in class/1 check-expect define-struct ... length
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class1/universe))
+	  (for-label class/1/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class2))
+    (the-eval '(require class/2))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
@@ -169,9 +169,9 @@ term invariant, we need a stronger mechanism for enforcing our
 discipline at construction-time.  The idea is to allow arbitrary
 computation to occur between the call to a constructor and the
 initialization of an object.  To enable this mechanism, we need to
-bump the language level up to @racket[class2].
+bump the language level up to @racket[class/2].
 
-All @racket[class1] programs continue to work in @racket[class2].  The
+All @racket[class/1] programs continue to work in @racket[class/2].  The
 main difference is that we now the ability to write @emph{constructors}.
 
 @filebox[@r[fraction%]]{
@@ -236,7 +236,7 @@ A: No.  We've been thinking about multiple constructors, but we don't
 have a strong story for them yet.  Remember: you can always write
 functions and you can think of these as alternative constructors.
 
-That brings up another feature in the @racketmodname[class2] language
+That brings up another feature in the @racketmodname[class/2] language
 --- constructors and functions are treated more uniformly now: you may
 leave off the @racket[new] keyword when constructing objects.
 

@@ -3,11 +3,11 @@
 (provide new send define/public define/private define/override this field fields set-field!)
 
 (require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
-(require (prefix-in isl+: (only-in "../class1/test-engine/racket-tests.rkt"
+(require (prefix-in isl+: (only-in "../test-engine/racket-tests.rkt"
                                    check-expect check-within 
                                    check-error check-member-of
                                    check-range)))
-(require (only-in "../class0/define-class.rkt" fields))
+(require (only-in "../0/define-class.rkt" fields))
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
                      unstable/syntax racket/syntax

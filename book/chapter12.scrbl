@@ -1,17 +1,17 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class1 check-expect define-struct ... length
+          (for-label (except-in class/1 check-expect define-struct ... length
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class1/universe))
+	  (for-label class/1/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class2))
+    (the-eval '(require class/2))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
@@ -207,8 +207,8 @@ of the @tt{in-range?%} class:
 
 @#reader scribble/comment-reader
 (racketmod
-class2
-(require 2htdp/image class2/universe)
+class/2
+(require 2htdp/image class/2/universe)
 
 ;; A World is (world% Generator Number)
 ;; and implements IWorld
@@ -244,8 +244,8 @@ class2
 
 @#reader scribble/comment-reader
 (racketmod
-class2
-(require 2htdp/image class2/universe)
+class/2
+(require 2htdp/image class/2/universe)
 
 ;; A World is (world% Generator Number)
 ;; and implements IWorld
@@ -290,8 +290,8 @@ class2
 
 @#reader scribble/comment-reader
 (racketmod
-class3
-(require 2htdp/image class3/universe)
+class/3
+(require 2htdp/image class/3/universe)
 
 ;; A World is (world% Generator Number)
 ;; and implements IWorld
@@ -350,8 +350,8 @@ class3
 
 @#reader scribble/comment-reader
 (racketmod
-class3
-(require 2htdp/image class3/universe)
+class/3
+(require 2htdp/image class/3/universe)
 
 ;; A World is (world% Generator Number)
 ;; and implements IWorld

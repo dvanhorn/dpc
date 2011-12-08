@@ -6,7 +6,7 @@
          "../test-engine/racket-tests.rkt")
 
 
-(require (only-in "../class/0/main.rkt" define-struct #%module-begin)
+(require (only-in "../0/main.rkt" define-struct #%module-begin)
          (for-syntax racket/base syntax/parse))
 (require (prefix-in isl+: lang/htdp-intermediate-lambda))
 (require (prefix-in r: racket))
@@ -17,7 +17,7 @@
          #%module-begin |.| (rename-out [my-app #%app])
          define test require provide define-struct
          all-defined-out only-in all-from-out except-in
-         (except-out (all-from-out "../class1/test-engine/racket-tests.rkt")
+         (except-out (all-from-out "../test-engine/racket-tests.rkt")
                      test))
 
 (define-syntax (my-app stx)

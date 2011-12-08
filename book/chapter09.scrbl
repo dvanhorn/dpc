@@ -1,17 +1,17 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class1 check-expect define-struct ... length
+          (for-label (except-in class/1 check-expect define-struct ... length
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class1/universe))
+	  (for-label class/1/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class2))
+    (the-eval '(require class/2))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
@@ -485,8 +485,8 @@ Idea for next time: mark evaluations as a loss when you lose.
 As written in class.
 
 @verbatim|{
-#lang class2
-(require 2htdp/image class2/universe)
+#lang class/2
+(require 2htdp/image class/2/universe)
 
 ;; A Board is a [Listof Color]
 ;; A Color is one of

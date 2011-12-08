@@ -1,7 +1,7 @@
 #lang s-exp syntax/module-reader
-class5
+class/5
 
-#:language-info '#(class1/language-info get-info #f)
+#:language-info '#(class/1/language-info get-info #f)
 
 #:read 
 (λ args
@@ -19,4 +19,4 @@ class5
                  [current-readtable rt])
     (apply read-syntax args)))
 
-(require (only-in "../../class1/lang/reader.rkt" rt))
+(require (only-in "../../1/lang/reader.rkt" rt))
