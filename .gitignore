@@ -1,0 +1,9 @@
+compiled
+.DS_Store
+*~
+*aux
+*log
+*toc
+*out
+pict*.png
+
