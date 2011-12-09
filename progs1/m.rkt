@@ -1,4 +1,4 @@
-#lang class1
+#lang class/1
 
 (define-interface foo (inc))
 

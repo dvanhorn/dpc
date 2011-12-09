@@ -1,5 +1,5 @@
-#lang class5
-(require class5/universe 2htdp/image)
+#lang class/5
+(require class/universe 2htdp/image)
 (require (except-in racket #%app))
 
 ;; BUG  : allocating dice to both players.

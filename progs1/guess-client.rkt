@@ -1,5 +1,5 @@
-#lang class1
-(require class1/universe)
+#lang class/1
+(require class/universe)
 (require 2htdp/image)
 
 (define-class guess-world%

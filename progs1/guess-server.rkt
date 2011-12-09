@@ -1,5 +1,5 @@
-#lang class1
-(require class1/universe)
+#lang class/1
+(require class/universe)
 
 ;; A Universe is a (new universe% [U #f Number] [U #f IWorld] [U #f IWorld]).
 (define-class universe%

@@ -1,6 +1,6 @@
-#lang class1
+#lang class/1
 (require 2htdp/image)
-(require class1/universe)
+(require class/universe)
 
 (define SIZE 100)
 (define 1/2-SIZE (/ SIZE 2))

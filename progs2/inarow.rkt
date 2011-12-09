@@ -1,5 +1,6 @@
-#lang class2
-(require 2htdp/image class2/universe)
+#lang class/2
+(require 2htdp/image)
+(require class/universe)
 
 ;; The Game 3-in-a-row
 ;; Red is the human player

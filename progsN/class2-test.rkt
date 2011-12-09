@@ -1,4 +1,4 @@
-#lang class2
+#lang class/2
 
 (define-class c%
   (fields x y z))

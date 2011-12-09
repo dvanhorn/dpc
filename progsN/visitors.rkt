@@ -1,4 +1,4 @@
-#lang class3
+#lang class/3
 
 ;; An [IRangeVisitor X] implements:
 ;; co : Number Number -> X

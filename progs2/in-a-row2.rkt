@@ -1,5 +1,6 @@
-#lang class2
-(require 2htdp/image class2/universe)
+#lang class/2
+(require 2htdp/image)
+(require class/universe)
 
 ;; A Board is a [Listof Color]
 ;; A Color is one of

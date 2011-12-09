@@ -1,4 +1,4 @@
-#lang class0
+#lang class/0
 
 ;; RUBRIC
 ;; ========================================================
@@ -28,7 +28,7 @@
 
 
 (require 2htdp/image)
-(require class0/universe)
+(require class/universe)
 
 (define CELL 20)
 (define 1/2-CELL (/ CELL 2))

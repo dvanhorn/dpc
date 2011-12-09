@@ -1,4 +1,4 @@
-#lang class3
+#lang class/3
 
 ;;> RUBRIC
 ;;> TOTAL: 120 points
@@ -22,7 +22,7 @@
 ;;> Analysis: 10 points
 ;;> Must have some reasonable discussion of who wins and why.
 
-(require "connect4-universe.rkt" class3/universe 2htdp/image)
+(require "connect4-universe.rkt" class/universe 2htdp/image)
 
 ;; Computer Player Worlds
 ;; A SWorld is one of

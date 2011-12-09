@@ -1,4 +1,4 @@
-#lang class3
+#lang class/3
 
 (define-class a%
   (fields x)

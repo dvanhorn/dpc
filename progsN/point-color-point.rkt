@@ -1,4 +1,4 @@
-#lang class4
+#lang class/4
 
 (define-class point%
   (fields x y)

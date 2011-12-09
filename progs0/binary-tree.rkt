@@ -1,4 +1,4 @@
-#lang class0
+#lang class/0
 ; A BT is one of:
 ; - (new leaf% Number)
 ; - (new node% Number BT BT)

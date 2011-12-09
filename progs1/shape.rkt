@@ -1,4 +1,4 @@
-#lang class1
+#lang class/1
 (require 2htdp/image)
 
 ;; A Shape is one of:

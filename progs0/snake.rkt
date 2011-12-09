@@ -1,10 +1,10 @@
-#lang class1
+#lang class/1
 
 ;; The Snake Game in Object-Oriented Style
 ;; Copyright (c) 2010 David Van Horn
 ;; Licensed under the Academic Free License version 3.0
 
-(require class1/universe)
+(require class/universe)
 (require 2htdp/image)
 
 (define SNAKE-COLOR "red")

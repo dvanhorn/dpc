@@ -1,4 +1,4 @@
-#lang class1
+#lang class/1
 (provide (all-defined-out))
 
 ;; RUBRIC
@@ -37,7 +37,7 @@
 
 ;; Problem Set 3, Problem 2
 (require 2htdp/image)
-(require class1/universe)
+(require class/universe)
 
 (define CELL 20)
 (define 1/2-CELL (/ CELL 2))

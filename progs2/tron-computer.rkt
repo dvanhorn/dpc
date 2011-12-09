@@ -1,4 +1,4 @@
-#lang class2
+#lang class/2
 ;; RUBRIC
 ;; ========================================================
 
@@ -32,7 +32,7 @@
 ;; =========================================================
 ;; Computer Tron
 
-(require class1/universe)
+(require class/universe)
 (require 2htdp/image)
 (require "tron.rkt")
 

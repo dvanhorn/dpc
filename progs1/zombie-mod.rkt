@@ -1,4 +1,4 @@
-#lang class1
+#lang class/1
 (require "zombie.rkt")
 ;; ==========================================================
 ;; Play the classic game of Zombie Attack!
@@ -10,7 +10,7 @@
 
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
 (require 2htdp/image)
-(require class1/universe)
+(require class/universe)
 
 ;; ==========================================================
 ;; A Player is one of:

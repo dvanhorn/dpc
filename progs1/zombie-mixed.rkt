@@ -1,4 +1,4 @@
-#lang class1
+#lang class/1
 
 ;; RUBRIC
 ;; ==========================================================
@@ -30,7 +30,7 @@
 ;; Based on Robot!, p. 234 of Barski's Land of Lisp.
 
 (require 2htdp/image)
-(require class1/universe)
+(require class/universe)
 
 (define CELL 20)
 (define 1/2-CELL (/ CELL 2))

@@ -1,5 +1,5 @@
-#lang class2
-(require 2htdp/image class2/universe)
+#lang class/2
+(require 2htdp/image class/universe)
 
 (provide (all-defined-out))
 

@@ -1,4 +1,4 @@
-#lang class4
+#lang class/4
 ;; A Person implements:
 (define-interface person<%>
   [name ; -> String

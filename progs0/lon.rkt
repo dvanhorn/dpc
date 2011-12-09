@@ -1,4 +1,4 @@
-#lang class0
+#lang class/0
 
 ;; Rubric:
 

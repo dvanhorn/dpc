@@ -1,4 +1,4 @@
-#lang class2
+#lang class/2
 ;; RUBRIC
 ;; ========================================================
 
@@ -6,7 +6,7 @@
 
 ;; This problem is supposed to be written in class1, but 
 ;; the solution is in class2 just for the convenience of
-;; leaving of `new'.
+;; leaving off `new'.
 
 ;; This rubric is fairly open-ended because the design is
 ;; fairly open-ended.
@@ -44,7 +44,7 @@
 ;; =========================================================
 ;; Two player distributed Tron
 
-(require class1/universe)
+(require class/universe)
 (require 2htdp/image)
 (provide serve play 
          mt% final% 

@@ -1,4 +1,4 @@
-#lang class1
+#lang class/1
 
 (define-class x% (fields y))
 ((new x% (new x% 5)) . y . y)

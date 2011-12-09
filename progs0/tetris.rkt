@@ -1,4 +1,4 @@
-#lang class0
+#lang class/0
 ;; Tetris in Object-Oriented Style
 ;; Copyright (c) 2010 David Van Horn
 ;; Licensed under the Academic Free License version 3.0
@@ -389,7 +389,7 @@
        [blocks mt-blocks]))
 
 
-(big-bang world0 
+(big-bang world0
           (on-tick (λ (w) (send w next)) (/ 1.0 5))
           (stop-when (λ (w) (send (send w blocks) overflow?)))
           (on-draw (λ (w) (send w ->image)))
