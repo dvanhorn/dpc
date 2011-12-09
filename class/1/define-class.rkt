@@ -7,7 +7,7 @@
                                    check-expect check-within 
                                    check-error check-member-of
                                    check-range)))
-(require (only-in "../../class0/define-class.rkt" field fields))
+(require (only-in "../0/define-class.rkt" field fields))
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
                      unstable/syntax racket/syntax

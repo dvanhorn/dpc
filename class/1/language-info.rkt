@@ -6,6 +6,6 @@
     (lambda (key default)
       (case key
         [(configure-runtime)
-         '(#(class1/runtime-config configure #f))]
+         '(#(class/1/runtime-config configure #f))]
         [else default]))))
 

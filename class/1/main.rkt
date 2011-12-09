@@ -6,7 +6,7 @@
          "../test-engine/racket-tests.rkt")
 
 
-(require (only-in "../../class0/main.rkt" define-struct #%module-begin)
+(require (only-in "../0/main.rkt" define-struct #%module-begin)
          (for-syntax racket/base syntax/parse))
 (require (prefix-in isl+: lang/htdp-intermediate-lambda))
 (require (prefix-in r: racket))
