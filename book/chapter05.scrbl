@@ -3,7 +3,7 @@
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 define-struct ... length))
 	  (for-label 2htdp/image)
-	  (for-label class/1/universe))
+	  (for-label class/universe))
 
 @title[#:tag "lec06"]{Universe}
 
@@ -68,7 +68,7 @@ Let's start with the counting world program:
 @#reader scribble/comment-reader
 (racketmod
   class/1
-  (require class/1/universe)
+  (require class/universe)
   (require 2htdp/image)
   
   (define-class counter-world%
@@ -136,7 +136,7 @@ the @racket[on-msg]:
 @#reader scribble/comment-reader
 (racketmod
   class/1
-  (require class/1/universe)
+  (require class/universe)
 
   (define-class universe%
     ;; IWorld -> Bundle
@@ -177,7 +177,7 @@ response, and disconnect no worlds:
 @#reader scribble/comment-reader
 (racketmod 
   class/1
-  (require class/1/universe)
+  (require class/universe)
 
   (define-class universe%
     ;; IWorld -> Bundle
@@ -312,7 +312,7 @@ Here's the server:
 @#reader scribble/comment-reader
 (racketmod
   class/1
-  (require class/1/universe)
+  (require class/universe)
 
   (define-class universe%
     (fields the-number)
@@ -345,7 +345,7 @@ Here is the client:
 @#reader scribble/comment-reader
 (racketmod
   class/1
-  (require class/1/universe)
+  (require class/universe)
   (require 2htdp/image)
 
   (define-class guess-world%
@@ -390,7 +390,7 @@ Here is the server:
 @#reader scribble/comment-reader
 (racketmod
   class/1
-  (require class/1/universe)
+  (require class/universe)
 
   ;; A Universe is a (new universe% [U #f Number] [U #f IWorld] [U #f IWorld]).
   (define-class universe%

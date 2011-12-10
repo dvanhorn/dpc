@@ -5,7 +5,7 @@
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/4/universe))
+	  (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval

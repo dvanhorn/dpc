@@ -3,7 +3,7 @@
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 define-struct ... length))
 	  (for-label 2htdp/image)
-	  (for-label class/1/universe))
+	  (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval

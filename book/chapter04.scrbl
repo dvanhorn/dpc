@@ -3,7 +3,7 @@
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 define-struct ... length))
 	  (for-label 2htdp/image)
-	  (for-label class/1/universe))
+	  (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -792,7 +792,7 @@ interact with it in the interactions window:
 @(the-eval
 '(begin
   (require 2htdp/image)
-  (require class/1/universe)
+  (require class/universe)
 
   (define WIDTH   8) ; in grid units
   (define HEIGHT  8) ; in grid units
@@ -1005,7 +1005,7 @@ future.
 (racketmod
   class/1
   (require 2htdp/image)
-  (require class/1/universe)
+  (require class/universe)
 
   (define WIDTH   8) ; in grid units
   (define HEIGHT  8) ; in grid units

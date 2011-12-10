@@ -5,7 +5,7 @@
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/1/universe))
+	  (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -99,10 +99,10 @@ class CPoint extends Point {
 
 }|
 
-Overriding in @racket[class4]:
+Overriding in @racket[class/4]:
 
 @codeblock{
-#lang class4
+#lang class/4
 
 ;; A Point is (point% Number Number)
 ;; and implements 
@@ -134,7 +134,7 @@ Overriding in @racket[class4]:
               (color-point% "red" 3 4))
 }
 
-Delegation in @racket[class4]:
+Delegation in @racket[class/4]:
 
 @codeblock{
 #lang racket
@@ -163,8 +163,8 @@ Delegation in @racket[class4]:
 A default World:
 
 @codeblock{
-#lang class4
-(require class4/universe 2htdp/image)
+#lang class/4
+(require class/universe 2htdp/image)
 
 ;; A DWorld is (default-world%)
 ;; and implements

@@ -5,7 +5,7 @@
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/1/universe))
+	  (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -208,7 +208,7 @@ of the @tt{in-range?%} class:
 @#reader scribble/comment-reader
 (racketmod
 class/2
-(require 2htdp/image class/2/universe)
+(require 2htdp/image class/universe)
 
 ;; A World is (world% Generator Number)
 ;; and implements IWorld
@@ -245,7 +245,7 @@ class/2
 @#reader scribble/comment-reader
 (racketmod
 class/2
-(require 2htdp/image class/2/universe)
+(require 2htdp/image class/universe)
 
 ;; A World is (world% Generator Number)
 ;; and implements IWorld
@@ -291,7 +291,7 @@ class/2
 @#reader scribble/comment-reader
 (racketmod
 class/3
-(require 2htdp/image class/3/universe)
+(require 2htdp/image class/universe)
 
 ;; A World is (world% Generator Number)
 ;; and implements IWorld
@@ -351,7 +351,7 @@ class/3
 @#reader scribble/comment-reader
 (racketmod
 class/3
-(require 2htdp/image class/3/universe)
+(require 2htdp/image class/universe)
 
 ;; A World is (world% Generator Number)
 ;; and implements IWorld

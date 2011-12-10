@@ -5,7 +5,7 @@
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/1/universe))
+	  (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -486,7 +486,7 @@ As written in class.
 
 @verbatim|{
 #lang class/2
-(require 2htdp/image class/2/universe)
+(require 2htdp/image class/universe)
 
 ;; A Board is a [Listof Color]
 ;; A Color is one of

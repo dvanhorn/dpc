@@ -4,7 +4,7 @@
           racket/sandbox
   	  (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/0 define-struct ...))
-	  (for-label class/0/universe))
+	  (for-label class/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -378,7 +378,7 @@ You can play the game by running:
 (racketmod
 class/0
 (require class/0/zombie)
-(require class/0/universe)
+(require class/universe)
 (big-bang zombie!)
 )
 

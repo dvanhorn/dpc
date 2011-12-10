@@ -5,7 +5,7 @@
           #;(for-label lang/htdp-intermediate-lambda)
   	  (for-label (only-in lang/htdp-intermediate-lambda define-struct))
           (for-label (except-in class/0 define-struct))
-	  (for-label class/0/universe))
+	  (for-label class/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -258,7 +258,7 @@ OO-style @racket[big-bang], add the following to the top of your
 program:
 
 @racketblock[
-(require class/0/universe)]
+(require class/universe)]
 
 In the functional setting, we had to explicitly give a piece of data
 representing the state of the initial world and list which functions
@@ -283,7 +283,7 @@ Our complete program is:
 @racketmod[
 class/0
 (require 2htdp/image)
-(require class/0/universe)
+(require class/universe)
 
 @code:comment{Use the rocket key to insert the rocket here.}
 (define ROCKET (bitmap class/0/rocket.png))
@@ -402,7 +402,7 @@ Giving us an overall program of:
 (racketmod
 class/0
 (require 2htdp/image)
-(require class/0/universe)
+(require class/universe)
 
 (define ROCKET (bitmap class/0/rocket.png))
 
@@ -455,7 +455,7 @@ Here is a complete program that includes an orbiting moon:
 (racketmod
 class/0
 (require 2htdp/image)
-(require class/0/universe)
+(require class/universe)
 
 (define ROCKET (bitmap class/0/rocket.png))
 (define MOON (circle 20 "solid" "blue"))

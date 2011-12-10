@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require "utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct))
-          (for-label (except-in class0 define-struct)))
+          (for-label (except-in class/0 define-struct)))
 
 @title[#:tag "soln01"]{Complex}
 
@@ -9,7 +9,7 @@ This is a solution for the @seclink["assign01"]{Complex} exercise.
 
 @#reader scribble/comment-reader
 (racketmod
-  class0
+  class/0
   ;;==========================================================
   ;; Complex Structure
 

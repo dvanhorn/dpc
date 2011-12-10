@@ -4,7 +4,7 @@
           (for-label (except-in class/1 check-expect define-struct ... length))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/1/universe))
+	  (for-label class/universe))
 
 @title[#:tag "lec08"]{Abstraction, Invariants, Testing}
 
