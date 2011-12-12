@@ -71,5 +71,55 @@ adapted for functions-as-objects.
 
 
 
+@section{Exercises}
 
+@subsection{Functional programming with objects}
 
+One perspective that unifies the paradigms of programming with
+functions and programming with objects is to view a ``function'' as an
+object that understands a method called @r[apply].  With that in
+mind, we can define an interface for functions-as-objects:
+
+@#reader scribble/comment-reader
+(racketblock
+;; A [IFun X Y] implements:
+;; apply : X -> Y
+;; Apply this function to the given input.
+)
+
+Here we are representing a @tt{X -> Y} function as an object that
+has an @r[apply] method that consumes an @tt{X} and produces a
+@tt{Y}.
+
+@itemlist[
+
+@item{Design a class that wraps a real function with contract @tt{(X
+-> Y)} to implement @tt{[IFun X Y]}.}
+
+@item{Using your wrapper class, construct the objects representing the
+  ``add 1'' function and ``sub 1'' function.}
+
+@item{Another useful operation on functions is composition.  Here is
+  the interface for a @r[compose] method that composes two functions
+  represented as objects:
+
+@#reader scribble/comment-reader
+(racketblock
+;; [IFun X Y] also implements:
+;; compose : [IFun Y Z] -> [IFun X Z]
+;; Produce a function that applies this function to its input, 
+;; then applies the given function to that result.
+)
+
+For example, if @r[addone] and @r[subone] refer to the objects
+you constructed in part 2, the following check should succeed:
+
+@#reader scribble/comment-reader
+(racketblock
+(check-expect ((addone #,dot compose subone) #,dot apply 5) 5)
+(check-expect ((addone #,dot compose addone) #,dot apply 5) 7)
+)
+
+Implement the @r[compose] method for your wrapper class.
+}
+]
