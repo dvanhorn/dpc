@@ -16,175 +16,381 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec18"]{Overriding}
+@title[#:tag "lec14"]{Visitors}
+
+Here is a high-level outline of what we covered in class today. Below is the
+code we wrote. These notes will be fleshed out soon---we're posting them in this
+unfinished form now so they can help you work on your assignment.
 
 @verbatim|{
-Is the test really on the 22nd? -- yes.
 
-Inheritance and overriding
+  Number generation game
 
-  Why do we use inheritance?
-    1. Abstracting common code
-    2. Managing the type system (in other languages)
-    3. Extend existing system -- often overused, but very useful
+    Want to remember and avoid generating numbers rejected by player
+      Store in generator
 
-  Example: points
-    color-point% extends point%
-      Use overriding to implement mv correctly for color-point%
-    color-point% contains point%
-      1. Class relationships aren't explicit
-      2. Must manually delegate every inherited behavior
+    Why does `pick' terminate?
+      You could stay unlucky forever...
+        We'll avoid the delicious subtleties of this issue and move on
 
-  Use mutation?
-  Use update methods?
-  Use copying + mutation?
-    Performance analysis is hard and is best done empirically
+    sudo read xkcd
 
-  Dispatch
-    Call the method most specific to the _object_
-    e.g. double-move calls mv which dispatches to the appropriate method body
+    With mutation
+      Q: Is mutation bad design?
+        Functional design is easier to test
+        But mutation can sometimes simplify our programs
 
-  Example: worlds
-    big-bang expects many behaviors that we usually don't want to specify
+    Testing randomness is hard
+    Testing mutation is hard
 
-  super to dispatch one level up
-    Jumping >1 level would very often be a bad idea and break modularity
+    Question Dan's attitude
+    Question Dan's entropy
 
-  With inheritance, data definitions are always _open_
-    e.g. A Point is one of
-          - (point% Num Num)
-          - (color-point% Color Num Num)
-          - ...
+    Change `tell-bad : Number ->' to `tell-bad : ->'
 
-  Overriding lets you parametrize behavior of methods by supplying new behavior
-    Powerful, just like higher-order functions in FP
-    But power comes with responsibility: must respect behavioral subtyping!
-}|
+    Property testing: as the number of inputs goes down, the amount of state
+    stored in the generator goes up, along with the complexity of the test
 
-Overriding in Java:
-
-@verbatim|{
-class Point {
-    Integer x;
-    Integer y;
-
-    public Point(Integer x, Integer y) {
-	this.x = x;
-	this.y = y;
-    }
-
-    public Point mv(Integer dx, Integer dy) {
-	return new Point(this.x + dx, this.y + dy);
-    }
-
-    public Point double_move(Integer dxy) {
-	return this.mv(dxy,dxy);
-    }
-
-}
-
-class CPoint extends Point {
-    String color;
-    
-    public CPoint(String color, Integer x, Integer y) {
-	super(x,y);
-	this.color = color;
-    }
-
-    public CPoint mv(Integer dx, Integer dy) {
-	return new CPoint(this.color, this.x-dx, this.y-dy);
-    }
-    
-}
+    How do we apply the number generator game to the homework?
+      Telling the number generator ``bad'' is a simple model of how we could
+      tell our AI player not to repeat the last set of decisions it made.
 
 }|
 
-Overriding in @racket[class/4]:
+@section{The Visitor Pattern}
 
-@codeblock{
-#lang class/4
+The visitor pattern is a general design pattern that allows you to
+seperate data from functionality in an object-oriented style.
 
-;; A Point is (point% Number Number)
-;; and implements 
-;; mv : Number Number -> Point
-;; moves the point by this much in each direction
-;; double-move : Number -> Point
-;; move both x and y by the given amount
-(define-class point%
-  (fields x y)
-  (define/public (mv dx dy)
-    (point% (+ dx (field x)) 
-            (+ dy (field y))))
-  (define/public (double-move dxy)
-    (mv dxy dxy))
-  
-  (check-expect (send (point% 1 2) mv 3 3) (point% 4 5))
-  (check-expect (send (point% 1 2) double-move 3) (point% 4 5))
-  )
+For instance, suppose you want to develop a library of ranges.  Users
+of your library are going to want a bunch of different methods, and in
+principal, you can't possibly know or want to implement all of them.
+On the other hand, you may not want to expose the implementation
+details of @emph{how} you chose to represent ranges.
 
-(define-class color-point%
-  (super point%)
-  (fields color)
-  (define/public (mv dx dy)
-    (color-point% (field color) 
-                  (+ dx (field x))
-                  (+ dy (field y)))))
+The visitor pattern can help---it requires you to implement @emph{one}
+method which accepts what we call a "visitor" that is then exposed to
+a view of the data.  Any computation over shapes can be implemented as
+a visitor, so this one method is universal---no matter how people want
+to use your library, this one method is enough to ensure they can
+write whatever computation they want.  What's better is that even if
+you change the representation of ranges, so long as you provide the
+same "view" of the data, everything will continue to work.
 
-(check-expect (send (color-point% "red" 1 2) mv 2 2)
-              (color-point% "red" 3 4))
-}
+So here is our data definition for ranges:
 
-Delegation in @racket[class/4]:
+@verbatim|{
+; A Range is one of
+;; - (new lo-range% Number Number)
+;; Interp: represents the range between `lo' and `hi'
+;;         including `lo', but *not* including `hi'
 
-@codeblock{
-#lang racket
+;; - (new hi-range% Number Number)
+;; Interp: represents the range between `lo' and `hi'
+;;         including `hi', but *not* including `lo'
+
+;; - (new union-range% Range Range)
+;; Interp: including all the numbers in both ranges
+
+(define-class lo-range%
+  (fields lo hi))
+
+(define-class hi-range%
+  (fields lo hi))
+
+(define-class union-range%
+  (fields left right))
+}|
+
+We will add a single method to the interface for ranges:
+
+@verbatim|{
+;; The IRange interface includes:
+;; - visit : [IRangeVisitor X] -> X
+}|
+
+We haven't said what is in the @tt{[IRangeVisitor X]} interface, but
+the key idea is that something that implements a @tt{[IRangeVisitor
+X]} represents a computation over ranges that computes an @tt{X}.  So
+for example, if we wanted to compute where a number is included in a
+range, we would want to implement the @tt{[IRangeVistitor Boolean]}
+interface since that computation would produce a yes/no answer.
+
+The idea, in general, of the visitor pattern is that the visitor will
+have a method for each variant of a union.  And the method for a
+particular variant takes as many arguments as there are fields in that
+variant.  In the case of a recursive union, the method takes the
+result of recursively visiting the data.
+
+Under that guideline, the @tt{[IRangeVisitor X]} interface will
+contain 3 methods:
+
+@verbatim|{
+;; An [IRangeVisitor X] implements:
+;; lo-range : Number Number -> X
+;; hi-range : Number Number -> X
+;; union-range : X X -> X
+}|
+
+Notice that the contracts for lo and hi-range match the contracts on
+the constructors for each variant, but rather than constructing a
+@tt{Range}, we are computing an @tt{X}.  In the case of
+@tt{union-range}, the method takes two inputs which are @tt{X}s, which
+represent the results of visiting the left and right ranges,
+respectively.
+
+Now we need to implement the @tt{visit} method in each of the
+@tt{Range} classes, which will just invoke the appropriate method of
+the visitor on its data and recur where needed:
+
+@verbatim|{
+(define-class lo-range%
+  (fields lo hi)
+ 
+  (define/public (visit v)
+    (v . lo-range (field lo) (field hi))))
+
+(define-class hi-range%
+  (fields lo hi)
+
+  (define/public (visit v)
+    (v . hi-range (field lo) (field hi))))
+
+(define-class union-range%
+  (fields left right)
+
+  (define/public (visit v)
+    (v . union-range ((field left) . visit v) 
+                     ((field right) . visit v))))
+}|
+
+We've now established the visitor pattern.  Let's actually construct a
+visitor that does something.
+
+We forgot to implement the @tt{in-range?} method, but no worries -- we
+dont' need to edit our class definitions, we can just write a visitor
+that does the @tt{in-range?} computation, which is an implementation
+of @tt{[IRangeVisitor Boolean]}:
+
+@verbatim|{
+;; An InRange? is an (in-range?% Number) 
+;; implements [IRangeVisitor Boolean].
+
+(define-class in-range%?
+  (field n)
+
+  (define (lo-range lo hi)
+    (and (>= (field n) lo)
+         (<  (field n) hi)))
+
+  (define (hi-range lo hi)
+    (and (>  (field n) lo)
+         (<= (field n) hi)))
+    
+  (define (union-range left right)
+    (or left right)))
+}|
+
+Now if we have our hands on a range and want to find out if a number
+is in the range, we just invoke the @tt{visit} method with an instance
+of the @tt{in-range?%} class:
+
+@verbatim|{
+(some-range-value . visit (in-range?% 5))   ;; is 5 in some-range-value ?
+}|
 
 
 
-;; A Point is (point% Number Number)
-;; and implements 
-;; mv : Number Number -> Point
-;; moves the point by this much in each direction
-(define-class point%
-  (fields x y)
-  (define/public (mv dx dy)
-    (point% (+ dx (field x))
-            (+ dy (field y))))
-  (check-expect (send (point% 1 2) mv 3 3) (point% 4 5))
-  )
+@section{Generators}
 
-(define-class color-point
-  (fields color pt)
-  (define/public (mv dx dy)
-    (color-point% (field color)
-                  (send (field pt) mv dx dy))))
-}
+@tt{generator-bad.rkt}
 
-A default World:
+@#reader scribble/comment-reader
+(racketmod
+class/2
+(require 2htdp/image class/universe)
 
-@codeblock{
-#lang class/4
-(require class/universe 2htdp/image)
+;; A World is (world% Generator Number)
+;; and implements IWorld
+(define-class world%
+  (fields generator num)
+  ;; to-draw : -> Scene
+  (define/public (to-draw)
+    (overlay
+     (text (number->string (field num)) 20 "black")
+     (empty-scene 500 500)))
+  ;; on-key : Key -> World
+  (define/public (on-key k)
+    (world% (field generator)
+            ((field generator) #,dot pick))))
 
-;; A DWorld is (default-world%)
+;; A Generator is a (generator% [Listof Number])
 ;; and implements
-;; on-tick : DWorld -> DWorld
-;; to-draw : DWorld -> Scene
-;; ...
-(define-class default-world%
-  (define/public (on-tick)
-    this)
-  (define/public (to-draw)
-    (empty-scene 300 300
-                 )
-    )
-  )
+;; pick : -> Number
+;; produce a number to show that isn't in bad
+(define-class generator%
+  (fields bad)
+  (define/public (pick)
+    (local [(define x (random 10))]
+      (cond [(member x (field bad)) (pick)]
+            [else x]))))
+(check-expect (<= 0 ((generator% empty) #,dot pick) 10) true)
+(check-expect (= ((generator% (list 4)) #,dot pick) 4) false)
 
-(define-class circle-world%
-  (super default-world%)
-  (define/public (to-draw)
-    (overlay (circle 20 "solid" "red")
-             (empty-scene 300 300))))
+(big-bang (world% (generator% empty) 0))
+)
 
-(big-bang (circle-world%))
-}
+@tt{generator-register.rkt}
+
+@#reader scribble/comment-reader
+(racketmod
+class/2
+(require 2htdp/image class/universe)
+
+;; A World is (world% Generator Number)
+;; and implements IWorld
+(define-class world%
+  (fields generator num)
+  ;; to-draw : -> Scene
+  (define/public (to-draw)
+    (overlay
+     (text (number->string (field num)) 20 "black")
+     (empty-scene 500 500)))
+  ;; on-key : Key -> World
+  (define/public (on-key k)
+    (cond [(key=? k "x")
+           (local [(define g ((field generator) #,dot add-bad (field num)))]
+             (world% g (g #,dot pick)))]
+          [else
+           (world% (field generator)
+                   ((field generator) #,dot pick))])))
+
+;; A Generator is a (generator% [Listof Number])
+;; and implements
+;; pick : -> Number
+;; produce a number to show that isn't in bad
+;; add-bad : Number -> Generator
+;; produce a generator like that with an additional bad number
+(define-class generator%
+  (fields bad)
+  (define/public (add-bad n)
+    (generator% (cons n (field bad))))
+  (define/public (pick)
+    (local [(define x (random 10))]
+      (cond [(member x (field bad)) (pick)]
+            [else x]))))
+(check-expect (<= 0 ((generator% empty) #,dot pick) 10) true)
+(check-expect (= ((generator% (list 4)) #,dot pick) 4) false)
+(check-expect (= (((generator% empty) #,dot add-bad 4) #,dot pick) 4) false)
+
+(big-bang (world% (generator% empty) 0))
+)
+
+@tt{generator-initial.rkt}
+
+@#reader scribble/comment-reader
+(racketmod
+class/3
+(require 2htdp/image class/universe)
+
+;; A World is (world% Generator Number)
+;; and implements IWorld
+(define-class world%
+  (fields generator num)
+  ;; to-draw : -> Scene
+  (define/public (to-draw)
+    (overlay
+     (text (number->string (field num)) 20 "black")
+     (empty-scene 500 500)))
+  ;; on-key : Key -> World
+  (define/public (on-key k)
+    (cond [(key=? "x" k)
+           (begin ((field generator) #,dot tell-bad)
+                  (world% (field generator)
+                          ((field generator) #,dot pick)))]
+          [else
+           (world% (field generator)
+                   ((field generator) #,dot pick))])))
+
+;; A Generator is a (generator% [Listof Number] Number)
+;; interp: the list of bad numbers, and the last number picked
+;; and implements
+;; pick : -> Number
+;; produce a number to show not in the list
+;; tell-bad : ->
+;; produces nothing
+;; effect : changes the generator to add the last number picked to the bad list
+(define-class generator%
+  (fields bad last)
+  (define/public (tell-bad)
+    (set-field! bad (cons (field last) (field bad))))
+  (define/public (pick)
+    (local [(define rnd (random 10))]
+      (cond [(member rnd (field bad)) (pick)]
+            [else (begin
+                    (set-field! last rnd)
+                    rnd)]))))
+(check-expect (<= 0 ((generator% (list 2 4 6) 0) #,dot pick) 100) true)
+
+(big-bang (world% (generator% (list 2 4 6) 0) 0))
+
+(check-expect (member ((generator% (list 2 4 6) 0) #,dot pick)
+                      (list 2 4 6))
+              false)
+
+(define (tell-bad-prop g)
+  (local [(define picked (g #,dot pick))]
+    (begin (g #,dot tell-bad)
+           (not (= picked (g #,dot pick))))))
+
+(check-expect (tell-bad-prop (generator% (list 1 2 3) 0)) true)
+)
+
+@tt{generator-mutate.rkt}
+
+@#reader scribble/comment-reader
+(racketmod
+class/3
+(require 2htdp/image class/universe)
+
+;; A World is (world% Generator Number)
+;; and implements IWorld
+(define-class world%
+  (fields generator num)
+  ;; to-draw : -> Scene
+  (define/public (to-draw)
+    (overlay
+     (text (number->string (field num)) 20 "black")
+     (empty-scene 500 500)))
+  ;; on-key : Key -> World
+  (define/public (on-key k)
+    (cond [(key=? k "x")
+           (world% (field generator)
+                   ((field generator) #,dot pick-bad))]
+          [else
+           (world% (field generator)
+                   ((field generator) #,dot pick))])))
+
+;; A Generator is a (generator% [Listof Number] Number)
+;; interp: numbers not to pick, last number picked
+;; and implements
+;; pick : -> Number
+;; produce a number to show that isn't in bad
+;; pick-bad : -> Number
+;; pick a number to show, and remember that the last one was bad
+(define-class generator%
+  (fields bad last)
+  (define/public (pick-bad)
+    (begin (set-field! bad (cons (field last) (field bad)))
+           (pick)))
+  (define/public (pick)
+    (local [(define x (random 10))]
+      (cond [(member x (field bad)) (pick)]
+            [else (begin (set-field! last x)
+                         x)]))))
+
+(check-expect (<= 0 ((generator% empty 0) #,dot pick) 10) true)
+(check-expect (= ((generator% (list 4) 0) #,dot pick) 4) false)
+
+(big-bang (world% (generator% empty 0) 0))
+)

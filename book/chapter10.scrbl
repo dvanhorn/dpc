@@ -16,536 +16,635 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec11"]{Mutation}
+@title[#:tag "lec09"]{Constructors}
 
-We want to design a class, @r[counter%], with the following interface
+@section{Canonical forms}
+
+Today we're going to look more at the concept of @emph{invariants}.
+Invariants often let us write code that takes advantage of the fact
+that we know some property, the invariant, of our data.  We saw this
+last class using sorted lists of numbers.  Today we're going to
+examine a new example: fractions.
+
+A fraction can be represented as a compound data that consists of two
+numbers representing the numerator and denominator:
 
 @codeblock{
-;; m : -> Number
-;; Produce the number of times `m' has been called
+  ;; A Fraction is a (new fraction% Integer Integer).
+  (define-class fraction%
+    (fields numerator denominator))
 }
 
-Now let's try to implement this class.  
+The problem here is that we'd like to consider the
+fractions:
 
-@racketblock[
-(define-class counter%
-  (fields called)
-  (define/public (m)
-    #, @(elem "hmmm")))
+@codeblock{
+  (new fraction% 1 2)
+  (new fraction% 2 4)
+}
+
+as representing the same number, namely @racket[1/2], but these are
+different representations of the same information.  The issue with
+fractions is a recurring issue we've seen with information that allows
+for multiple representations (sets are another example).  
+
+There are a couple approaches to solving this issue:
+
+@itemlist[#:style 'ordered
+
+@item{Represents information is some @emph{canonical} way.}
+
+@item{Codify the interpretation of data as a program.}
 ]
 
-Unfortunately, it's not immediately clear what to put in the body of
-@r[m]. We can understand our task better by writing examples.  
+The first approach basically eliminates the problem of multiple
+representations by picking a unique representation for any given piece
+of information.  For example, with fractions, we might choose to
+represent all fractions in lowest terms.  This means any fraction
+admits only a single representation and therefore any fractions which
+are interpreted as "the same" have exactly the same structure.  (This
+approach is not always possible or feasible.)
 
-@racketblock[
- (check-expect ((counter% 0) #,(racketidfont ".") m) 1)
- (check-expect ((counter% 4) #,(racketidfont ".") m) 5)
-]
+The second approach requires us to write a program (a function, a
+method, etc.) that determines when two pieces of data are interpreted
+as representing the same information.  For example, we could write a
+method that converts fractions to numbers and compares them for
+numerical equality; or we simplify the fraction to lowest terms and
+compare them structurally.
 
-This suggests the following implementation:
+Along the lines of the second approach, let's consider adding the
+following method:
 
-@filebox[@r[counter%]]{
-@racketblock[
- (define/public (m)
-   (add1 (field called)))
-]}
-
-Now our all of our tests pass.
-
-@(the-eval '(begin
-	      (define-class counter%
-		(fields called)
-		(define/public (m) (add1 (field called))))
-	      ))
-
-However, when we try our a few more examples, we see this:
-
-@interaction[#:eval the-eval
-(define c (counter% 0))
-(send c m)
-(send c m)
-]
-
-Of course, this is the wrong answer.  We shouldn't be surprised, since
-nothing has changed about @r[c]---in fact, nothing ever happens to
-@r[c], and only one @r[counter%] instance is produced in this
-program.  
-In order to give @r[m] the ability to remember things, we will need to
-do something to get a different @r[counter%].
-
-One possibility is to change @r[m] to produce both the desired result
-@emph{and} a new counter.
-
-@interaction[#:eval the-eval
-(define-struct r (n new-counter))
-
-(define-class counter%
-  (fields called)
-  (define/public (m)
-    (make-r
-     (add1 (field called))
-     (counter% (add1 (field called))))))
-(define c (counter% 0))
-
-(send c m)
-
-(define d (r-new-counter (send c m)))
-d
-(send d m)]
-
-So far, so good---we can get a new @r[counter%], and when we use that
-new value, we get the right answer.  However, we haven't solved the
-problem yet:
-
-@interaction[#:eval the-eval 
-(send c m)]
-
-This is the same answer that we had before, and not the desired one.
-
-In fact, this behavior is the result of one of the important design
-principles of this class, and of Fundies 1, up until this point.  If
-you call a function or method with the same inputs, you get the same
-result.  Always!
-
-Unfortunately, that make it impossible to implement @r[m], because @r[m]s spec
-violates this assumption---if you call it, it is required to produce a
-@emph{different} result from the last time it was called.
-
-Previously, we've always been able to rely on this test passing,
-regardless of what you put in @r[E]
-
-@racketblock[
-(check-expect E E)
-]
-
-Actually, it turns out that there have been a few exceptions to this rule:
-@itemlist[
-@item{@racket[(random 5)]}
-@item{User input, such as in @r[big-bang]}]
-
-Now, however, we are proposing a much more fundament violation of this
-principle. 
-
-Before we violate the principle, though, let's look at one more
-possible idea:  accumulators.
-
-We could add an acummulator to @r[m], which is the previous number of
-times we've been called. We've used this solution before to create
-functions and methods that remember previous information.  In this
-case, though, accumulators are a non-solution.  If we add an
-accumulator to @r[m] to indicate what we're remembering, we get this
-method:
-
-@filebox[@r[counter%]]{
-@racketblock[
-(define/public (m accum) (add1 accum))]}
-
-But that's a pretty boring method---it's just a wrapper around
-@r[add1].  And it's not a solution to our problem: instead of the
-@r[counter%] class or the @r[m] method remembering the number of
-times we've called @r[m], we have to remember it ourselves, and
-provide it as input every time we call @r[m].  
-
-
-@section{Ch-Ch-Ch-Ch-Changes}
-
-To truly solve our problem, and implement @r[m], we need new language
-support.  This support is provided in @racketmodname[class/3].
-
-The @racketmodname[class/3] language provides the new @r[set-field!]
-form, which is used like this:
-
-@racketblock[
-(set-field! f new-value)
-]
-
-This @emph{changes} the value of the field named @r[f] in @r[this]
-object to whatever @r[new-value] is.  
-
-We can now revise our defintion of @r[m] to 
-
-@filebox[@r[counter%]]{
-@racketblock[
-(define/public (m)
-  (begin (set-field! called (add1 (field called)))
-	 (add1 (field called))))]}
-
-Note that @r[set-field!] @emph{doesn't produce} a new version of the field,
-instead it @emph{changes} the field named @r[called] to something new.
-
-@margin-note{Question: How would we do something like this in a purely
-		       functional language? 
-
-		       Answer: We would do something similar to the
-@r[make-r] approach presented above.  In
-@link["http://haskell.org"]{Haskell}, this approach is frequently
-used.}
-
-
-We've also introduced one more language feature in
-@racketmodname[class/3]: @r[begin].  The @r[begin] form works by
-evaluating each expression in turn, throwing away the result of every
-expression except that last one.  Then it does the last part, and
-produces that result.
-
-@margin-note{Question: Do we have @r[begin0]?  
-
-Answer: No.}
-
-Unlike @r[set-field!], @r[begin] doesn't add any new capability to the
-language.  For example, we can simulate @r[begin] using @r[local].
-For example:
-
-@racketblock[
-(local [(define dummy (set-field! called (add1 (field called))))]
-  (add1 (field called)))
-]
-
-This is very verbose, and requires creating new variables like
-@r[dummy] that are never used.  Therefore, @r[begin] is a useful
-addition to our language, now that we work with expressions like
-@r[set-field!] that don't produce any useful results.  
-
-@margin-note{@bold{A brief discussion of }@r[void]
-
-What happens if we return the result of @r[set-field!]?  It produces
-nothing---DrRacket doesn't print anything at all.
-
-However, there's no way for DrRacket to truly have nothing at all, so
-it has an internal value called @r[void].  This value doesn't have any
-uses, though, and you shouldn't ever see it.}
-
-
-Now Expressions do two things:
- - produce a result (everything does this)
- - has some effect (some expressions do this)
-
-Now we write effect statements.  Have to write them for every
-method/function that has an effect.
-
-@filebox[@r[counter%]]{
+@filebox[@r[fraction%]]{
 @#reader scribble/comment-reader
 (racketblock
-;; m : -> Number
-;; Produce the number of times m has been called
-;; Effect : increment the called field
-(define/public (m)
-  (begin (set-field! called (add1 (field called)))
-         (add1 (field called))))
+  ;; to-number : -> Number
+  ;; Convert this fraction to a number.
+  (define/public (to-number)
+    (/ (field numerator)
+       (field denominator)))
 )}
 
-We've lost a lot of reasoning power but gained expressiveness.
-
-What have I really gained, though?
-
-Imagine that you're modeling bank financial systems.  You want to
-deposit money into the account, and then the money should be there
-afterwards.  
+This method essentially embodies our interpretation of the
+@racket[fraction%] class of data.  It doesn't help with this issues:
 
 @codeblock{
-;; An Account is (account% Number)
-(define-class account%
-  (fields amt)
-  
-  ;; Number -> Account
-  (define/public (deposit n)
-    (account% (+ (field amt) n))))
+  (check-expect (new fraction% 1 2)
+		(new fraction% 2 4))
 }
 
-But this doesn't model bank accounts properly.  
-
-I deposit, my valentine deposits, I deposit -- whoops!
-
-New version:
+But of course now we can write our tests to rely on this
+interpretation function:
 
 @codeblock{
-;; An Account is (account% Number)
-(define-class account%
-  (fields amt)
-  
-  ;; Number -> Void
-  ;; Effect: increases the field amt by n
-  ;; Purpose: add money to this account
-  (define/public (deposit n)
-    (set-field! amt (+ (field amt) n))))
+  (check-expect ((new fraction% 1 2) . to-number)
+		((new fraction% 2 4) . to-number))
 }
-Note that we don't need to produce any result at all.  
 
+But what if we wanted to go down the second route?  We could define a
+method that computes a fraction in lowest terms:
+
+@filebox[@r[fraction%]]{
+@#reader scribble/comment-reader
+(racketblock
+  ;; simplify : -> Fraction
+  ;; Simplify a fraction to lowest terms.
+  (check-expect ((new fraction% 3 6) . simplify)
+		(new fraction% 1 2))
+)}
+
+We can use the @racket[gcd] function to compute the greatest common
+denominator of the terms:
+
+@filebox[@r[fraction%]]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (simplify)
+    (new fraction%
+	 (/ (field numerator) 
+	    (gcd (field numerator) 
+		 (field denominator)))
+	 (/ (field denominator) 
+	    (gcd (field numerator) 
+		 (field denominator)))))
+)}
+
+This allows us to structurally compare two fractions that have been
+simplified to lowest terms:
 
 @codeblock{
-;; A Person is (person% String Account Number)
-(define-class person%
-  (fields name bank paycheck)
-  ;; -> Void
-  ;; Deposit the appropriate amount
-  ;; Effect: changes the the bank account amt
-  (define/public (pay)
-    (send (field bank) deposit (field paycheck))))
+  (check-expect ((new fraction% 3 6) . simplify)
+		((new fraction% 1 2) . simplify))
 }
 
-@(the-eval
-  '(module a class/3
-     (provide account% person%)
-     ;; An Account is (account% Number)
-     (define-class account%
-       (fields amt)
-  
-       ;; Number -> 
-       ;; Effect: increases the field amt by n
-       ;; Purpose: add money to this account
-       (define/public (deposit n)
-	 (set-field! amt (+ (field amt) n))))
+But it does not prevent us from constructing fractions that are not in
+lowest terms, which is what we were aiming for --- we want it to be an
+invariant of @racket[fraction%] objects that they are in their
+simplest form.  One possibility is to define a @emph{constructor
+function} that consumes a numerator and denominator and constructs a
+@racket[fraction%] object in lowest terms:
 
-     ;; A Person is (person% String Account Number)
-     (define-class person%
-       (fields name bank paycheck)
-       ;; -> Void
-       ;; Deposit the appropriate amount
-       ;; Effect: changes the the bank account amt
-       (define/public (pay)
-	 (send (field bank) deposit (field paycheck))))))
+@codeblock{
+;; fract-constructor : Number Number -> Fraction
+;; construct a fraction in lowest terms.
+(define (fract-constructor n d)
+  (new fraction%
+       (/ n (gcd n d))
+       (/ d (gcd n d))))
+}
 
-@(the-eval '(require 'a))
+So we are able to write a new function with the behavior we want and
+it establishes our invariant.  That's good, but there are still some
+inconveniences:
 
-@interaction[#:eval the-eval
-(define dvh-acct (account% 0))
-(define dvh (person% "DVH" dvh-acct 150))
-(define sweetie (person% "Sweetie" dvh-acct 3000))
-
-(send dvh pay)
-dvh-acct
-(send sweetie pay)
-dvh-acct
+@itemlist[
+@item{We have to write a function.}
+@item{We have to remember to use it everywhere in place of the constructor.}
+@item{We still have the @racket[fraction%] constructor around, which allows
+users, including ourselves, to violate the invariant.}
 ]
 
+If we want to have a stronger guarantee that we maintain the lowest
+term invariant, we need a stronger mechanism for enforcing our
+discipline at construction-time.  The idea is to allow arbitrary
+computation to occur between the call to a constructor and the
+initialization of an object.  To enable this mechanism, we need to
+bump the language level up to @racket[class/2].
 
-Note that we @emph{cannot} replace @r[dvh-acct] with @r[(account% 0)]
--- we'd get totally different results.
+All @racket[class/1] programs continue to work in @racket[class/2].  The
+main difference is that we now the ability to write @emph{constructors}.
 
-Now equality is much more subtle -- intensional equality vs
-extensional equality. Same fork example.  
-
-What if we do:
-@#reader scribble/comment-reader
-(interaction #:eval the-eval
-(define new-acct dvh-acct)
-(define p (person% "Fred" new-acct 400))
-(send p pay)
-;; updated
-dvh-acct 
-)
-
-What if we create new account% with 0?  Then the effects are not
-shared.  
-
-What if we do:
-@#reader scribble/comment-reader
-(interaction #:eval the-eval
-(define x (send dvh-acct amt))
-x
-(send dvh pay)
-;; still the same
-x 
-)
-
-What if we do
-@#reader scribble/comment-reader
-(interaction #:eval the-eval
-(define y (send dvh bank))
-y
-(send dvh pay)
-;; now different
-y
-)
-
-The differece is that @r[x] is the name of a number, and numbers don't
-change, but y is the name of an account, and accounts change over
-time.  
-
-Objects can change, but other things do not change.  Structures and
-lists can contain objects that change, but the structures and lists
-themselves do not change, the object they point to are the same
-objects.  
-
-Testing is hard with mutation.  Give an example in the notes.  
-
-
-@section{Circular Data}
-
-Books & Authors
-
-Books have:
-title : String
-author : Author
-
-Authors have:
-name : String
-books : [Listof Book]
-
-As data def:
+@filebox[@r[fraction%]]{
 @codeblock{
-;; A Book is (book% String Author)
-;; An Author is (author% String [Listof Book])
-}
+  (constructor (n d)
+    ;;...some expression that uses the fields form to return values
+    ;;   for all of the fields...
+    ...)
+}}
 
-Can we make an @tt{Author}?
-@codeblock{
-(author% "Rose" empty)
-(book% "Reign of Roquet" (author% "Rose" empty))
-}
-
-But this is wrong: the Rose has written a book, but the author object
-doesn't know about it.
-
-Do we need books to know the author? Yes.
-
-We've seen this before with graph structure.  We represented graphs as
-association lists, using symbolic names. 
-@codeblock{
-;; A Book is (book% String Author)
-(define-class book%
-  (fields title author))
-
-;; An Author is (author% String [Listof Book])
-(define-class author%
-  (fields name books))
-
-(define rose  (author% "Rose" empty))
-(define reign (book% "Reign of Roquet" rose))
-}
-But:
-@codeblock{
-reign
-rose
-}
-
-Question: Does @r[reign] contain a copy of @r[rose], or are they all
-the same @r[rose]?  Answer: always the same, because we use the name
-@r[rose], we didn't construct a new one.
-
-Let's add a new method for modifying the author after a book is
-written:
-@codeblock{
-(define/public (add-book b)
-  (set-field! books (cons b (field books))))
-}
-
-Now we change our example:
-@codeblock{
-(define rose  (author% "Rose" empty))
-(define reign (book% "Reign of Roquet" rose))
-(send rose add-book reign)
-}
-
-@(the-eval
-   '(module b class/3
-      (provide book% author% rose reign)
-      ;; A Book is (book% String Author)
-      (define-class book%
-	(fields title author))
-      
-      ;; An Author is (author% String [Listof Book])
-      (define-class author%
-	(fields name books)
-	(define/public (add-book b)
-	  (set-field! books (cons b (field books)))))
-
-      
-      (define rose  (author% "Rose" empty))
-      (define reign (book% "Reign of Roquet" rose))
-      (send rose add-book reign)))
-
-@(the-eval '(require 'b))
-
-How does it print? 
-
-@interaction[#:eval the-eval
-rose
-reign
-]
-
-See graph-style printing.
-
-But every times we construct a book with an author, we want to use
-@r[add-book].  So, let's use the constructor.  
+The @racket[constructor] form can take any number of arguments
+and must use the @racket[fields] to initialize each of the fields.
+If you leave off the constructor form, a default constructor is
+generated as:
 
 @codeblock{
-(constructor (t a)
-  (fields t a)
-  (send a add-book this))
+  (constructor (n d)
+    (fields n d))
 }
 
-In the first expression, we @emph{cannot} use @r[this], and we must produce
-the result using @r[fields].  Later, we can use @r[this], and we get the
-desired result. 
+And in general if you have @tt{n} fields, the defaults constructor
+looks like:
 
-@section{Yet another kind of equality}
+@codeblock{
+  (constructor (field1 field2 ... fieldn)
+    (fields field1 field2 ... fieldn))
+}
 
-Mutation exposes yet another sense in which two things may be consider
-@emph{"the same"}: two things are the same if mutating one mutates the
-other.
+But by writing our own constructor, we can insert computation to
+convert arguments in a canonical form.  For our @racket[fraction%]
+class, we can use the following code:
 
-@section{Back-channels}
+@codeblock{
+  ;; Number Number -> Fraction
+  (constructor (n d)
+    (fields (/ n (gcd n d))
+	    (/ d (gcd n d))))
+}
 
-Up until this point, computations communicate by consuming arguments
-and producing values.  Mutation enables more channels of communication
-between computations via @emph{shared} mutable data.
+This code is used every time we have a @racket[(new fraction% Number
+Number)] expression.  Since this is the only way to construct a
+fraction, we know that @emph{all fractions are represented in lowest
+terms}.  It is simply impossible, through both error or malice, to
+construct an object that does not have this property.
 
-As an example, recall our counter world program from @secref{counter}:
+Returning to our @racket[simplify] method; we don't really need it any
+longer.  (We could, if need be, re-write the code to take advantage of
+the invariant and give a correct implementation of
+@racket[simplify] as @racket[(define/public (simplify) this)], since
+all fractions are already simplified.)  Likewise, we no longer need
+the @racket[fract-constructor] function.
 
+Finally, we get to the point we wanted:
+@codeblock{
+  (check-expect (new fraction% 1 2)
+		(new fraction% 2 4))
+}
+
+Q: Can you have multiple constructor?  
+
+A: No.  We've been thinking about multiple constructors, but we don't
+have a strong story for them yet.  Remember: you can always write
+functions and you can think of these as alternative constructors.
+
+That brings up another feature in the @racketmodname[class/2] language
+--- constructors and functions are treated more uniformly now: you may
+leave off the @racket[new] keyword when constructing objects.
+
+@examples[#:eval the-eval
+  (define-class posn%
+    (fields x y))
+  (new posn% 2 3)
+  (posn% 4 5)]
+
+Q: Can you have a different number of arguments to the constructor
+than to the number of fields?  
+
+A: Yes.  There's no relation between the number of arguments to your
+constructor and the number of fields in the object being constructed.
+
+One thing to note is that printing values has changed.  You'll notice
+that @racket[fraction%] values no longer print as @racket[(new
+fraction% Number Number)], but instead as @racket[(object:fraction%
+Number Number)].  This is because by adding arbitrary computation at
+construction-time, there's no longer a close relationship between a 
+call to a constructor and the contents of an object.  So in printing
+values we have a choice to make: either print the constructor call,
+which doesn't tell us about the contents of the object, @emph{or} 
+print the contents of the object, which doesn't tell us about the
+call to the constructor.  We chose the latter.
+
+Q: Can you call methods on the object being constructed?  
+
+A: No.  What would they do?  Suppose you invoked a method that
+referred to fields of @racket[this] object --- those things just
+don't exist yet.
+
+Some languages allow this.  Java for example, will let you invoke
+methods from within constructors and should those methods reference
+fields that are not initialized, bad things happen.  (This is just
+poor language design, and descends from
+@link["http://en.wikipedia.org/wiki/C._A._R._Hoare"]{Sir Tony Hoare}'s
+"Billion Dollar Mistake": the null reference.)
+
+
+@section{Integrity checking}
+
+Beyond computing canonical forms, constructors are also useful for
+checking the integrity of data given to a constructor.  For example,
+suppose we are writing a class to represent dates in terms of their
+year, month, and day of the month.  Now, what if we're given the 67th
+day of March in the year -17?  What should that data represent?  Maybe
+it should be March 40 (because as we heard in class, @racket[(= 40 (-
+67 17))]; maybe it should be May 6th, 17 B.C., maybe it should May
+6th, 17 years before the UNIX epoch of 1970; maybe it should be March
+5, 17 A.D., which we arrive at by mod'ing 67 by the number of days in
+March and making the year positive; or maybe... this data is just
+bogus and we should raise an error and refuse to continue computing.
+
+Let's see how we can implement a simple form of @emph{integrity checking}
+in a constructor.  We will implement a class to represent dates and 
+raise an error in case of a situation like the above.
+
+@codeblock{
+  ;; A Date is (date% Number Number Number).
+  ;; Interp: Year Month Day.
+  ;; Year must be positive.
+  ;; Month must be in [1,12].
+  ;; Day must be in [1,31].
+  (define-class date%
+    (fields year month day))
+}
+
+We can still construct meaningless dates, so what we would like to do
+is check the inputs to a constructor make some sense.  This let's us
+establish the integrity of all @racket[date%] objects --- if you have 
+your hands on a @racket[date%] object, you can safely assume it
+satisfies the specification we've given in the data definition.
+
+The simplest way to satisfy the specification is with this constructor:
+
+@filebox[@r[date%]]{
+@codeblock{
+  (constructor (y m d)
+    (error "I didn't like this date!"))
+}}
+
+This is known as a "sound" solution in the program verification
+community.  Notice: if you have your hands on a @racket[date%] object,
+you can safely assume it satisfies the specification we've given in
+the data definition.  Why?  Because you @emph{cannot} construct a
+@racket[date%] object.
+
+We'd like to do better by accepting more legitimate dates.  Here is
+one that accepts all the things deemed acceptable in our specification
+(this is both "sound" and "complete"):
+
+@filebox[@r[date%]]{
+@codeblock{
+  (constructor (y m d)
+    (cond [(<= y 0) (error "year was negative or zero")]
+          [(or (> m 12) (< m 1)) (error "month too big or too small")]
+          [(or (> d 31) (< d 1)) (error "day too big or too small")]
+          [else (fields y m d)]))
+}}
+
+@(the-eval 
+  '(define-class date%
+     (fields year month day)
+     (constructor (y m d)
+       (cond [(<= y 0) (error "year was negative or zero")]
+	     [(or (> m 12) (< m 1)) (error "month too big or too small")]
+	     [(or (> d 31) (< d 1)) (error "day too big or too small")]
+	     [else (fields y m d)]))))
+
+@examples[#:eval the-eval
+  (date% 2011 3 67)]
+
+@margin-note{It is still possible to construct meaningless dates, such
+as February 31, 2011.  However, more stringent validation is just some
+more code away, and since we are more concerned with the
+@emph{concept} of integrity checking than in a robust date library, we
+won't go into the details.}
+
+Thus we can @emph{establish} invariants with computation, or we can
+@emph{reject} inputs that don't have the invariant we want to
+maintain.  And we can combine these approaches.  (You may want to
+compute fractions in lowest terms @emph{and} reject @racket[0] as
+a denominator in @racket[fraction%], for example.)
+
+@section{Ordered binary trees}
+
+Now we want to look at a slightly larger program and how we use
+constructors to enforce important invariants.  In this section, we want
+to develop a @emph{representation of sorted lists of numbers}, which
+is what we did in the @seclink["lec08"]{last lecture}, but this time
+we're going to represent a sorted list of numbers as an @emph{ordered
+binary tree}.
+
+An ordered binary tree looks like this:
+
+@verbatim{
+      *
+     / \
+    *   3
+   / \
+  1   2
+}
+
+Notice that there is data only at the leaves of the tree and that if
+you traverse the leaves in left-to-right order, you recover the sorted
+list of numbers.  Thus there is an important invariant about this data
+structure: whenever we have an ordered binary tree node, the left
+sub-tree is sorted and the right sub-tree is sorted @emph{and} and
+numbers in the left sub-tree are smaller than or equal to all the
+numbers in the right sub-tree.
+
+Here is our data and class definition for ordered binary trees:
+
+@codeblock{
+  ;; A OBT is one of:
+  ;; - (node% OBT OBT)
+  ;; - (leaf% Number)
+  (define-class leaf%
+    (fields number))
+  (define-class node%
+    (fields left right))
+}
+
+Some examples:
+
+@codeblock{
+  (leaf% 7)
+  (node% (leaf% 1) (leaf% 2))
+}
+
+Now, is this an example?
+
+@codeblock{
+  (node% (leaf% 7) (leaf% 2))
+}
+
+This example points out that we are currently missing the
+specification of our invariant in the data definition:
+
+@codeblock{
+  ;; A OBT is one of:
+  ;; - (node% OBT OBT)
+  ;; - (leaf% Number)
+  ;; Invariant: numbers are in ascending order from left to right.
+}
+
+What happens if we try to construct something that violates our
+invariant?  Nothing -- we just construct bogus things.  Now how
+could enforce this ascending order invariant?
+
+Well, let's first think about the @racket[leaf%] case.  We are given a
+number and we need to construct an ordered binary tree, meaning all
+the numbers in the tree are in ascending order.  Since we are
+constructing a tree with only one number in it, it's trivial to
+enforce this invariant---it's always true!
+
+Now consider the @racket[node%] case.  We are given two ordered binary
+trees.  What does that mean?  It means the numbers of each tree are in
+ascending order.  But wait---isn't that the property we are trying to
+enforce?  Yes.  Notice that if we @emph{assume} this of the inputs and
+@emph{guarantee} this of the constructed value, then it @emph{must be
+true of all @tt{OBT}s}; i.e. the assumption was valid.  If this
+reasoning seems circular to you, keep in mind this is not unlike "the
+magic of recursion", which is not magic at all, but seems to be since
+it lets you assume the very function you are writing works in
+recursive calls on structurally smaller inputs.  If you do the right
+thing in the base case, and if on that assumption of the recursive
+call, you can construct the correct result, then that assumption about
+the recursive call was valid and your program is correct for all inputs.
+
+OK, so the challenge at hand is not in verifying that the input
+@tt{OBT}s posses the invariant, but in guaranteeing that the result of
+the constructor possesses it.  If we can do that, than we know the
+given @tt{OBT}s must have the property.
+
+But now this assumption is not sufficient to guarantee that the
+default constructor works:
+
+@filebox[@r[node%]]{
+@codeblock{
+  ;; OBT OBT -> OBT
+  (constructor (a b)
+    (fields a b))
+}}
+
+Why?  Although we know that the left and right sub-tree are @tt{OBT}s,
+we know nothing about the relationship @emph{between} the left and
+right sub-tree, which was an important part of the invariant.  Consider
+for example, the @tt{OBT}s:
+
+@codeblock{
+  (node% (leaf% 4) (leaf% 5))
+  (node% (leaf% 2) (leaf% 3))
+}
+
+Independently considered, these are definitely @tt{OBT}s.  However, if
+we construct a @racket[node%] out of these two trees, we get:
+
+@codeblock{
+  (node% (node% (leaf% 4) (leaf% 5))
+         (node% (leaf% 2) (leaf% 3)))
+}
+
+which is definitely @emph{not} an @tt{OBT}.  (Thus we have broken the
+stated contract on the constructor.)
+
+We could correctly @emph{compute} an @tt{OBT} by determining that, in
+this example, the first given tree needs to be the right sub-tree and
+the second given tree needs to be the left sub-tree.  We can make such
+a determination based on the maximum and minimum numbers in each of
+the given trees, and that suggest the following constructor:
+
+@filebox[@r[node%]]{
+@codeblock{
+  ;; OBT OBT -> OBT
+  (constructor (a b)
+    (cond [(<= (b . max) (a . min))
+           (fields b a)]
+          [(<= (a . max) (b . min))
+           (fields a b)]
+          [else
+           ...]))
+}}
+
+The @racket[max] and @racket[min] methods are easily dismissed from
+our wish list:
+
+@filebox[@r[leaf%]]{
+@codeblock{
+(define/public (min)
+  (field n))
+(define/public (max)
+  (field n))
+}}
+
+@filebox[@r[node%]]{
+@codeblock{
+(define/public (min)
+  ((field left) . min))
+(define/public (max)
+  ((field right) . max))
+}}
+
+At this point, our constructor does the right thing when given two
+@tt{OBT}s that do not overlap, as in the example we considered, but a
+troubling pair of examples to ponder over is:
+
+@codeblock{
+  (node% (leaf% 2) (leaf% 4))
+  (node% (leaf% 3) (leaf% 5))
+}
+
+Again, considered independently, these are definitely @tt{OBT}s, but
+there's no way to construct an ordered binary tree with one of these
+as the left and the other as the right; either order you pick will be
+wrong.  This case is the @racket[else] clause of our constructor.
+What should we do?  One solution is just to reject this case and raise
+and error:
+
+@filebox[@r[node%]]{
+@codeblock{
+  ;; OBT OBT -> OBT
+  (constructor (a b)
+    (cond [(<= (b . max) (a . min))
+           (fields b a)]
+          [(<= (a . max) (b . min))
+           (fields a b)]
+          [else
+           (error "trees overlap")]))
+}}
+
+But really this again fails to live up to the stated contract since we
+should be able to take any two @tt{OBT}s and construct an @tt{OBT} out
+of them.  We know that if the trees overlap, we can't simple make a
+node with them as sub-trees; we have to do something more sophisticated.
+Here's an idea: insert all of the elements of one into the other.
+So long as we make this insertion do the right thing, our constructor
+will succeed in maintaining the invariant properly.
+
+So if we indulge in some wishful thinking and suppose we have a
+@racket[insert-tree] in our interface:
+
+@codeblock{
+  ;; insert-tree : OBT -> OBT
+  ;; Insert all elements of this tree into the given one.
+}
+
+then we can write the constructor as follows:
+
+@filebox[@r[node%]]{
 @#reader scribble/comment-reader
-(racketblock
-  ;; A Counter is a (counter-world% Natural)
-  (define-class counter-world%
-    (fields n)
-    ...
-    ;; on-tick : -> Counter
-    (define/public (on-tick)
-      (new counter-world% (add1 (field n)))))
-  
-  (big-bang (new counter-world% 0))
-)
+@racketblock[
+  ;; OBT OBT -> OBT
+  (constructor (a b)
+    (cond [(<= (b . max) (a . min))
+           (fields b a)]
+          [(<= (a . max) (b . min))
+           (fields a b)]
+          [else
+           (local [(define t (a #,(racketidfont ".") insert-tree b))]
+	     (fields (t . left) (t . right)))]))
+]}
 
-To illustrate how mutable data provides alternative channels of
-communication, let's develop a variant of the program that
-communicates the state of the world through an implicit stateful
-back-channel.
+That leaves @racket[insert-tree] to be written.  First let's consider
+the case of inserting a @racket[leaf%] into a tree.  If we again rely
+on some wishful thinking and relegate the work to another method that
+inserts a number into a list, we can easily write @racket[insert-tree]
+for the @racket[leaf%] case:
 
-@#reader scribble/comment-reader
-(racketblock
-  ;; A Counter is a (counter-world% Natural)
-  (define-class counter-world%
-     (fields n)
-     ...
-     ;; on-tick : -> Counter
-     (define/public (on-tick)
-       (begin (set-field! n (add1 (field n)))
-              this)))
+@filebox[@r[leaf%]]{
+@codeblock{
+  (define/public (insert-tree other)
+    (send other insert (field number)))
+}}
 
-  (big-bang (new counter-world% 0))
-)
+In the @racket[node%] case, if we first consider the template (the
+inventory of what we have available to use), we have:
 
-Notice how the new @r[on-tick] method doesn't produce a new
-@r[counter-world%] object with an incremented counter; instead it
-@emph{mutates} its own counter and returns its (mutilated) self.
+@filebox[@r[node%]]{
+@racketblock[
+  (define/public (insert-tree other)
+    ((field left) #,(racketidfont ".") insert-tree other) ... 
+    ((field right) #,(racketidfont ".") insert-tree other) ...)
+]}
 
-You'll find that this program appears to behave just like the old
-version, but backchannels open up new forms of interaction (and
-interference) that may not be intended.  For example, can you predict
-what thise program will do?
+But here we don't really want to insert the left tree into the other
+and the right into the other.  We want to insert the right tree into
+the other, then insert the left tree into @emph{that one} (other
+permutations of the order of insertions would work, too).  That leads
+us to:
 
-@#reader scribble/comment-reader
-(racketblock
-(launch-many-worlds (big-bang (new counter-world% 0))
-                    (big-bang (new counter-world% 0)))
-)
+@filebox[@r[node%]]{
+@racketblock[
+  (define/public (insert-tree other)
+    ((field left) #,(racketidfont ".") insert-tree ((field right) #,(racketidfont ".") insert-tree other)))
+]}
 
-How about this (seemingly equivalent) one?
+We have only a single item remaining on our wish list---we need to
+implement the @racket[insert] method for inserting a single number
+into a tree.
 
-@#reader scribble/comment-reader
-(racketblock
-(define w (new counter-world% 0))
-(launch-many-worlds (big-bang w)
-                    (big-bang w))
-)
+First let's consider the case of inserting a number into a
+@racket[leaf%].  If we have a leaf and we insert a number into it, we
+know we get a node with two leaves.  But where should the inserted
+number go?  One solution is to compare the inserted number against the
+existing number to determine which side the number should go to:
+
+
+@filebox[@r[leaf%]]{
+@codeblock{
+(define/public (insert m)
+  (node% (leaf% (the-real-min n m))
+         (leaf% (the-real-max n m))))
+}}
+
+In the case of inserting a number into a node, we compare the number
+against the maximum of the left sub-tree to determine if the number
+should be inserted in the left or right:
+
+@filebox[@r[node%]]{
+@racketblock[
+  (define/public (insert n)
+    (cond [(> n ((field left) . max))
+           (node% (field left)
+		  ((field right) #,(racketidfont ".") insert n))]
+	  [else
+	   (node% ((field left) #,(racketidfont ".") insert n)
+		  (field right))]))
+]}
 

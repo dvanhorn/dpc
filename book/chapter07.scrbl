@@ -1,359 +1,544 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class/1 check-expect define-struct ... length))
+          (for-label (except-in class/1 define-struct ... length))
 	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
 	  (for-label class/universe))
 
-@title[#:tag "lec08"]{Abstraction, Invariants, Testing}
+@title[#:tag "lec07"]{Delegation}
 
-@section{New language features: @r[check-expect] in new places}
 
-It's now possible to use @r[check-expect] in several places that
-didn't work before.  First, it now works inside functions.  The test
-is run @emph{every} time the function is called.  Second, it works
-inside class definitions. Tests in classes are lifted out of the
-class, so they cannot refer to fields, or directly call methods, or
-refer to @r[this]. 
+@section{New language features}
 
-For example:
+@subsection{Interface intheritance}
+
+Interfaces can now inherit from other interfaces.  In this example,
+the @r[foo%] class promises to implement the methods specified in
+@r[bar<%>], but also the methods listed in the super-interfaces
+@r[baz<%>] and @r[foo<%>].
+
+@#reader scribble/comment-reader
+(racketmod
+  class/1
+  (define-interface baz<%> (blah))
+  (define-interface foo<%> (blah))
+  (define-interface bar<%> 
+    (super foo<%>)
+    (super baz<%>)
+    (x y))
+
+  (define-class foo%
+    (implements bar<%>)
+    (fields x y z blah))
+)
+
+
+@subsection{Dot notation}
+
+To make programming with objects more convenient, we've added new
+syntax to @racketmodname[class/1] to support method calls.  In
+particular, the following now sends method @r[x] to object @r[o] with
+argument @r[arg]:
+
+@racketblock[
+(x #,(racketidfont ".") o arg)
+]
+
+This is equivalent to
+@racketblock[
+(send x o arg)
+]
+
+We can chain method calls like this:
+
+@racketblock[
+(x #,(racketidfont ".") o arg #,(racketidfont ".") m arg*)
+]
+
+This sends the @r[m] method to the @emph{result} of the previous
+expression.  
+This is equivalent to
+@racketblock[
+(send (send x o arg) m arg*)
+]
+
+Although in lecture this didn't work in the interactions window, it
+now works everywhere that you use @racketmodname[class/1]. 
+
+
+@section{Constructor design issue in modulo zombie (Assignment 3,
+Problem 3)}
+
+Course staff solution for regular zombie game:
+
+@filebox[@r[world%]]{
+@#reader scribble/comment-reader
+(racketblock
+ (define/public (teleport)
+   (new world%
+	(new player%
+	     (random WIDTH)
+	     (random HEIGHT))
+	(field zombies)
+	(field mouse)))
+)
+}
+
+This has a significant bug: it always produces a plain
+@racket[player%], not a @racket[modulo-player%].
+
+Bug (pair0MN):
+
+@filebox[@r[modulo-player%]]{
+@#reader scribble/comment-reader
+(racketblock
+ (define/public (teleport)
+   (new player%
+	(* -1 (random WORLD-SIZE))
+	(* -1 (random WORLD-SIZE))))
+)
+}
+
+This has a similar bug: it always produces a plain
+@racket[player%], not a @racket[modulo-player%].  However, it's in the
+the @tt{modulo-player%} file, so there's an easy fix.  
+
+
+Lack of abstraction (pair0PQ):
+
+@filebox[@r[modulo-player%]]{
+@#reader scribble/comment-reader
+(racketblock
+ ;; warp : Real Real -> ModuloPlayer
+ ;; change the location of this player to the given location
+ (define/public (warp x y)
+   (new modulo-player%
+	(field dest-x)
+	(field dest-y)
+	x y))
+)
+}
+
+@filebox[@r[player%]]{
+@#reader scribble/comment-reader
+(racketblock
+ ;; warp : Real Real -> Player
+ ;; change the location of this player to the given location
+ (define/public (warp x y)
+   (new player%
+	(field dest-x)
+	(field dest-y)
+	x y))
+)
+}
+
+This works correctly (this is the fix for the bug in Pair0MN's
+solution), but it duplicates code.  
+
+We want to fix these bugs without duplicating code.  
+
+Possible solutions (suggested in class):
+@itemlist[
+@item{Parameterize the @racket[teleport] method with a class name.
+Unfortunately, this doesn't work because the class name in
+@racket[new] is not an expression.}
+@item{Use @racket[this] as the class name.  This doesn't work because
+@racket[this] is an @emph{instance}, not a @emph{class}.}
+]
+
+The solution is to add a new method to the interface, which constructs
+a new method of the appropriate class.  So, we add this method to the
+@racket[player%] class:
+
+@racketblock[
+(define/public (move x y)
+  (new player% x y))
+]
+
+And this method to the @racket[modulo-player%] class:
+
+@racketblock[
+(define/public (move x y)
+  (new modulo-player% x y))
+]
+
+Here's an example of the technique in full.  We start with these classes:
+
 @codeblock{
 #lang class/1
+(define-class s%
+  (fields x y))
+
+;; A Foo is one of:
+;; - (new c% Number Number)
+;; - (new d% Number Number)
+
 (define-class c%
-  (fields x y z)
-  
-  ;; works
-  (check-expect ((new c% 1 2 3) . m) 1)
-  ;; doesn't work
-  (check-expect ((new c% 1 2 3) . m) (field x))
-  (define/public (m) 1))
-
-(define (f x)
-  (check-expect 1 1))
-(f 5)
+  (super s%)
+  (define/public (make x y) (new c% x y))
+  (define/public (origin) (new c% 0 0)))
+(define-class d%
+  (super s%)
+  (define/public (make x y) (new d% x y))
+  (define/public (origin) (new d% 0 0)))
 }
 
-When used in an expression, as in a function, @r[check-expect] does
-not produce any value, and should not be combined with any other
-expressions that do computation.  
 
-@section{Invariants of Data Structures}
-
-Here's an interface for a sorted list of numbers.
+Now we abstract the @racket[origin] method to use @racket[make], and
+we can abstract @racket[origin] to the superclass @racket[s%], since
+it becomes identical in both classes, avoiding the code duplication.
 
 @codeblock{
 #lang class/1
-;; An ISorted implements
-;; insert : Number -> Sorted
-;; contains? : Number -> Boolean
-;; ->list : -> [Listof Number]
+(define-class s%
+  (fields x y)
+  (send this make 0 0))
+
+;; A Foo is one of:
+;; - (new c% Number Number)
+;; - (new d% Number Number)
+
+(define-class c%
+  (super s%)
+  (define/public (make x y)
+    (new c% x y)))
+(define-class d%
+  (super s%)
+  (define/public (make x y) 
+    (new d% x y)))
+
+(new c% 50 100)
+(send (new c% 50 100) origin)
+}
+
+
+
+@section{Abstracting list methods with different representations}
+
+Here is the list interface from the last homework assignment:
+
+@#reader scribble/comment-reader
+(racketblock
+; ==========================================================
+; Parametric lists
+
+; A [Listof X] implements list<%>.
+(define-interface list<%>
+  [; X -> [Listof X]
+   ; Add the given element to the front of the list.
+   cons
+   ; -> [Listof X]
+   ; Produce the empty list.
+   empty
+   ; -> Nat
+   ; Count the number of elements in this list.
+   length
+   ; [Listof X] -> [Listof X]
+   ; Append the given list to the end of this list.
+   append
+   ; -> [Listof X]
+   ; Reverse the order of elements in this list.
+   reverse
+   ; [X -> Y] -> [Listof Y]
+   ; Construct the list of results of applying the function
+   ; to elements of this list.
+   map
+   ; [X -> Boolean] -> [Listof X]
+   ; Construct the list of elements in this list that
+   ; satisfy the predicate.
+   filter
+   ; [X Y -> Y] Y -> Y
+   ; For elements x_0...x_n, (f x_0 ... (f x_n b)).
+   foldr
+   ; [X Y -> Y] Y -> Y
+   ; For elements x_0...x_n, (f x_n ... (f x_0 b)).
+   foldl])
+)
+
+Here's the usual implementation of a small subset of this interface,
+first for the recursive union implementation:
+
+@#reader scribble/comment-reader
+(racketblock
+  (define-class cons%
+    (fields first rest)
+    
+    (define/public (cons x)
+      (new cons% x this))
+    
+    (define/public (empty)
+      (new empty%))
+
+    (define/public (length)
+      (add1 (send (field rest) length)))
+
+    (define/public (foldr c b)
+      (c (field first)
+	 (send (field rest) foldr c b))))
+
+  (define-class empty%
+    
+    (define/public (cons x)
+      (new cons% x this))
+    
+    (define/public (empty)
+      this)
+
+    (define/public (length)
+      0)
+
+    (define/public (foldr c b)
+      b)))
+
+And for the wrapper list implementation:
+
+@#reader scribble/comment-reader
+(racketblock
+  (define-class wlist%
+    (fields ls)
+    
+    (define/public (cons x)
+      (new wlist% (ls:cons x (field ls))))
+    
+    (define/public (empty)
+      (new wlist% ls:empty))
+
+    (define/public (length)
+      (ls:length (field ls)))
+
+    (define/public (foldr c b)
+      (ls:foldr c b (field ls))))
+)
+
+None of these look the same, so how can we abstract?  Our abstraction
+design recipe for using inheritance requires that methods look
+identical in order to abstract them into a common super class.  But,
+for example, the @r[length] method looks like this for @r[wlist%]:
+
+@#reader scribble/comment-reader
+(racketblock
+    (define/public (length)
+      (ls:length (field ls))))
+
+Like this for @r[empty%]:
+
+@#reader scribble/comment-reader
+(racketblock
+    (define/public (length)
+      0))
+
+And like this for @r[cons%]:
+
+@#reader scribble/comment-reader
+(racketblock
+    (define/public (length)
+      (add1 (send (field rest) length))))
+
+
+@margin-note{In fact, all of
+		them---but
+		that's a topic
+		for another day.}
+Before we can abstract this method, we must make them all look the
+same. Fortunately, many list operations
+can be expressed using just a few simple operations, of which the most
+important is @r[foldr].  Here's an implementation of @r[length] which
+just uses @r[foldr] and simple arithmetic.  
+
+@#reader scribble/comment-reader
+(racketblock
+    (define/public (length)
+      (send this foldr (λ (a b) (add1 b)) 0))
+)
+
+Note that this isn't specific to any one implementation of lists---in
+fact, we can use it for any of them.  This means that we can now
+abstract the method, creating a new @r[list%] class to share all of
+our common code:
+
+
+@#reader scribble/comment-reader
+(racketblock
+ (define-class list%
+    (define/public (length)
+      (send this foldr (λ (a b) (add1 b)) 0))
+    (code:comment "other methods here"))
+)
+
+The only methods that need to be implemented differently for different
+list versions are @r[empty] and @r[cons], because they construct new
+lists, and @r[foldr], because it's the fundamental operation we use to
+build the other operations out of.  It's also helpful to implementat
+@r[foldl], since it's fairly complex to factor out.  
+
+@section{Solidifying what we've done}
+
+So far in this class, we've seen a number of different ways of
+specifying the creation and behavior of the data we work with.  At
+this point, it's valuable to take a step back and consider all of the
+concepts we've seen, and how they differ from what we had in Fundies
+1. 
+
+@subsection{Data Definitions}
+
+Data defintions describe how data is constructed.  For example,
+primitive classes of data such as @tt{Number} and @tt{String} are
+examples, of data defintions, as is @r[(make-posn Number Number)].  We
+can also describe enumerations and unions, just as we did previously.  
+
+In this class, we've introduced a new way of writing data defintions,
+referring to @emph{classes}.  For example:
+
+@racketblock[
+(code:comment "A [WList X] is (new wlist% [Listof X])")
+]
+
+We can combine this style of data defintion with other data definition
+forms, such as unions.  However, classes also need to describe one
+other important aspect---their @emph{interface}.  So we will add the
+following to the above data defintion:
+
+@racketblock[
+(code:comment "A [WList X] is (new wlist% [Listof X])")
+(code:comment "    and implements the [IList X] interface")
+]
+
+@subsection{Interface Definitions}
+
+An @emph{interface defintion} lists the operations that something that
+implements the interface will support.  Just as we have a convention that data
+defintions start with a capital letter, interface defintions start with a
+capital letter "I".  The interface defintion for @tt{[IList X]} is:
+
+@codeblock[#:keep-lang-line? #f]{
+#lang racket
+;; An [IList X] implements
+
+;; empty : -> [IList X]
+;; Produce an empty list
+;; cons : X -> [IList X]
+;; Produce a list with the given element at the front.
 ;; empty? : -> Boolean
+;; Determine if this list is empty.
+;; length : -> Number
+;; Count the elements in this list
 
-;; Invariant: The list is sorted in ascending order.  
-
-;; Precondition: the list must not be empty
-;; max : -> Number
-;; min : -> Number
+;; ... and other methods ...
 }
 
-How would we implement this interface?  
+There are several important aspects of this interface defintion to note.
+First, it lists all of the methods that can be used on an @tt{[IList X]}, along
+with their contracts and purpose statements.  Mere method names are not
+enough---with just a method name you have no idea how to use a method, or what
+to use it for.  Second, interface defintions can have parameters (here @tt{X}),
+just like data defintions.  Third, there is no description of how to
+@emph{construct} an @tt{[IList X]}.  That's the job of data defintions that
+implement this interface.  
 
-We can simply adopt the recursive union style that we've already seen
-for implementing lists.  Here we see the basic defintion as well as
-the implementation of the @r[contains?] method.
-@codeblock{
-#lang class/1
-;; A Sorted is one of
-;; - (new smt%)
-;; - (new scons% Number Sorted)
-(define-class smt%
-  (check-expect ((new smt%) . contains? 5) false)
-  (define/public (contains? n)
-    false))
+Of course, just like data defintions don't have to be named, interface
+defintions don't have to be named either.  If you need to describe an interface
+just once, it's fine to write the interface right there where you need it.  
 
-(define-class scons%
-  (fields first rest)
-  (check-expect ((new scons% 5 (new smt%)) . contains? 5) true)
-  (check-expect ((new scons% 5 (new smt%)) . contains? 7) false)
-  (check-expect ((new scons% 5 (new scons% 7 (new smt%))) . contains? 3)
-		false)
-  (check-expect ((new scons% 5 (new scons% 7 (new smt%))) . contains? 9)
-		false)
-  (define/public (contains? n)
-    (or (= n (field first))
-	((field rest) . contains? n))))
-}
+@subsection{Contracts}
 
+Contracts describe the appropriate inputs and outputs of functions and
+methods.  In the past, we've seen many contracts that refer to data
+defintions.  In this class, we've also seen contracts that refer to interface
+defintions, like so:
 
-However, we can write a new implementation that uses our invariant to
-avoid checking the rest of the list when it isn't necessary.  
+@racketblock[(code:comment "[IList Number] -> [IList Number]")]
 
-@racketblock[
-  (define/public (contains? n)
-    (cond [(= n (field first)) true]
-	  [(< n (field first)) false]
-	  [else ((field rest) #,(racketidfont ".") contains? n)]))
+When describing the contract of a function or method, it's almost always
+preferable to refer to an interface definition instead of a data defintion that
+commits to a specific representation.  @; Sometimes, there's only one data
+@; definition that makes sense, and then there isn't a difference between using
+@; the interface defintion and the data defintion.  
+
+@subsection{Design Recipe}
+
+Interfaces change the design recipe in one important way.  In the Template
+step, we take an inventory of what is available in the body of a function or
+method.  When designing a method, we have the following available to us:
+@itemlist[
+@item{The fields of this object, accessed with @r[field],}
+@item{The methods of this object, accessed by calling them,}
+@item{And the operations of the arguments, which are given by their @emph{interfaces}.}
 ]
 
-Because the list is always sorted in ascending order, if @r[n] is less
-than the first element, it must be less than every other element, and
-therefore can't possibly be equal to any element in the list.  
-
-Now we can implement the remaining methods from the interface. First, @r[insert]
-
-@filebox[@r[smt%]]{
-@racketblock[
-(check-expect ((new smt%) #,(racketidfont ".") insert 5) 
-	      (new scons% 5 (new smt%)))
-(define/public (insert n)
-  (new scons% n (new smt%)))
-]}
-
-@filebox[@r[scons%]]{
-@racketblock[
-(check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") insert 7)
-	      (new scons% 5 (new scons% 7 (new smt%))))
-(check-expect ((new scons% 7 (new smt%)) #,(racketidfont ".") insert 5)
-	      (new scons% 5 (new scons% 7 (new smt%))))
-(define/public (insert n)
-  (cond [(< n (field first))
-	 (new scons% n this)]
-	[else
-	 (new scons%
-	      (field first)
-	      ((field rest) #,(racketidfont ".") insert n))]))
-]}
-
-Note that we don't have to look at the whole list to insert the
-elements.  This is again a benefit of programming using the
-invariant that we have a sorted list.
-
-Next, the @racket[max] method.  
-We don't have to do anything for the empty list, because we have a 
-precondition that we can only call @r[max] when the list is non-empty.
-
-@filebox[@r[scons%]]{
-@racketblock[
-(define real-max max)
-(check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") max) 5)
-(check-expect ((new scons% 5 (new scons% 7 (new smt%))) #,(racketidfont ".") max) 7)
-(define/public (max)
-  (cond [((field rest) #,(racketidfont ".") empty?) (field first)]
-	[else ((field rest) #,(racketidfont ".") max)]))
-]}
-
-Again, this implementation relies on our data structure invariant.  To
-make this work, though, we need to implement @r[empty?].
-
-@filebox[@r[smt%]]{
-@racketblock[
-(check-expect ((new smt%) #,(racketidfont ".") empty?) true)
-(define/public (empty?) true)
-]}
-
-@filebox[@r[scons%]]{
-@racketblock[
-(check-expect ((new scons% 1 (new smt%)) #,(racketidfont ".") empty?) false)
-(define/public (empty?) false)
-]}
-
-The final two methods are similar.  Again, we don't implement @r[min]
-in @r[smt%], because of the precondition in the interface.  
-@filebox[@r[smt%]]{
-@racketblock[
-(code:comment "no min method")
-(define/public (->list) empty)
-]
-}
-
-@filebox[@r[scons%]]{
-@racketblock[
-(define/public (min) (field first))
-(define/public (->list)
-  (cons (field first) ((field rest) #,(racketidfont ".") ->list)))
-]}
+For example, if a method takes an input @r[a-list] which is specified in the
+contract to be an @tt{IList}, then we know that @r[(send a-list empty?)],
+@r[(send a-list length)], and so on.  
 
 
-@section{Properties of Programs and  Randomized Testing}
+@section{Delegation}
 
-A @emph{property} is a claim about the behavior of a program.  Unit
-tests check particular, very specific properties, but often there are
-more general properties that we can state and check about programs.  
+So far, we've seen multiple ways to abstract repeated code.  First, in Fundies
+1, we saw functional abstraction, where we take parts of functions that differ
+and make them parameters to the abstracted function.  Second, in this class
+we've seen abstraction  by using inheritance, where if methods in two related
+classes are identical, they can be lifted into one method in a common
+superclass.  
 
-Here's a property about our sorted list library, which we would like
-to be true:
+However, can we still abstract common code without @emph{either} of these
+mechanisms?  Yes.  
 
-@tt{∀ sls : ISorted . ∀ n : Number . }@racket[((sls #,(racketidfont ".") insert n) #,(racketidfont ".") contains? n)]
+Consider the @racketmodname[class/0], @emph{without} helper functions.  We can
+write a binary tree class like this:
 
-How would we check this?  We can check a few instances with unit
-tests, but this property makes a very strong claim.  If we were
-working in ACL2, as in the Logic and Computation class, we could
-provide a machine-checked proof of the property, verifying that it is
-true for every single @tt{Sorted} and @tt{Number}.  
+@#reader scribble/comment-reader
+(racketmod
+  class/0
+  ;; A BT is one of:
+  ;; - (new leaf% Number)
+  ;; - (new node% Number BT BT)
 
-For something in between these two extremes, we can use @emph{randomized
-testing}.  This allows us to gain confidence that our property is
-true, with just a bit of programming effort.  
+  ;; double : Number -> BT
+  ;; Double this tree and put the number on top.
 
-First, we want to write a program that asks the question associated
-with this property.
+  (define-class leaf%
+    (fields number)
+    
+    (define/public (double n)
+      (new node% n this this)))
 
-@racketblock[
-(code:comment "Property: forall sorted lists and numbers, this predicate holds")
-(code:comment  "insert-contains? : ISorted Number -> Boolean")
-(define (insert-contains? sls n)
-  ((sls #,(racketidfont ".") insert n) #,(racketidfont ".") contains? n))
-]
+  (define-class node%
+    (fields number left right)
+    
+    (define/public (double n)
+      (new node% n this this)))
+)
 
-Now we make lots of randomly generated tests, and see if the predicate
-holds. First, let's build a random sorted list generator.
+Unfortunately, the @r[double] method is identical in both the @r[leaf%] and
+@r[node%] classes.  How can we abstract this without using inheritance or a
+helper function?
 
-@racketblock[
-(code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
-(define (build-sorted)
-  (cond [(zero? i) (new smt%)]
-	[else
-	 (new scons% 
-	      (f i)
-	      (build-sorted (sub1 i) f))]))
-(build-sorted 5 (lambda (x) x))
-]
+One solution is to create a new class, and @emph{delegate} the responsibility
+of doing the doubling to it.  Below is an example of this:
 
-Oh no!  We broke the invariant.  The @r[scons%] constructor allows you
-to break the invariant, and now all of our methods don't work.
-Fortunately, we can implement a fixed version that uses the @r[insert]
-method to maintain the sorted list invariant:
+@#reader scribble/comment-reader
+(racketblock
+  (define-class helper%
+    ;; Number BT -> BT
+    ;; Double the given tree and puts the number on top.
+    (define/public (double-helper number bt)
+      (new node% number bt bt)))
+  (define tutor (new helper%))
 
-@racketblock[
-(code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
-(define (build-sorted)
-  (cond [(zero? i) (new smt%)]
-	[else
-	 ((build-sorted (sub1 i) f) #,(racketidfont ".") insert (f i))]))
-(check-expect (build-sorted 3 (lambda (x) x))
-	      (new scons% 1 (new scons% 2 (new scons% 3 (new smt%)))))
+  (define-class leaf%
+    (fields number)
+    
+    (define/public (double n)
+      (send tutor double-helper n this)))
 
-]
+  (define-class node%
+    (fields number left right)
+    
+    (define/public (double n)
+      (send tutor double-helper n this)))
+)
 
-Now @r[build-sorted] produces the correct answer, which we can easily
-verify at the Interactions window.
-
-Using @r[build-sorted], we can develop @r[random-sorted], which
-generates a sorted list of random numbers.:
-
-@racketblock[
-(code:comment "Nat -> Sorted")
-(define (random-sorted i)
-  (build-sorted i (lambda (_) (random 100))))
-]
-
-Given these building blocks,
-we can write a test that checks our property.  
-
-@racketblock[
-(check-expect (insert-contains? (random-sorted 30) (random 50))
-	      true)
-]
-
-Every time we hit the @tt{Run} button, we generate a random sorted
-list of numbers, and check if a particular random integer behaves
-appropriately when @r[insert]ed into it.  But if we could repeatedly
-check this property hundreds or thousands of times, it would be even
-more unlikely that our program violates the property.  After all, we
-could have just gotten lucky.
-
-
-First, we write a function to perform some action many times:
-@racketblock[
-(code:comment "Nat (Any -> Any) -> 'done")
-(code:comment "run the function f i times")
-(define (do i f)
-  (cond [(zero? i) 'done]
-	[else (f (do (sub1 i) f))]))]
-
-Then we can run our test many times:
-@racketblock[
-(do 1000
-    (lambda (_)
-      (check-expect (insert-contains? (random-sorted 30) (random 50))
-		    true)))
-]
-
-When this says that we've passed 1000 tests, we'll be more sure that
-we've gotten our function right.  
-
-What if we change our property to this untrue statement?
-@racketblock[
-(code:comment "Property: forall sorted lists and numbers, this predicate holds")
-(code:comment "insert-contains? : ISorted Number -> Boolean")
-(define (insert-contains? sls n)
-  (sls #,(racketidfont ".") contains? n))
-]
-
-Now we get lots of test failures, but the problem is @emph{not} in our
-implementation of sorted lists, it's in our property definition.  If
-we had instead had a bug in our implementation, we would have
-similarly seen many failures.  Thus, it isn't always possible to tell
-from a test failure, or even many failures, whether it's the code or
-the specification is wrong---you have to look at the test failure to
-check.  
-
-This is why it's extremely important to get your specifications (like
-contracts, data definitions, and interface definitions) correct.  Your
-program can only be correct if they are.
-
-@section{Abstraction Barriers and Modules}
-
-Recall that in our original version of @r[build-sorted], we saw that the
-@r[scons%] constructor allowed us to violate the invariant---it didn't
-check that the value provided for @r[first] was at least as small as
-the elements of @r[rest].  We would like to prevent clients of our
-sorted list implementation from having access to this capability, so
-that we can be sure that our invariant is maintained.
-
-To address this, we set up an @emph{abstraction barrier}, preventing
-other people from seeing the @r[scons%] constructor.  To create these
-barriers, we use a @emph{module system}.  We will consider our
-implementation of sorted lists to be one module, and we can add a
-simple specification to allow other modules to see parts of the
-implementation (but not all of it).
-
-Modules in our languages are very simple---you've already written
-them.  They start with @tt{#lang class/N} and cover a whole file.
-
-Here's the module implementing our sorted list, which we save in a
-file called @tt{"sorted-list.rkt"}.  
-
-@filebox[@r[sorted-list.rkt]]{
-@codeblock{
-#lang class/1
-
-;; ... all of the rest of the code ...
-
-(define smt (new smt%))
-(provide smt)
-}}
-
-We've added two new pieces to this file.  First, we define @r[smt] to
-be an instance of the empty sorted list.  Then, we use @r[provide] to
-make @r[smt], but not @emph{any} other definition from our module,
-available to other modules.  
-
-Therefore, the @emph{only} part of our code that the rest of the world
-can see is the @r[smt] value.  To add new elements, the rest of the
-world has to use the @r[insert] method.  
-
-@racketmod[
-class/1
-(require "sorted-list.rkt")
-
-(smt #,(racketidfont ".") insert 4)
-]
-
-Here, we've used @r[require], which we've used to refer to libraries
-that come with DrRacket.  However, we can specify the name of a file,
-and we get everything that the module in that file @r[provide]s, which
-here is just the @r[smt] definition.  Everything else, such as the
-dangerous @r[scons%] constructor, is hidden, and our implementation of
-sorted lists can rely on its invariant.  
+The @r[helper%] class has just one method, although we could add as many as we
+wanted.  We also need only one instance of @r[helper%], called @r[tutor],
+although we could create new instances when we needed them as well.  Now the
+body of @r[double-helper] contains all of the doubling logic in our program,
+which might become much larger without needing duplicate code.  

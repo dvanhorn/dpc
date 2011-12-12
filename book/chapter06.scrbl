@@ -5,540 +5,456 @@
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
-@title[#:tag "lec07"]{Delegation}
+@title[#:tag "lec06"]{Universe}
 
+@section{A look at the Universe API}
 
-@section{New language features}
+Today we're going to start looking at the design of multiple,
+concurrently running programs that communicate we each other.  We will
+use the @racket[universe] system as our library for communicating
+programs.
 
-@subsection{Interface intheritance}
+The basic universe concept is that there is a "universe" program that
+is the adminstrator of a set of world programs.  The universe and the
+world programs can communicate with each other by sending messages,
+which are represented as S-Expressions.
 
-Interfaces can now inherit from other interfaces.  In this example,
-the @r[foo%] class promises to implement the methods specified in
-@r[bar<%>], but also the methods listed in the super-interfaces
-@r[baz<%>] and @r[foo<%>].
+So far we have focused on the design of single programs; we are now
+going to start looking at the design of communicating systems of
+programs.
+
+In addition to these notes, be sure to read the documentation on
+@secref[#:doc '(lib "teachpack/teachpack.scrbl") #:tag-prefixes
+'("2htdp") "world2"].
+
+@section{Messages}
+
+A message is represented as an S-Expression.  Here is there is their
+data definition:
+
+An S-expression is roughly a nested list of basic data; to be precise
+an S-expression is one of:
+
+@itemlist[
+ @item{a string,}
+ @item{a symbol,}
+ @item{a number,}
+ @item{a boolean,}
+ @item{a char, or}
+ @item{a list of S-expressions.}]
+
+The way that a world program sends a message to the universe is by
+constructing a package:
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Package is a (make-package World SExp).
+)
+
+The world component is the new world just like the event handler's
+produced for single world programs.  The s-expression component is a
+message that is sent to the universe.
+
+@section[#:tag "counter"]{Simple universe example}
+
+As a simple example, let's look at a world program that counts up and
+sends messages to a universe server as it counts.  In this simple
+example there is only one world that communicates with the server, and
+the server does nothing but receive the count message (it sends no
+messages back to the world).
+
+Let's start with the counting world program:
 
 @#reader scribble/comment-reader
 (racketmod
   class/1
-  (define-interface baz<%> (blah))
-  (define-interface foo<%> (blah))
-  (define-interface bar<%> 
-    (super foo<%>)
-    (super baz<%>)
-    (x y))
-
-  (define-class foo%
-    (implements bar<%>)
-    (fields x y z blah))
+  (require class/universe)
+  (require 2htdp/image)
+  
+  (define-class counter-world%
+    (fields n)
+  
+    (define/public (on-tick)
+      (new counter-world% (add1 (field n))))
+  
+    (define/public (tick-rate)
+      1)
+  
+    (define/public (to-draw)
+      (overlay (text (number->string (field n))
+                     40
+                     "red")
+               (empty-scene 300 100))))
+  
+  (big-bang (new counter-world% 0))
 )
 
+When you run this program, you see the world counting up from zero.
 
-@subsection{Dot notation}
-
-To make programming with objects more convenient, we've added new
-syntax to @racketmodname[class/1] to support method calls.  In
-particular, the following now sends method @r[x] to object @r[o] with
-argument @r[arg]:
-
-@racketblock[
-(x #,(racketidfont ".") o arg)
-]
-
-This is equivalent to
-@racketblock[
-(send x o arg)
-]
-
-We can chain method calls like this:
-
-@racketblock[
-(x #,(racketidfont ".") o arg #,(racketidfont ".") m arg*)
-]
-
-This sends the @r[m] method to the @emph{result} of the previous
-expression.  
-This is equivalent to
-@racketblock[
-(send (send x o arg) m arg*)
-]
-
-Although in lecture this didn't work in the interactions window, it
-now works everywhere that you use @racketmodname[class/1]. 
-
-
-@section{Constructor design issue in modulo zombie (Assignment 3,
-Problem 3)}
-
-Course staff solution for regular zombie game:
+Now to register this program with a universe server, we need to
+implement a @racket[register] method that produces a string that is
+the IP address of the server.  (Since we're going to run the universe
+and world on the same computer, we will use @racket[LOCALHOST] which
+is bound to the address of our computer.)
 
 @filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
- (define/public (teleport)
-   (new world%
-	(new player%
-	     (random WIDTH)
-	     (random HEIGHT))
-	(field zombies)
-	(field mouse)))
+  (define/public (register) LOCALHOST)
 )
 }
 
-This has a significant bug: it always produces a plain
-@racket[player%], not a @racket[modulo-player%].
+Now when you run this program you will see the world program try to
+connect to the universe, but since we have not written---much less
+run---the server, it cannot find the universe.  After a few tries, it
+gives up and continues running without communicating with the
+universe.
 
-Bug (pair0MN):
+Now let's write a seperate simple universe server.  To do this, you
+want to open a new tab or window.
 
-@filebox[@r[modulo-player%]]{
-@#reader scribble/comment-reader
-(racketblock
- (define/public (teleport)
-   (new player%
-	(* -1 (random WORLD-SIZE))
-	(* -1 (random WORLD-SIZE))))
-)
-}
 
-This has a similar bug: it always produces a plain
-@racket[player%], not a @racket[modulo-player%].  However, it's in the
-the @tt{modulo-player%} file, so there's an easy fix.  
+A universe program, much like a world program, consists of a current
+state of the universe and is event-driven, invoking methods to produce
+new universe states.
 
+We'll be working with the OO-style universe, but you should read the
+documentation for @racketmodname[2htdp/universe] and translate over
+the concepts to our setting as you've done for @racket[big-bang].
 
-Lack of abstraction (pair0PQ):
+At a minimum, the universe must handle the events of:
 
-@filebox[@r[modulo-player%]]{
-@#reader scribble/comment-reader
-(racketblock
- ;; warp : Real Real -> ModuloPlayer
- ;; change the location of this player to the given location
- (define/public (warp x y)
-   (new modulo-player%
-	(field dest-x)
-	(field dest-y)
-	x y))
-)
-}
+@itemlist[#:style 'ordered
+  @item{a world
+registering with this universe, and }
+  @item{a registered world sending a
+message to the universe.}]
 
-@filebox[@r[player%]]{
-@#reader scribble/comment-reader
-(racketblock
- ;; warp : Real Real -> Player
- ;; change the location of this player to the given location
- (define/public (warp x y)
-   (new player%
-	(field dest-x)
-	(field dest-y)
-	x y))
-)
-}
-
-This works correctly (this is the fix for the bug in Pair0MN's
-solution), but it duplicates code.  
-
-We want to fix these bugs without duplicating code.  
-
-Possible solutions (suggested in class):
-@itemlist[
-@item{Parameterize the @racket[teleport] method with a class name.
-Unfortunately, this doesn't work because the class name in
-@racket[new] is not an expression.}
-@item{Use @racket[this] as the class name.  This doesn't work because
-@racket[this] is an @emph{instance}, not a @emph{class}.}
-]
-
-The solution is to add a new method to the interface, which constructs
-a new method of the appropriate class.  So, we add this method to the
-@racket[player%] class:
-
-@racketblock[
-(define/public (move x y)
-  (new player% x y))
-]
-
-And this method to the @racket[modulo-player%] class:
-
-@racketblock[
-(define/public (move x y)
-  (new modulo-player% x y))
-]
-
-Here's an example of the technique in full.  We start with these classes:
-
-@codeblock{
-#lang class/1
-(define-class s%
-  (fields x y))
-
-;; A Foo is one of:
-;; - (new c% Number Number)
-;; - (new d% Number Number)
-
-(define-class c%
-  (super s%)
-  (define/public (make x y) (new c% x y))
-  (define/public (origin) (new c% 0 0)))
-(define-class d%
-  (super s%)
-  (define/public (make x y) (new d% x y))
-  (define/public (origin) (new d% 0 0)))
-}
-
-
-Now we abstract the @racket[origin] method to use @racket[make], and
-we can abstract @racket[origin] to the superclass @racket[s%], since
-it becomes identical in both classes, avoiding the code duplication.
-
-@codeblock{
-#lang class/1
-(define-class s%
-  (fields x y)
-  (send this make 0 0))
-
-;; A Foo is one of:
-;; - (new c% Number Number)
-;; - (new d% Number Number)
-
-(define-class c%
-  (super s%)
-  (define/public (make x y)
-    (new c% x y)))
-(define-class d%
-  (super s%)
-  (define/public (make x y) 
-    (new d% x y)))
-
-(new c% 50 100)
-(send (new c% 50 100) origin)
-}
-
-
-
-@section{Abstracting list methods with different representations}
-
-Here is the list interface from the last homework assignment:
-
-@#reader scribble/comment-reader
-(racketblock
-; ==========================================================
-; Parametric lists
-
-; A [Listof X] implements list<%>.
-(define-interface list<%>
-  [; X -> [Listof X]
-   ; Add the given element to the front of the list.
-   cons
-   ; -> [Listof X]
-   ; Produce the empty list.
-   empty
-   ; -> Nat
-   ; Count the number of elements in this list.
-   length
-   ; [Listof X] -> [Listof X]
-   ; Append the given list to the end of this list.
-   append
-   ; -> [Listof X]
-   ; Reverse the order of elements in this list.
-   reverse
-   ; [X -> Y] -> [Listof Y]
-   ; Construct the list of results of applying the function
-   ; to elements of this list.
-   map
-   ; [X -> Boolean] -> [Listof X]
-   ; Construct the list of elements in this list that
-   ; satisfy the predicate.
-   filter
-   ; [X Y -> Y] Y -> Y
-   ; For elements x_0...x_n, (f x_0 ... (f x_n b)).
-   foldr
-   ; [X Y -> Y] Y -> Y
-   ; For elements x_0...x_n, (f x_n ... (f x_0 b)).
-   foldl])
-)
-
-Here's the usual implementation of a small subset of this interface,
-first for the recursive union implementation:
-
-@#reader scribble/comment-reader
-(racketblock
-  (define-class cons%
-    (fields first rest)
-    
-    (define/public (cons x)
-      (new cons% x this))
-    
-    (define/public (empty)
-      (new empty%))
-
-    (define/public (length)
-      (add1 (send (field rest) length)))
-
-    (define/public (foldr c b)
-      (c (field first)
-	 (send (field rest) foldr c b))))
-
-  (define-class empty%
-    
-    (define/public (cons x)
-      (new cons% x this))
-    
-    (define/public (empty)
-      this)
-
-    (define/public (length)
-      0)
-
-    (define/public (foldr c b)
-      b)))
-
-And for the wrapper list implementation:
-
-@#reader scribble/comment-reader
-(racketblock
-  (define-class wlist%
-    (fields ls)
-    
-    (define/public (cons x)
-      (new wlist% (ls:cons x (field ls))))
-    
-    (define/public (empty)
-      (new wlist% ls:empty))
-
-    (define/public (length)
-      (ls:length (field ls)))
-
-    (define/public (foldr c b)
-      (ls:foldr c b (field ls))))
-)
-
-None of these look the same, so how can we abstract?  Our abstraction
-design recipe for using inheritance requires that methods look
-identical in order to abstract them into a common super class.  But,
-for example, the @r[length] method looks like this for @r[wlist%]:
-
-@#reader scribble/comment-reader
-(racketblock
-    (define/public (length)
-      (ls:length (field ls))))
-
-Like this for @r[empty%]:
-
-@#reader scribble/comment-reader
-(racketblock
-    (define/public (length)
-      0))
-
-And like this for @r[cons%]:
-
-@#reader scribble/comment-reader
-(racketblock
-    (define/public (length)
-      (add1 (send (field rest) length))))
-
-
-@margin-note{In fact, all of
-		them---but
-		that's a topic
-		for another day.}
-Before we can abstract this method, we must make them all look the
-same. Fortunately, many list operations
-can be expressed using just a few simple operations, of which the most
-important is @r[foldr].  Here's an implementation of @r[length] which
-just uses @r[foldr] and simple arithmetic.  
-
-@#reader scribble/comment-reader
-(racketblock
-    (define/public (length)
-      (send this foldr (λ (a b) (add1 b)) 0))
-)
-
-Note that this isn't specific to any one implementation of lists---in
-fact, we can use it for any of them.  This means that we can now
-abstract the method, creating a new @r[list%] class to share all of
-our common code:
-
-
-@#reader scribble/comment-reader
-(racketblock
- (define-class list%
-    (define/public (length)
-      (send this foldr (λ (a b) (add1 b)) 0))
-    (code:comment "other methods here"))
-)
-
-The only methods that need to be implemented differently for different
-list versions are @r[empty] and @r[cons], because they construct new
-lists, and @r[foldr], because it's the fundamental operation we use to
-build the other operations out of.  It's also helpful to implementat
-@r[foldl], since it's fairly complex to factor out.  
-
-@section{Solidifying what we've done}
-
-So far in this class, we've seen a number of different ways of
-specifying the creation and behavior of the data we work with.  At
-this point, it's valuable to take a step back and consider all of the
-concepts we've seen, and how they differ from what we had in Fundies
-1. 
-
-@subsection{Data Definitions}
-
-Data defintions describe how data is constructed.  For example,
-primitive classes of data such as @tt{Number} and @tt{String} are
-examples, of data defintions, as is @r[(make-posn Number Number)].  We
-can also describe enumerations and unions, just as we did previously.  
-
-In this class, we've introduced a new way of writing data defintions,
-referring to @emph{classes}.  For example:
-
-@racketblock[
-(code:comment "A [WList X] is (new wlist% [Listof X])")
-]
-
-We can combine this style of data defintion with other data definition
-forms, such as unions.  However, classes also need to describe one
-other important aspect---their @emph{interface}.  So we will add the
-following to the above data defintion:
-
-@racketblock[
-(code:comment "A [WList X] is (new wlist% [Listof X])")
-(code:comment "    and implements the [IList X] interface")
-]
-
-@subsection{Interface Definitions}
-
-An @emph{interface defintion} lists the operations that something that
-implements the interface will support.  Just as we have a convention that data
-defintions start with a capital letter, interface defintions start with a
-capital letter "I".  The interface defintion for @tt{[IList X]} is:
-
-@codeblock[#:keep-lang-line? #f]{
-#lang racket
-;; An [IList X] implements
-
-;; empty : -> [IList X]
-;; Produce an empty list
-;; cons : X -> [IList X]
-;; Produce a list with the given element at the front.
-;; empty? : -> Boolean
-;; Determine if this list is empty.
-;; length : -> Number
-;; Count the elements in this list
-
-;; ... and other methods ...
-}
-
-There are several important aspects of this interface defintion to note.
-First, it lists all of the methods that can be used on an @tt{[IList X]}, along
-with their contracts and purpose statements.  Mere method names are not
-enough---with just a method name you have no idea how to use a method, or what
-to use it for.  Second, interface defintions can have parameters (here @tt{X}),
-just like data defintions.  Third, there is no description of how to
-@emph{construct} an @tt{[IList X]}.  That's the job of data defintions that
-implement this interface.  
-
-Of course, just like data defintions don't have to be named, interface
-defintions don't have to be named either.  If you need to describe an interface
-just once, it's fine to write the interface right there where you need it.  
-
-@subsection{Contracts}
-
-Contracts describe the appropriate inputs and outputs of functions and
-methods.  In the past, we've seen many contracts that refer to data
-defintions.  In this class, we've also seen contracts that refer to interface
-defintions, like so:
-
-@racketblock[(code:comment "[IList Number] -> [IList Number]")]
-
-When describing the contract of a function or method, it's almost always
-preferable to refer to an interface definition instead of a data defintion that
-commits to a specific representation.  @; Sometimes, there's only one data
-@; definition that makes sense, and then there isn't a difference between using
-@; the interface defintion and the data defintion.  
-
-@subsection{Design Recipe}
-
-Interfaces change the design recipe in one important way.  In the Template
-step, we take an inventory of what is available in the body of a function or
-method.  When designing a method, we have the following available to us:
-@itemlist[
-@item{The fields of this object, accessed with @r[field],}
-@item{The methods of this object, accessed by calling them,}
-@item{And the operations of the arguments, which are given by their @emph{interfaces}.}
-]
-
-For example, if a method takes an input @r[a-list] which is specified in the
-contract to be an @tt{IList}, then we know that @r[(send a-list empty?)],
-@r[(send a-list length)], and so on.  
-
-
-@section{Delegation}
-
-So far, we've seen multiple ways to abstract repeated code.  First, in Fundies
-1, we saw functional abstraction, where we take parts of functions that differ
-and make them parameters to the abstracted function.  Second, in this class
-we've seen abstraction  by using inheritance, where if methods in two related
-classes are identical, they can be lifted into one method in a common
-superclass.  
-
-However, can we still abstract common code without @emph{either} of these
-mechanisms?  Yes.  
-
-Consider the @racketmodname[class/0], @emph{without} helper functions.  We can
-write a binary tree class like this:
+The first is handled by the @racket[on-new] method and the second by
+the @racket[on-msg]:
 
 @#reader scribble/comment-reader
 (racketmod
-  class/0
-  ;; A BT is one of:
-  ;; - (new leaf% Number)
-  ;; - (new node% Number BT BT)
+  class/1
+  (require class/universe)
 
-  ;; double : Number -> BT
-  ;; Double this tree and put the number on top.
-
-  (define-class leaf%
-    (fields number)
-    
-    (define/public (double n)
-      (new node% n this this)))
-
-  (define-class node%
-    (fields number left right)
-    
-    (define/public (double n)
-      (new node% n this this)))
+  (define-class universe%
+    ;; IWorld -> Bundle
+    (define/public (on-new iw) ...)
+  
+    ;; IWorld S-Expr -> Bundle
+    (define/public (on-msg iw m) ...))
 )
 
-Unfortunately, the @r[double] method is identical in both the @r[leaf%] and
-@r[node%] classes.  How can we abstract this without using inheritance or a
-helper function?
+When a world registers, the @racket[on-new] method is called with an
+IWorld value.  An IWorld value opaquely represents a world, that is
+you do not have the ability to examine the contents of the value, but
+you can compare it for equality with other IWorld values using
+@racket[iworld=?].
 
-One solution is to create a new class, and @emph{delegate} the responsibility
-of doing the doubling to it.  Below is an example of this:
+When a world sends message, the @racket[on-msg] method is called with
+the IWorld representing the world that sent the message and the S-Exp
+message that was sent.
+
+In both cases, the method must produce a bundle:
 
 @#reader scribble/comment-reader
 (racketblock
-  (define-class helper%
-    ;; Number BT -> BT
-    ;; Double the given tree and puts the number on top.
-    (define/public (double-helper number bt)
-      (new node% number bt bt)))
-  (define tutor (new helper%))
-
-  (define-class leaf%
-    (fields number)
-    
-    (define/public (double n)
-      (send tutor double-helper n this)))
-
-  (define-class node%
-    (fields number left right)
-    
-    (define/public (double n)
-      (send tutor double-helper n this)))
+  ;; A Bundle is a (make-bundle Universe [Listof Mail] [Listof IWorld]).
 )
 
-The @r[helper%] class has just one method, although we could add as many as we
-wanted.  We also need only one instance of @r[helper%], called @r[tutor],
-although we could create new instances when we needed them as well.  Now the
-body of @r[double-helper] contains all of the doubling logic in our program,
-which might become much larger without needing duplicate code.  
+The universe component is the new state of the universe; the list of
+mail is a list of messages that will be sent back to the worlds (more
+on this in a moment), and the list of worlds are worlds that the
+server has chosen to disconnect from.
+
+
+For the purposes of our example, the universe maintains no state (the
+class has no data).  When a new world registers, we do nothing, and
+when a world sends a message, we also do nothing, send nothing in
+response, and disconnect no worlds:
+
+@#reader scribble/comment-reader
+(racketmod 
+  class/1
+  (require class/universe)
+
+  (define-class universe%
+    ;; IWorld -> Bundle
+    (define/public (on-new iw) 
+      (make-bundle this empty empty))
+    
+    ;; IWorld S-Expr -> Bundle
+    (define/public (on-msg iw m)
+      (make-bundle this empty empty)))
+  
+  (universe (new universe%)) 
+) 
+
+Running this program launches the universe server, making it ready to
+receive registrations from worlds.  After starting the universe
+server, if we switch back to the world program tab and run it, we'll
+see that it successfully registers with the universe and the universe
+console reports that the world signed up with it.
+
+Thrilling.
+
+At this point, the world registers, but never sends any message to the
+server.  Now let's modify the world program to notify the server when
+it ticks by sending it's current count as a message.
+
+That requires changing our on-tick method from:
+
+@filebox[@r[world%]]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (on-tick)
+    (new counter-world% (add1 (field n))))
+)
+}
+
+to one that constructs a package:
+
+@filebox[@r[world%]]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (on-tick)
+    (make-package (new counter-world% (add1 (field n)))
+		  (add1 (field n))))
+)
+}
+
+Now let's re-run the world program.  Notice that messages are being
+received by the server in the console.
+
+@section{Migrating computation from client to server}
+
+Now let's change the system so that "work" of adding is done on the
+server side.  When the world ticks it sends its current count to the
+server; when the server receives the count, it responds by sending a
+message back to the world that is the count plus one.  On the world
+side, that means we must now add the ability to receive messages by
+implementing the @racket[on-receive] method, which will update the
+world state appropriately and the @racket[on-tick] method will do no
+computation, but only communication:
+
+@filebox[@r[world%]]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (on-tick)
+    (make-package this (field n)))
+  
+  (define/public (on-receive m)
+    (new counter-world% m))
+)
+}
+
+On the server side, we now need to send a message back to the world,
+so we need to consider the data definition for mail:
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Mail is a (make-mail IWorld S-Exp).
+)
+
+This constructs a message that will be sent to the world represented
+by the IWorld value consisting of the S-Exp value.
+
+@filebox[@r[universe%]]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (on-msg iw m)
+    (make-bundle this 
+		 (list (make-mail iw (add1 m))) 
+		 empty))
+)
+}
+
+If we restart the universe and world, you'll notice that the universe
+console is now showing messages going in both directions.
+
+Now let's see an example of multiple world programs communicating with
+a single server.
+
+If we were to just write this:
+
+@#reader scribble/comment-reader
+(racketblock
+  (big-bang (new counter-world% 0))
+  (big-bang (new counter-world% 50))
+)
+
+the program would wait for the first big-bang expression to finish
+evaluating before moving on the second one.  To make it possible to
+run many worlds at the same time, the universe library provides the
+@racket[launch-many-worlds] form that will evaluate all of its
+subexpressions in parallel:
+
+@#reader scribble/comment-reader
+(racketblock
+  (launch-many-worlds
+    (big-bang (new counter-world% 0))
+    (big-bang (new counter-world% 50)))
+)
+
+Notice that both worlds count independently.
+
+@section{Guess my number}
+
+Now let's a more interesting game.  We'll start by considering the
+guess my number game.
+
+In this game, the server is thinking of a number and you have to guess
+it.
+
+Here's the server:
+
+@#reader scribble/comment-reader
+(racketmod
+  class/1
+  (require class/universe)
+
+  (define-class universe%
+    (fields the-number)
+    
+    (define/public (on-new iw) 
+      (make-bundle this empty empty))
+    
+    (define/public (on-msg iw m)
+      (make-bundle this 
+		   (list (make-mail iw (respond m (field the-number))))
+		   empty)))
+
+  ;; Number Number -> String
+  (define (respond guess number)
+    (cond [(< guess number) "too small"]
+	  [(> guess number) "too big"]
+	  [else "just right"]))
+
+  ;; the universe is thinking of 2.
+  (universe (new universe% 2))
+)
+
+
+The universe now has a single peice of data, which is the number it is
+thinking of.  It responds to guesses by sending back a string
+indicating whether the guess is just right, too big, or too small.
+
+Here is the client:
+
+@#reader scribble/comment-reader
+(racketmod
+  class/1
+  (require class/universe)
+  (require 2htdp/image)
+
+  (define-class guess-world%
+    (fields status)
+    
+    (define/public (on-receive m)
+      (new guess-world% m))
+      
+    (define/public (to-draw)
+      (overlay (text (field status)
+		     40
+		     "red")
+	       (empty-scene 300 100)))
+    
+    (define/public (on-key k)
+      (local [(define n (string->number k))]
+        (if (number? n)
+	    (make-package this n)
+	    this)))                    
+  
+    (define/public (register) LOCALHOST))
+
+  (big-bang (new guess-world% "guess a number"))
+)
+
+The client has a single peice of data, which represents the status of
+its guess.  It responds to numeric key events by sending the guess to
+the server and ignores all other key events.
+
+The @racket[string->number] function is being used to test for numeric
+key events---it works by producing @racket[false] when given a string
+that cannot be converted to a number, otherwise it converts the string
+to a number.
+
+@section{Two player guess my number}
+
+Now let's write a 2-player version of the game where one player thinks
+of a number and the other player guesses.
+
+Here is the server:
+
+@#reader scribble/comment-reader
+(racketmod
+  class/1
+  (require class/universe)
+
+  ;; A Universe is a (new universe% [U #f Number] [U #f IWorld] [U #f IWorld]).
+  (define-class universe%
+    (fields number
+	    picker
+	    guesser)
+    
+    ;; is the given world the picker?
+    (define/public (picker? iw)
+      (and (iworld? (field picker))
+	   (iworld=? iw (field picker))))
+    
+    ;; is the given world the guesser?
+    (define/public (guesser? iw)
+      (and (iworld? (field guesser))
+	   (iworld=? iw (field guesser))))
+    
+    (define/public (on-new iw)
+      (cond [(false? (field picker))
+	     (make-bundle
+	      (new universe% false iw false)
+	      (list (make-mail iw "pick a number"))
+	      empty)]          
+	    [(false? (field guesser))
+	     (make-bundle
+	      (new universe% (field number) (field picker) iw)
+	      empty
+	      empty)]          
+	    [else
+	     (make-bundle this empty (list iw))]))
+    
+    (define/public (on-msg iw m)
+      (cond [(and (picker? iw)
+		  (false? (field number)))           
+	     (make-bundle
+	      (new universe% m (field picker) (field guesser))
+	      empty
+	      empty)]
+	    [(picker? iw) ;; already picked a number
+	     (make-bundle this empty empty)]
+	    [(and (guesser? iw)
+		  (number? (field number)))
+	     (make-bundle this 
+			  (list (make-mail iw (respond m (field number))))
+			  empty)]
+	    [(guesser? iw)
+	     (make-bundle this
+			  (list (make-mail iw "no number"))
+			  empty)])))
+  
+  ;; Number Number -> String
+  (define (respond guess number)
+    (cond [(< guess number) "too small"]
+	  [(> guess number) "too big"]
+	  [else "just right"]))
+
+  (universe (new universe% false false false))
+)
+
+The client stays the same!  You can launch the two players with:
+
+@#reader scribble/comment-reader
+(racketblock
+  (launch-many-worlds
+   (big-bang (new guess-world% "guess a number"))
+   (big-bang (new guess-world% "guess a number"))))
+

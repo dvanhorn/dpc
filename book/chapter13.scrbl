@@ -16,445 +16,425 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec17"]{Java}
+@title[#:tag "lec12"]{Exam Review}
 
-@section{EWD's rules for science}
-
-Van Horn presented some slides.
-
-@section{Two Ideas: Java and Types}
-
-Types are a @emph{mechanism} for enforcing data definitions and contracts.
-
-Java is a programming language like the one we've seen, with a
-different syntax and with types.
-
-@section{Programming in Java}
-
-@subsection{Java Syntax}
-
-@racketblock[
-(code:comment "A C is (C Number String String)")
-(define-class C
-  (fields x y z)
-  (code:comment "Number Number -> C")
-  (define/public (m p q)
-    ...))
-]
+@section{Problem 1}
 
 @verbatim|{
-class C {
-    Number x;
-    String y;
-    String z;
-    public C m(Number p, Number q) {
-	...
-    }
-    public C(Number x, String y, String z) {
-	this.x = x;
-	this.y = y;
-	this.z = z;
-    }
-}
-}|
+The hard part is translating english prose into a data defintion.
+This is the most fundamental skill in CS.  
 
-Let's create a simple pair of numbers:
-@;'
+For ranges, here's what the spec is:
+[lo,hi) -- a closed open range
 
-@verbatim|{
-class Pair {
-    Number left;
-    Number right;
-    
-    public Pair(Number left, Number right) {
-	this.left = left;
-	this.right = right;
-    }
-    
-    public Pair swap() {
-	return new Pair(this.right, this.left);
-    }
-}
-}|
+Data Def: 
+A Range is a (co% Number Number)
 
-    But really, this doesn't work, because Java doesn't have the type @tt{Number}.  So we'll choose @tt{Integer} instead.
+Then we add (lo,hi].
+
+A Range is one of:
+- (co% Number Number)
+- (oc% Number Number)
+
+Then we add:
+  [4,5) union (6,8] union [100,101)
+
+Thus we get the data def:
+
+A Range is one of
+- (co% Number Number)
+- (oc% Number Number)
+- (u% Range Range) ;; note recursive data def
+
+Let's write the u% class:
+
+(define-class u%
+  (fields left right) ;; not min/max
+  (define/public (in-range? n)
+    (or (send (field left) in-range? n)
+	(send (field right) in-range? n))))
+
+How would we write @r[union]  in @r[co]?
+
+(define/public (union r)
+  (u% r this))
+
+same in u% and oc%
+
+@section{Problem 2: Shapes}
+
+Data Def:
+
+A Shape is one of:
+- (rect% N N)
+- (circ% N)
+
+Part 1:
+Write the bba (bounding-box-area) method.  Everyone did well on this.
+
+Part 2: 
+Abstract the two methods to a super class.
+
+in rect%
+(define/public (bba)
+  (* (field width) (field height)))
+
+in circ%
+(define/public (bba)
+  (sqr (* 2 (field radius))))
+
+So, let's extend the Shape interface:
+
+; Shape implements:
+; width : -> N
+;; compute the width of this shape
+; height : -> N
+;; compute the height 
+
+Now we can rewrite our methods:
+
+in rect%
+(define/public (bba)
+  (* (width) (height)))
+
+in circ%
+(define/public (bba)
+  (* (width) (height)))
+
+Now our methods are identical.  We can lift them up to a superclass:
+
+(define-class shape%
+  (define/public (bba)
+    (* (width) (height))))
+
+Except we need to change this to:
+
+(define-class shape%
+  (define/public (bba)
+    (* (this . width) (this . height))))
+
+Now we have to implement our interface in rect% and circ%
+
+In rect%, we're already done -- define-class has generated the
+accessor methods for us.
+
+In circ%, we do this:
+
+(define/public (width)
+  (* 2 (field radius)))
+
+(define/public (height)
+  (* 2 (field radius)))
+or
+(define/public (height)
+  (width))
+
+Extend our data definintion:
+
+A Shape is one of:
+- (rect% N N)
+- (circ% N)
+- (square% N)
+
+(define-class square%
+  (super shape%)
+  (fields width)
+  (define/public (height) (field width)))
+
+or, to be cuter (not necessarily a good idea on exams) :
+
+(define-class square%
+  (super rect%)
+  (constructor (x) (fields x x)))
+
+@section{Problem 3: Functions as Objects}
+
+In this problem, we give you an interface:
+
+An [IFun X Y] implements
+apply : X -> Y
+apply this function to the given input
+
+Explanation of parametric interfaces.  Analogy to parametric data
+definitions, ie [Listof X].  
+
+What do we know about someting that implements [IFun Number String]?
+It has an apply method which takes a Number and produces a String.
+
+Let's consider Part 1 of this problem.
+
+You're given an (X -> Y) function.  You should construct something
+that implements [IFun X Y].  
+
+So, we must construct a data definition, since we don't have any way
+yet of constructing [IFun X Y].
+
+; A [Fun X Y] is a (f% (X -> Y)) and implements [IFun X Y]
+
+(define-class f%
+  (fields f)
+  ;; template
+  (define/public (apply x)
+    ... (field f) ... x))
+
+code:
+
+  (define/public (apply x)
+    ((field f) x))
+
+Now, on to part 2:
+
+(define addone (f% add1))
+> (addone . apply 3)
+4
+(define subone (f% sub1))
+> (subone . apply 3)
+2
+
+Now, on to part 3:
+
+We extend the interface with the compose method:
+
+;; compose : [IFun Y Z] -> [IFun X Z]
+;; produce a function that applies this function and then the given
+;; function
+
+Since we extended the interface, we must implement the compose method
+in f%. 
+
+(define/public (compose g)
+  ... (field f) g (g . apply ...) (g . compose ...) ...)
+
+remove the useless bits:
+
+(define/public (compose g)
+  ... (field f) (g . apply ...) ...)
+
+First, we need to construct an [IFun X Z].  But the only way to do
+that is with (f% ...), which requires a function as input:
+
+(define/public (compose g)
+  (f% (lambda (x)
+	... (field f) 
+	... (g . apply ...)  ...)))
+
+Now our inventory is extended:
+
+(define/public (compose g)
+  (f% (lambda (x)
+	... x ;; contract: X
+	... (field f) ;; contract : X -> Y
+	... (g . apply ...)  ;; contract : Y -> Z
+	...)))
+
+(define/public (compose g)
+  (f% (lambda (x)
+	(g . apply ((field f) x)))))
 
 
-@;'
+Possible mistakes:
 
-@verbatim|{
-class Pair {
-    Integer left;
-    Integer right;
-    
-    public Pair(Integer left, Integer right) {
-	this.left = left;
-	this.right = right;
-    }
-    
-    public Pair swap() {
-	return new Pair(this.right, this.left);
-    }
-}
-}|
+(define/public (compose g)
+  (f% (lambda (x)
+	(g ((field f) x)))))
 
-									       
-To test this, we'll import a testing library:
+g is not a function, this doesn't work
 
-@verbatim{
-import tester.Tester;
-}
+(define/public (compose g)
+  (f% (lambda (x)
+	(g . f ((field f) x)))))
 
-and write some examples:
+f is not in the [IFun Y Z] interface, this doesn't work
 
-@;'
+@section{Problem 4: Queues}
 
-@verbatim|{
-class Examples {
-    public Examples() {}
-    public boolean testSwap(Tester t) {
-	return t.checkExpect(new Pair(3,4).swap(), 
-			     new Pair(4,3));
-    }
-}
-}|
-
-
-@section{Running Java Programs}
-
-We don't have a Run button in Java, so we need a different way to run
-our program. To do this, we first need to install our test library.
-This requires installing a @tt{JAR} file from the NU Tester
-@link["http://code.google.com/p/nutester/"]{web site}.  
-
-The we have to compile the program.  
-
-@itemlist[
-	@item{javac}
-	@item{The classpath and the -cp option}
-	@item{Now we have class files, which are binary and all mashed
-	up}
-	@item{To run this, we use the @tt{java} command, which also
-	has a @tt{-cp} option}
-	@item{If we change things, we have to recompile and then rerun.}
-]
-
-@section{A More Complex Example}
-
-@;'
-
-What if we want to represent a union?
-
-@verbatim|{
-    class Square {
-	Integer size;
-	public Square(Integer size) {
-	    this.size = size;
-	}
-    }
-    class Circ {
-	Integer radius;
-	public Circ(Integer radius) {
-	    this.radius = radius;
-	}
-    }
-}|
-
-How do we declare that both of these are @tt{Shape}s?
-
-
-@verbatim|{
-    import tester.Tester;
-
-    interface IShape {}
-
-    class Square implements IShape {
-	Integer size;
-	public Square(Integer size) {
-	    this.size = size;
-	}
-	public IShape nothing(IShape i) {
-	    return i;
-	}
-    }
-
-    class Circ implements IShape {
-	Integer radius;
-	public Circ(Integer radius) {
-	    this.radius = radius;
-	}
-    }
-
-    class Examples {
-	Examples () {}
-	public boolean testNothing(Tester t) {
-	    Square s = new Square(5); // A local binding
-	    return t.checkExpect(s.nothing(new Circ(2)), 
-				 new Circ(2));
-	}
-    }
-	
-}|
-
-@section{Recursive Unions}
-
-@verbatim|{
-    import tester.Tester;
-    class Mt implements IList {
-	public Mt() {}
-    }
-
-    class Cons implements IList {
-	Integer first;
-	IList rest;
-	
-	public Cons(Integer first, IList rest) {
-	    this.first = first;
-	    this.rest = rest;
-	}
-    }
-
-    interface IList {}
-    
-    class Examples {
-	public Examples() {}
-	
-	public boolean testList(Tester t) {
-	    return t.checkExpect(new Mt(), new Mt())
-		&& t.checkExpect(new Cons(5, new Mt()), new Cons(5, new Mt()));
-	}
-    }	
-
-}|
-
-@section[#:tag "java-enum"]{Enumerations}
-
-In Fundies I, we might have written:
+This problem is all about maintaining invariants.  
 
 @codeblock{
-    ;; A Title is one of
-    ;; - 'dr
-    ;; - 'mr
-    ;; - 'ms
-}
-@;'
-
-In Java, we write:
-
-@verbatim|{
-	interface ITitle {}
-	class Dr implements ITitle {
-	    Dr() {}
-	}
-	class Mr implements ITitle {
-	    Mr() {}
-	}
-	class Ms implements ITitle {
-	    Ms() {}
-	}
-}|
-
-Why write these silly constructors?
-
-@verbatim|{
-	interface ITitle {}
-	class Dr implements ITitle {
-	    Dr() {}
-	}
-	class Mr implements ITitle {
-	    Mr() {}
-	}
-	class Ms implements ITitle {
-	    Integer x;
-	    Ms() {}
-
-	    public Integer m() {
-		return x+1;
-	    }
-	}
-
-	class Main {
-	    public static void main(String[] args) {
-		new Ms().m();
-		return;
-	    }
-	}
-}|
-
-
-Now we get a @tt{NullPointerException}.  But what is that?
-
-A discussion of the evils of @tt{null}.
-
-For example, this compiles:
-
-@verbatim|{
-	interface ITitle {}
-	class Dr implements ITitle {
-	    Dr() {}
-	}
-	class Mr implements ITitle {
-	    Mr() {}
-	}
-	class Ms implements ITitle {
-	    Integer x;
-	    Ms(Integer x) {
-	        this.x = x;
-	    }
-
-	    public Integer m() {
-		return null;
-	    }
-	}
-
-	class Main {
-	    public static void main(String[] args) {
-		new Ms().m();
-		return;
-	    }
-	}
-}|
-
-Never write @tt{null} in your program!
-
-A long sermon on @tt{null}.
-
-@section{Parameterized Data Definitions}
-
-Consider our @tt{Pair} class:
-
-@verbatim|{
-class Pair {
-    Integer left;
-    Integer right;
-    
-    public Pair(Integer left, Integer right) {
-	this.left = left;
-	this.right = right;
-    }
-    
-    public Pair swap() {
-	return new Pair(this.right, this.left);
-    }
-}
-}|
-
-Now if we want a @tt{Pair} of @tt{String}s:
-
-@verbatim|{
-class PairString {
-    String left;
-    String right;
-    
-    public Pair(String left, String right) {
-	this.left = left;
-	this.right = right;
-    }
-    
-    public Pair swap() {
-	return new Pair(this.right, this.left);
-    }
-}
-}|
-
-
-This is obviously bad---we had to copy and paste.  So let's abstract:
-
-@verbatim|{
-class Pair<T,V> {
-    T left;
-    V right;
-    
-    public Pair(T left, V right) {
-	this.left = left;
-	this.right = right;
-    }
-    
-    public Pair<V,T> swap() {
-	return new Pair<V,T>(this.right, this.left);
-    }
+;; A [IQ X] implements:
+;;
+;; head : -> X
+;; Produce the element at the head of this queue.
+;; Assume: this queue is not empty.
+;;
+;; deq : -> [IQ X]      (Short for "dequeue")
+;; Produces a new queue like this queue, but without 
+;; this queue's first element.
+;; Assume: this queue is not empty.
+;;
+;; enq : X -> [IQ X]    (Short for "enqueue")
+;; Produce new queue with given element added to the
+;; END of this queue.
+;;
+;; emp? : -> Boolean
+;; Is this queue empty?
 }
 
-class Examples {
-    public Examples() {}
-    public boolean testSwap(Tester t) {
-	return t.checkExpect(new Pair<Integer,Integer>(3,4).swap(), 
-			     new Pair<Integer,Integer>(4,3));
-    }
+here's the representation idea:
+
+front: (list 'x 'y)
+rear: (list 'z 'p 'q) -- reverse order
+
+So this has the elements in this order:
+  'x 'y 'q 'p 'z
+
+Invariants have dual roles: they give us things to ensure, and things
+we can rely on.
+
+Let's consider one case where we can simply rely on the invariant.
+
+;; A [Q% X] is a (q% [Listof X] [Listof X])
+(define/class q%
+  (fields front rear)
+  (define/public (emp?)
+    (empty? (field front)))
+  ...
+)
+
+The @r[head] method is another such case.
+We know, from the assumption, that the queue isn't empty.  From the
+invariant, we therefore know that the front isn't empty.  
+So we just get:
+(define/public (head)
+  (first (field front)))
+
+Now let's consider a case where we have to ensure the invariant -- the
+@r[enq] method.
+
+(define/public (enq x)
+  (q% (field front) (cons x (field rear))))
+
+But what if the queue is empty?  We just broke the invariant.  Whoops.
+
+(define/public (enq x)
+  (cond [(emp?)
+	 (q% (list x) empty)]
+	[else
+	 (q% (field front) (cons x (field rear)))]))
+
+Now we maintain the invariant in both cases.
+
+Now we get to the trickiest method, @r[deq].  Here's a simple way of
+doing it.
+
+(define/public (deq)
+  (q% (rest (field front))
+      (field rear)))
+
+But what if there's only one person?  Then we're ok, because the whole
+queue is empty?  
+
+What if there's only one person in the front, but a million people in
+the rear?  Then we've broken the invariant.  
+
+We need to distinguish the two possible cases:
+
+(define/public (deq)
+  (cond [(empty? (rest (field front)))
+	 (q% (reverse (field rear))
+	     empty)]
+	[else (q% (rest (field front))
+		  (field rear))]))
+part 2:
+
+(q% '(x y z) '(p q r)) has the same interp as
+(q% '(x y) '(p q r z)) but different representations
+
+Now we define a to-list method that does the interpretation for
+testing purposes.
+
+;; to-list : -> [Listof X]
+;; produce a list of the elements of this queue in order
+(define/public (to-list)
+  (append (field front) (reverse (field rear))))
+
+Now we can use this to test that the interp of the two queue in our
+example is the same.  
+
+part 3:
+Write a constructor.
+
+In the q% class:
+(constructor (f r)
+   (cond [(empty? f)
+	  (fields (reverse r) empty)]
+	 [else (fields f r)]))
+
+Various other possibilites.  
+
+(constructor (f r)
+  (fields (append f (reverse r)) empty))
+
+@section{Problem 5: Properties and Dictionaries}
+
+
+@codeblock{
+;; A Dict is one of:
+;;  - (ld-empty%)
+;;  - (ld-cons% Nat String Dict)
+;; implements:
+;;
+;; has-key? : Nat -> Boolean
+;; Does this dict. have the given key?
+;;
+;; lookup : Nat -> String
+;; Produce the value associated with the given key in this dict.
+;; Assume: the key exists in this dict.
+;;
+;; set : Nat String -> Dict
+;; Associate the given key to the given value in this dict.
+
+(define-class ld-empty%
+  (define/public (has-key? k) false)
+
+  (define/public (set k v)
+    (ld-cons% k v this)))
+
+(define-class ld-cons%
+  (fields key val rest)
+
+  (define/public (has-key? k)
+    (cond [(= (field key) k) true]
+          [else ((field rest) . has-key? k)]))
+
+  (define/public (lookup k)
+    (cond [(= (field key) k) (field val)]
+          [else ((field rest) . lookup k)]))
+
+  (define/public (set k v)
+    (ld-cons% k v this)))
 }
 
-}|
+In this problem, we're not asking you to develop new code, but to
+reason about existing code.   You need to develop properties
+that the dictionary implmentation has, and then embody those
+properties as predicates that we can test.  
 
-@section{Abstraction}
+First, the "set/lookup" property:
 
-@;'
+(d . set n s . lookup n) should produce s.  As a predicate:
 
-@verbatim|{
+;; Dict Number String -> Boolean
+;; check the set/lookup property on these inputs
+(define (set/lookup? d n s) (string=? (d . set n s . lookup n) s))
 
-class C {
-    Integer x;
-    Integer y;
-    C(Integer x, Integer y) {
-	this.x = x;
-	this.y = y;
-    }
-    
-    public Integer sq() {
-	return this.x * this.x;
-    }
-}
+Now, we can use this to write tests.
 
+(check-expect (set/lookup? (ld-empty%) 3 "Wilma") true)
+(check-expect (set/lookup? (ld-empty%) 17 "Fred") true)
 
-class D {
-    Integer x;
-    String z;
-    D(Integer x, String z) {
-	this.x = x;
-	this.z = z;
-    }
-    
-    public Integer sq() {
-	return this.x * this.x;
-    }
-}
+Then, we consider a generalization of this property to consider
+multiple keys and values.  
 
-}|
+(define (2-set/lookup? d n s m t)
+  (and 
+   (string=? (d . set n s . set m t . lookup n)
+	     s)
+   (string=? (d . set n s . set m t . lookup m)
+	     t)))
 
+Here's an example where this works:
 
-    Now to abstract:
-
-@verbatim|{
-
-class S {
-    Integer x;
-    public Integer sq() {
-	return this.x * this.x;
-    }
-    S(Integer x) {
-	this.x = x;
-    }
-}
-
-class C extends S {
-    Integer y;
-    C(Integer x, Integer y) {
-	super(x);
-	this.y = y;
-    }
-}
-
-
-class D {
-    Integer x;
-    String z;
-    D(Integer x, String z) {
-	this.x = x;
-	this.z = z;
-    }
-    
-    public Integer sq() {
-	return this.x * this.x;
-    }
-}
-
+(check-expect (2-set/lookup? (ld-empty%) 3 "Fred" 4 "Wilma") true)
+ 
 }|

@@ -1,521 +1,478 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class/4 check-expect define-struct ... length
+          (for-label (except-in class/1 check-expect define-struct ... length
 				numerator denominator))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
 	  (for-label class/universe))
 
-@title[#:tag "lec21"]{Under the Hood: Implementing OO}
+@(require scribble/eval racket/sandbox)
+@(define the-eval
+  (let ([the-eval (make-base-eval)])
+    (the-eval '(require (for-syntax racket/base)))
+    (the-eval '(require class/2))
+    (the-eval '(require 2htdp/image))
+    (the-eval '(require (prefix-in r: racket)))
+    the-eval))
+
+@title[#:tag "lec19"]{Equality}
+
+
+@section{Equality}
+
+@subsection{Several kinds of equality}
+@itemlist[
+@item{Structural equality---identical twins are the "same".}
+@item{Intensional equality---are we pointing at the same thing?}
+]
+Distinction matters a lot in the context of mutation.  If you punch
+one identical twin, the other one doesn't get a black eye. 
+
+@section{Defining structural equality}
+
+@codeblock{
+#lang class/4
+;; A Posn is a (posn% Number Number)
+(define-class posn%
+  (fields x y)
+
+  ;; =? : Posn -> Bool
+  ;; is the given posn the same as this one?
+  (define/public (=? p)
+    (and (= (field x) (send p x))
+	 (= (field y) (send p y))))
+
+  (check-expect (send (posn% 3 4) =? (posn% 3 4)) true)
+  (check-expect (send (posn% 3 4) =? (posn% 3 5)) false)
+)
+
+}
+
+What about lists?
+
+@codeblock{
+#lang class/3
+;; A LoP is one of either
+;; - (mt%)
+;; - (cons% Posn LoP)
+(define-class mt%)
+(define-class cons%
+  (fields first rest))
+}
+
+What does it mean for the elements have to be the same?
+
+In @r[mt%]:
+
+@codeblock{
+;; LoP -> Boolean 
+(define/public (=? lop)
+  (send lop empty?))
+}
+
+So we need to add @r[empty?] to our interface definition.
+@codeblock{
+;; A LoP is one of either
+;; - (mt%)
+;; - (cons% Posn LoP)
+;; and implements:
+;; empty? : -> Boolean
+;; is this LoP empty? 
+}
+
+In @r[mt%]:
+@codeblock{
+(define/public (empty?) true)
+}
+
+In @r[cons%]:
+@codeblock{
+(define/public (empty?) false)
+}
+
+Now to implement equality for @r[cons%]:
+
+@codeblock{
+(define/public (=? lop)
+  (and (not (send lop empty?)
+	    (send (field first) =? (send lop first))
+	    (send (field rest) =? (send lop rest)))))
+}
+
+Note that we're using the @r[=?] method to compare the @r[Posn]s in
+the list. 
+
+@section{Multiple Representations}
+
+@codeblock{
+;; A Posn implements IPosn
+
+;; An IPosn implements
+;; x : -> Number
+;; y : -> Number
+  ;; =? : IPosn -> Bool
+  ;; is the given posn the same as this one?
+
+;; A Posn2 is a (posn2% Number Number)
+(define-class posn2%
+  (fields ls)
+  (constructor (x y)
+	       (fields (list x y)))
+  (define/public (x) (first (field ls)))
+  (define/public (y) (second (field ls)))
+  (define/public (=? p)
+    (and (= (x) (send p x))
+	 (= (y) (send p y)))))
+}
 
-@section{Pulling back the veil from object-oriented programming}
+Now we can compare the two different kinds of posns and everything
+works properly.
 
-We will implement OO in ISL+lambda.
+What about multiple representations for lists of posns?
 
-In Fundies 1 we saw a way to implement the language we were writing
-programs in.  Today we're going to do something similar.  How can we
-do this?
 
-We could write a Java compiler, which would help us program Java, but
-the JLS is like 900 pages long.
+@codeblock{
+#lang class/3
 
-Structs with functions in them.  That would be similar to having
-objects because we'd have data with functionality bundled together.
+;; A Posn implements IPosn.
 
-We could also implement dictionary and use those to associate values
-and fields and values and methods.
+;; An IPosn implements:
+;;
+;; x : -> Number
+;; y : -> Number
+;; =? : IPosn -> Boolean
 
-We could use built-in Racket objects.  That would be similar to what
-we've done, and would be similar to structure and functions.
+;; A Posn2 is a (posn2% Number Number).
+;; implement IPosn.
+(define-class posn2%
+ (fields ls)
+ (constructor (x0 y0)
+   (fields (list x0 y0)))
 
-We could use functions to represents objects.
+ (define/public (x)
+   (first (field ls)))
 
-We could write an interpreter for @r[class/1] in ISL+.
+ (define/public (y)
+   (second (field ls)))
 
-We are going to start out by using functions to represent objects.
-Ask yourself:  WHAT IS AN OBJECT?
+ (check-expect (send (posn2% 3 4) =? (posn2% 3 4)) true)
+ (check-expect (send (posn2% 3 4) =? (posn2% 3 5)) false)
+ (define/public (=? p)
+   (and (= (send this x) (send p x))
+        (= (send this y) (send p y)))))
 
-@verbatim|{
-- Data + functions - this is the "how they are made" or "what they are
-  contructed out of".
-}|
 
+(check-expect (send (posn% 1 2) =? (posn2% 1 2)) true)
+(check-expect (send (posn% 1 2) =? (posn2% 1 1)) false)
 
-@section{Objects as Functions}
 
-Another view is: what do objects do?
+;; A Posn1 is a (posn% Number Number).
+;; implements IPosn.
+(define-class posn%
+ (fields x y)
 
-@verbatim|{
-- Objects respond to messages.
-}|
 
-What are messages?  Messages are names.
+ ;; Posn -> Boolean
+ ;; Is the given posn the same as this?
+ (check-expect (send (posn% 3 4) =? (posn% 3 4)) true)
+ (check-expect (send (posn% 3 4) =? (posn% 3 5)) false)
+ (define/public (=? p)
+   (and (equal? (field x) (send p x))
+        (equal? (field y) (send p y)))))
 
-So let's write something that responds to things that are names.
-Let's make an example of something that responds to messages.  As an
-example, we'll make a square object that responds to the messages:
-@verbatim|{
-- side
-- area
-}|
+;; A LoP is one of:
+;; - (mt%)
+;; - (cons% Posn LoP)
+;; implements ILoP
 
-If we make a square-10 object, what's its contract:
+;; An ILoP implements:
+;;
+;; first : -> Posn
+;; rest : -> ILoP
+;; empty? : -> Boolean
 
-@verbatim|{
-;; square-10 : Message -> Number
-}|
+(define the-real-empty? empty?)
+(define the-real-first first)
+(define the-real-rest rest)
 
-How should we represent messages?  Symbols.
+(define-class list%
+ (fields ls)
+ (define/public (empty?)
+   (the-real-empty? (field ls)))
 
-@verbatim|{
-;; A Message is a Symbol
+ (define/public (first)
+   (the-real-first (field ls)))
 
-;; square-10 : Message -> Number
-(define (square-10 msg)
-  (cond [(symbol=? msg 'side) 10]
-        [(symbol=? msg 'area) 100]
-        [else "message not understood"]))
+ (define/public (rest)
+   (list% (the-real-rest (field ls))))
 
-(check-expect (square-10 'side) 10)
-(check-expect (square-10 'area) 100)
-(check-error  (square-10 'bad))
-}|
+ (define/public (=? lop)
+   (cond [(send this empty?) (send lop empty?)]
+         [else
+          (and (not (send lop empty?))
+               (send (send this first) =? (send lop first))
+               (send (send this rest) =? (send lop rest)))])))
 
-How would we write a square-5 object?
 
-@verbatim|{
-;; square-5 : Message -> Number
-(define (square-5 msg)
-  (cond [(symbol=? msg 'side) 5]
-        [(symbol=? msg 'area) 25]
-        [else "message not understood"]))
 
-(check-expect (square-5 'side) 5)
-(check-expect (square-5 'area) 25)
-(check-error  (square-5 'bad))
-}|
 
-Now we have two simple objects that look very similar.  Let's
-abstract.
 
-@verbatim|{
-;; A Square is a Message -> Number
-;; square% : Number -> Square
-(define (square% side)
-  (local [(define (the-square msg)
-            (cond [(symbol=? msg 'side) side]
-                  [(symbol=? msg 'area) (sqr side)]
-                  [else (error "message not understood")])))
-    the-square))
 
-(define square-10 (square% 10))
-(define square-5  (square% 5))
-}|
 
-Why is what've done a little weird considering we said that an object
-is data plus functions.
 
-Depending on your perspective:
+;; A [Listof X] is one of:
+;; - (mt%)
+;; - (cons% X [Listof X])
+;; where X implements
+;; =? : X -> Boolean
 
-@verbatim|{
-- We only have data.
-- We only have functions.
-}|
+(define-class mt%
 
-Our messages are always just a symbol.  But what about arguments?
+ ;; [Listof X] -> Boolean
+ ;; Is the given list of posns the same as this?
+ (define/public (=? lop)
+   (send lop empty?))
 
-But there's something else.  Where did the data go?
+ (define/public (empty?)
+   true))
 
-The trick is that when we produce the square function, it remembers
-the values it can see, like side, when it was created.  So the data is
-remember in the function.  
+(define-class cons%
+ (fields first rest)
 
-*Functions are really code plus data.*
-
-Basically a list of fields that map to values, plus code.
-
-That's why we are able to implement objects so easily.
-
-But how do we do inheritance?
+ (define/public (=? lop)
+   (and (not (send lop empty?))
+        (send (field first) =? (send lop first))
+        (send (field rest) =? (send lop rest))))
 
-Let's create another kind of shape -- let's create circles.
-
-@verbatim|{
-;; A Circle is a Message -> Number
-;; Number -> Circle
-(define (circle% radius)
-  (local [(define (the-circle msg)
-            (cond [(symbol=? msg 'radius) radius]
-                  [(symbol=? msg 'area) (* radius radius pi)]
-                  [else (error "message not understood")]))]
-    the-circle))
-
-(define circle-2 (circle% 2))
-(check-expect (circle-2 'radius) 2)
-(check-within (circle-2 'area) (* 2 2 pi) 0.0001)
-}|
+ (define/public (empty?)
+   false))
 
-There's a lot of repeated code here.  How can we abstract something
-common to both of these definitions.
+(check-expect (send (mt%) =? (mt%)) true)
+(check-expect (send (cons% (posn% 3 4) (mt%)) =? (cons% (posn% 3 4) (mt%)))
+             true)
+(check-expect (send (cons% (posn% 3 4) (mt%)) =?  (mt%))
+             false)
+(check-expect (send (cons% (posn% 3 4) (mt%)) =? (cons% (posn% 3 5) (mt%)))
+             false)
 
-We have different code for handling message, but all of the objects
-have the same code for the message that is not understood.
+(check-expect (send (list% empty) =? (list% empty)) true)
+(check-expect (send (list% (list (posn% 3 4))) =? (list% (list (posn% 3 4))))
+             true)
+(check-expect (send (list% (list (posn% 3 4))) =? (list% (list)))
+             false)
+(check-expect (send (list% (list (posn% 3 4))) =? (list% (list (posn% 3 5))))
+             false)
 
-@verbatim|{
-(define (dumb-object msg)
-  (error "message not understood"))
-}|
+(check-expect (send (list% (list (posn% 3 4))) =? (cons% (posn2% 3 4) (mt%)))
+             true)
 
-This is an object -- not a constructor for an object.
+}
 
-Let's write a constructor for this:
+Now we can make all of the appropriate combinations work together:
+different kinds of lists with the same kind of posns, the same kind of
+lists with different kinds of posns, and different kinds of lists with
+different kinds of posns.
 
-@verbatim|{
-(define (dumb%)
-  (local [(define (the-dumb-object msg)
-            (error "message not understood"))]
-    the-dumb-object))
-}|
-
-Now how could we use this?
-
-@verbatim|{
-(define (square% side super)
-  (local [(define (the-square msg)
-            (cond [(symbol=? msg 'side) side]
-                  [(symbol=? msg 'area) (sqr side)]
-                  [else ((super) msg)]))]
-    the-square))
-}|
-
-This is odd -- we can make squares with different super classes.
-Let's fix that.
-
-@verbatim|{
-(define (square% side super)
-  (local [(define (the-square msg)
-            (cond [(symbol=? msg 'side) side]
-                  [(symbol=? msg 'area) (sqr side)]
-                  [else ((dumb%) msg)]))]
-    the-square))
-}|
-
-dumb% is actually object%.
-
-@verbatim|{
-(define (object%)
-  (local [(define (the-dumb-object msg)
-            (error "message not understood"))]
-    the-dumb-object))
-}|
-
-
-How many times are we going to create an object% objecct?  How do we
-have it happen only once.
-
-@verbatim|{
-(define (square% side super)
-  (local [(define super (object%))
-          (define (the-square msg)
-            (cond [(symbol=? msg 'side) side]
-                  [(symbol=? msg 'area) (sqr side)]
-                  [else (super msg)]))]
-    the-square))
-}|
-
-And likewise for circle:
-
-@verbatim|{
-(define (circle% radius)
-  (local [(define super (object%))
-          (define (the-circle msg)
-            (cond [(symbol=? msg 'radius) radius]
-                  [(symbol=? msg 'area) (* radius radius pi)]
-                  [else (super msg)]))]
-    the-circle))
-}|
-
-We've now abstracted out the behavior of the error message.
-
-But, let's come back to the observation that we can add methods to
-object% that every object will now understand.
-
-For example, we could add =?, but that sounds hard.  Let's do
-something really simple:
-
-@verbatim|{
-(define (object%)
-  (local [(define (the-dumb-object msg)
-            (cond [(symbol=? msg 'hi) "Howdy"]
-                  [else (error "message not understood")]))]
-    the-dumb-object))
-}|
-
-But we've broken the contract.  So we'll say instead that an object
-can respond to any message and produce anything.
-
-OK, let's see how it works:
-
-@verbatim|{
-(check-expect ((square% 10) 'hi) "Howdy")
-}|
-
-Look!  We have inheritance!  All istances of subclasses of object%
-understand the hi message!
-
-This almost everything that is going on under the hood in classN,
-Java, Ruby, etc.
-
-But does this do overridding?
-
-@verbatim|{
-(define (square% side)
-  (local [(define super (object%))
-          (define (the-square msg)
-            (cond [(symbol=? msg 'side) side]
-                  [(symbol=? msg 'area) (sqr side)]
-                  ;; Overriding the hi method.
-                  [(symbol=? msg 'hi) "Good day, sir."]
-                  [else (super msg)]))]
-    the-square))
-}|
-
-Great, but none of our messages take arguments.  How can we do that?
-We could change our representation of a messages to include arguments.
-
-@verbatim|{
-;; A Message is a (make-msg Symbol [Listof Anything]).
-(define-struct msg (name args))
-
-;; Symbol Message -> Boolean
-(define (msg-is? sym msg)
-  (symbol=? sym (msg-name msg)))
-
-(define (object%)
-  (local [(define (the-dumb-object msg)
-            (cond [(msg-is? 'hi msg) "Howdy"]
-                  [else (error "message not understood"))))]
-    the-dumb-object))
-
-(check-expect ((object%) (make-msg 'hi empty)) "Howdy")
-}|
-
-Another approach, revert back to Message = Symbol.
-
-@verbatim|{
-;; An Object is a Message [Listof Symbol] -> Anything
-
-(define (object%)
-  (local [(define (the-dumb-object msg args)
-            (cond [(msg-is? 'hi msg) "Howdy"]
-                  [else (error "message not understood"))))]
-    the-dumb-object))
-}|
-
-Another approach, return a function that takes the arguments.
-
-Suppose we want to add a multiply method to circles.
-
-@verbatim|{
-(define (circle% radius)
-  (local [(define super (object%))
-          (define (the-circle msg)
-            (cond [(symbol=? msg 'radius) radius]
-                  [(symbol=? msg 'area) (* radius radius pi)]
-                  [(symbol=? msg 'multiply)
-                   (lambda (factor)
-                     (circle% (* factor radius)))]
-                  [else (super msg)]))]
-    the-circle))
-}|
-
-These contracts suck.  We really want to talk about the contract of
-each method that is supported by an object.
-
-@verbatim|{
-;; A Circle is a Object that implements
-;; 'radius -> Number
-;; 'area -> Number
-;; 'multiply -> (Number -> Circle)
-
-(((circle% 10) 'multiply) 4) => circle with radius 40
-
-(check-expect ((((circle% 10) 'multiply) 4) 'radius) 40)
-}|
-
-So we've got classes, objects, inheritance, overriding, and basically
-everything you'd want in a class system.
-
-We might like to have a nice notation to make it more convenient to
-write programs in this style, but this is really all that is going on.
-
-Suppose we add a field to square%, called area, which is computed at
-construction time and store away in the field.
-
-@verbatim|{
-(define (square% side)
-  (local [(define super (object%))
-          (define area (sqr side))
-          (define (the-square msg)
-            (cond [(symbol=? msg 'side) side]
-                  [(symbol=? msg 'area) area]
-                  ;; Overriding the hi method.
-                  [(symbol=? msg 'hi) "Good day, sir."]
-                  [else (super msg)]))]
-    the-square))
-}|
-
-So we can write constructors that do computation.
-
-What about this?
-
-@verbatim|{
-(define (square% side)
-  (local [(define super (object%))
-          (define area (sqr side))
-          (define (this msg)
-            (cond [(symbol=? msg 'side) side]
-                  [(symbol=? msg 'area) area]
-                  ;; Overriding the hi method.
-                  [(symbol=? msg 'hi) "Good day, sir."]
-                  [else (super msg)]))]
+@section{Intensional equality}
+
+How can we tell if two posns are two different names for the same
+thing, or if they're two different posns with the same contents?  
+
+For example:
+
+@codeblock{
+(define p1 (posn% 3 4))
+(define p2 (posn% 3 4))
+}
+
+or 
+
+@codeblock{
+(define p1 (posn% 3 4))
+(define p2 p1)
+}
+
+These are very different in the presence of mutation.  We have a way
+of testing this: @r[eq?].  Similarly, the @r[equal?] function checks
+structural equality.  
+
+But that didn't shed any light on the question.  Is there a way we can
+check this @emph{in} our language?
+
+Answer: yes.  Do some operation to one of them that changes the state
+of the object, and see if it @emph{also} happens to the other one.
+
+Drawback: you can't necessarily undo this operation.  
+
+@codeblock{
+(define (really-the-same? p1 p2)
+  ....)
+}
+
+Now we need some operation to perform on @r[p1].  
+
+@filebox[@tt{posn%}]{
+@codeblock{
+;; -> (posn% 'black-eye Number)
+(define/public (punch!)
+  (begin
+    (set-field! x 'black-eye)
     this))
-}|
+}
+}
 
-Let's redefine area to use.  So in @r[class/1] we might write (sqr (this
-. side)).  We'll if we pick our names better, it should become
-obvious.
+@racketblock[
+(define sam (posn% 3 4))
+(send sam punch!)
+]
 
-@verbatim|{
-(define (square% side)
-  (local [(define super (object%))
-          (define (this msg)
-            (cond [(symbol=? msg 'side) side]
-                  [(symbol=? msg 'area) (sqr (this 'side))]
-                  ;; Overriding the hi method.
-                  [(symbol=? msg 'hi) "Good day, sir."]
-                  [else (super msg)]))]
-    this))
-}|
+"I punched him so hard, I punched him right out of the data
+defintion."
 
-@section{Objects as Structures}
+Now we can define @r[really-the-same?].
 
-Now I want to step back and look at a different approach for doing
-this.
+@codeblock{
+(define (really-the-same? p1 p2)
+  (begin
+    (send p1 punch!)
+    (symbol? (send p2 x))))
+}
 
-Guiding principle: Data + Functions
+@racketblock[
+(really-the-same? p1 p2)
+p1
+]
 
-@verbatim|{
-;; A Method is a Function.
-;; An Object is a (make-obj [Listof Any] [Listof Method]).
+Now @r[p1] is permanently broken, and can't be undone.  So
+@r[really-the-same?] is a very problematic, and you should use
+@r[eq?], which uses DrRacket's internal knowledge of where things came
+from to answer this question without changing the objects.  
 
-(define-struct obj (fields methods))
-}|
+Question:
 
-But the "is a Function" contract is not very useful, but really we
-don't know what the contract on a method is until later.
+@racketblock[
+(eq? p1 (send p1 punch!))]
 
-Let's create our simple square-10 object:
+Produces true.
 
-@verbatim|{
-(define square-10 (make-obj (list ...) (list ...)))
-}|
+@racketblock[
+(send p2 =? (send p2 punch!))
+]
 
-What should go in these lists?
+Produces true (or crashes).
 
-@verbatim|{
-(define square-10 
-  (make-obj (list 10) 
-            (list 
-              ;; side : -> Number
-              (lambda () 10)
-              ;; area : -> Number
-              (lambda () 100))))
 
-(check-expect ((first (obj-methods square-10))) 10)
-(check-expect ((second (obj-methods square-100))) 100)
-}|
+@racketblock[
+(send (send p3 punch!) =? p3)
+]
 
-What's wrong with this?  Nothing is called by name.
+Produces true (or crashes).
 
-Methods can't access the fields!  What the hell is going on here?
+Question:
+Does intensional equality imply structural equality?  Yes.
 
-Here's an idea: pass the object itself to the methods.
 
-@verbatim|{
-(define square-10 
-  (make-obj (list 10) 
-            (list 
-              ;; side : -> Number
-              (lambda (itself) 
-                (first (object-fields itself)))
-              ;; area : -> Number
-              (lambda (itself) 
-                (* (first (obj-fields itself))
-                   (first (obj-fields itself)))))))
+@section{Parameterized Data Defintions and Equality}
 
-(check-expect ((first (obj-methods square-10)) square-10) 10)
-(check-expect ((second (obj-methods square-100)) square-10) 100)
+Generalizing @tt{LoP} to @tt{[Listof X]}.
 
-(define square-10 
-  (make-obj (list 10) 
-            (list 
-              ;; side : -> Number
-              (lambda (itself) 
-                (first (object-fields itself)))
-              ;; area : -> Number
-              (lambda (itself) 
-                (* ((first (obj-methods itself)) itself)
-                   ((first (obj-methods itself)) itself))))))
-}|
 
-A better name for itself: this!
+@codeblock{
+;; A [Listof X] is one of:
+;; - (mt%)
+;; - (cons% X [Listof X])
+}
 
-It's annoying to program like this, but we can abstract this
+But we have to change one more thing.  Our @r[=?] method assumes that
+@r[X] implements an @r[=?] method themselves.
+
+@codeblock{
+;; A [Listof X] is one of:
+;; - (mt%)
+;; - (cons% X [Listof X])
+;; where X implements
+;; =? : X -> Boolean
+}
+
+We could also change the signature of @r[=?] to take a comparison.
+But then we'd have to change all of our code.  We've lifted a
+restriction, but only to things that can be compared for equality.  
+
+@section{Equality in Java}
 
 @verbatim|{
-;; Object Name -> Anything
-(define (send obj meth)
-  ...)
+
+class Posn {
+   Integer x;
+   Integer y;
+   Posn(Integer x, Integer y) {
+       this.x = x;
+       this.y = y;
+   }
+
+   public Boolean isEqual(Posn p) {
+       return this.x == p.x
+           && this.y == p.y;
+   }
+}
+
+interface LoP {
+   Boolean isEmpty();
+   Posn getFirst();
+   LoP getRest();
+}
+
+class MT implements LoP {
+   MT() {}
+
+   public Posn getFirst() {
+       return null;
+   }
+
+   public LoP getRest() {
+       return ????;
+   }
+
+   public Boolean isEmpty() {
+       return true;
+   }
+
+   public Boolean isEqual(LoP lop) {
+       return lop.isEmpty();
+   }
+}
+
+class Cons implements LoP {
+   Posn first;
+   LoP rest;
+
+   Cons(Posn first, LoP rest) {
+       this.first = first;
+       this.rest = rest;
+   }
+
+   public Boolean isEmpty() {
+       return false;
+   }
+
+   public Boolean isEqual(LoP lop) {
+       return (!lop.isEmpty())
+           && this.first.isEqual(lop.getFirst())
+           && this.rest.isEqual(lop.getRest());
+   }
+
+   public Posn getFirst() {
+       return this.first;
+   }
+
+   public LoP getRest() {
+       return this.rest;
+   }
+
+
+}
+
 }|
 
-Why would you ever do this?  Every single object-oriented language
-you've programmed in works like this: it has a table of data and
-functions and those functions take as its first object the object
-itself.
 
-Python makes you write self as the first argument, which is just
-exposing this implementation detail.
-
-Why would you do one or the other?
-
-The functional style is slow, but easy.
-
-The structural style is fast, but hard. 
-
-
-Here's a question: where in the methods do we need to refer to
-square-10?  Nowhere.  Thus we can easily lift the methods out of the
-definition for square-10.
-
-@verbatim|{
-(define square-methods
-  (list 
-    ;; side : -> Number
-    (lambda (itself) 
-      (first (object-fields itself)))
-    ;; area : -> Number
-    (lambda (itself) 
-      (* ((first (obj-methods itself)) itself)
-         ((first (obj-methods itself)) itself)))))
-
-(define square-10 
-  (make-obj (list 10) square-methods))
-
-(define square-5
-  (make-obj (list 5) square-methods))
-
-(define (square% side)
-  (make-obj (list side) square-methods))
-}|

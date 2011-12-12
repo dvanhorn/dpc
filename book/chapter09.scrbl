@@ -1,617 +1,359 @@
 #lang scribble/manual
 @(require "../web/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class/1 check-expect define-struct ... length
-				numerator denominator))
+          (for-label (except-in class/1 check-expect define-struct ... length))
 	  (for-label 2htdp/image)
 	  (for-label (only-in test-engine/racket-tests check-expect))
 	  (for-label class/universe))
 
-@(require scribble/eval racket/sandbox)
-@(define the-eval
-  (let ([the-eval (make-base-eval)])
-    (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class/2))
-    (the-eval '(require 2htdp/image))
-    (the-eval '(require (prefix-in r: racket)))
-    the-eval))
+@title[#:tag "lec08"]{Abstraction, Invariants, Testing}
 
-@title[#:tag "lec10"]{Being Smart}
+@section{New language features: @r[check-expect] in new places}
 
-@section{The 3-In-A-Row Game}
+It's now possible to use @r[check-expect] in several places that
+didn't work before.  First, it now works inside functions.  The test
+is run @emph{every} time the function is called.  Second, it works
+inside class definitions. Tests in classes are lifted out of the
+class, so they cannot refer to fields, or directly call methods, or
+refer to @r[this]. 
 
-Today we're going to look at this game we made up.  It's called 3-in-a-row.
-The object of the game is to place three peices in a row.  You take
-turns playing against the computer.
-
-Here is an example of playing the game. You start with an empty board.
-You can place a peice by pressing a number, which puts the peice at
-the slot with that number (counting from zero).
-
-...
-
-What we're going to work on today is coming up with a smart computer
-player.  In class we'll develop one for the 3-in-a-row game.  On the
-current homework, you
-
+For example:
 @codeblock{
-;; A Board is a [Listof Color]
-;; A Color is one of 
-;; 'red 
-;; 'black
-}
-
-What's wrong with this?  It's hard to represent the current board
-state that is all empty.
-
-We modify our data definition as:
-
-@codeblock{
-;; A Board is a [Listof Color]
-
-;; A Color is one of:      Interp:
-;; 'red                    - the player
-;; 'black                  - the computer
-;; 'white                  - blank
-}
-
-What's an important function for us to write to manipulate a board
-like this?  How about determinining who, if anybody, has won the game?
-
-Let's write the function:
-
-@codeblock{
-;; player-win? : Board -> Boolean
-;; Are there three red peices in a row on the board?
-}
-
-Idea: use an accumulator to remember how many red peices in a row
-we've seen so far.  When you see a non-red peice, you reset the
-accumulator.  When you see a red peice you increment the accumulator.
-When the accumulator gets to three, the player has won.
-
-So we define a local function that adds an accumulator argument.
-
-@codeblock{
-(define (player-win? b)
-  ;; win-helper : Board Number -> Boolean
-  ;; Acc : hom many red peices we've seen so far
-  (local [(define (win-helper b acc)
-            (cond [(= acc WIN) true]
-		  [(empty? b) false]
-		  [else
-		   (cond [(symbol=? 'red (first b))
-			  (win-helper (rest b) (add1 acc))]
-			 [else
-			  (win-helper (rest b) 0)])]))]
-     (win-helper b 0)))
-}
-
-Now let's program the computer-win? predicate:
-
-@codeblock{
-(define (player-win? b)
-  ;; win-helper : Board Number -> Boolean
-  ;; Acc : hom many red peices we've seen so far
-  (local [(define (win-helper b acc)
-            (cond [(= acc WIN) true]
-		  [(empty? b) false]
-		  [else
-		   (cond [(symbol=? 'red (first b))
-			  (win-helper (rest b) (add1 acc))]
-			 [else
-			  (win-helper (rest b) 0)])]))]
-     (win-helper b 0)))
-}
-
-Apply the abstraction recipe and we see to abstract out the symbol and
-make it a parameter to the function:
-
-@codeblock{
-(define (win? p b)
-  ;; win-helper : Board Number -> Boolean
-  ;; Acc : hom many red peices we've seen so far
-  (local [(define (win-helper b acc)
-            (cond [(= acc WIN) true]
-		  [(empty? b) false]
-		  [else
-		   (cond [(symbol=? p (first b))
-			  (win-helper (rest b) (add1 acc))]
-			 [else
-			  (win-helper (rest b) 0)])]))]
-     (win-helper b 0)))
-
-(define (win-player? b)
-  (win? 'red b))
-
-(define (win-computer? b)
-  (win? 'black b))
-}
-
-Now...
-
-@codeblock{
-;; play : Color Number Board -> Board
-;; place the appropriate piece on the board
-}
-
-Is the board going to be a constant size?
-
-Why are you asking?
-
-Because if the board is a constant size, then the board could be
-represented with a vector.
-
-Looking at our win? predicate suggests the list representation is
-good.
-
-But our play function suggests that an @emph{indexed} view of our data
-is a appropriate.
-
-So you can think of a list with two views: one is recursive, the other
-is indexed; each position in the list is numbered and we can refer
-to values in the list according to the index at which they reside.
-
-Why do we need play, when you just call play with the same arguments?
-
-Because what if we changed the representation of the board.
-Also, play has it's own purpose.
-
-@codeblock{
-(define (play c n b)
-  (list-set b n c))
-}
-
-Game works like this: we play, computer plays, we play, computer
-plays, etc. until someone wins.
-
-
-A World is going to have two things: a board and a representation of
-the computer player.  We'll see the computer data definition later.
-
-@codeblock{
-(define-class world%
-  (fields board computer)
-  ;; -> Scene
-  ;; Render this world as a scene.
-  (define/public (to-draw)
-    (overlay 
-     (foldr beside empty-image (map (lambda (clr) (circle 20 "solid" clr))
-				    (field board)))
-     (empty-scene 500 500)))
-
-  ;; KeyEvents
-  ;; Handle number keys by playing and N-key by reseting the game.
-  (define/public (on-key k)
-    (cond [(number? ...) 
-	   (world% (play 'red (string->number k) (field board))
-		   (field computer))]
-	  ...)))
-
-(define INITIAL (build-list SIZE (lambda (_) 'white)))
-
-(big-bang (world% INITIAL 'computer)) 
-; Bogus value for the computer, since we don't use it currently
-}
-
-Now we can play, but the computer never plays.  (The white circles
-don't look great).
-
-Now let's think about how the computer is going to play.
-
-What should a computer player do?  What should it's interface be?
-What's the job of a computer player?
-
-Looks at the board and picks a move.
-
-Reducing this to a decision problem.  Where do we want to play (OK,
-not a decision problem).
-
-[Missed the discussion at this point.]
-
-We've got a new board that represents where the player has played.
-
-How can get the computer to choose a place to play?
-
-Make a new board, play 'black wherever the computer picks to
-play (giving the board that we just played on.
-
-What would be the problem with the computer returning a board?
-
-We want to have a strict seperation of concerns.
-
-Chooses a number and we play there.
-
-@codeblock{
-(define-class computer%
-  (define/public (pick brd)
-    ...))
-}
-
-Q: Speaking of cheating, what do we do to enforce that the player make
-a legal move?
-
-Let's implement the simplest strategy for the computer.  What is the
-simplest strategy for the computer playing?  Play on Zero.
-
-Now play until player wins.  What happened?  Nothing.  We never used
-the win? predicate even though we wrote it.
-
-Let's do on-key.
-
-What are the possible outcomes?
-
-- Player wins
-- Computer wins
-- It's a draw
-
-When the game is over, should we respond to key board events?  No.
-That world is going to behave pretty differently than this world.  The
-best way to represent that is with another class.
-
-@codeblock{
-;; A DoneWorld
-}
-
-What information does a done world need to maintain?
-
-- Who won
-- The computer (since the computer is going to learn as it plays)
-
-It wouldn't learn much if we reset what it had learned after each
-round.
-
-We draw by saying who won.  We're going to handle the N-key event by
-start a new game, which will start with the computer we have.
-
-When we have a tie, go to done, saying there was a tie.
-
-Nice design pattern for implementing world games; for example, in tron
-or connect four: the universe has multiple states it could be in (no
-worlds connected, one connected, two connected).  Also comes up in
-local games: states of the world (playing, done).
-
-State machine, transition system.  Pattern comes up all the time.
-
-@verbatim{
----> PLAY ---------> DONE
-       ^              |
-       +--------------+
-}
-
-Models nicely in an OO language.
-
-We no longer need to conditionally something if we're in the done
-state or play state -- we can just rely on the object itself being a
-done object or a play object.  The conditional goes away.
-
-How can we check for a tie?
-
-There are no white pieces.
-
-@codeblock{
-(define (tie? b)
-  (not (member 'white b)))
-}
-
-Still failing to do a bunch of things:
-
-- Checking that player doesn't cheat.
-- The computer plays in a dumb (and illegal) way
-
-Let's consider how to make the computer smarter.
-
-Start with seven peices.
-
-How can pick a good spot?  How can pick the best spot?
-
-- Pick the first spot that you win?
-
-What if the board is blank?
-
-So *if* you can win, you want to win.
-
-- Block the other player from winning.
-
-Which do we want to do first?
-
-If you can win, win.  If you can't but you can block a win, block.
-Otherwise, ... who knows.
-
-We don't want to think in advance.
-
-Might want to consult our past experience (our predictions).
-
-We got to this situation and played at the end and always lost.
-
-We haven't decided how much to remember from previous plays.
-
-Indexed data and lists (works just fine for small lists).
-
-Play -- you lose your turn if you play off the board, or if you pick
-a spot that has already been played.
-
-First goal: play in an empty space.
-
-How can find an empty space?  Pick a number, see if it's empty.
-
-Idea: iterate through numbers and pick the first one that is empty.
-
-Is there a problem here?  We might go off the end.
-
-Invariant: never asked to play on a full board.  So we don't have to
-worry about that case.
-
-Let's make sure we are maintaining that invariant.  We make sure
-there's an empty spot just before asking the player to pick.
-
-We have the computer play, then not checking to see if the computer
-won -- we just keep on playing.
-
-Let's fix that.
-
-
-EVALUATION
-
-How do we evaluate a position?
-
-W C P P W
-
-What information do we get out?
-
-Summarize by where we should play or false.
-
-Before we do that, we should gather information on all possible plays.
-
-
-We have 5 spots and we need to evaluate each position.
-
-@verbatim{
-_ _ _ _ _
-}
-
-What are the possibilities:
-
-- it's full
-- don't know
-- we win if we play here
-- we lose if we play here
-
-Sufficient to capture everything we could know.
-
-Other more compicated games might need more information.  Which comes
-from refining the unkown bit to reason about "likely" outcomes.
-
-Develop a function that takes a board and evaluates it.
-
-Develop a data definition for an evaluation:
-
-@codeblock{
-;; An Eval is a [Listof Result].
-;; A Result is one of:
-;; - 'win
-;; - 'lose
-;; - 'full
-;; - 'unkown
-
-;; Board -> Eval
-(define/public (evaluate brd)
-  ...)
-}
-
-Maybe have an evaluate-element function.  It needs the 
-the index and the board.
-
-@codeblock{
-(local [;; Board Number -> Result
-	(define (eval-elem index) ...)]
-  (build-list SIZE evaluate-elem))
-}
-
-How do we evaluate a position?
-
-@codeblock{
-(local [;; Board Number -> Result
-	(define (eval-elem index) 
-	  (cond [(not (symbol=? 'white (list-ref brd index))) 'full]
-		[(computer-win? (play 'black index brd)) 'win]
-		[(player-win? (play 'red index brd)) 'lose]
-		[else 'unkown]))]
-  (build-list SIZE evaluate-elem))
-}	
-
-Going back to pick:
-
-if there's a win, play there; otherwise if there's a block, play there;
-otherwise play at the first place we can.
-
-We need a function that will tells us the first postion
-
-@codeblock{
-;; find-res : Eval Result -> (U Number False)
-;; find the first occurrence of the given result.
-}
-
-But what if the whole board is bad for us?  If we say, where can I
-when, what should we get back.
-
-What if we return -1 instead?  Why is false a better choice?  It is a
-different KIND of value that we won't confuse with other kinds of 
-indexes.
-
-Write obvious recursive function.  What's the problem? Might try to
-add one to false.  Avoid doing that.
-
-Now, let's go back to pick.
-
-Now play.  Tada: we block the player after it plays two.
-
-But we could have done better.  When did the program go wrong?
-With it's first move.
-
-It makes the mistake again and again.
-
-
-Needs to remember that playing in spot 0 is not going to work out
-well.
-
-What does our computer need to do in order to learn things?
-
-
-A list of boards and where it went.
-
-What tells us where to move?  Evaluations.
-
-Save previous evaluations.
-
-Tie evaluations to end result of that game.
-
-Idea for next time: mark evaluations as a loss when you lose.
-
-
-@section{Indexed Views on Data}
-
-@section{State Transition Patterns}
-
-@section{Designing a Computer Player}
-
-@subsection{A simple player}
-@subsection{Evaluating positions}
-@subsection{Picking a move}
-@subsection{Remembering the past}
-
-@section{Completed code}
-
-As written in class.
-
-@verbatim|{
-#lang class/2
-(require 2htdp/image class/universe)
-
-;; A Board is a [Listof Color]
-;; A Color is one of
-;; - 'white - blank
-;; - 'black - the computer
-;; - 'red - the player
-
-(define WIN 3)
-(define SIZE 10)
-
-;; player-win? : Board -> Boolean
-(define (player-win? b)
-  (win-helper 'red b 0))
-
-;; computer-win? : Board -> Boolean
-(define (computer-win? b)
-  (win-helper 'black b 0))
-
-;; tie: Board -> Boolean
-(define (tie? b)
-  (not (member 'white b)))
-
-;; win-helper : Color Board Number ->  Boolean
-;; Acc : how many pieces we've seen so far  
-(define (win-helper sym b acc)
-  (cond [(= acc WIN) true]
-        [(empty? b) false]
-        [else (cond [(symbol=? sym (first b))
-                     (win-helper sym (rest b) (add1 acc))]
-                    [else (win-helper sym (rest b) 0)])]))
-
-;; play : Color Number Board -> Board
-;; place the appropriate piece on the board
-(define (play c n b)
-  (cond 
-    [(> n (add1 SIZE)) b]
-    [(symbol=? 'white (list-ref b n))
-     (list-set b n c)]
-    [else b]))
-
-
-;; list-set : Listof[X] Nat X -> Listof[X]
-;; replaces the kth element of l with e
-(define (list-set l k e)
-  (cond [(= k 0) (cons e (rest l))]
-        [else (cons (first l) (list-set (rest l) (sub1 k) e))]))
-
-;; find-res : Evaluation Result -> Number or False
-;; find the first occurence of this result
-(define (find-res eval r)
-  (cond [(empty? eval) false]
-        [else (cond [(symbol=? r (first eval)) 0]
-                    [else 
-                     (local [(define result (find-res (rest eval) r))]
-                       (cond [(number? result) (add1 result)]
-                             [else false]))])]))
-
-;; A Computer implements:
-;; pick : Board -> Number
-(define-class computer%
+#lang class/1
+(define-class c%
+  (fields x y z)
   
-  ;; An Evaluation is a [Listof Result]
-  ;; A Result is one of 'Win 'Block 'Full 'Unk
-  
-  ;; evaluate Board -> Evaluation
-  (define/public (evaluate brd)
-    (local [(define (evaluate-elem index)
-              (cond [(not (symbol=? 'white (list-ref brd index))) 'Full]
-                    [(computer-win? (play 'black index brd)) 'Win]
-                    [(player-win? (play 'red index brd)) 'Block]
-                    [else 'Unk]))]
-      (build-list SIZE evaluate-elem)))
-  
-  ;; Pick a space to play in
-  ;; Invariant : brd is not full
-  ;; Board -> Number
-  (define/public (pick brd)
-    (local [(define eval (evaluate brd))]
-      (cond [(member 'Win eval)
-             (find-res eval 'Win)]
-            [(member 'Block eval)
-             (find-res eval 'Block)]
-            [else
-             (find-res eval 'Unk)]))))
+  ;; works
+  (check-expect ((new c% 1 2 3) . m) 1)
+  ;; doesn't work
+  (check-expect ((new c% 1 2 3) . m) (field x))
+  (define/public (m) 1))
 
-(define SCENE (empty-scene 500 500))
+(define (f x)
+  (check-expect 1 1))
+(f 5)
+}
 
-;; A World is (world% Board Computer)
-(define-class world%
-  (fields board computer)
-  (define/public (to-draw)
-    (overlay
-     (foldr beside empty-image (map (λ (clr) (circle 20 "solid" clr)) (field board)))
-     SCENE))
-  
-  (define/public (on-key k)
-    (cond [(number? (string->number k)) 
-           (local [(define new-board (play 'red (string->number k) (field board)))]
-             (cond [(player-win? new-board) (done% "Player Win!" (field computer))]
-                   [(tie? new-board) (done% "Tie!" (field computer))]
-                   [else
-                    (local [(define second-board (play 'black 
-                                                       (send (field computer) pick new-board)
-                                                       new-board))]
-                      (cond [(computer-win? second-board) (done% "Computer Win!" 
-                                                                 (field computer))]
-                            [(tie? second-board) (done% "Tie!" (field computer))]
-                            [else (world% second-board (field computer))]))]))]
-          [(key=? "n" k) (world% INITIAL (field computer))]
-          [else this]))
-  )
+When used in an expression, as in a function, @r[check-expect] does
+not produce any value, and should not be combined with any other
+expressions that do computation.  
 
-;; A DoneWorld is (done% String Computer)
-(define-class done%
-  (fields msg computer)
-  
-  (define/public (to-draw)
-    (overlay (text (field msg) 30 "black")
-             SCENE))
-  
-  (define/public (on-key k)
-    (cond [(key=? "n" k) (world% INITIAL (field computer))]
-          [else this])))
+@section{Invariants of Data Structures}
 
-(define INITIAL (build-list SIZE (λ (i) 'white)))
+Here's an interface for a sorted list of numbers.
 
-(big-bang (new world% INITIAL (computer%)))
-}|
+@codeblock{
+#lang class/1
+;; An ISorted implements
+;; insert : Number -> Sorted
+;; contains? : Number -> Boolean
+;; ->list : -> [Listof Number]
+;; empty? : -> Boolean
+
+;; Invariant: The list is sorted in ascending order.  
+
+;; Precondition: the list must not be empty
+;; max : -> Number
+;; min : -> Number
+}
+
+How would we implement this interface?  
+
+We can simply adopt the recursive union style that we've already seen
+for implementing lists.  Here we see the basic defintion as well as
+the implementation of the @r[contains?] method.
+@codeblock{
+#lang class/1
+;; A Sorted is one of
+;; - (new smt%)
+;; - (new scons% Number Sorted)
+(define-class smt%
+  (check-expect ((new smt%) . contains? 5) false)
+  (define/public (contains? n)
+    false))
+
+(define-class scons%
+  (fields first rest)
+  (check-expect ((new scons% 5 (new smt%)) . contains? 5) true)
+  (check-expect ((new scons% 5 (new smt%)) . contains? 7) false)
+  (check-expect ((new scons% 5 (new scons% 7 (new smt%))) . contains? 3)
+		false)
+  (check-expect ((new scons% 5 (new scons% 7 (new smt%))) . contains? 9)
+		false)
+  (define/public (contains? n)
+    (or (= n (field first))
+	((field rest) . contains? n))))
+}
+
+
+However, we can write a new implementation that uses our invariant to
+avoid checking the rest of the list when it isn't necessary.  
+
+@racketblock[
+  (define/public (contains? n)
+    (cond [(= n (field first)) true]
+	  [(< n (field first)) false]
+	  [else ((field rest) #,(racketidfont ".") contains? n)]))
+]
+
+Because the list is always sorted in ascending order, if @r[n] is less
+than the first element, it must be less than every other element, and
+therefore can't possibly be equal to any element in the list.  
+
+Now we can implement the remaining methods from the interface. First, @r[insert]
+
+@filebox[@r[smt%]]{
+@racketblock[
+(check-expect ((new smt%) #,(racketidfont ".") insert 5) 
+	      (new scons% 5 (new smt%)))
+(define/public (insert n)
+  (new scons% n (new smt%)))
+]}
+
+@filebox[@r[scons%]]{
+@racketblock[
+(check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") insert 7)
+	      (new scons% 5 (new scons% 7 (new smt%))))
+(check-expect ((new scons% 7 (new smt%)) #,(racketidfont ".") insert 5)
+	      (new scons% 5 (new scons% 7 (new smt%))))
+(define/public (insert n)
+  (cond [(< n (field first))
+	 (new scons% n this)]
+	[else
+	 (new scons%
+	      (field first)
+	      ((field rest) #,(racketidfont ".") insert n))]))
+]}
+
+Note that we don't have to look at the whole list to insert the
+elements.  This is again a benefit of programming using the
+invariant that we have a sorted list.
+
+Next, the @racket[max] method.  
+We don't have to do anything for the empty list, because we have a 
+precondition that we can only call @r[max] when the list is non-empty.
+
+@filebox[@r[scons%]]{
+@racketblock[
+(define real-max max)
+(check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") max) 5)
+(check-expect ((new scons% 5 (new scons% 7 (new smt%))) #,(racketidfont ".") max) 7)
+(define/public (max)
+  (cond [((field rest) #,(racketidfont ".") empty?) (field first)]
+	[else ((field rest) #,(racketidfont ".") max)]))
+]}
+
+Again, this implementation relies on our data structure invariant.  To
+make this work, though, we need to implement @r[empty?].
+
+@filebox[@r[smt%]]{
+@racketblock[
+(check-expect ((new smt%) #,(racketidfont ".") empty?) true)
+(define/public (empty?) true)
+]}
+
+@filebox[@r[scons%]]{
+@racketblock[
+(check-expect ((new scons% 1 (new smt%)) #,(racketidfont ".") empty?) false)
+(define/public (empty?) false)
+]}
+
+The final two methods are similar.  Again, we don't implement @r[min]
+in @r[smt%], because of the precondition in the interface.  
+@filebox[@r[smt%]]{
+@racketblock[
+(code:comment "no min method")
+(define/public (->list) empty)
+]
+}
+
+@filebox[@r[scons%]]{
+@racketblock[
+(define/public (min) (field first))
+(define/public (->list)
+  (cons (field first) ((field rest) #,(racketidfont ".") ->list)))
+]}
+
+
+@section{Properties of Programs and  Randomized Testing}
+
+A @emph{property} is a claim about the behavior of a program.  Unit
+tests check particular, very specific properties, but often there are
+more general properties that we can state and check about programs.  
+
+Here's a property about our sorted list library, which we would like
+to be true:
+
+@tt{∀ sls : ISorted . ∀ n : Number . }@racket[((sls #,(racketidfont ".") insert n) #,(racketidfont ".") contains? n)]
+
+How would we check this?  We can check a few instances with unit
+tests, but this property makes a very strong claim.  If we were
+working in ACL2, as in the Logic and Computation class, we could
+provide a machine-checked proof of the property, verifying that it is
+true for every single @tt{Sorted} and @tt{Number}.  
+
+For something in between these two extremes, we can use @emph{randomized
+testing}.  This allows us to gain confidence that our property is
+true, with just a bit of programming effort.  
+
+First, we want to write a program that asks the question associated
+with this property.
+
+@racketblock[
+(code:comment "Property: forall sorted lists and numbers, this predicate holds")
+(code:comment  "insert-contains? : ISorted Number -> Boolean")
+(define (insert-contains? sls n)
+  ((sls #,(racketidfont ".") insert n) #,(racketidfont ".") contains? n))
+]
+
+Now we make lots of randomly generated tests, and see if the predicate
+holds. First, let's build a random sorted list generator.
+
+@racketblock[
+(code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
+(define (build-sorted)
+  (cond [(zero? i) (new smt%)]
+	[else
+	 (new scons% 
+	      (f i)
+	      (build-sorted (sub1 i) f))]))
+(build-sorted 5 (lambda (x) x))
+]
+
+Oh no!  We broke the invariant.  The @r[scons%] constructor allows you
+to break the invariant, and now all of our methods don't work.
+Fortunately, we can implement a fixed version that uses the @r[insert]
+method to maintain the sorted list invariant:
+
+@racketblock[
+(code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
+(define (build-sorted)
+  (cond [(zero? i) (new smt%)]
+	[else
+	 ((build-sorted (sub1 i) f) #,(racketidfont ".") insert (f i))]))
+(check-expect (build-sorted 3 (lambda (x) x))
+	      (new scons% 1 (new scons% 2 (new scons% 3 (new smt%)))))
+
+]
+
+Now @r[build-sorted] produces the correct answer, which we can easily
+verify at the Interactions window.
+
+Using @r[build-sorted], we can develop @r[random-sorted], which
+generates a sorted list of random numbers.:
+
+@racketblock[
+(code:comment "Nat -> Sorted")
+(define (random-sorted i)
+  (build-sorted i (lambda (_) (random 100))))
+]
+
+Given these building blocks,
+we can write a test that checks our property.  
+
+@racketblock[
+(check-expect (insert-contains? (random-sorted 30) (random 50))
+	      true)
+]
+
+Every time we hit the @tt{Run} button, we generate a random sorted
+list of numbers, and check if a particular random integer behaves
+appropriately when @r[insert]ed into it.  But if we could repeatedly
+check this property hundreds or thousands of times, it would be even
+more unlikely that our program violates the property.  After all, we
+could have just gotten lucky.
+
+
+First, we write a function to perform some action many times:
+@racketblock[
+(code:comment "Nat (Any -> Any) -> 'done")
+(code:comment "run the function f i times")
+(define (do i f)
+  (cond [(zero? i) 'done]
+	[else (f (do (sub1 i) f))]))]
+
+Then we can run our test many times:
+@racketblock[
+(do 1000
+    (lambda (_)
+      (check-expect (insert-contains? (random-sorted 30) (random 50))
+		    true)))
+]
+
+When this says that we've passed 1000 tests, we'll be more sure that
+we've gotten our function right.  
+
+What if we change our property to this untrue statement?
+@racketblock[
+(code:comment "Property: forall sorted lists and numbers, this predicate holds")
+(code:comment "insert-contains? : ISorted Number -> Boolean")
+(define (insert-contains? sls n)
+  (sls #,(racketidfont ".") contains? n))
+]
+
+Now we get lots of test failures, but the problem is @emph{not} in our
+implementation of sorted lists, it's in our property definition.  If
+we had instead had a bug in our implementation, we would have
+similarly seen many failures.  Thus, it isn't always possible to tell
+from a test failure, or even many failures, whether it's the code or
+the specification is wrong---you have to look at the test failure to
+check.  
+
+This is why it's extremely important to get your specifications (like
+contracts, data definitions, and interface definitions) correct.  Your
+program can only be correct if they are.
+
+@section{Abstraction Barriers and Modules}
+
+Recall that in our original version of @r[build-sorted], we saw that the
+@r[scons%] constructor allowed us to violate the invariant---it didn't
+check that the value provided for @r[first] was at least as small as
+the elements of @r[rest].  We would like to prevent clients of our
+sorted list implementation from having access to this capability, so
+that we can be sure that our invariant is maintained.
+
+To address this, we set up an @emph{abstraction barrier}, preventing
+other people from seeing the @r[scons%] constructor.  To create these
+barriers, we use a @emph{module system}.  We will consider our
+implementation of sorted lists to be one module, and we can add a
+simple specification to allow other modules to see parts of the
+implementation (but not all of it).
+
+Modules in our languages are very simple---you've already written
+them.  They start with @tt{#lang class/N} and cover a whole file.
+
+Here's the module implementing our sorted list, which we save in a
+file called @tt{"sorted-list.rkt"}.  
+
+@filebox[@r[sorted-list.rkt]]{
+@codeblock{
+#lang class/1
+
+;; ... all of the rest of the code ...
+
+(define smt (new smt%))
+(provide smt)
+}}
+
+We've added two new pieces to this file.  First, we define @r[smt] to
+be an instance of the empty sorted list.  Then, we use @r[provide] to
+make @r[smt], but not @emph{any} other definition from our module,
+available to other modules.  
+
+Therefore, the @emph{only} part of our code that the rest of the world
+can see is the @r[smt] value.  To add new elements, the rest of the
+world has to use the @r[insert] method.  
+
+@racketmod[
+class/1
+(require "sorted-list.rkt")
+
+(smt #,(racketidfont ".") insert 4)
+]
+
+Here, we've used @r[require], which we've used to refer to libraries
+that come with DrRacket.  However, we can specify the name of a file,
+and we get everything that the module in that file @r[provide]s, which
+here is just the @r[smt] definition.  Everything else, such as the
+dangerous @r[scons%] constructor, is hidden, and our implementation of
+sorted lists can rely on its invariant.  

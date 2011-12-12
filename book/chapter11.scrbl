@@ -16,425 +16,602 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec12"]{Exam Review}
+@title[#:tag "lec10"]{Being Smart}
 
-@section{Problem 1}
+@section{The 3-In-A-Row Game}
+
+Today we're going to look at this game we made up.  It's called 3-in-a-row.
+The object of the game is to place three peices in a row.  You take
+turns playing against the computer.
+
+Here is an example of playing the game. You start with an empty board.
+You can place a peice by pressing a number, which puts the peice at
+the slot with that number (counting from zero).
+
+...
+
+What we're going to work on today is coming up with a smart computer
+player.  In class we'll develop one for the 3-in-a-row game.  On the
+current homework, you
+
+@codeblock{
+;; A Board is a [Listof Color]
+;; A Color is one of 
+;; 'red 
+;; 'black
+}
+
+What's wrong with this?  It's hard to represent the current board
+state that is all empty.
+
+We modify our data definition as:
+
+@codeblock{
+;; A Board is a [Listof Color]
+
+;; A Color is one of:      Interp:
+;; 'red                    - the player
+;; 'black                  - the computer
+;; 'white                  - blank
+}
+
+What's an important function for us to write to manipulate a board
+like this?  How about determinining who, if anybody, has won the game?
+
+Let's write the function:
+
+@codeblock{
+;; player-win? : Board -> Boolean
+;; Are there three red peices in a row on the board?
+}
+
+Idea: use an accumulator to remember how many red peices in a row
+we've seen so far.  When you see a non-red peice, you reset the
+accumulator.  When you see a red peice you increment the accumulator.
+When the accumulator gets to three, the player has won.
+
+So we define a local function that adds an accumulator argument.
+
+@codeblock{
+(define (player-win? b)
+  ;; win-helper : Board Number -> Boolean
+  ;; Acc : hom many red peices we've seen so far
+  (local [(define (win-helper b acc)
+            (cond [(= acc WIN) true]
+		  [(empty? b) false]
+		  [else
+		   (cond [(symbol=? 'red (first b))
+			  (win-helper (rest b) (add1 acc))]
+			 [else
+			  (win-helper (rest b) 0)])]))]
+     (win-helper b 0)))
+}
+
+Now let's program the computer-win? predicate:
+
+@codeblock{
+(define (player-win? b)
+  ;; win-helper : Board Number -> Boolean
+  ;; Acc : hom many red peices we've seen so far
+  (local [(define (win-helper b acc)
+            (cond [(= acc WIN) true]
+		  [(empty? b) false]
+		  [else
+		   (cond [(symbol=? 'red (first b))
+			  (win-helper (rest b) (add1 acc))]
+			 [else
+			  (win-helper (rest b) 0)])]))]
+     (win-helper b 0)))
+}
+
+Apply the abstraction recipe and we see to abstract out the symbol and
+make it a parameter to the function:
+
+@codeblock{
+(define (win? p b)
+  ;; win-helper : Board Number -> Boolean
+  ;; Acc : hom many red peices we've seen so far
+  (local [(define (win-helper b acc)
+            (cond [(= acc WIN) true]
+		  [(empty? b) false]
+		  [else
+		   (cond [(symbol=? p (first b))
+			  (win-helper (rest b) (add1 acc))]
+			 [else
+			  (win-helper (rest b) 0)])]))]
+     (win-helper b 0)))
+
+(define (win-player? b)
+  (win? 'red b))
+
+(define (win-computer? b)
+  (win? 'black b))
+}
+
+Now...
+
+@codeblock{
+;; play : Color Number Board -> Board
+;; place the appropriate piece on the board
+}
+
+Is the board going to be a constant size?
+
+Why are you asking?
+
+Because if the board is a constant size, then the board could be
+represented with a vector.
+
+Looking at our win? predicate suggests the list representation is
+good.
+
+But our play function suggests that an @emph{indexed} view of our data
+is a appropriate.
+
+So you can think of a list with two views: one is recursive, the other
+is indexed; each position in the list is numbered and we can refer
+to values in the list according to the index at which they reside.
+
+Why do we need play, when you just call play with the same arguments?
+
+Because what if we changed the representation of the board.
+Also, play has it's own purpose.
+
+@codeblock{
+(define (play c n b)
+  (list-set b n c))
+}
+
+Game works like this: we play, computer plays, we play, computer
+plays, etc. until someone wins.
+
+
+A World is going to have two things: a board and a representation of
+the computer player.  We'll see the computer data definition later.
+
+@codeblock{
+(define-class world%
+  (fields board computer)
+  ;; -> Scene
+  ;; Render this world as a scene.
+  (define/public (to-draw)
+    (overlay 
+     (foldr beside empty-image (map (lambda (clr) (circle 20 "solid" clr))
+				    (field board)))
+     (empty-scene 500 500)))
+
+  ;; KeyEvents
+  ;; Handle number keys by playing and N-key by reseting the game.
+  (define/public (on-key k)
+    (cond [(number? ...) 
+	   (world% (play 'red (string->number k) (field board))
+		   (field computer))]
+	  ...)))
+
+(define INITIAL (build-list SIZE (lambda (_) 'white)))
+
+(big-bang (world% INITIAL 'computer)) 
+; Bogus value for the computer, since we don't use it currently
+}
+
+Now we can play, but the computer never plays.  (The white circles
+don't look great).
+
+Now let's think about how the computer is going to play.
+
+What should a computer player do?  What should it's interface be?
+What's the job of a computer player?
+
+Looks at the board and picks a move.
+
+Reducing this to a decision problem.  Where do we want to play (OK,
+not a decision problem).
+
+[Missed the discussion at this point.]
+
+We've got a new board that represents where the player has played.
+
+How can get the computer to choose a place to play?
+
+Make a new board, play 'black wherever the computer picks to
+play (giving the board that we just played on.
+
+What would be the problem with the computer returning a board?
+
+We want to have a strict seperation of concerns.
+
+Chooses a number and we play there.
+
+@codeblock{
+(define-class computer%
+  (define/public (pick brd)
+    ...))
+}
+
+Q: Speaking of cheating, what do we do to enforce that the player make
+a legal move?
+
+Let's implement the simplest strategy for the computer.  What is the
+simplest strategy for the computer playing?  Play on Zero.
+
+Now play until player wins.  What happened?  Nothing.  We never used
+the win? predicate even though we wrote it.
+
+Let's do on-key.
+
+What are the possible outcomes?
+
+- Player wins
+- Computer wins
+- It's a draw
+
+When the game is over, should we respond to key board events?  No.
+That world is going to behave pretty differently than this world.  The
+best way to represent that is with another class.
+
+@codeblock{
+;; A DoneWorld
+}
+
+What information does a done world need to maintain?
+
+- Who won
+- The computer (since the computer is going to learn as it plays)
+
+It wouldn't learn much if we reset what it had learned after each
+round.
+
+We draw by saying who won.  We're going to handle the N-key event by
+start a new game, which will start with the computer we have.
+
+When we have a tie, go to done, saying there was a tie.
+
+Nice design pattern for implementing world games; for example, in tron
+or connect four: the universe has multiple states it could be in (no
+worlds connected, one connected, two connected).  Also comes up in
+local games: states of the world (playing, done).
+
+State machine, transition system.  Pattern comes up all the time.
+
+@verbatim{
+---> PLAY ---------> DONE
+       ^              |
+       +--------------+
+}
+
+Models nicely in an OO language.
+
+We no longer need to conditionally something if we're in the done
+state or play state -- we can just rely on the object itself being a
+done object or a play object.  The conditional goes away.
+
+How can we check for a tie?
+
+There are no white pieces.
+
+@codeblock{
+(define (tie? b)
+  (not (member 'white b)))
+}
+
+Still failing to do a bunch of things:
+
+- Checking that player doesn't cheat.
+- The computer plays in a dumb (and illegal) way
+
+Let's consider how to make the computer smarter.
+
+Start with seven peices.
+
+How can pick a good spot?  How can pick the best spot?
+
+- Pick the first spot that you win?
+
+What if the board is blank?
+
+So *if* you can win, you want to win.
+
+- Block the other player from winning.
+
+Which do we want to do first?
+
+If you can win, win.  If you can't but you can block a win, block.
+Otherwise, ... who knows.
+
+We don't want to think in advance.
+
+Might want to consult our past experience (our predictions).
+
+We got to this situation and played at the end and always lost.
+
+We haven't decided how much to remember from previous plays.
+
+Indexed data and lists (works just fine for small lists).
+
+Play -- you lose your turn if you play off the board, or if you pick
+a spot that has already been played.
+
+First goal: play in an empty space.
+
+How can find an empty space?  Pick a number, see if it's empty.
+
+Idea: iterate through numbers and pick the first one that is empty.
+
+Is there a problem here?  We might go off the end.
+
+Invariant: never asked to play on a full board.  So we don't have to
+worry about that case.
+
+Let's make sure we are maintaining that invariant.  We make sure
+there's an empty spot just before asking the player to pick.
+
+We have the computer play, then not checking to see if the computer
+won -- we just keep on playing.
+
+Let's fix that.
+
+
+EVALUATION
+
+How do we evaluate a position?
+
+W C P P W
+
+What information do we get out?
+
+Summarize by where we should play or false.
+
+Before we do that, we should gather information on all possible plays.
+
+
+We have 5 spots and we need to evaluate each position.
+
+@verbatim{
+_ _ _ _ _
+}
+
+What are the possibilities:
+
+- it's full
+- don't know
+- we win if we play here
+- we lose if we play here
+
+Sufficient to capture everything we could know.
+
+Other more compicated games might need more information.  Which comes
+from refining the unkown bit to reason about "likely" outcomes.
+
+Develop a function that takes a board and evaluates it.
+
+Develop a data definition for an evaluation:
+
+@codeblock{
+;; An Eval is a [Listof Result].
+;; A Result is one of:
+;; - 'win
+;; - 'lose
+;; - 'full
+;; - 'unkown
+
+;; Board -> Eval
+(define/public (evaluate brd)
+  ...)
+}
+
+Maybe have an evaluate-element function.  It needs the 
+the index and the board.
+
+@codeblock{
+(local [;; Board Number -> Result
+	(define (eval-elem index) ...)]
+  (build-list SIZE evaluate-elem))
+}
+
+How do we evaluate a position?
+
+@codeblock{
+(local [;; Board Number -> Result
+	(define (eval-elem index) 
+	  (cond [(not (symbol=? 'white (list-ref brd index))) 'full]
+		[(computer-win? (play 'black index brd)) 'win]
+		[(player-win? (play 'red index brd)) 'lose]
+		[else 'unkown]))]
+  (build-list SIZE evaluate-elem))
+}	
+
+Going back to pick:
+
+if there's a win, play there; otherwise if there's a block, play there;
+otherwise play at the first place we can.
+
+We need a function that will tells us the first postion
+
+@codeblock{
+;; find-res : Eval Result -> (U Number False)
+;; find the first occurrence of the given result.
+}
+
+But what if the whole board is bad for us?  If we say, where can I
+when, what should we get back.
+
+What if we return -1 instead?  Why is false a better choice?  It is a
+different KIND of value that we won't confuse with other kinds of 
+indexes.
+
+Write obvious recursive function.  What's the problem? Might try to
+add one to false.  Avoid doing that.
+
+Now, let's go back to pick.
+
+Now play.  Tada: we block the player after it plays two.
+
+But we could have done better.  When did the program go wrong?
+With it's first move.
+
+It makes the mistake again and again.
+
+
+Needs to remember that playing in spot 0 is not going to work out
+well.
+
+What does our computer need to do in order to learn things?
+
+
+A list of boards and where it went.
+
+What tells us where to move?  Evaluations.
+
+Save previous evaluations.
+
+Tie evaluations to end result of that game.
+
+Idea for next time: mark evaluations as a loss when you lose.
+
+
+@section{Indexed Views on Data}
+
+@section{State Transition Patterns}
+
+@section{Designing a Computer Player}
+
+@subsection{A simple player}
+@subsection{Evaluating positions}
+@subsection{Picking a move}
+@subsection{Remembering the past}
+
+@section{Completed code}
+
+As written in class.
 
 @verbatim|{
-The hard part is translating english prose into a data defintion.
-This is the most fundamental skill in CS.  
-
-For ranges, here's what the spec is:
-[lo,hi) -- a closed open range
-
-Data Def: 
-A Range is a (co% Number Number)
-
-Then we add (lo,hi].
-
-A Range is one of:
-- (co% Number Number)
-- (oc% Number Number)
-
-Then we add:
-  [4,5) union (6,8] union [100,101)
-
-Thus we get the data def:
-
-A Range is one of
-- (co% Number Number)
-- (oc% Number Number)
-- (u% Range Range) ;; note recursive data def
-
-Let's write the u% class:
-
-(define-class u%
-  (fields left right) ;; not min/max
-  (define/public (in-range? n)
-    (or (send (field left) in-range? n)
-	(send (field right) in-range? n))))
-
-How would we write @r[union]  in @r[co]?
-
-(define/public (union r)
-  (u% r this))
-
-same in u% and oc%
-
-@section{Problem 2: Shapes}
-
-Data Def:
-
-A Shape is one of:
-- (rect% N N)
-- (circ% N)
-
-Part 1:
-Write the bba (bounding-box-area) method.  Everyone did well on this.
-
-Part 2: 
-Abstract the two methods to a super class.
-
-in rect%
-(define/public (bba)
-  (* (field width) (field height)))
-
-in circ%
-(define/public (bba)
-  (sqr (* 2 (field radius))))
-
-So, let's extend the Shape interface:
-
-; Shape implements:
-; width : -> N
-;; compute the width of this shape
-; height : -> N
-;; compute the height 
-
-Now we can rewrite our methods:
-
-in rect%
-(define/public (bba)
-  (* (width) (height)))
-
-in circ%
-(define/public (bba)
-  (* (width) (height)))
-
-Now our methods are identical.  We can lift them up to a superclass:
-
-(define-class shape%
-  (define/public (bba)
-    (* (width) (height))))
-
-Except we need to change this to:
-
-(define-class shape%
-  (define/public (bba)
-    (* (this . width) (this . height))))
-
-Now we have to implement our interface in rect% and circ%
-
-In rect%, we're already done -- define-class has generated the
-accessor methods for us.
-
-In circ%, we do this:
-
-(define/public (width)
-  (* 2 (field radius)))
-
-(define/public (height)
-  (* 2 (field radius)))
-or
-(define/public (height)
-  (width))
-
-Extend our data definintion:
-
-A Shape is one of:
-- (rect% N N)
-- (circ% N)
-- (square% N)
-
-(define-class square%
-  (super shape%)
-  (fields width)
-  (define/public (height) (field width)))
-
-or, to be cuter (not necessarily a good idea on exams) :
-
-(define-class square%
-  (super rect%)
-  (constructor (x) (fields x x)))
-
-@section{Problem 3: Functions as Objects}
-
-In this problem, we give you an interface:
-
-An [IFun X Y] implements
-apply : X -> Y
-apply this function to the given input
-
-Explanation of parametric interfaces.  Analogy to parametric data
-definitions, ie [Listof X].  
-
-What do we know about someting that implements [IFun Number String]?
-It has an apply method which takes a Number and produces a String.
-
-Let's consider Part 1 of this problem.
-
-You're given an (X -> Y) function.  You should construct something
-that implements [IFun X Y].  
-
-So, we must construct a data definition, since we don't have any way
-yet of constructing [IFun X Y].
-
-; A [Fun X Y] is a (f% (X -> Y)) and implements [IFun X Y]
-
-(define-class f%
-  (fields f)
-  ;; template
-  (define/public (apply x)
-    ... (field f) ... x))
-
-code:
-
-  (define/public (apply x)
-    ((field f) x))
-
-Now, on to part 2:
-
-(define addone (f% add1))
-> (addone . apply 3)
-4
-(define subone (f% sub1))
-> (subone . apply 3)
-2
-
-Now, on to part 3:
-
-We extend the interface with the compose method:
-
-;; compose : [IFun Y Z] -> [IFun X Z]
-;; produce a function that applies this function and then the given
-;; function
-
-Since we extended the interface, we must implement the compose method
-in f%. 
-
-(define/public (compose g)
-  ... (field f) g (g . apply ...) (g . compose ...) ...)
-
-remove the useless bits:
-
-(define/public (compose g)
-  ... (field f) (g . apply ...) ...)
-
-First, we need to construct an [IFun X Z].  But the only way to do
-that is with (f% ...), which requires a function as input:
-
-(define/public (compose g)
-  (f% (lambda (x)
-	... (field f) 
-	... (g . apply ...)  ...)))
-
-Now our inventory is extended:
-
-(define/public (compose g)
-  (f% (lambda (x)
-	... x ;; contract: X
-	... (field f) ;; contract : X -> Y
-	... (g . apply ...)  ;; contract : Y -> Z
-	...)))
-
-(define/public (compose g)
-  (f% (lambda (x)
-	(g . apply ((field f) x)))))
-
-
-Possible mistakes:
-
-(define/public (compose g)
-  (f% (lambda (x)
-	(g ((field f) x)))))
-
-g is not a function, this doesn't work
-
-(define/public (compose g)
-  (f% (lambda (x)
-	(g . f ((field f) x)))))
-
-f is not in the [IFun Y Z] interface, this doesn't work
-
-@section{Problem 4: Queues}
-
-This problem is all about maintaining invariants.  
-
-@codeblock{
-;; A [IQ X] implements:
-;;
-;; head : -> X
-;; Produce the element at the head of this queue.
-;; Assume: this queue is not empty.
-;;
-;; deq : -> [IQ X]      (Short for "dequeue")
-;; Produces a new queue like this queue, but without 
-;; this queue's first element.
-;; Assume: this queue is not empty.
-;;
-;; enq : X -> [IQ X]    (Short for "enqueue")
-;; Produce new queue with given element added to the
-;; END of this queue.
-;;
-;; emp? : -> Boolean
-;; Is this queue empty?
-}
-
-here's the representation idea:
-
-front: (list 'x 'y)
-rear: (list 'z 'p 'q) -- reverse order
-
-So this has the elements in this order:
-  'x 'y 'q 'p 'z
-
-Invariants have dual roles: they give us things to ensure, and things
-we can rely on.
-
-Let's consider one case where we can simply rely on the invariant.
-
-;; A [Q% X] is a (q% [Listof X] [Listof X])
-(define/class q%
-  (fields front rear)
-  (define/public (emp?)
-    (empty? (field front)))
-  ...
-)
-
-The @r[head] method is another such case.
-We know, from the assumption, that the queue isn't empty.  From the
-invariant, we therefore know that the front isn't empty.  
-So we just get:
-(define/public (head)
-  (first (field front)))
-
-Now let's consider a case where we have to ensure the invariant -- the
-@r[enq] method.
-
-(define/public (enq x)
-  (q% (field front) (cons x (field rear))))
-
-But what if the queue is empty?  We just broke the invariant.  Whoops.
-
-(define/public (enq x)
-  (cond [(emp?)
-	 (q% (list x) empty)]
-	[else
-	 (q% (field front) (cons x (field rear)))]))
-
-Now we maintain the invariant in both cases.
-
-Now we get to the trickiest method, @r[deq].  Here's a simple way of
-doing it.
-
-(define/public (deq)
-  (q% (rest (field front))
-      (field rear)))
-
-But what if there's only one person?  Then we're ok, because the whole
-queue is empty?  
-
-What if there's only one person in the front, but a million people in
-the rear?  Then we've broken the invariant.  
-
-We need to distinguish the two possible cases:
-
-(define/public (deq)
-  (cond [(empty? (rest (field front)))
-	 (q% (reverse (field rear))
-	     empty)]
-	[else (q% (rest (field front))
-		  (field rear))]))
-part 2:
-
-(q% '(x y z) '(p q r)) has the same interp as
-(q% '(x y) '(p q r z)) but different representations
-
-Now we define a to-list method that does the interpretation for
-testing purposes.
-
-;; to-list : -> [Listof X]
-;; produce a list of the elements of this queue in order
-(define/public (to-list)
-  (append (field front) (reverse (field rear))))
-
-Now we can use this to test that the interp of the two queue in our
-example is the same.  
-
-part 3:
-Write a constructor.
-
-In the q% class:
-(constructor (f r)
-   (cond [(empty? f)
-	  (fields (reverse r) empty)]
-	 [else (fields f r)]))
-
-Various other possibilites.  
-
-(constructor (f r)
-  (fields (append f (reverse r)) empty))
-
-@section{Problem 5: Properties and Dictionaries}
-
-
-@codeblock{
-;; A Dict is one of:
-;;  - (ld-empty%)
-;;  - (ld-cons% Nat String Dict)
-;; implements:
-;;
-;; has-key? : Nat -> Boolean
-;; Does this dict. have the given key?
-;;
-;; lookup : Nat -> String
-;; Produce the value associated with the given key in this dict.
-;; Assume: the key exists in this dict.
-;;
-;; set : Nat String -> Dict
-;; Associate the given key to the given value in this dict.
-
-(define-class ld-empty%
-  (define/public (has-key? k) false)
-
-  (define/public (set k v)
-    (ld-cons% k v this)))
-
-(define-class ld-cons%
-  (fields key val rest)
-
-  (define/public (has-key? k)
-    (cond [(= (field key) k) true]
-          [else ((field rest) . has-key? k)]))
-
-  (define/public (lookup k)
-    (cond [(= (field key) k) (field val)]
-          [else ((field rest) . lookup k)]))
-
-  (define/public (set k v)
-    (ld-cons% k v this)))
-}
-
-In this problem, we're not asking you to develop new code, but to
-reason about existing code.   You need to develop properties
-that the dictionary implmentation has, and then embody those
-properties as predicates that we can test.  
-
-First, the "set/lookup" property:
-
-(d . set n s . lookup n) should produce s.  As a predicate:
-
-;; Dict Number String -> Boolean
-;; check the set/lookup property on these inputs
-(define (set/lookup? d n s) (string=? (d . set n s . lookup n) s))
-
-Now, we can use this to write tests.
-
-(check-expect (set/lookup? (ld-empty%) 3 "Wilma") true)
-(check-expect (set/lookup? (ld-empty%) 17 "Fred") true)
-
-Then, we consider a generalization of this property to consider
-multiple keys and values.  
-
-(define (2-set/lookup? d n s m t)
-  (and 
-   (string=? (d . set n s . set m t . lookup n)
-	     s)
-   (string=? (d . set n s . set m t . lookup m)
-	     t)))
-
-Here's an example where this works:
-
-(check-expect (2-set/lookup? (ld-empty%) 3 "Fred" 4 "Wilma") true)
- 
+#lang class/2
+(require 2htdp/image class/universe)
+
+;; A Board is a [Listof Color]
+;; A Color is one of
+;; - 'white - blank
+;; - 'black - the computer
+;; - 'red - the player
+
+(define WIN 3)
+(define SIZE 10)
+
+;; player-win? : Board -> Boolean
+(define (player-win? b)
+  (win-helper 'red b 0))
+
+;; computer-win? : Board -> Boolean
+(define (computer-win? b)
+  (win-helper 'black b 0))
+
+;; tie: Board -> Boolean
+(define (tie? b)
+  (not (member 'white b)))
+
+;; win-helper : Color Board Number ->  Boolean
+;; Acc : how many pieces we've seen so far  
+(define (win-helper sym b acc)
+  (cond [(= acc WIN) true]
+        [(empty? b) false]
+        [else (cond [(symbol=? sym (first b))
+                     (win-helper sym (rest b) (add1 acc))]
+                    [else (win-helper sym (rest b) 0)])]))
+
+;; play : Color Number Board -> Board
+;; place the appropriate piece on the board
+(define (play c n b)
+  (cond 
+    [(> n (add1 SIZE)) b]
+    [(symbol=? 'white (list-ref b n))
+     (list-set b n c)]
+    [else b]))
+
+
+;; list-set : Listof[X] Nat X -> Listof[X]
+;; replaces the kth element of l with e
+(define (list-set l k e)
+  (cond [(= k 0) (cons e (rest l))]
+        [else (cons (first l) (list-set (rest l) (sub1 k) e))]))
+
+;; find-res : Evaluation Result -> Number or False
+;; find the first occurence of this result
+(define (find-res eval r)
+  (cond [(empty? eval) false]
+        [else (cond [(symbol=? r (first eval)) 0]
+                    [else 
+                     (local [(define result (find-res (rest eval) r))]
+                       (cond [(number? result) (add1 result)]
+                             [else false]))])]))
+
+;; A Computer implements:
+;; pick : Board -> Number
+(define-class computer%
+  
+  ;; An Evaluation is a [Listof Result]
+  ;; A Result is one of 'Win 'Block 'Full 'Unk
+  
+  ;; evaluate Board -> Evaluation
+  (define/public (evaluate brd)
+    (local [(define (evaluate-elem index)
+              (cond [(not (symbol=? 'white (list-ref brd index))) 'Full]
+                    [(computer-win? (play 'black index brd)) 'Win]
+                    [(player-win? (play 'red index brd)) 'Block]
+                    [else 'Unk]))]
+      (build-list SIZE evaluate-elem)))
+  
+  ;; Pick a space to play in
+  ;; Invariant : brd is not full
+  ;; Board -> Number
+  (define/public (pick brd)
+    (local [(define eval (evaluate brd))]
+      (cond [(member 'Win eval)
+             (find-res eval 'Win)]
+            [(member 'Block eval)
+             (find-res eval 'Block)]
+            [else
+             (find-res eval 'Unk)]))))
+
+(define SCENE (empty-scene 500 500))
+
+;; A World is (world% Board Computer)
+(define-class world%
+  (fields board computer)
+  (define/public (to-draw)
+    (overlay
+     (foldr beside empty-image (map (λ (clr) (circle 20 "solid" clr)) (field board)))
+     SCENE))
+  
+  (define/public (on-key k)
+    (cond [(number? (string->number k)) 
+           (local [(define new-board (play 'red (string->number k) (field board)))]
+             (cond [(player-win? new-board) (done% "Player Win!" (field computer))]
+                   [(tie? new-board) (done% "Tie!" (field computer))]
+                   [else
+                    (local [(define second-board (play 'black 
+                                                       (send (field computer) pick new-board)
+                                                       new-board))]
+                      (cond [(computer-win? second-board) (done% "Computer Win!" 
+                                                                 (field computer))]
+                            [(tie? second-board) (done% "Tie!" (field computer))]
+                            [else (world% second-board (field computer))]))]))]
+          [(key=? "n" k) (world% INITIAL (field computer))]
+          [else this]))
+  )
+
+;; A DoneWorld is (done% String Computer)
+(define-class done%
+  (fields msg computer)
+  
+  (define/public (to-draw)
+    (overlay (text (field msg) 30 "black")
+             SCENE))
+  
+  (define/public (on-key k)
+    (cond [(key=? "n" k) (world% INITIAL (field computer))]
+          [else this])))
+
+(define INITIAL (build-list SIZE (λ (i) 'white)))
+
+(big-bang (new world% INITIAL (computer%)))
 }|

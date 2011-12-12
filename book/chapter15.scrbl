@@ -16,463 +16,445 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec19"]{Equality}
+@title[#:tag "lec17"]{Java}
+
+@section{EWD's rules for science}
+
+Van Horn presented some slides.
+
+@section{Two Ideas: Java and Types}
+
+Types are a @emph{mechanism} for enforcing data definitions and contracts.
+
+Java is a programming language like the one we've seen, with a
+different syntax and with types.
+
+@section{Programming in Java}
+
+@subsection{Java Syntax}
+
+@racketblock[
+(code:comment "A C is (C Number String String)")
+(define-class C
+  (fields x y z)
+  (code:comment "Number Number -> C")
+  (define/public (m p q)
+    ...))
+]
+
+@verbatim|{
+class C {
+    Number x;
+    String y;
+    String z;
+    public C m(Number p, Number q) {
+	...
+    }
+    public C(Number x, String y, String z) {
+	this.x = x;
+	this.y = y;
+	this.z = z;
+    }
+}
+}|
+
+Let's create a simple pair of numbers:
+@;'
+
+@verbatim|{
+class Pair {
+    Number left;
+    Number right;
+    
+    public Pair(Number left, Number right) {
+	this.left = left;
+	this.right = right;
+    }
+    
+    public Pair swap() {
+	return new Pair(this.right, this.left);
+    }
+}
+}|
+
+    But really, this doesn't work, because Java doesn't have the type @tt{Number}.  So we'll choose @tt{Integer} instead.
 
 
-@section{Equality}
+@;'
 
-@subsection{Several kinds of equality}
+@verbatim|{
+class Pair {
+    Integer left;
+    Integer right;
+    
+    public Pair(Integer left, Integer right) {
+	this.left = left;
+	this.right = right;
+    }
+    
+    public Pair swap() {
+	return new Pair(this.right, this.left);
+    }
+}
+}|
+
+									       
+To test this, we'll import a testing library:
+
+@verbatim{
+import tester.Tester;
+}
+
+and write some examples:
+
+@;'
+
+@verbatim|{
+class Examples {
+    public Examples() {}
+    public boolean testSwap(Tester t) {
+	return t.checkExpect(new Pair(3,4).swap(), 
+			     new Pair(4,3));
+    }
+}
+}|
+
+
+@section{Running Java Programs}
+
+We don't have a Run button in Java, so we need a different way to run
+our program. To do this, we first need to install our test library.
+This requires installing a @tt{JAR} file from the NU Tester
+@link["http://code.google.com/p/nutester/"]{web site}.  
+
+The we have to compile the program.  
+
 @itemlist[
-@item{Structural equality---identical twins are the "same".}
-@item{Intensional equality---are we pointing at the same thing?}
-]
-Distinction matters a lot in the context of mutation.  If you punch
-one identical twin, the other one doesn't get a black eye. 
-
-@section{Defining structural equality}
-
-@codeblock{
-#lang class/4
-;; A Posn is a (posn% Number Number)
-(define-class posn%
-  (fields x y)
-
-  ;; =? : Posn -> Bool
-  ;; is the given posn the same as this one?
-  (define/public (=? p)
-    (and (= (field x) (send p x))
-	 (= (field y) (send p y))))
-
-  (check-expect (send (posn% 3 4) =? (posn% 3 4)) true)
-  (check-expect (send (posn% 3 4) =? (posn% 3 5)) false)
-)
-
-}
-
-What about lists?
-
-@codeblock{
-#lang class/3
-;; A LoP is one of either
-;; - (mt%)
-;; - (cons% Posn LoP)
-(define-class mt%)
-(define-class cons%
-  (fields first rest))
-}
-
-What does it mean for the elements have to be the same?
-
-In @r[mt%]:
-
-@codeblock{
-;; LoP -> Boolean 
-(define/public (=? lop)
-  (send lop empty?))
-}
-
-So we need to add @r[empty?] to our interface definition.
-@codeblock{
-;; A LoP is one of either
-;; - (mt%)
-;; - (cons% Posn LoP)
-;; and implements:
-;; empty? : -> Boolean
-;; is this LoP empty? 
-}
-
-In @r[mt%]:
-@codeblock{
-(define/public (empty?) true)
-}
-
-In @r[cons%]:
-@codeblock{
-(define/public (empty?) false)
-}
-
-Now to implement equality for @r[cons%]:
-
-@codeblock{
-(define/public (=? lop)
-  (and (not (send lop empty?)
-	    (send (field first) =? (send lop first))
-	    (send (field rest) =? (send lop rest)))))
-}
-
-Note that we're using the @r[=?] method to compare the @r[Posn]s in
-the list. 
-
-@section{Multiple Representations}
-
-@codeblock{
-;; A Posn implements IPosn
-
-;; An IPosn implements
-;; x : -> Number
-;; y : -> Number
-  ;; =? : IPosn -> Bool
-  ;; is the given posn the same as this one?
-
-;; A Posn2 is a (posn2% Number Number)
-(define-class posn2%
-  (fields ls)
-  (constructor (x y)
-	       (fields (list x y)))
-  (define/public (x) (first (field ls)))
-  (define/public (y) (second (field ls)))
-  (define/public (=? p)
-    (and (= (x) (send p x))
-	 (= (y) (send p y)))))
-}
-
-Now we can compare the two different kinds of posns and everything
-works properly.
-
-What about multiple representations for lists of posns?
-
-
-@codeblock{
-#lang class/3
-
-;; A Posn implements IPosn.
-
-;; An IPosn implements:
-;;
-;; x : -> Number
-;; y : -> Number
-;; =? : IPosn -> Boolean
-
-;; A Posn2 is a (posn2% Number Number).
-;; implement IPosn.
-(define-class posn2%
- (fields ls)
- (constructor (x0 y0)
-   (fields (list x0 y0)))
-
- (define/public (x)
-   (first (field ls)))
-
- (define/public (y)
-   (second (field ls)))
-
- (check-expect (send (posn2% 3 4) =? (posn2% 3 4)) true)
- (check-expect (send (posn2% 3 4) =? (posn2% 3 5)) false)
- (define/public (=? p)
-   (and (= (send this x) (send p x))
-        (= (send this y) (send p y)))))
-
-
-(check-expect (send (posn% 1 2) =? (posn2% 1 2)) true)
-(check-expect (send (posn% 1 2) =? (posn2% 1 1)) false)
-
-
-;; A Posn1 is a (posn% Number Number).
-;; implements IPosn.
-(define-class posn%
- (fields x y)
-
-
- ;; Posn -> Boolean
- ;; Is the given posn the same as this?
- (check-expect (send (posn% 3 4) =? (posn% 3 4)) true)
- (check-expect (send (posn% 3 4) =? (posn% 3 5)) false)
- (define/public (=? p)
-   (and (equal? (field x) (send p x))
-        (equal? (field y) (send p y)))))
-
-;; A LoP is one of:
-;; - (mt%)
-;; - (cons% Posn LoP)
-;; implements ILoP
-
-;; An ILoP implements:
-;;
-;; first : -> Posn
-;; rest : -> ILoP
-;; empty? : -> Boolean
-
-(define the-real-empty? empty?)
-(define the-real-first first)
-(define the-real-rest rest)
-
-(define-class list%
- (fields ls)
- (define/public (empty?)
-   (the-real-empty? (field ls)))
-
- (define/public (first)
-   (the-real-first (field ls)))
-
- (define/public (rest)
-   (list% (the-real-rest (field ls))))
-
- (define/public (=? lop)
-   (cond [(send this empty?) (send lop empty?)]
-         [else
-          (and (not (send lop empty?))
-               (send (send this first) =? (send lop first))
-               (send (send this rest) =? (send lop rest)))])))
-
-
-
-
-
-
-
-
-;; A [Listof X] is one of:
-;; - (mt%)
-;; - (cons% X [Listof X])
-;; where X implements
-;; =? : X -> Boolean
-
-(define-class mt%
-
- ;; [Listof X] -> Boolean
- ;; Is the given list of posns the same as this?
- (define/public (=? lop)
-   (send lop empty?))
-
- (define/public (empty?)
-   true))
-
-(define-class cons%
- (fields first rest)
-
- (define/public (=? lop)
-   (and (not (send lop empty?))
-        (send (field first) =? (send lop first))
-        (send (field rest) =? (send lop rest))))
-
- (define/public (empty?)
-   false))
-
-(check-expect (send (mt%) =? (mt%)) true)
-(check-expect (send (cons% (posn% 3 4) (mt%)) =? (cons% (posn% 3 4) (mt%)))
-             true)
-(check-expect (send (cons% (posn% 3 4) (mt%)) =?  (mt%))
-             false)
-(check-expect (send (cons% (posn% 3 4) (mt%)) =? (cons% (posn% 3 5) (mt%)))
-             false)
-
-(check-expect (send (list% empty) =? (list% empty)) true)
-(check-expect (send (list% (list (posn% 3 4))) =? (list% (list (posn% 3 4))))
-             true)
-(check-expect (send (list% (list (posn% 3 4))) =? (list% (list)))
-             false)
-(check-expect (send (list% (list (posn% 3 4))) =? (list% (list (posn% 3 5))))
-             false)
-
-(check-expect (send (list% (list (posn% 3 4))) =? (cons% (posn2% 3 4) (mt%)))
-             true)
-
-}
-
-Now we can make all of the appropriate combinations work together:
-different kinds of lists with the same kind of posns, the same kind of
-lists with different kinds of posns, and different kinds of lists with
-different kinds of posns.
-
-@section{Intensional equality}
-
-How can we tell if two posns are two different names for the same
-thing, or if they're two different posns with the same contents?  
-
-For example:
-
-@codeblock{
-(define p1 (posn% 3 4))
-(define p2 (posn% 3 4))
-}
-
-or 
-
-@codeblock{
-(define p1 (posn% 3 4))
-(define p2 p1)
-}
-
-These are very different in the presence of mutation.  We have a way
-of testing this: @r[eq?].  Similarly, the @r[equal?] function checks
-structural equality.  
-
-But that didn't shed any light on the question.  Is there a way we can
-check this @emph{in} our language?
-
-Answer: yes.  Do some operation to one of them that changes the state
-of the object, and see if it @emph{also} happens to the other one.
-
-Drawback: you can't necessarily undo this operation.  
-
-@codeblock{
-(define (really-the-same? p1 p2)
-  ....)
-}
-
-Now we need some operation to perform on @r[p1].  
-
-@filebox[@tt{posn%}]{
-@codeblock{
-;; -> (posn% 'black-eye Number)
-(define/public (punch!)
-  (begin
-    (set-field! x 'black-eye)
-    this))
-}
-}
-
-@racketblock[
-(define sam (posn% 3 4))
-(send sam punch!)
+	@item{javac}
+	@item{The classpath and the -cp option}
+	@item{Now we have class files, which are binary and all mashed
+	up}
+	@item{To run this, we use the @tt{java} command, which also
+	has a @tt{-cp} option}
+	@item{If we change things, we have to recompile and then rerun.}
 ]
 
-"I punched him so hard, I punched him right out of the data
-defintion."
+@section{A More Complex Example}
 
-Now we can define @r[really-the-same?].
+@;'
+
+What if we want to represent a union?
+
+@verbatim|{
+    class Square {
+	Integer size;
+	public Square(Integer size) {
+	    this.size = size;
+	}
+    }
+    class Circ {
+	Integer radius;
+	public Circ(Integer radius) {
+	    this.radius = radius;
+	}
+    }
+}|
+
+How do we declare that both of these are @tt{Shape}s?
+
+
+@verbatim|{
+    import tester.Tester;
+
+    interface IShape {}
+
+    class Square implements IShape {
+	Integer size;
+	public Square(Integer size) {
+	    this.size = size;
+	}
+	public IShape nothing(IShape i) {
+	    return i;
+	}
+    }
+
+    class Circ implements IShape {
+	Integer radius;
+	public Circ(Integer radius) {
+	    this.radius = radius;
+	}
+    }
+
+    class Examples {
+	Examples () {}
+	public boolean testNothing(Tester t) {
+	    Square s = new Square(5); // A local binding
+	    return t.checkExpect(s.nothing(new Circ(2)), 
+				 new Circ(2));
+	}
+    }
+	
+}|
+
+@section{Recursive Unions}
+
+@verbatim|{
+    import tester.Tester;
+    class Mt implements IList {
+	public Mt() {}
+    }
+
+    class Cons implements IList {
+	Integer first;
+	IList rest;
+	
+	public Cons(Integer first, IList rest) {
+	    this.first = first;
+	    this.rest = rest;
+	}
+    }
+
+    interface IList {}
+    
+    class Examples {
+	public Examples() {}
+	
+	public boolean testList(Tester t) {
+	    return t.checkExpect(new Mt(), new Mt())
+		&& t.checkExpect(new Cons(5, new Mt()), new Cons(5, new Mt()));
+	}
+    }	
+
+}|
+
+@section[#:tag "java-enum"]{Enumerations}
+
+In Fundies I, we might have written:
 
 @codeblock{
-(define (really-the-same? p1 p2)
-  (begin
-    (send p1 punch!)
-    (symbol? (send p2 x))))
+    ;; A Title is one of
+    ;; - 'dr
+    ;; - 'mr
+    ;; - 'ms
+}
+@;'
+
+In Java, we write:
+
+@verbatim|{
+	interface ITitle {}
+	class Dr implements ITitle {
+	    Dr() {}
+	}
+	class Mr implements ITitle {
+	    Mr() {}
+	}
+	class Ms implements ITitle {
+	    Ms() {}
+	}
+}|
+
+Why write these silly constructors?
+
+@verbatim|{
+	interface ITitle {}
+	class Dr implements ITitle {
+	    Dr() {}
+	}
+	class Mr implements ITitle {
+	    Mr() {}
+	}
+	class Ms implements ITitle {
+	    Integer x;
+	    Ms() {}
+
+	    public Integer m() {
+		return x+1;
+	    }
+	}
+
+	class Main {
+	    public static void main(String[] args) {
+		new Ms().m();
+		return;
+	    }
+	}
+}|
+
+
+Now we get a @tt{NullPointerException}.  But what is that?
+
+A discussion of the evils of @tt{null}.
+
+For example, this compiles:
+
+@verbatim|{
+	interface ITitle {}
+	class Dr implements ITitle {
+	    Dr() {}
+	}
+	class Mr implements ITitle {
+	    Mr() {}
+	}
+	class Ms implements ITitle {
+	    Integer x;
+	    Ms(Integer x) {
+	        this.x = x;
+	    }
+
+	    public Integer m() {
+		return null;
+	    }
+	}
+
+	class Main {
+	    public static void main(String[] args) {
+		new Ms().m();
+		return;
+	    }
+	}
+}|
+
+Never write @tt{null} in your program!
+
+A long sermon on @tt{null}.
+
+@section{Parameterized Data Definitions}
+
+Consider our @tt{Pair} class:
+
+@verbatim|{
+class Pair {
+    Integer left;
+    Integer right;
+    
+    public Pair(Integer left, Integer right) {
+	this.left = left;
+	this.right = right;
+    }
+    
+    public Pair swap() {
+	return new Pair(this.right, this.left);
+    }
+}
+}|
+
+Now if we want a @tt{Pair} of @tt{String}s:
+
+@verbatim|{
+class PairString {
+    String left;
+    String right;
+    
+    public Pair(String left, String right) {
+	this.left = left;
+	this.right = right;
+    }
+    
+    public Pair swap() {
+	return new Pair(this.right, this.left);
+    }
+}
+}|
+
+
+This is obviously bad---we had to copy and paste.  So let's abstract:
+
+@verbatim|{
+class Pair<T,V> {
+    T left;
+    V right;
+    
+    public Pair(T left, V right) {
+	this.left = left;
+	this.right = right;
+    }
+    
+    public Pair<V,T> swap() {
+	return new Pair<V,T>(this.right, this.left);
+    }
 }
 
-@racketblock[
-(really-the-same? p1 p2)
-p1
-]
-
-Now @r[p1] is permanently broken, and can't be undone.  So
-@r[really-the-same?] is a very problematic, and you should use
-@r[eq?], which uses DrRacket's internal knowledge of where things came
-from to answer this question without changing the objects.  
-
-Question:
-
-@racketblock[
-(eq? p1 (send p1 punch!))]
-
-Produces true.
-
-@racketblock[
-(send p2 =? (send p2 punch!))
-]
-
-Produces true (or crashes).
-
-
-@racketblock[
-(send (send p3 punch!) =? p3)
-]
-
-Produces true (or crashes).
-
-Question:
-Does intensional equality imply structural equality?  Yes.
-
-
-@section{Parameterized Data Defintions and Equality}
-
-Generalizing @tt{LoP} to @tt{[Listof X]}.
-
-
-@codeblock{
-;; A [Listof X] is one of:
-;; - (mt%)
-;; - (cons% X [Listof X])
+class Examples {
+    public Examples() {}
+    public boolean testSwap(Tester t) {
+	return t.checkExpect(new Pair<Integer,Integer>(3,4).swap(), 
+			     new Pair<Integer,Integer>(4,3));
+    }
 }
 
-But we have to change one more thing.  Our @r[=?] method assumes that
-@r[X] implements an @r[=?] method themselves.
+}|
 
-@codeblock{
-;; A [Listof X] is one of:
-;; - (mt%)
-;; - (cons% X [Listof X])
-;; where X implements
-;; =? : X -> Boolean
-}
+@section{Abstraction}
 
-We could also change the signature of @r[=?] to take a comparison.
-But then we'd have to change all of our code.  We've lifted a
-restriction, but only to things that can be compared for equality.  
-
-@section{Equality in Java}
+@;'
 
 @verbatim|{
 
-class Posn {
-   Integer x;
-   Integer y;
-   Posn(Integer x, Integer y) {
-       this.x = x;
-       this.y = y;
-   }
-
-   public Boolean isEqual(Posn p) {
-       return this.x == p.x
-           && this.y == p.y;
-   }
+class C {
+    Integer x;
+    Integer y;
+    C(Integer x, Integer y) {
+	this.x = x;
+	this.y = y;
+    }
+    
+    public Integer sq() {
+	return this.x * this.x;
+    }
 }
 
-interface LoP {
-   Boolean isEmpty();
-   Posn getFirst();
-   LoP getRest();
-}
 
-class MT implements LoP {
-   MT() {}
-
-   public Posn getFirst() {
-       return null;
-   }
-
-   public LoP getRest() {
-       return ????;
-   }
-
-   public Boolean isEmpty() {
-       return true;
-   }
-
-   public Boolean isEqual(LoP lop) {
-       return lop.isEmpty();
-   }
-}
-
-class Cons implements LoP {
-   Posn first;
-   LoP rest;
-
-   Cons(Posn first, LoP rest) {
-       this.first = first;
-       this.rest = rest;
-   }
-
-   public Boolean isEmpty() {
-       return false;
-   }
-
-   public Boolean isEqual(LoP lop) {
-       return (!lop.isEmpty())
-           && this.first.isEqual(lop.getFirst())
-           && this.rest.isEqual(lop.getRest());
-   }
-
-   public Posn getFirst() {
-       return this.first;
-   }
-
-   public LoP getRest() {
-       return this.rest;
-   }
-
-
+class D {
+    Integer x;
+    String z;
+    D(Integer x, String z) {
+	this.x = x;
+	this.z = z;
+    }
+    
+    public Integer sq() {
+	return this.x * this.x;
+    }
 }
 
 }|
 
 
+    Now to abstract:
+
+@verbatim|{
+
+class S {
+    Integer x;
+    public Integer sq() {
+	return this.x * this.x;
+    }
+    S(Integer x) {
+	this.x = x;
+    }
+}
+
+class C extends S {
+    Integer y;
+    C(Integer x, Integer y) {
+	super(x);
+	this.y = y;
+    }
+}
+
+
+class D {
+    Integer x;
+    String z;
+    D(Integer x, String z) {
+	this.x = x;
+	this.z = z;
+    }
+    
+    public Integer sq() {
+	return this.x * this.x;
+    }
+}
+
+}|
