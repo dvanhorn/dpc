@@ -598,5 +598,34 @@ We arrive at the folllowing final code:
 			    (empty-scene 40 40)))
 )
 
+@section{Exercises}
 
+@subsection[#:tag "assign_range"]{Shapes}
 
+Here is the signature for a method to compute the area of a 
+shape's bounding box---the smallest rectangle that can contain 
+the shape.
+@#reader scribble/comment-reader
+(racketblock
+  ;; bba : -> Number     (short for "bounding-box-area")
+  ;; Compute the area of the smallest bounding box for this shape.
+)
+
+Here are some examples of how @r[bba] should work:
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect ((rect% 3 4) . bba) 12)
+  (check-expect ((circ% 1.5) . bba)  9)
+)
+
+@itemlist[
+@item{Design the @r[bba] method for the
+  @r[rect%] and @r[circ%] class.}
+
+@item{Design a super class of @r[rect%] and @r[circ%] and lift the
+  @r[bba] method to the super class.  Extend the shape interface as
+  needed, but implement any methods you add.}
+
+@item{Design a new variant of a Shape, Square, which should support
+  all of the methods of the interface.}
+]
