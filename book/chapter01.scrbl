@@ -507,7 +507,7 @@ class/0
 
 @section{Exercise}
 
-@subsection{Complex, with class.}
+@subsection[#:tag "assign_complex"]{Complex, with class.}
        
         For this exercise, you will develop a class-based representation
         of complex numbers, which are used in several fields, including:

@@ -5,7 +5,7 @@
 
 @title[#:tag "soln01"]{Complex}
 
-This is a solution for the @seclink["assign01"]{Complex} exercise.
+This is a solution for the @seclink["assign_complex"]{Complex} exercise.
 
 @#reader scribble/comment-reader
 (racketmod
