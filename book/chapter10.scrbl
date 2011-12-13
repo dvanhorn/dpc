@@ -648,3 +648,76 @@ should be inserted in the left or right:
 		  (field right))]))
 ]}
 
+@section{Exercises}
+
+@subsection{Queues}
+
+The University Registrar is instituting a new course registration
+system, in which each student will wait in a ``Virtual Line'' until
+every student ahead of them has registered.  A simple way to represent
+a line (also known as a @emph{queue}) is by using a list.  But this
+representation makes it slow to add somebody to the end of the line
+(or to take somebody off the front of the line, depending on whether
+the front of the list represents the front or rear of the line).
+
+In order to provide maximal waiting efficiency, you have been tasked
+with implementing a representation that uses @emph{two} lists!  The
+key idea of this fancy representation is that one list will represent
+some portion of the front of the line, while the other will represent
+the remainder of the line @emph{in reverse order}.  So if you're the
+first element of the first list, you are at the head of the line.  On
+the other hand, if you're the first element of the second list, you
+are the very last person in line.
+
+Here is the interface for queues:
+@codeblock{
+;; A [IQ X] implements:
+
+;; head : -> X
+;; Produce the element at the head of this queue.
+;; Assume: this queue is not empty.
+
+;; deq : -> [IQ X]      (Short for "dequeue")
+;; Produces a new queue like this queue, but without 
+;; this queue's first element.
+;; Assume: this queue is not empty.
+
+;; enq : X -> [IQ X]    (Short for "enqueue")
+;; Produce new queue with given element added to the
+;; END of this queue.
+
+;; emp? : -> Boolean
+;; Is this queue empty?
+}
+
+The @r[head] and @r[deq] operations require that the queue be
+non-empty when they are used, but this can be assumed and these
+operations do not need to check for an empty queue.
+
+Further, the Registrar's office has just learned about
+@emph{invariants}, and insists on maintaining the following invariant
+about all of their queues:
+
+@centered{
+@emph{if the front of the queue is empty, the whole queue must also be empty.}
+}
+
+The Registrar's office has given you three tasks to prepare their
+Virtual Line for its launch later this semester:
+
+@itemlist[
+@item{Design an implementation of the queue data structure to the Registrar's
+  specifications.  You must maintain the invariant stated above, and
+  you should take advantage of the invariant when implementing the
+  operations.}
+@item{Unfortunately, when testing the queue, the Registrar has
+  discovered that some queues with the same elements in the same order
+  can be represented in multiple ways.  Give an example of two
+  different representations of the same queue.  Implement a
+  @r[to-list] operation which produces a list of elements going in
+  order from the front to the rear of the queue. In your tests, you
+  should show how this addresses the problem.}
+@item{The Registrar has a problem with careless data entry.  Design
+  and implement a constructor for queues which, given two input lists
+  of elements, ensures that the invariant is maintained.}
+]
