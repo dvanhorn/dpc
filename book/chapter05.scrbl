@@ -1206,57 +1206,6 @@ future.
 )
 
 
-@internal{
-
-Interfaces avoid commitments to representation choices.  So long as we
-implement the interface, we can make our own representation choices.
-
-WORLDS
-======
-
-;; A World is a (new world% Snake Food Direction ...)
-
-vs
-
-;; A World is a (new world% Snake Food).
-
-;;;;;;;;
-
-;; draw 
-
-fold over the list of segments and send the draw method to each
-segment.
-
-Shows functions and objects can fit together nicely.
-
-Writing the world
-=================
-
-to-draw : -> Scene
-
-Draw the snake and the food.
-
-We still haven't implemented food, but we know how to draw a food.  We
-just can't create a food.
-
-on-tick : -> World
-
-For the moment have it handling eating.
-
-Food
-====
-
-...
-
-
---------------
-
-Most important: designing different peices of your program independently
-
-What are the pieces?  How can they communicate?
-
-}
-
 @section{Exercises}
 
 @subsection{Zombie!}
