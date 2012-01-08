@@ -1,16 +1,16 @@
 #lang scribble/manual
-@require[(for-label class1)]
+@require[(for-label class/1)]
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class1))
+    (the-eval '(require class/1))
     the-eval))
 
 @title[#:style 'quiet]{Class 1}
 
-@defmodulelang[class1]
+@defmodulelang[class/1]
 
 @defform[(require module-name ...)]{
 Imports all the modules named @racket[module-name]s.}
@@ -33,7 +33,7 @@ Imports all the modules named @racket[module-name]s.}
                               body)])]{
 
 Defines a new class named @racket[class-name], much like as with
-@racketmodname[class0], however a class may declare @racket[super-name]
+@racketmodname[class/0], however a class may declare @racket[super-name]
 as a super class of @racket[class-name] by using @racket[(super
 super-name)].  A class may also declare to implement a number of
 interfaces using @racket[(implements interface-name ...)].
@@ -75,7 +75,7 @@ See @racket[define-class] and @racket[define-interface].}
  @defform[(new class-name arg ...)]
  @defform[(field field-name)]
  @defform[(send object message arg ...)]]]{
-These have the same meaning as in @racketmodname[class0].}
+These have the same meaning as in @racketmodname[class/0].}
 
 @defform/subs[#:literals (super)
 (define-interface interface-name 
@@ -89,11 +89,3 @@ as well as all methods declared in any of the @racket[super-interface]s.
 The @racket[super-interface]s must name previously defined interfaces.  
 }
 
-@section[#:style (list 'toc-hidden 'hidden)]{Object-oriented Universe (class 1)}
-
-@defmodule[class1/universe]
-
-@deftogether[
-[@defproc[(big-bang [obj World]) World]
- @defproc[(universe [obj Universe]) Universe]]]{
-These have the same meaning as in @racketmodname[class0/universe].}
