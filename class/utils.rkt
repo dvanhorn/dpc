@@ -2,7 +2,8 @@
 (provide indented
          exercise
          plt-filename
-         scheme-from-file)
+         scheme-from-file
+	 (rename-out [racket r]))
 (require scribble/base)
 
 (define (indented . args)
