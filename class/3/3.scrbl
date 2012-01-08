@@ -40,7 +40,7 @@ Makes all of the @r[id]s available to other modules.}
                               body)])]{
 
 Defines a new class named @racket[class-name], just as with
-@racketmodname[class2].  However, the body of each method may use
+@racketmodname[class/2].  However, the body of each method may use
 @r[set-field!] to change the value of a field.  For example.
 
 @interaction[#:eval the-eval
@@ -77,7 +77,7 @@ These have the same meaning as in @racketmodname[class/0].}
 (define-interface interface-name 
   (super super-interface) ... 
   (method-name ...))
-	      ()]{This has the same meaning as in @racketmodname[class1].}
+	      ()]{This has the same meaning as in @racketmodname[class/1].}
 
 }
 

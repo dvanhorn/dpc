@@ -1,4 +1,4 @@
-#lang class3
+#lang class/3
 (provide gzip%)
 (require file/gunzip file/gzip)
 (require (only-in racket/base open-output-bytes open-input-bytes get-output-bytes 
