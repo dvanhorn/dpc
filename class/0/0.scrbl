@@ -1,13 +1,13 @@
 #lang scribble/manual
 
-@require[(for-label class0/universe
-		    class0
+@require[(for-label class/universe
+		    class/0
 		    (prefix-in 2htdp: 2htdp/universe)
 		    (except-in 2htdp/image image?))]
 
 @title[#:style 'quiet]{Class 0}
 
-@defmodulelang[class0]
+@defmodulelang[class/0]
 
 @defform[(require module-name ...)]{
 Imports all the modules named @racket[module-name]s.}
@@ -71,7 +71,7 @@ method with the given arguments, @racket[arg]s.}
 
 @subsection[#:style 'hidden #:tag-prefix 'big-bang]{Big bang}
 
-@defmodule[class0/universe #:use-sources ("class/tick-rate.rkt")]
+@defmodule[class/universe #:use-sources ("../tick-rate.rkt")]
 
 @defproc[(big-bang [obj World]) World]{
 
@@ -85,8 +85,8 @@ default behavior.  The world @emph{must} at least provide a
 Here is an example world program that counts up from zero:
 
 @racketmod[
-class0
-(require class0/universe)
+class/0
+(require class/universe)
 (require 2htdp/image)
 
 (define-class counter-world%
@@ -148,7 +148,7 @@ class0
   
   Draw this world, producing an image.}
 
-@require[(for-label "tick-rate.rkt")]
+@require[(for-label "../tick-rate.rkt")]
 
 @defform[#:id tick-rate
 	 #:literals (send tick-rate)
@@ -219,7 +219,7 @@ default behavior.  The universe @emph{must} at least provide a
 
   Tick this universe, producing a bundle.}
 
-@require[(for-label "tick-rate.rkt")]
+@require[(for-label "../tick-rate.rkt")]
 
 @defform[#:id tick-rate
 	 #:literals (send tick-rate)
