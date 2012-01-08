@@ -1,4 +1,4 @@
-#lang class5
+#lang class/5
 
 (define posn%
   (class

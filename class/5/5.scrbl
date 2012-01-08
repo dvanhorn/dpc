@@ -1,16 +1,16 @@
 #lang scribble/manual
-@require["../utils.rkt" (for-label class5)]
+@require["../utils.rkt" (for-label class/5)]
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class5))
+    (the-eval '(require class/5))
     the-eval))
 
 @title[#:style 'quiet]{Class 5}
 
-@defmodulelang[class5]
+@defmodulelang[class/5]
 
 @defform[(require module-name ...)]{
 Imports all the modules named @racket[module-name]s.}
@@ -70,7 +70,7 @@ See @racket[define-class] and @racket[define-interface].}
  @defform[(new class-name arg ...)]
  @defform[(field field-name)]
  @defform[(send object message arg ...)]]]{
-These have the same meaning as in @racketmodname[class0].}
+These have the same meaning as in @racketmodname[class/0].}
 
 @defform/subs[#:literals (super)
 (define-interface interface-name 
@@ -81,11 +81,3 @@ These have the same meaning as in @racketmodname[class0].}
 
 }
 
-@section[#:style (list 'toc-hidden 'hidden)]{Object-oriented Universe (class 5)}
-
-@defmodule[class4/universe]
-
-@deftogether[
-[@defproc[(big-bang [obj World]) World]
- @defproc[(universe [obj Universe]) Universe]]]{
-These have the same meaning as in @racketmodname[class0/universe].}
