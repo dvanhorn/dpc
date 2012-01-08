@@ -1,16 +1,16 @@
 #lang scribble/manual
-@require["../utils.rkt" (for-label class4)]
+@require["../utils.rkt" (for-label class/4)]
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class4))
+    (the-eval '(require class/4))
     the-eval))
 
 @title[#:style 'quiet]{Class 4}
 
-@defmodulelang[class4]
+@defmodulelang[class/4]
 
 @defform[(require module-name ...)]{
 Imports all the modules named @racket[module-name]s.}
@@ -39,7 +39,7 @@ Makes all of the @r[id]s available to other modules.}
                             (define/private (method-name arg ...)
                               body)])]{
 
-The same as in @racketmodname[class3], however overriding is supported.
+The same as in @racketmodname[class/3], however overriding is supported.
 }
 
 @defform[(set-field! f e)]{
@@ -60,21 +60,14 @@ See @racket[define-class] and @racket[define-interface].}
  @defform[(new class-name arg ...)]
  @defform[(field field-name)]
  @defform[(send object message arg ...)]]]{
-These have the same meaning as in @racketmodname[class0].}
+These have the same meaning as in @racketmodname[class/0].}
 
 @defform/subs[#:literals (super)
 (define-interface interface-name 
   (super super-interface) ... 
   (method-name ...))
-	      ()]{This has the same meaning as in @racketmodname[class1].}
+	      ()]{This has the same meaning as in @racketmodname[class/1].}
 
 }
 
-@section[#:style (list 'toc-hidden 'hidden)]{Object-oriented Universe (class 4)}
 
-@defmodule[class4/universe]
-
-@deftogether[
-[@defproc[(big-bang [obj World]) World]
- @defproc[(universe [obj Universe]) Universe]]]{
-These have the same meaning as in @racketmodname[class0/universe].}
