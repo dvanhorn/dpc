@@ -1,10 +1,10 @@
 #lang racket
 
 (require 2htdp/universe)
-(require racket/class)
+(require racket/class "tick-rate.rkt")
 (provide (rename-out [big-bang* big-bang]
                      [universe* universe]))
-(provide (except-out (all-from-out 2htdp/universe) big-bang universe))
+(provide (except-out (all-from-out 2htdp/universe) big-bang universe) tick-rate)
 
 (define-syntax-rule 
   (m on-event i)

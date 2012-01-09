@@ -4,10 +4,15 @@
 
 @title[#:style 'hidden]{Object-oriented Universe}
 
-@section[#:style 'hidden #:tag-prefix 'big-bang]{Big bang}
 
-@(require (for-label "tick-rate.rkt"))
-@defmodule[class/universe #:use-sources ("class/tick-rate.rkt")]
+@(require
+  (for-label "tick-rate.rkt" "universe.rkt" 
+  class/0   
+  (prefix-in 2htdp: 2htdp/universe)
+  (except-in 2htdp/image image?)))
+@defmodule[class/universe #:use-sources ("tick-rate.rkt")]
+
+@section[#:style 'hidden #:tag-prefix 'big-bang]{Big bang}
 
 @defproc[(big-bang [obj World]) World]{
 
@@ -149,7 +154,7 @@ default behavior.  The universe @emph{must} at least provide a
   Signal that the given world has sent the given message to the
   universe, producing a bundle.}
 
-@defform[#:id on-tick 
+@defform/none[;#:id on-tick 
 	 #:literals (send on-tick) 
   (send a-universe on-tick)]{
 
@@ -157,7 +162,7 @@ default behavior.  The universe @emph{must} at least provide a
 
 @require[(for-label "tick-rate.rkt")]
 
-@defform[#:id tick-rate
+@defform/none[;#:id tick-rate
 	 #:literals (send tick-rate)
   (send a-universe tick-rate)]{
 
@@ -170,7 +175,7 @@ default behavior.  The universe @emph{must} at least provide a
 
   Signal that the given world has left the universe, producing a bundle.}
 
-@defform[#:id check-with
+@defform/none[;#:id check-with
 	 #:literals (send check-with)
   (send a-universe check-with)]{
   
@@ -183,7 +188,7 @@ default behavior.  The universe @emph{must} at least provide a
 
   Produce a string representation of the universe.}
 
-@defform[#:id state
+@defform/none[;#:id state
 	 #:literals (send state)
   (send a-universe state)]{
   

@@ -19,7 +19,7 @@ Imports all the modules named @racket[module-name]s.}
 Makes all of the @r[id]s available to other modules.}
 
 @defform/subs[#:literals (fields constructor implements define/public
-                                 define/private super check-expect)
+                                 define/private super check-expect name)
               (class 
                 name-spec
                 super-spec
@@ -60,6 +60,7 @@ Changes the value of field @r[f] to be the result of @r[e].
 @deftogether[
 [@defform[(super class-or-interface-name)]
  @defform[(implements interface-name ...)]
+ @defform[(name class-name)]
  @defform[(constructor (args ...) body)]]]{
 See @racket[define-class] and @racket[define-interface].}
 
