@@ -2,6 +2,7 @@
 (provide indented
          exercise
          plt-filename
+         dot
          scheme-from-file
 	 (rename-out [racket r]))
 (require scribble/base)
@@ -103,3 +104,6 @@
 
 (define-syntax (plt-filename stx)
   (datum->syntax #'here (getenv "CURRENT_CLASS")))
+
+(define dot
+  (racketidfont "."))

@@ -6,6 +6,8 @@
 This book introduces the fundamental elements of class-based program
 design.
 
+The book is also available in PDF form @link["dpc.pdf"]{here}.
+
 @table-of-contents[]
 
 @section[#:style 'unnumbered]{Preface}
@@ -19,7 +21,7 @@ design.
 @subsection[#:style 'unnumbered]{Acknowledgements}
 
 We are grateful to Matthias Felleisen, Dan Brown, and the Northeastern
-students we had the privilege of teaching in Spring 2011.
+students we have had the privilege of teaching in 2011 and 2012.
 
 @include-section["chapter01.scrbl"]
 @include-section["chapter02.scrbl"]

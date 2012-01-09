@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "../web/utils.rkt"
+@(require "../class/utils.rkt"
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length
 				numerator denominator))

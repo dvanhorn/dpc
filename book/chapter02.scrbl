@@ -1,7 +1,6 @@
 #lang scribble/manual
 @(require scribble/eval
-	  "../web/utils.rkt"
-	  #;"utils.rkt"
+	  "../class/utils.rkt"
           racket/sandbox
   	  (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/0 define-struct ...))
