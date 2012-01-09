@@ -16,7 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec12"]{Exam Review}
+@title{Exam Review}
 
 @section{Problem 1}
 

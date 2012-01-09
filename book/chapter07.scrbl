@@ -5,10 +5,11 @@
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
-@title[#:tag "lec07"]{Delegation}
-
+@title[#:tag "chapter:delegation"]{Delegation}
 
 @section{New language features}
+
+And here.
 
 @subsection{Interface intheritance}
 

@@ -7,7 +7,7 @@
 	  (for-label (only-in test-engine/racket-tests check-expect))
 	  (for-label class/universe))
 
-@title[#:tag "lec21"]{Under the Hood: Implementing OO}
+@title{Under the Hood: Implementing OO}
 
 @section{Pulling back the veil from object-oriented programming}
 

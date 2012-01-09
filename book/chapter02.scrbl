@@ -14,7 +14,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec02"]{Designing Classes}
+@title{Designing Classes}
 
 
 @;section{Designing Classes}

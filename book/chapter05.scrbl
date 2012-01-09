@@ -14,7 +14,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec05"]{Larger system design: Snakes on a plane}
+@title{Larger system design: Snakes on a plane}
 
 
 @section[#:tag-prefix "lec05"]{Questions and answers}

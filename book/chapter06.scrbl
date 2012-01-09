@@ -5,7 +5,7 @@
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
-@title[#:tag "lec06"]{Universe}
+@title{Universe}
 
 @section{A look at the Universe API}
 

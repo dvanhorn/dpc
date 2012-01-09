@@ -14,7 +14,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec04"]{Inheritance}
+@title{Inheritance}
 
 @section{Method inheritance with binary trees}
 

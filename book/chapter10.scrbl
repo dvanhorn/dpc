@@ -16,7 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec09"]{Constructors}
+@title{Constructors}
 
 @section{Canonical forms}
 

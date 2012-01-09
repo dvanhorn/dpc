@@ -16,7 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec18"]{Overriding}
+@title{Overriding}
 
 @verbatim|{
 Is the test really on the 22nd? -- yes.

@@ -6,7 +6,7 @@
 	  (for-label (only-in test-engine/racket-tests check-expect))
 	  (for-label class/universe))
 
-@title[#:tag "lec08"]{Abstraction, Invariants, Testing}
+@title{Abstraction, Invariants, Testing}
 
 @section{New language features: @r[check-expect] in new places}
 

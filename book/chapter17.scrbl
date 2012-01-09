@@ -16,7 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec19"]{Equality}
+@title[#:tag "chapter:equality"]{Equality}
 
 
 @section{Equality}

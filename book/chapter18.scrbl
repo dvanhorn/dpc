@@ -16,7 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title[#:tag "lec20"]{More about Equality}
+@title{More about Equality}
 
 @section[#:tag "lec20-announce"]{Announcements}
 
