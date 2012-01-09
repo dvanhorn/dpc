@@ -10,7 +10,7 @@
   class/0   
   (prefix-in 2htdp: 2htdp/universe)
   (except-in 2htdp/image image?)))
-@defmodule[class/universe #:use-sources ("tick-rate.rkt")]
+@defmodule[class/universe #:use-sources ()]
 
 @section[#:style 'hidden #:tag-prefix 'big-bang]{Big bang}
 
