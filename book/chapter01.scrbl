@@ -1,6 +1,6 @@
 #lang scribble/manual
 @(require scribble/eval
-	  "utils.rkt"
+	  class/utils
           racket/sandbox
           #;(for-label lang/htdp-intermediate-lambda)
   	  (for-label (only-in lang/htdp-intermediate-lambda define-struct))
