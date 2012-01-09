@@ -64,7 +64,7 @@ It's a shortcoming of our documentation system that we can't define
 @racket[ROCKET] to be the rocket image directly, but as you can see
 this did the right thing:
 
-@(the-eval '(define ROCKET (bitmap "../class/0/rocket.png")))
+@(the-eval `(define ROCKET (bitmap ,(string-append (path->string (collection-path "class/0")) "/rocket.png"))))
 @(the-eval '(define WIDTH 100))
 @(the-eval '(define HEIGHT 300))
 @(the-eval '(define MT-SCENE (empty-scene WIDTH HEIGHT)))
