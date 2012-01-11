@@ -1,9 +1,11 @@
-all: dpc.pdf dpc-2up.pdf dpc.html
+all: class dpc.pdf dpc-2up.pdf dpc.html
 
 scrbls := $(wildcard *.scrbl)
 
-dpc.tex: $(scrbls)
+class:
 	raco setup class
+
+dpc.tex: $(scrbls)
 	env STUDENTS=1 raco make dpc.scrbl
 	env STUDENTS=1 raco scribble --latex \
 		--prefix dpc-prefix.tex \
@@ -23,4 +25,6 @@ clean:
 	-rm *~ *log *aux *out *toc pict*png
 	-rm -rf compiled
 	-rm dpc.tex
+	-rm racket.css scribble.css scribble-style.css scribble-common.js
+
 
