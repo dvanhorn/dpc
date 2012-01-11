@@ -3,6 +3,7 @@ all: dpc.pdf dpc-2up.pdf dpc.html
 scrbls := $(wildcard *.scrbl)
 
 dpc.tex: $(scrbls)
+	raco setup class
 	env STUDENTS=1 raco make dpc.scrbl
 	env STUDENTS=1 raco scribble --latex \
 		--prefix dpc-prefix.tex \
