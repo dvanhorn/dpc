@@ -20,7 +20,7 @@
     the-eval))
 
 
-@title{Objects are Function plus Data}
+@title{Objects = Function + Data}
 
 @section{Functional rocket}
 
