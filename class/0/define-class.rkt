@@ -2,7 +2,11 @@
 (provide (all-defined-out))
 (provide send define/public define/private this)
 
-(require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
+(require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define))
+         (prefix-in isl+: (only-in "../test-engine/racket-tests.rkt"
+                                   check-expect check-within 
+                                   check-error check-member-of
+                                   check-range)))
 
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
@@ -33,19 +37,31 @@
     (pattern ((~or define/public define/private) 
               ((~var f (member-name names)) x:id ...) e:expr)))
   
-  (syntax-parse stx #:literals (fields)
+  (syntax-parse stx #:literals (super implements fields 
+                                      isl+:check-expect 
+                                      isl+:check-within
+                                      isl+:check-error
+                                      isl+:check-member-of
+                                      isl+:check-range)
     [(define-class class%      
        (~optional (fields (~var fld (member-name null)) ...)
                   #:defaults ([(fld 1) null]))
-       (~var <definition> (member-def (syntax->list #'(fld ...))))
+       (~or (~var <definition> (member-def (syntax->list #'(fld ...))))
+            (~and ce (~or (isl+:check-expect <act> <exp>)
+                          (isl+:check-within <act> <exp> <rng>)
+                          (isl+:check-error <act> <msg>)
+                          (isl+:check-error <act>)
+                          (isl+:check-member-of <act> <exp0> <exp1> ...)
+                          (isl+:check-range <act> <lo> <hi>))))
        ...)
      #:with -class% (datum->syntax #f (syntax-e #'class%))
      (with-syntax ([field (datum->syntax stx 'field)]
                    [(the-fld ...)
                     (generate-temporaries (syntax (fld ...)))])
        (quasisyntax
-        (begin
-          (define-syntax class% (class-name #'-class%))
+        (begin          
+          ce ...
+          (define-syntax class% (class-name #'-class%))          
           (r:define -class%
             (r:class/derived #,stx (class% r:object% 
                                            (r:writable<%>
