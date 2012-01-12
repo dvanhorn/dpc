@@ -23,9 +23,9 @@ One of the most important lessons of @emph{How to Design Programs} is
 that the structure of code follows the structure of the data it
 operates on, which means that the structure of your code can be
 derived @emph{systematically} from your data definitions.  In this
-lecture, we see how to apply the design recipe to design data
+chapter, we see how to apply the design recipe to design data
 represented using classes as well as operations implemented as methods
-in these classes. 
+in these classes.
 
 @section{Atomic and Compound Data}
 
