@@ -685,7 +685,7 @@ class/0
 			       (new complex% -7 22))
 			 (send (send c2+3 div c4+5) =?
 			       (new complex% 23/41 2/41))
-			 (send (new complex% 3 4) mag)]}
- ]
+			 (send (new complex% 3 4) mag)]
+ 
 
 
