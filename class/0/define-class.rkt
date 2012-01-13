@@ -1,4 +1,7 @@
 #lang racket
+;; TODO after 2012: Kill define/public, define/private.
+;; TODO after 2012: Kill function application syntax for method calls
+;; within method definitions and bring back only after inheritance.
 (provide (all-defined-out))
 (provide send define/public define/private this)
 
@@ -27,17 +30,26 @@
              (eq? (syntax-e #'name) 'field) 
              "class members may not be named `field'" 
              #:fail-when 
+             (eq? (syntax-e #'name) 'define) 
+             "class members may not be named `define'"
+             #:fail-when 
              (eq? (syntax-e #'name) 'define/public) 
              "class members may not be named `define/public'"
+             #:fail-when 
+             (eq? (syntax-e #'name) 'define/private) 
+             "class members may not be named `define/private'"
              #:fail-when 
              (memf (λ (id) (eq? (syntax-e id) (syntax-e #'name))) names)
              "duplicate class member name"))
   (define-syntax-class (member-def names)
-    #:literals (define/public define/private)
+    #:literals (define define/public define/private)
     (pattern ((~or define/public define/private) 
-              ((~var f (member-name names)) x:id ...) e:expr)))
+              ((~var f (member-name names)) x:id ...) e:expr)
+             #:with def this-syntax)
+    (pattern (define ((~var f (member-name names)) x:id ...) e:expr)
+             #:with def #'(define/public (f x ...) e)))
   
-  (syntax-parse stx #:literals (super implements fields 
+  (syntax-parse stx #:literals (super #;implements fields 
                                       isl+:check-expect 
                                       isl+:check-within
                                       isl+:check-error
@@ -93,7 +105,7 @@
                 (fprintf p ")"))
                (define/public (custom-display p) (custom-write p))
 	       
-               <definition>
+               <definition>.def
                ...))))))]))
 
 (define-syntax (new stx)

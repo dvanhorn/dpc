@@ -1,7 +1,8 @@
 #lang scribble/manual
 
 @require[(for-label class/universe
-		    class/0
+		    (except-in class/0 check-expect)
+		    (only-in lang/htdp-intermediate-lambda check-expect)
 		    (prefix-in 2htdp: 2htdp/universe)
 		    (except-in 2htdp/image image?))]
 
@@ -9,60 +10,62 @@
 
 @defmodulelang[class/0]
 
+The @racket[class/0] language is the most basic version of the class
+system.  In essence, it extends the Intermediate Student Language
+(plus Lambda) with the ability to define classes, construct objects
+that are instances of classes, and to send such objects messages to
+call methods.
+
 @defform[(require module-name ...)]{
 Imports all the modules named @racket[module-name]s.}
 
-@defform/subs[#:literals (fields define/public define/private)
+@defform/subs[#:literals (fields define)
 	      (define-class class-name 
-                 fields-spec
-		 method-spec ...)
-	      ([fields-spec code:blank
-			    (fields field-name ...)]
-	       [method-spec (define/public (method-name arg ...)
-			      body)
-			    (define/private (method-name arg ...)
-			      body)])]{
+                 field-names
+		 method-or-test ...)
+	      ([field-names code:blank
+                            (fields field-name ...)]
+               [method-or-test method test]
+	       [method (define (method-name arg ...) body)])]{
 
 Defines a new class named @racket[class-name] with fields
 @racket[field-name]s and methods @racket[method-name]s.
 The class has one additional method for each field name
 @racket[field-name], which access the field values.
 
-Methods defined with @racket[define/public] are accessible both inside
-and outside of the class definition, while methods defined with
-@racket[define/private] are only accessible within the class
-definition.
+A method is defined with @racket[(define (method-name arg ...) body)].
+Such a definition extends the set of messages every instance of
+@racket[class-name] understands.  When an object is sent a
+@racket[method-name] message and some values, the @racket[body] of the
+method definition is evaluated with the given values for the
+@racket[arg]s.  Within a method, @racket[this] refers to the current
+object, i.e. the object whose method was called, and @racket[(field
+field-name)] refers to the value of the field named
+@racket[field-name] of the current object.
 
-To refer to a field within the class definition, use @racket[(field
-field-name)].
+A @racket[test] can be any form of @racket[check-expect].
+Conceptually, each @racket[test] is lifted out of the class definition
+and does not exist inside any instance of @racket[class-name],
+therefore @racket[test]s cannot reference fields using @racket[field]
+or use @racket[this].}
 
-Methods may be invoked within the class definition using the function
-call syntax @racket[(method-name arg #,(racketidfont "..."))], but
-must be invoked with @racket[send] from oustide the class definition
-as in @racket[(send object method-name arg #,(racketidfont "..."))].
+@defform[(new class-name arg ...)]{ 
 
-The name @racket[this] is implicitly bound to the current object,
-i.e. the object whose method was called.
+Constructs an object that is an instance of @racket[class-name] with
+with @racket[arg]s as the values for the fields.}
 
-To construct an instance of @racket[class-name], use @racket[(new
-class-name arg #,(racketidfont "..."))] with as many arguments as there are fields in the
-class.}
+@defform[(send object method-name arg ...)]{ 
+
+Sends @racket[object] the message @racket[method-name] with arguments
+@racket[arg]s, that is, call @racket[object]'s method named
+@racket[method-name] with the given arguments, @racket[arg]s.}
+
 
 @deftogether[
 [@defidform[this]
  @defform[(fields id ...)]
- @defform[(define/public (method-name id ...) body)]
- @defform[(define/private (method-name id ...) body)]]]{
-See @racket[define-class].}
+ @defform[(field field-name)]]]{
 
-@defform[(new class-name arg ...)]{Creates an object which is an instance of
-@racket[class-name] with @racket[arg]s as the values for the fields.}
+See @racket[define-class].  These forms are not allowed outside of a
+method definition.}
 
-@defform[(field field-name)]{References the value of the field named
-@racket[field-name].}
-
-@defform[(send object message arg ...)]{ 
-
-Send @racket[object] the message @racket[message] with arguments
-@racket[arg]s, that is, invoke @racket[object]'s @racket[message]
-method with the given arguments, @racket[arg]s.}
