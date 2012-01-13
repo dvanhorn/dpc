@@ -118,19 +118,19 @@ implementation of the @racket[next] method, producing the appropriate
   (define-class red%
     ;; -> Light
     ;; Produce the next traffic light
-    (define/public (next)
+    (define (next)
       (new green%)))
 
   (define-class green%
     ;; -> Light
     ;; Produce the next traffic light
-    (define/public (next)
+    (define (next)
       (new yellow%)))
 
   (define-class yellow%
     ;; -> Light
     ;; Produce the next traffic light
-    (define/public (next)
+    (define (next)
       (new red%)))
 
   (check-expect (send (new red%) next) (new green%))
@@ -205,7 +205,7 @@ The template for @racket[leaf%]:
 (racketblock
 ;; -> Number
 ;; count the number of numbers in this leaf
-(define/public (count)
+(define (count)
  ... (field number) ...)
 )
 
@@ -214,7 +214,7 @@ The template for @racket[node%]:
 (racketblock
 ;; -> Number
 ;; count the number of numbers in this node
-(define/public (count)
+(define (count)
  ... (field number) ...
  (send (field left) count) ...
  (send (field right) count) ...)
@@ -229,7 +229,7 @@ For @racket[leaf%]:
 (racketblock
 ;; -> Number
 ;; count the number of numbers in this leaf
-(define/public (count)
+(define (count)
   1)
 )
 
@@ -238,7 +238,7 @@ For @racket[node%]:
 (racketblock
 ;; -> Number
 ;; count the number of numbers in this node
-(define/public (count)
+(define (count)
   (+ 1
      (send (field left) count)
      (send (field right) count)))
@@ -253,7 +253,7 @@ the top.  Here is a straightforward implementation for @racket[leaf%]:
 (racketblock
 ;; Number -> BT
 ;; double the leaf and put the number on top
-(define/public (double n)
+(define (double n)
   (new node%
        n
        (new leaf% (field number))
@@ -269,7 +269,7 @@ identifier @racket[this].  We can thus write the method as:
 (racketblock
 ;; Number -> BT
 ;; double the leaf and put the number on top
-(define/public (double n)
+(define (double n)
   (new node% n this this))
 )
 
@@ -282,7 +282,7 @@ this in a subsequent class.}
 (racketblock
 ;; Number -> BT
 ;; double the node and put the number on top
-(define/public (double n)
+(define (double n)
   (new node% n this this))
 )
 
@@ -299,24 +299,24 @@ class/0
   (fields number)
   ;; -> Number
   ;; count the number of numbers in this leaf
-  (define/public (count)
+  (define (count)
   1)
   ;; Number -> BT
   ;; double the leaf and put the number on top
-  (define/public (double n)
+  (define (double n)
     (new node% n this this)))
 
 (define-class node%
   (fields number left right)
   ;; -> Number
   ;; count the number of numbers in this node
-  (define/public (count)
+  (define (count)
     (+ 1
        (send (field left) count)
        (send (field right) count)))
   ;; Number -> BT
   ;; double the node and put the number on top
-  (define/public (double n)
+  (define (double n)
     (new node% n this this)))
 
 (define ex1 (new leaf% 7))

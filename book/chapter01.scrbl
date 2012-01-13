@@ -71,9 +71,9 @@ this did the right thing:
 @(the-eval
 '(define-class world% 
   (fields height)
-  (define/public (on-tick)
+  (define (on-tick)
     (new world% (add1 (field height))))
-  (define/public (to-draw)
+  (define (to-draw)
     (place-image ROCKET
     		 (/ WIDTH 2)
 		 (- HEIGHT (field height))
@@ -147,7 +147,7 @@ This suggests that we can now re-write the data definition for Worlds:
 ]
 
 To add functionality to our class, we define @emph{methods} using the
-@racket[define/public] form.  In this case, we want to add two methods
+@racket[define] form.  In this case, we want to add two methods
 @racket[on-tick] and @racket[to-draw]: 
 
 @racketblock[ 
@@ -157,10 +157,10 @@ To add functionality to our class, we define @emph{methods} using the
   (fields height)
 
   @code:comment{on-tick : ...}
-  (define/public (on-tick ...) ...)
+  (define (on-tick ...) ...)
 
   @code:comment{to-draw : ...}
-  (define/public (to-draw ...) ...))
+  (define (to-draw ...) ...))
 ]
 
 We will return to the contracts and code, but now that we've seen how
@@ -203,10 +203,10 @@ That leads us to the following method signatures:
   (fields height)
 
   @code:comment{on-tick : -> World}
-  (define/public (on-tick) ...)
+  (define (on-tick) ...)
 
   @code:comment{to-draw : -> Scene}
-  (define/public (to-draw) ...))
+  (define (to-draw) ...))
 ]
 
 Since we have contracts and have seen how to invoke methods, we can
@@ -231,11 +231,11 @@ Finally, we can write the code from our methods:
   (fields height)
 
   @code:comment{on-tick : -> World}
-  (define/public (on-tick)
+  (define (on-tick)
     (new world% (add1 (field height))))
 
   @code:comment{to-draw : -> Scene}
-  (define/public (to-draw)
+  (define (to-draw)
     (place-image ROCKET
     		 (/ WIDTH 2)
 		 (- HEIGHT (field height))
@@ -298,11 +298,11 @@ class/0
   (fields height)
 
   @code:comment{on-tick : -> World}
-  (define/public (on-tick)
+  (define (on-tick)
     (new world% (add1 (field height))))
 
   @code:comment{to-draw : -> Scene}
-  (define/public (to-draw)
+  (define (to-draw)
     (place-image ROCKET
     		 (/ WIDTH 2)
 		 (- HEIGHT (field height))
@@ -389,7 +389,7 @@ definition as follows:
 (define-class world%
   ...
   ;; on-tick : -> World 
-  (define/public (on-tick)
+  (define (on-tick)
     (new world%
          (+ (field velocity) (field height))
          (cond [(<= (field height) 0) (abs (field velocity))]
@@ -417,14 +417,14 @@ class/0
   (fields height velocity)
   
   ;; on-tick : -> World 
-  (define/public (on-tick)
+  (define (on-tick)
     (new world%
          (+ (field velocity) (field height))
          (cond [(<= (field height) 0) (abs (field velocity))]
                [else (field velocity)])))
   
   ;; to-draw : -> Scene
-  (define/public (to-draw)
+  (define (to-draw)
     (place-image ROCKET
                  (/ WIDTH 2) 
                  (- HEIGHT (field height))
@@ -472,7 +472,7 @@ class/0
   (fields height velocity moon-height)
   
   ;; on-tick : -> World 
-  (define/public (on-tick)
+  (define (on-tick)
     (new world%
          (+ (field velocity) (field height))
          (cond [(= (field height) 0) (abs (field velocity))]
@@ -480,7 +480,7 @@ class/0
          (modulo (+ 5 (field moon-height)) 200)))
   
   ;; to-draw : -> Scene
-  (define/public (to-draw)
+  (define (to-draw)
     (place-image MOON
                  (/ WIDTH 3) 
                  (field moon-height)
@@ -591,28 +591,28 @@ class/0
 	       (fields real imag)                 
 	       (define/private (n) (+ (field real) (* +i (field imag))))
 	       
-	       (define/public (=? c)
+	       (define (=? c)
 		 (= (n) (send c to-number)))
 	       
-	       (define/public (plus c)
+	       (define (plus c)
 		 (from-number (+ (n) (send c to-number))))
 	       
-	       (define/public (minus c)
+	       (define (minus c)
 		 (from-number (- (n) (send c to-number))))
 	       
-	       (define/public (times c)
+	       (define (times c)
 		 (from-number (* (n) (send c to-number))))
 	       
-	       (define/public (div c)
+	       (define (div c)
 		 (from-number (/ (n) (send c to-number))))
 	       
-	       (define/public (sq)
+	       (define (sq)
 		 (from-number (sqr (n))))
 	       
-	       (define/public (sqroot)
+	       (define (sqroot)
 		 (from-number (sqrt (n))))
 	       
-	       (define/public (mag)
+	       (define (mag)
 		 (magnitude (n)))
 
 	       (define/private (from-number c)
@@ -620,7 +620,7 @@ class/0
 		      (real-part c)
 		      (imag-part c)))
 	       
-	       (define/public (to-number) (n)))))
+	       (define (to-number) (n)))))
         
         Supposing your language was impoverished and didn't support
         complex numbers, you should be able to build them yourself 

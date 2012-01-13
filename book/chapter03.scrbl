@@ -48,7 +48,7 @@ A: You won't be able to represent the empty list with a value that
  @racketblock[
  (define-class cons%
    (fields first rest)
-   (define/public (method-template ...)
+   (define (method-template ...)
      (field first) ...
      (send (field rest) method-template ...)))
 ]
