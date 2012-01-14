@@ -2,9 +2,8 @@
 @(require scribble/eval
 	  class/utils
           racket/sandbox
-          #;(for-label lang/htdp-intermediate-lambda)
-  	  (for-label (only-in lang/htdp-intermediate-lambda define-struct))
-          (for-label (except-in class/0 define-struct))
+          (for-label (except-in class/0 check-expect))
+	  (for-label (only-in lang/htdp-intermediate-lambda check-expect))
 	  (for-label class/universe))
 
 @(define the-eval
@@ -20,72 +19,78 @@
     the-eval))
 
 
-@title{Objects = Function + Data}
+@(the-eval 
+  `(begin 
+     (define ROCKET (bitmap ,(string-append (path->string (collection-path "class/0")) "/rocket.png")))
+     (define WIDTH 100)
+     (define HEIGHT 300)
+     (define MT-SCENE (empty-scene WIDTH HEIGHT))
+     (define-class world% 
+       (fields height)
+       (define (on-tick)
+	 (new world% (add1 (field height))))
+       (define (to-draw)
+	 (place-image ROCKET
+		      (/ WIDTH 2)
+		      (- HEIGHT (field height))
+		      MT-SCENE)))))
 
-@section{Functional rocket}
+@title{Objects = Data + Function}
 
-Here's a review of the first program we wrote last semester.  It's the
-program to launch a rocket, written in the Beginner Student Language:
+One of the key concepts behind so-called @emph{object-oriented
+programming} (OOP) is the notion of an @emph{object}.  An object is a
+new kind of value that can, as a first cut, be understood as a pairing
+together of two familiar concepts: data and function.  
 
-@#reader scribble/comment-reader
-(racketblock
-  (require 2htdp/image)
-  (require 2htdp/universe)
+@itemlist[
+@item{@bold{An object is like a structure} in that it has a fixed
+number of fields, thus an object (again, like a structure) can
+represent compound data.  But unlike a structure, an object contains
+not just data, but @emph{functionality} too;}
 
-  ;; Use the rocket key to insert the rocket here.
-  (define ROCKET (bitmap class/0/rocket.png))
+@item{@bold{An object is like a (set of) function(s)} in that it has
+behavior---it @emph{computes}; it is not just inert data.}]
 
-  (define WIDTH 100)
-  (define HEIGHT 300)
-  (define MT-SCENE (empty-scene WIDTH HEIGHT))
-  
-  ;; A World is a Number.
-  ;; Interp: distance from the ground in AU.
+This suggests that objects are a natural fit for well-designed
+programs since good programs are organized around data definitions and
+functions that operate over such data.  An object, in essence,
+packages these two things together into a single programming
+apparatus.  This has two important consequences:
 
-  ;; render : World -> Scene
-  (check-expect (render 0) 
-		(place-image ROCKET (/ WIDTH 2) HEIGHT MT-SCENE))
-  (define (render h)
-    (place-image ROCKET
-		 (/ WIDTH 2)
-		 (- HEIGHT h)
-		 MT-SCENE))
+@itemlist[#:style 'ordered
 
-  ;; next : World -> World
-  (check-expect (next 0) 7)
-  (define (next h)
-    (+ h 7))
+@item{@bold{You already know how to design programs oriented around
+objects.}
 
-  (big-bang 0
-	    (on-tick next)
-	    (to-draw render))
-)
+Since objects are just the combination of two familiar concepts that
+you already use to design programs, you already know how to design
+programs around objects, even if you never heard the term "object"
+before.  In short, the better you are at programming with functions,
+the better you will be at programming with objects.}
 
-It's a shortcoming of our documentation system that we can't define
-@racket[ROCKET] to be the rocket image directly, but as you can see
-this did the right thing:
+@item{@bold{Objects enable new kinds of abstraction and composition.}
 
-@(the-eval `(define ROCKET (bitmap ,(string-append (path->string (collection-path "class/0")) "/rocket.png"))))
-@(the-eval '(define WIDTH 100))
-@(the-eval '(define HEIGHT 300))
-@(the-eval '(define MT-SCENE (empty-scene WIDTH HEIGHT)))
-@(the-eval
-'(define-class world% 
-  (fields height)
-  (define (on-tick)
-    (new world% (add1 (field height))))
-  (define (to-draw)
-    (place-image ROCKET
-    		 (/ WIDTH 2)
-		 (- HEIGHT (field height))
-		 MT-SCENE))))
+Although the combination of data and function may seem simple, objects
+enable new forms of abstraction and composition.  That is, objects
+open up new approaches to the construction of computations.  By
+studying these new approaches, we can distill new design principles.
+Because we understand objects are just the combination of data and
+function, we can understand how all of these principles apply in the
+familiar context of programming with functions.  In short, the better
+you are at programming with objects, the better you will be at
+programming with functions.}]
 
-@interaction[#:eval the-eval
-ROCKET
-]
+In this chapter, we will explore the basic concepts of objects by
+revisiting a familiar program, first organized around data and
+functions and then again organized around objects.
 
-You can use the same trick, or you can copy this rocket image and
-paste it directly into DrRacket.
+
+@;A set of objects is defined by a @emph{class}, which determines the
+@;number and name of fields and the name and meaning of each behavior
+@;that every object is the set contains.  By analogy, while an object is
+@;like a structure, a class definition is like a structure definition.
+
+@include-section{sec-functional-rocket.scrbl}
 
 @section{Object-oriented rocket}
 
@@ -95,13 +100,12 @@ representing the height of the rocket, and the @emph{functions} that
 operate over that class of data, in this case @racket[next] and
 @racket[render].
 
-This should be old-hat programming by now.  But in this class, we are
+This should be old-hat programming by now.  But in this book, we are
 going to explore a new programming paradigm that is based on
-@emph{objects}.  Objects are an old programming concept that first
-appeared in the 1950s just across the Charles river.  As a first
-approximation, you can think of an @emph{object} as the coupling
-together of the two significant components of our program (data and
-functions) into a single entity: an object.
+@emph{objects}.  As a first approximation, you can think of an
+@emph{object} as the coupling together of the two significant
+components of our program (data and functions) into a single entity:
+an object.
 
 Since we are learning a new programming language, you will no longer
 be using BSL and friends.  Instead, select
@@ -514,7 +518,24 @@ class/0
 (big-bang (new world% HEIGHT -1 100))
 )
 
-@section{Exercise}
+@section{A Brief History of Objects}
+
+Objects are an old programming concept that first appeared in the late
+1950s and early 1960s just across the Charles river at MIT in the AI
+group that was developing Lisp.  Simula 67, a language developed in
+Norway as a successor to Simula I, introduced the notion of classes.
+In the 1970s, Smalltalk was developed at Xerox PARC by Alan Kay and
+others.  Smalltalk and Lisp and their descendants have influenced each
+other ever since.  Object-oriented programming became one of the
+predominant programming styles in the 1990s.  This coincided with the
+rise of graphical user interfaces (GUIs), which objects model well.
+The use of object and classes to organize interactive, graphical
+programs continues today with libraries such as the Cocoa framework
+for Mac OS X.
+
+
+
+@section{Exercises}
 
 @subsection[#:tag "assign_complex"]{Complex, with class.}
        
