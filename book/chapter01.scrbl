@@ -27,38 +27,39 @@
 Here's a review of the first program we wrote last semester.  It's the
 program to launch a rocket, written in the Beginner Student Language:
 
-@racketblock[
-(require 2htdp/image)
-(require 2htdp/universe)
+@#reader scribble/comment-reader
+(racketblock
+  (require 2htdp/image)
+  (require 2htdp/universe)
 
-@code:comment{Use the rocket key to insert the rocket here.}
-(define ROCKET (bitmap class/0/rocket.png))
+  ;; Use the rocket key to insert the rocket here.
+  (define ROCKET (bitmap class/0/rocket.png))
 
-(define WIDTH 100)
-(define HEIGHT 300)
-(define MT-SCENE (empty-scene WIDTH HEIGHT))
+  (define WIDTH 100)
+  (define HEIGHT 300)
+  (define MT-SCENE (empty-scene WIDTH HEIGHT))
+  
+  ;; A World is a Number.
+  ;; Interp: distance from the ground in AU.
 
-@code:comment{A World is a Number.}
-@code:comment{Interp: distance from the ground in AU.}
+  ;; render : World -> Scene
+  (check-expect (render 0) 
+		(place-image ROCKET (/ WIDTH 2) HEIGHT MT-SCENE))
+  (define (render h)
+    (place-image ROCKET
+		 (/ WIDTH 2)
+		 (- HEIGHT h)
+		 MT-SCENE))
 
-@code:comment{render : World -> Scene}
-(check-expect (render 0) 
-	      (place-image ROCKET (/ WIDTH 2) HEIGHT MT-SCENE))
-(define (render h)
-  (place-image ROCKET
-               (/ WIDTH 2)
-               (- HEIGHT h)
-               MT-SCENE))
+  ;; next : World -> World
+  (check-expect (next 0) 7)
+  (define (next h)
+    (+ h 7))
 
-@code:comment{next : World -> World}
-(check-expect (next 0) 7)
-(define (next h)
-  (+ h 7))
-
-(big-bang 0
-          (on-tick next)
-          (to-draw render))
-]
+  (big-bang 0
+	    (on-tick next)
+	    (to-draw render))
+)
 
 It's a shortcoming of our documentation system that we can't define
 @racket[ROCKET] to be the rocket image directly, but as you can see
@@ -141,27 +142,28 @@ called (or @emph{invoked}) by using the @racket[send] form like so:
 (send (new world% 7) height)]
 
 This suggests that we can now re-write the data definition for Worlds:
-@racketblock[
-@code:comment{A World is a (new world% Number).}
-@code:comment{Interp: height represents distance from the ground in AU.}
-]
+@#reader scribble/comment-reader
+(racketblock
+  ;; A World is a (new world% Number).
+  ;; Interp: height represents distance from the ground in AU.
+)
 
 To add functionality to our class, we define @emph{methods} using the
 @racket[define] form.  In this case, we want to add two methods
 @racket[on-tick] and @racket[to-draw]: 
+@#reader scribble/comment-reader
+(racketblock
+  ;; A World is a (new world% Number).
+  ;; Interp: height represents distance from the ground in AU.
+  (define-class world% 
+    (fields height)
 
-@racketblock[ 
-@code:comment{A World is a (new world% Number).}  
-@code:comment{Interp: height represents distance from the ground in AU.}
-(define-class world% 
-  (fields height)
+    ;; on-tick : ...
+    (define (on-tick ...) ...)
 
-  @code:comment{on-tick : ...}
-  (define (on-tick ...) ...)
-
-  @code:comment{to-draw : ...}
-  (define (to-draw ...) ...))
-]
+    ;; to-draw : ...
+    (define (to-draw ...) ...))
+)
 
 We will return to the contracts and code, but now that we've seen how
 to define methods, let's look at how to @emph{invoke} them in order to
@@ -185,9 +187,11 @@ When we designed the functional analogues of these methods, the
 functions took as input the world on which they operated, i.e. they
 had contracts like:
 
-@racketblock[
-@code:comment{tick : World -> World}
-@code:comment{render : World -> Scene}]
+@#reader scribble/comment-reader
+(racketblock
+  ;; tick : World -> World
+  ;; render : World -> Scene
+)
 
 But in an object, the data and functions are packaged together.
 Consequently, the method does not need to take the world input; that
@@ -196,50 +200,54 @@ accessible using the @racket[field] form.
 
 That leads us to the following method signatures:
 
-@racketblock[
-@code:comment{A World is a (new world% Number).}  
-@code:comment{Interp: height represents distance from the ground in AU.}
-(define-class world% 
-  (fields height)
+@#reader scribble/comment-reader
+(racketblock
+  ;; A World is a (new world% Number).
+  ;; Interp: height represents distance from the ground in AU.
+  (define-class world% 
+    (fields height)
 
-  @code:comment{on-tick : -> World}
-  (define (on-tick) ...)
+    ;; on-tick : -> World
+    (define (on-tick) ...)
 
-  @code:comment{to-draw : -> Scene}
-  (define (to-draw) ...))
-]
+    ;; to-draw : -> Scene
+    (define (to-draw) ...))
+)
 
 Since we have contracts and have seen how to invoke methods, we can
 now formulate test cases:
 
-@racketblock[
-(check-expect (send (new world% 7) on-tick)
-	      (new world% 8))
-(check-expect (send (new world% 7) to-draw)
-	      (place-image ROCKET
-	      		   (/ WIDTH 2)
-			   (- HEIGHT 7)
-			   MT-SCENE))
-]
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (send (new world% 7) on-tick)
+		(new world% 8))
+  (check-expect (send (new world% 7) to-draw)
+		(place-image ROCKET
+			     (/ WIDTH 2)
+			     (- HEIGHT 7)
+			     MT-SCENE))
+)
 
 Finally, we can write the code from our methods:
 
-@racketblock[
-@code:comment{A World is a (new world% Number).}  
-@code:comment{Interp: height represents distance from the ground in AU.}
-(define-class world% 
-  (fields height)
+@#reader scribble/comment-reader
+(racketblock
+  ;; A World is a (new world% Number).
+  ;; Interp: height represents distance from the ground in AU.
+  (define-class world% 
+    (fields height)
 
-  @code:comment{on-tick : -> World}
-  (define (on-tick)
-    (new world% (add1 (field height))))
+    ;; on-tick : -> World
+    (define (on-tick)
+      (new world% (add1 (field height))))
 
-  @code:comment{to-draw : -> Scene}
-  (define (to-draw)
-    (place-image ROCKET
-    		 (/ WIDTH 2)
-		 (- HEIGHT (field height))
-		 MT-SCENE)))]
+    ;; to-draw : -> Scene
+    (define (to-draw)
+      (place-image ROCKET
+		   (/ WIDTH 2)
+		   (- HEIGHT (field height))
+		   MT-SCENE)))
+)
 
 At this point, we can construct @racket[world%] objects and invoke
 methods.
@@ -280,44 +288,48 @@ So to launch our rocket, we simply do the following:
 
 Our complete program is:
 
-@racketmod[
-class/0
-(require 2htdp/image)
-(require class/universe)
+@#reader scribble/comment-reader
+(racketmod
+  class/0
+  (require 2htdp/image)
+  (require class/universe)
+  
+  ;; Use the rocket key to insert the rocket here.
+  (define ROCKET (bitmap class/0/rocket.png))
+  
+  (define WIDTH 100)
+  (define HEIGHT 300)
+  (define MT-SCENE (empty-scene WIDTH HEIGHT))
+  
+  ;; A World is a (new world% Number).
+  ;; Interp: height represents distance from the ground in AU.
+  (define-class world% 
+    (fields height)
 
-@code:comment{Use the rocket key to insert the rocket here.}
-(define ROCKET (bitmap class/0/rocket.png))
-
-(define WIDTH 100)
-(define HEIGHT 300)
-(define MT-SCENE (empty-scene WIDTH HEIGHT))
-
-@code:comment{A World is a (new world% Number).}  
-@code:comment{Interp: height represents distance from the ground in AU.}
-(define-class world% 
-  (fields height)
-
-  @code:comment{on-tick : -> World}
-  (define (on-tick)
-    (new world% (add1 (field height))))
-
-  @code:comment{to-draw : -> Scene}
-  (define (to-draw)
-    (place-image ROCKET
-    		 (/ WIDTH 2)
-		 (- HEIGHT (field height))
-		 MT-SCENE)))
-
-(check-expect (send (new world% 7) on-tick)
-	      (new world% 8))
-(check-expect (send (new world% 7) to-draw)
-	      (place-image ROCKET
-	      		   (/ WIDTH 2)
-			   (- HEIGHT 7)
-			   MT-SCENE))
-
-@code:comment{Run, program, run!}
-(big-bang (new world% 0))]
+    ;; on-tick : -> World
+    ;; Advance this rocket one unit.
+    (check-expect (send (new world% 7) on-tick)
+		  (new world% 8))
+    (define (on-tick)
+      (new world% (add1 (field height))))
+    
+    ;; to-draw : -> Scene
+    ;; Render this world as a scene.
+    (check-expect (send (new world% 7) to-draw)
+		  (place-image ROCKET
+			       (/ WIDTH 2)
+			       (- HEIGHT 7)
+			       MT-SCENE))
+    (define (to-draw)
+      (place-image ROCKET
+		   (/ WIDTH 2)
+		   (- HEIGHT (field height))
+		   MT-SCENE)))
+  
+  
+  ;; Run, program, run!
+  (big-bang (new world% 0))
+)
 
 @section{Landing and taking off}
 
@@ -472,6 +484,8 @@ class/0
   (fields height velocity moon-height)
   
   ;; on-tick : -> World 
+  (check-expect (send (new world% 0 1 100) on-tick)
+		(new world% 1 1 105))
   (define (on-tick)
     (new world%
          (+ (field velocity) (field height))
@@ -480,6 +494,14 @@ class/0
          (modulo (+ 5 (field moon-height)) 200)))
   
   ;; to-draw : -> Scene
+  (check-expect (send (new world% 0 1 100) to-draw)
+		(place-image MOON
+			     (/ WIDTH 3) 
+			     100
+			     (place-image ROCKET 
+					  (/ WIDTH 2) 
+					  HEIGHT 
+					  MT-SCENE)))
   (define (to-draw)
     (place-image MOON
                  (/ WIDTH 3) 
@@ -488,19 +510,6 @@ class/0
                               (/ WIDTH 2) 
                               (- HEIGHT (field height))
                               MT-SCENE))))
-
-(check-expect (send (new world% 0 1 100) to-draw)
-              (place-image MOON
-                           (/ WIDTH 3) 
-                           100
-                           (place-image ROCKET 
-                                        (/ WIDTH 2) 
-                                        HEIGHT 
-                                        MT-SCENE)))
-
-(check-expect (send (new world% 0 1 100) on-tick)
-              (new world% 1 1 105))
-(check-expect (send (send (new world% 10 -2 100) on-tick) height) 8)
 
 (big-bang (new world% HEIGHT -1 100))
 )
@@ -541,25 +550,28 @@ class/0
         you can't do is @emph{order} the complex numbers, so @racket[<]
         and friends work only on real numbers.)
         
-        @examples[#:eval the-eval
-                         @code:comment{Verify the imaginary unit property.}
-                         (sqr (sqrt -1))
-                         (sqr 0+1i)
-                         @code:comment{Arithmetic on complex numbers.}
-                         (+ 2+3i 4+5i)
-                         (- 2+3i 4+5i)
-                         (* 2+3i 4+5i)
-                         (/ 2+3i 4+5i)
-                         @code:comment{Complex numbers can't be ordered.}
-                         (< 1+2i 2+3i)
-                         @code:comment{Real numbers are complex numbers with an imaginary part of 0,}
-                         @code:comment{so you can perform arithmetic with them as well.}
-                         (+ 2+3i 2)
-                         (- 2+3i 2)
-                         (* 2+3i 2)
-                         (/ 2+3i 2)
-			 (magnitude 3+4i)]
- 
+@#reader scribble/comment-reader
+(examples
+  #:eval the-eval
+  ;; Verify the imaginary unit property.
+  (sqr (sqrt -1))
+  (sqr 0+1i)
+  ;; Arithmetic on complex numbers.
+  (+ 2+3i 4+5i)
+  (- 2+3i 4+5i)
+  (* 2+3i 4+5i)
+  (/ 2+3i 4+5i)
+  ;; Complex numbers can't be ordered.
+  (< 1+2i 2+3i)
+  ;; Real numbers are complex numbers with an imaginary part of 0,
+  ;; so you can perform arithmetic with them as well.
+  (+ 2+3i 2)
+  (- 2+3i 2)
+  (* 2+3i 2)
+  (/ 2+3i 2)
+  (magnitude 3+4i)
+)
+
         @(begin0 
            "" 
            (the-eval '(require class/0))
@@ -645,15 +657,18 @@ class/0
 	and the
 	@link["http://en.wikipedia.org/wiki/Square_root#Principal_square_root_of_a_complex_number"]{square root of a complex number}.
 
-        @examples[#:eval the-eval
-                         (define c-1  (make-cpx -1 0))
-                         (define c0+0 (make-cpx 0 0))                         
-                         (define c2+3 (make-cpx 2 3))
-                         (define c4+5 (make-cpx 4 5))
-                         (=? c0+0 c0+0)
-                         (=? c0+0 c2+3)
-                         (=? (plus c2+3 c4+5)
-                             (make-cpx 6 8))]
+@#reader scribble/comment-reader
+(interaction 
+  #:eval the-eval
+  (define c-1  (make-cpx -1 0))
+  (define c0+0 (make-cpx 0 0))                         
+  (define c2+3 (make-cpx 2 3))
+  (define c4+5 (make-cpx 4 5))
+  (=? c0+0 c0+0)
+  (=? c0+0 c2+3)
+  (=? (plus c2+3 c4+5)
+      (make-cpx 6 8))
+)
         
         Develop a class-based data representation for @tt{Complex}
         values.
@@ -663,29 +678,32 @@ class/0
         @racket[times], @racket[div], @racket[sq], @racket[mag], @racket[sqroot] and
         @racket[to-number].
         
-        @examples[#:eval the-eval
-                         @code:comment{Some example Complex values.}
-			 (define c-1  (new complex% -1 0))
-			 (define c0+0 (new complex% 0 0))
-			 (define c2+3 (new complex% 2 3))
-			 (define c4+5 (new complex% 4 5))
-                         @code:comment{Verify the imaginary unit property.}
-			 (send c-1 mag)
-			 (send c-1 sqroot) 
-			 (send (send (send c-1 sqroot) sq) =? c-1)
-			 (send (send (new complex% 0 1) sq) =? c-1)
-                         @code:comment{Arithmetic on complex numbers.}
-			 (send c0+0 =? c0+0)
-			 (send c0+0 =? c2+3)
-			 (send (send c2+3 plus c4+5) =?
-			       (new complex% 6 8))
-			 (send (send c2+3 minus c4+5) =?
-			       (new complex% -2 -2))
-			 (send (send c2+3 times c4+5) =?
-			       (new complex% -7 22))
-			 (send (send c2+3 div c4+5) =?
-			       (new complex% 23/41 2/41))
-			 (send (new complex% 3 4) mag)]
+@#reader scribble/comment-reader
+(examples 
+  #:eval the-eval
+  ;; Some example Complex values.
+  (define c-1  (new complex% -1 0))
+  (define c0+0 (new complex% 0 0))
+  (define c2+3 (new complex% 2 3))
+  (define c4+5 (new complex% 4 5))
+  ;; Verify the imaginary unit property.
+  (send c-1 mag)
+  (send c-1 sqroot) 
+  (send (send (send c-1 sqroot) sq) =? c-1)
+  (send (send (new complex% 0 1) sq) =? c-1)
+  ;; Arithmetic on complex numbers.
+  (send c0+0 =? c0+0)
+  (send c0+0 =? c2+3)
+  (send (send c2+3 plus c4+5) =?
+	(new complex% 6 8))
+  (send (send c2+3 minus c4+5) =?
+	(new complex% -2 -2))
+  (send (send c2+3 times c4+5) =?
+	(new complex% -7 22))
+  (send (send c2+3 div c4+5) =?
+	(new complex% 23/41 2/41))
+  (send (new complex% 3 4) mag)
+)
  
 
 
