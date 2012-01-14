@@ -8,6 +8,7 @@ class:
 dpc.tex: $(scrbls)
 	env STUDENTS=1 raco make dpc.scrbl
 	env STUDENTS=1 raco scribble --latex \
+		++xref-in setup/xref load-collections-xref \
 		--prefix dpc-prefix.tex \
 		--style dpc-style.tex dpc.scrbl
 
@@ -19,7 +20,8 @@ dpc-2up.pdf: dpc.pdf
 
 dpc.html: $(scrbls)
 	env STUDENTS=1 raco scribble --html \
-		 dpc.scrbl
+		++xref-in setup/xref load-collections-xref \
+		dpc.scrbl
 
 clean:
 	-rm *~ *log *aux *out *toc pict*png
