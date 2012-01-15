@@ -31,8 +31,4 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section["chapter18.scrbl"]
 @include-section["chapter19.scrbl"]
 
-@include-section["solution01.scrbl"]
-@include-section["solution02.scrbl"]
-@include-section["solution03.scrbl"]
-@include-section["solution04.scrbl"]
-@include-section["solution05.scrbl"]
+@include-section["solutions.scrbl"]
