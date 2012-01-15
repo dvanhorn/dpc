@@ -12,7 +12,7 @@
 	  	     		check-expect
                                 define-struct)))
 
-@title[#:tag "soln05"]{2/9: Networked Connect 4}
+@title[#:tag "soln05"]{Networked Connect 4}
 
 This is a solution for the @seclink["assign05"]{Connect 4} assignment
 that was due on 2/9.  Only a solution to Problem 2 is provided;
