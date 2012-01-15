@@ -1,11 +1,12 @@
 #lang scribble/manual
 @(require "../class/utils.rkt"
-          (for-label (only-in lang/htdp-intermediate-lambda define-struct))
-          (for-label (except-in class/0 define-struct)))
+          (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect))
+          (for-label (except-in class/0 define-struct check-expect)))
 
-@title[#:tag "soln01"]{Complex}
+@title[#:tag "Complex_with_class_solution"]{Solution:
+@secref{Complex_with_class}}
 
-This is a solution for the @seclink["assign_complex"]{Complex} exercise.
+This is a solution for the @secref{Complex_with_class} exercise.
 
 @#reader scribble/comment-reader
 (racketmod
@@ -129,90 +130,90 @@ This is a solution for the @seclink["assign_complex"]{Complex} exercise.
     
     ;; Complex -> Boolean
     ;; Is the given complex equal to this one?
-    (define/public (=? n)
-      (and (= (field real)
+    (define (=? n)
+      (and (= (send this real)
 	      (send n real))
-	   (= (field imag)
+	   (= (send this imag)
 	      (send n imag))))
     
     ;; Complex -> Complex
     ;; Add the given complex to this one.
-    (define/public (plus n)
+    (define (plus n)
       (new complex% 
-	   (+ (field real) (send n real))
-	   (+ (field imag) (send n imag))))
+	   (+ (send this real) (send n real))
+	   (+ (send this imag) (send n imag))))
     
     ;; Complex -> Complex
     ;; Subtract the given complex from this one.
-    (define/public (minus n)
+    (define (minus n)
       (new complex% 
-	   (- (field real) (send n real))
-	   (- (field imag) (send n imag))))
+	   (- (send this real) (send n real))
+	   (- (send this imag) (send n imag))))
     
     ;; Complex -> Complex
     ;; Multiply the given complex by this one.
-    (define/public (times n)
+    (define (times n)
       (new complex%
-	   (- (* (field real) (send n real))
-	      (* (field imag) (send n imag)))
-	   (+ (* (field imag) (send n real))
-	      (* (field real) (send n imag)))))
+	   (- (* (send this real) (send n real))
+	      (* (send this imag) (send n imag)))
+	   (+ (* (send this imag) (send n real))
+	      (* (send this real) (send n imag)))))
     
     ;; Complex -> Complex
     ;; Divide this complex by the given one.
-    (define/public (div n)
+    (define (div n)
       (new complex%
-	   (/ (+ (* (field real) (send n real))
-		 (* (field imag) (send n imag)))
+	   (/ (+ (* (send this real) (send n real))
+		 (* (send this imag) (send n imag)))
 	      (+ (sqr (send n real))
 		 (sqr (send n imag))))
-	   (/ (- (* (field imag) (send n real))
-		 (* (field real) (send n imag)))
+	   (/ (- (* (send this imag) (send n real))
+		 (* (send this real) (send n imag)))
 	      (+ (sqr (send n real))
 		 (sqr (send n imag))))))
     
     ;; -> Complex
     ;; Multiply this complex by itself.
-    (define/public (sq)
-      (times this))
+    (define (sq)
+      (send this times this))
   
     ;; Alternative:
     ;; OK, but `this' solution is preferred.
-    ;; (define/public (sq)
+    ;; (define (sq)
     ;;   (times (new complex%
-    ;;               (field real)
-    ;;               (field imag))))
+    ;;               (send this real)
+    ;;               (send this imag))))
   
     ;; Alternative:
     ;; Not OK: no code re-use.  
-    ;; (define/public (times n)
+    ;; (define (times n)
     ;;   (new complex%
-    ;;        (- (* (field real) (field real))
-    ;;           (* (field imag) (field imag)))
-    ;;        (+ (* (field imag) (field real))
-    ;;           (* (field real) (field imag)))))
+    ;;        (- (* (send this real) (send this real))
+    ;;           (* (send this imag) (send this imag)))
+    ;;        (+ (* (send this imag) (send this real))
+    ;;           (* (send this real) (send this imag)))))
   
     ;; -> Number
     ;; Compute the magnitude of this complex.
-    (define/public (mag)
-      (sqrt (+ (sqr (field real))
-	       (sqr (field imag)))))
+    (define (mag)
+      (sqrt (+ (sqr (send this real))
+	       (sqr (send this imag)))))
     
     ;; -> Complex
     ;; Compute the square root of this complex.
-    (define/public (sqroot)
+    (define (sqroot)
       (new complex% 
-	   (sqrt (/ (+ (mag) (field real)) 2))
-	   (* (sqrt (/ (- (mag) (field real)) 2))
-	      (if (negative? (field imag))
+	   (sqrt (/ (+ (send this mag) (send this real)) 2))
+	   (* (sqrt (/ (- (send this mag) (send this real)) 2))
+	      (if (negative? (send this imag))
 		  -1
 		  +1))))
   
     ;; -> Number
     ;; Convert this complex to a Racket complex number.
-    (define/public (to-number)
-      (+ (field real) 
-	 (* +i (field imag)))))
+    (define (to-number)
+      (+ (send this real) 
+	 (* +i (send this imag)))))
 
   ;; Some example Complex values.
   (define c-1  (new complex% -1 0))

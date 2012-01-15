@@ -16,7 +16,7 @@
 
 @title[#:tag "Exercises (Ch 1.)"]{Exercises}
 
-@section{Complex, with class}
+@section[#:tag "Complex_with_class"]{Complex, with class}
        
 For this exercise, you will develop a class-based representation of
 complex numbers, which are used in several fields, including:
