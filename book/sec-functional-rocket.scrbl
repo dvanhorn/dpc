@@ -11,28 +11,34 @@
     ;(the-eval '(require lang/htdp-intermediate-lambda))
     (the-eval '(require class/0))
     (the-eval '(require 2htdp/image))
-    (the-eval '(require (prefix-in r: racket)))
+    ;(the-eval '(require (prefix-in r: racket)))
     #|(call-in-sandbox-context 
      the-eval 
      (lambda () ((dynamic-require 'htdp/bsl/runtime 'configure)
                  (dynamic-require 'htdp/isl/lang/reader 'options))))|#
-    the-eval))
+    the-eval))  
 
 @(the-eval
-  `(begin 
+  `(begin     
+     ;; A World is a Rocket.
+     
+     ;; A Rocket is a non-negative Number.
+     ;; Interp: distance from the ground to base of rocket in AU.
+     
      (define CLOCK-SPEED  1/30) ; SEC/TICK
      (define ROCKET-SPEED 1)    ; AU/SEC
-
-     (define ROCKET (bitmap ,(string-append (path->string (collection-path "class/0")) "/rocket.png")))
-     (define WIDTH 100)
-     (define HEIGHT 200)
+     
+     (define ROCKET (bitmap ,(string-append (path->string (collection-path "class/0")) "/rocket.png"))) ;; Use rocket key to insert the rocket here.
+     (define WIDTH 100)   ;; PX
+     (define HEIGHT 200)  ;; PX
      (define MT-SCENE (empty-scene WIDTH HEIGHT))
-
+     
      ;; next : Rocket -> Rocket
-     ;; Compute next position of given rocket after one tick of time.
+     ;; Compute next position of the rocket after one tick of time.
+     (check-expect (next 10) (+ 10 DELTA))
      (define (next r)
-       (+ r (* ROCKET-SPEED CLOCK-SPEED)))     
-
+       (+ r DELTA))
+     
      ;; render : Rocket -> Scene
      ;; Render the rocket as a scene.
      (define (render r)
@@ -40,25 +46,23 @@
      
      ;; draw-on : Rocket Scene -> Scene
      ;; Draw rocket on to scene.
+     (check-expect (draw-on 0 (empty-scene 100 100))
+		   (overlay/align/offset "center" "bottom"
+					 ROCKET
+					 0 1
+					 (empty-scene 100 100)))
      (define (draw-on r scn)
        (overlay/align/offset "center" "bottom" 
 			     ROCKET 
 			     0 (add1 r)
 			     scn))))
-
+     
 @title{Functional rocket}
 
 In this section, let's develop a simple program that animates the
 lift-off of a rocket.
 
-@(define-syntax-rule (def-racket big-bang-id)
-  (begin
-    (require (for-label (only-in 2htdp/universe big-bang)))
-    (define big-bang-id (racket big-bang))))
-@(def-racket big-bang-id)
-
-
-The animation will be carried out by using the @|big-bang-id|
+The animation will be carried out by using the @racket[big-bang]
 system of the @racketmodname[2htdp/universe] library.  For an
 animation, @racket[big-bang] requires settling on a representation of
 @emph{world-states} and two functions: one that renders a world state
@@ -108,7 +112,7 @@ This dictates that we need to develop two functions that consume
 @#reader scribble/comment-reader
 (racketblock
 ;; next : Rocket -> Rocket
-;; Compute next position of given rocket after one tick of time.
+;; Compute next position of the rocket after one tick of time.
 
 ;; render : Rocket -> Scene
 ;; Render the rocket as a scene.
@@ -131,14 +135,22 @@ For both, we define constants:
 
 The @racket[CLOCK-SPEED] is the rate at which the clock ticks, given
 in seconds per tick, and @racket[ROCKET-SPEED] is the rate at which
-the rocket lifts off, given in AU per second.  We can now give
-examples of how @racket[next] should work.  We are careful to write
-test-cases in terms of the defined constants so that if we revise them
-later our tests will still be correct:
+the rocket lifts off, given in AU per second.  We use these two
+constants to define a third, computed, constant that gives change in
+the rocket's distance from the ground per clock tick:
 
 @#reader scribble/comment-reader
 (racketblock
-(check-expect (next 10) (+ 10 (* ROCKET-SPEED CLOCK-SPEED)))
+(define DELTA (* CLOCK-SPEED ROCKET-SPEED)) ; AU/TICK
+)
+
+We can now give examples of how @racket[next] should work.  We are
+careful to write test-cases in terms of the defined constants so that
+if we revise them later our tests will still be correct:
+
+@#reader scribble/comment-reader
+(racketblock
+(check-expect (next 10) (+ 10 DELTA))
 )
 
 Now that we have develop a purpose statement, contract, and example,
@@ -147,10 +159,10 @@ we can write the code, which is made clear from the example:
 @#reader scribble/comment-reader
 (racketblock
 ;; next : Rocket -> Rocket
-;; Compute next position of given rocket after one tick of time.
-(check-expect (next 10) (+ 10 (* ROCKET-SPEED CLOCK-SPEED)))
+;; Compute next position of the rocket after one tick of time.
+(check-expect (next 10) (+ 10 DELTA))
 (define (next r)
-  (+ r (* ROCKET-SPEED CLOCK-SPEED)))
+  (+ r DELTA))
 )
 
 @section{The @racket[render] function}
@@ -248,6 +260,7 @@ Our complete BSL program is:
 
   (define CLOCK-SPEED  1/30) ; SEC/TICK
   (define ROCKET-SPEED 1)    ; AU/SEC
+  (define DELTA (* CLOCK-SPEED ROCKET-SPEED)) ; AU/TICK
   
   (define ROCKET #,(image (string-append (path->string (collection-path "class/0")) "/rocket.png"))) ;; Use rocket key to insert the rocket here.
   (define WIDTH 100)   ;; PX
@@ -255,10 +268,10 @@ Our complete BSL program is:
   (define MT-SCENE (empty-scene WIDTH HEIGHT))
   
   ;; next : Rocket -> Rocket
-  ;; Compute next position of given rocket after one tick of time.
-  (check-expect (next 10) (+ 10 (* ROCKET-SPEED CLOCK-SPEED)))
+  ;; Compute next position of the rocket after one tick of time.
+  (check-expect (next 10) (+ 10 DELTA))
   (define (next r)
-    (+ r (* ROCKET-SPEED CLOCK-SPEED)))     
+    (+ r DELTA))
   
   ;; render : Rocket -> Scene
   ;; Render the rocket as a scene.

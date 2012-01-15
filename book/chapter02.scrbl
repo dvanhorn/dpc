@@ -339,7 +339,9 @@ class/0
 	      (new node% 0 ex3 ex3))
 )
 
-@section{Exercises}
+@include-section{sec-more-rocket.scrbl}
+
+@section[#:tag "Exercises (Ch. 2)"]{Exercises}
 
 @subsection{Lists}
 
