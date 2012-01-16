@@ -3,9 +3,10 @@
           (for-label (only-in lang/htdp-intermediate-lambda define-struct))
           (for-label (except-in class/0 define-struct)))
 
-@title[#:tag "soln02"]{Range}
+@title[#:tag "Home_on_the_Range_solution"]{Solution:
+@secref{Home_on_the_Range}}
 
-This is a solution for the @seclink["assign_range"]{Range} exercise.
+This is a solution for the @secref{Home_on_the_Range} exercise.
 
 @#reader scribble/comment-reader
 (racketmod

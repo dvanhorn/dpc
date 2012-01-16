@@ -318,14 +318,14 @@ The full @tt{BT} code is now:
 @#reader scribble/comment-reader
 (racketmod
 class/0
-;;   +----------------------------+
-;;   | +------------------------+ |
+;;   +- - - - - - - - - - - - - - +
+;;   | +- - - - - - - - - - - - + |
 ;;   V V                        | |
 ;; A BT is one of:              | |
 ;; - (new leaf% Number)         | |
 ;; - (new node% Number BT BT)   | |
-;;                     |  +-----+ |
-;;                     +----------+
+;;                     |  +- - -+ |
+;;                     +- - - - --+
 (define-class leaf%
   (fields number)
   ;; count : -> Number

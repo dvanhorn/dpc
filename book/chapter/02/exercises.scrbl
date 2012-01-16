@@ -13,7 +13,9 @@ solution is to define the @tt{max} of the empty list as negative
 infinity, @racket[-inf.0], a number smaller than every other number
 (except itself).
 
-@section[#:tag "assign_range"]{Home on the Range}
+@section{Home on the Range}
+
+@margin-note{@secref{Home_on_the_Range_solution}}
 
 A @emph{range} represents a set of numbers between two endpoints.  To
 start with, you only need to consider ranges that @emph{include} the
@@ -92,8 +94,8 @@ the Zombie game duplicates a lot of code between these classes.  In
 fact, the @tt{Zombie} and @tt{Player} classes have more in common than
 apart.  It may even be tempting to pursue an unnatural design in which
 there is only a single class of data, which must consist of an
-additional @emph{bit}, which is interpreted as signifying "zombieness"
-versus "playerness".  Down that path waits shame, defeat, and a
+additional @emph{bit}, which is interpreted as signifying ``zombieness''
+versus ``playerness.''  Down that path waits shame, defeat, and a
 brittle design that makes babies cry.
 
 To recoil at the prospect of copy-and-paste is commendable, but we
