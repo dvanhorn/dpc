@@ -10,25 +10,25 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 
 @table-of-contents[]
 
-@include-section["chapter00.scrbl"]
-@include-section["chapter01.scrbl"]
-@include-section["chapter02.scrbl"]
-@include-section["chapter03.scrbl"]
-@include-section["chapter04.scrbl"]
-@include-section["chapter05.scrbl"]
-@include-section["chapter06.scrbl"]
-@include-section["chapter07.scrbl"]
-@include-section["chapter08.scrbl"]
-@include-section["chapter09.scrbl"]
-@include-section["chapter10.scrbl"]
-@include-section["chapter11.scrbl"]
-@include-section["chapter12.scrbl"]
-@include-section["chapter13.scrbl"]
-@include-section["chapter14.scrbl"]
-@include-section["chapter15.scrbl"]
-@include-section["chapter16.scrbl"]
-@include-section["chapter17.scrbl"]
-@include-section["chapter18.scrbl"]
-@include-section["chapter19.scrbl"]
+@include-section{chapter/00.scrbl}
+@include-section{chapter/01.scrbl}
+@include-section{chapter/02.scrbl}
+@include-section{chapter/03.scrbl}
+@include-section{chapter/04.scrbl}
+@include-section{chapter/05.scrbl}
+@include-section{chapter/06.scrbl}
+@include-section{chapter/07.scrbl}
+@include-section{chapter/08.scrbl}
+@include-section{chapter/09.scrbl}
+@include-section{chapter/10.scrbl}
+@include-section{chapter/11.scrbl}
+@include-section{chapter/12.scrbl}
+@include-section{chapter/13.scrbl}
+@include-section{chapter/14.scrbl}
+@include-section{chapter/15.scrbl}
+@include-section{chapter/16.scrbl}
+@include-section{chapter/17.scrbl}
+@include-section{chapter/18.scrbl}
+@include-section{chapter/19.scrbl}
 
 @include-section["solutions.scrbl"]

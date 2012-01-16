@@ -1,6 +1,7 @@
 all: class dpc.pdf dpc-2up.pdf dpc.html
 
-scrbls := $(wildcard *.scrbl)
+scrbls := $(wildcard *.scrbl) \
+	$(wildcard chapter/01/*.scrbl)
 
 class:
 	raco setup class

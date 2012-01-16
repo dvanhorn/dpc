@@ -1,6 +1,6 @@
 #lang scribble/manual
 @(require scribble/eval
-	  "../class/utils.rkt"
+	  class/utils
           racket/sandbox
   	  (for-label (only-in lang/htdp-intermediate-lambda define-struct ... check-expect))
           (for-label (except-in class/0 define-struct ... check-expect))
@@ -371,7 +371,7 @@ class/0
 (check-expect (send ex3 double 0)
 	      (new node% 0 ex3 ex3)))
 
-@include-section{sec-more-rocket.scrbl}
+@include-section{02/more-rocket.scrbl}
 
 @section[#:tag "Exercises (Ch. 2)"]{Exercises}
 

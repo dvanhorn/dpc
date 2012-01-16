@@ -54,23 +54,7 @@ In this chapter, we will explore the basic concepts of objects by
 revisiting a familiar program, first organized around data and
 functions and then again organized around objects.
 
-@include-section{sec-functional-rocket.scrbl}
-@include-section{sec-object-rocket.scrbl}
-@;include-section{sec-more-rocket.scrbl}
-
-@section{A Brief History of Objects}
-
-Objects are an old programming concept that first appeared in the late
-1950s and early 1960s just across the Charles river at MIT in the AI
-group that was developing Lisp.  Simula 67, a language developed in
-Norway as a successor to Simula I, introduced the notion of classes.
-In the 1970s, Smalltalk was developed at Xerox PARC by Alan Kay and
-others.  Smalltalk and Lisp and their descendants have influenced each
-other ever since.  Object-oriented programming became one of the
-predominant programming styles in the 1990s.  This coincided with the
-rise of graphical user interfaces (GUIs), which objects model well.
-The use of object and classes to organize interactive, graphical
-programs continues today with libraries such as the Cocoa framework
-for Mac OS X.
-
-@include-section{sec-01-exercises.scrbl}
+@include-section{01/functional-rocket.scrbl}
+@include-section{01/object-rocket.scrbl}
+@include-section{01/history.scrbl}
+@include-section{01/exercises.scrbl}
