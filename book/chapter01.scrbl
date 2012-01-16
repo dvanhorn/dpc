@@ -5,7 +5,7 @@
 	  (for-label (only-in lang/htdp-intermediate-lambda check-expect))
 	  (for-label class/universe))
 
-@title{Objects = Data + Function}
+@title[#:tag "Object_=_Data_+_Function"]{Objects = Data + Function}
 
 One of the key concepts behind so-called @emph{object-oriented
 programming} (OOP) is the notion of an @emph{object}.  An object is a
