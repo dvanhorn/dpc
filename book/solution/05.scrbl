@@ -1,5 +1,5 @@
 #lang scribble/manual
-@(require "../class/utils.rkt"
+@(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda 
                               define-struct
                               or
