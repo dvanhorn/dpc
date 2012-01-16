@@ -17,6 +17,8 @@
 @title[#:tag "Exercises (Ch 1.)"]{Exercises}
 
 @section[#:tag "Complex_with_class"]{Complex, with class}
+
+@margin-note{@secref{Complex_with_class_solution}}
        
 For this exercise, you will develop a class-based representation of
 complex numbers, which are used in several fields, including:
@@ -198,3 +200,5 @@ Add accessor methods for extracting the @racket[real] and
 	(new complex% 23/41 2/41))
   (send (new complex% 3 4) mag)
 )
+
+@include-section[(lib "assignments/assign01-rectangles.scrbl")]
