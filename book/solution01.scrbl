@@ -19,7 +19,7 @@ This is a solution for the @secref{Complex_with_class} exercise.
   (define-struct cpx (real imag))
   
   ;; Complex Complex -> Boolean
-  ;; Is the given complex equal to this one?
+  ;; Are the complexes equal?
   (define (=? n m)
     (and (= (cpx-real n)
             (cpx-real m))
@@ -27,19 +27,19 @@ This is a solution for the @secref{Complex_with_class} exercise.
             (cpx-imag m))))
   
   ;; Complex Complex -> Complex
-  ;; Add the given complex to this one.
+  ;; Add the complexes.
   (define (plus n m)
     (make-cpx (+ (cpx-real n) (cpx-real m))
 	      (+ (cpx-imag n) (cpx-imag m))))
   
   ;; Complex Complex -> Complex
-  ;; Subtract the given complex from this one.
+  ;; Subtract the complexes.
   (define (minus n m)
     (make-cpx (- (cpx-real n) (cpx-real m))
 	      (- (cpx-imag n) (cpx-imag m))))
   
   ;; Complex Complex -> Complex
-  ;; Multiply the given complex by this one.
+  ;; Multiply the complexes.
   (define (times n m)
     (make-cpx (- (* (cpx-real n) (cpx-real m))
 		 (* (cpx-imag n) (cpx-imag m)))
@@ -47,7 +47,7 @@ This is a solution for the @secref{Complex_with_class} exercise.
 		 (* (cpx-real n) (cpx-imag m)))))
   
   ;; Complex Complex -> Complex
-  ;; Divide this complex by the given one.
+  ;; Divide the complexes.
   (define (div n m)
     (make-cpx (/ (+ (* (cpx-real n) (cpx-real m))
 		    (* (cpx-imag n) (cpx-imag m)))
@@ -59,18 +59,18 @@ This is a solution for the @secref{Complex_with_class} exercise.
 		    (sqr (cpx-imag m))))))
   
   ;; Complex -> Complex
-  ;; Multiply this complex by itself.
+  ;; Multiply the complex by itself.
   (define (sq n)
     (times n n))
   
   ;; Complex -> Number
-  ;; Compute the magnitude of this complex.
+  ;; Compute the magnitude of the complex.
   (define (mag n)
     (sqrt (+ (sqr (cpx-real n))
 	     (sqr (cpx-imag n)))))
   
   ;; Complex -> Complex
-  ;; Compute the square root of this complex.
+  ;; Compute the square root of the complex.
   (define (sqroot n)
     (make-cpx (sqrt (/ (+ (mag n) (cpx-real n)) 2))
 	      (* (sqrt (/ (- (mag n) (cpx-real n)) 2))
@@ -79,7 +79,7 @@ This is a solution for the @secref{Complex_with_class} exercise.
 		     +1))))
   
   ;; Complex -> Number
-  ;; Convert this complex to a Racket complex number.
+  ;; Convert the complex to a Racket complex number.
   (define (to-number n)
     (+ (cpx-real n) 
        (* +i (cpx-imag n))))
