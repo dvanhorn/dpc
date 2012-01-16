@@ -63,7 +63,7 @@ an object.
 Since we are learning a new programming language, you will no longer
 be using BSL and friends.  Instead, select
 @menuitem["Language"]{Choose Language...} in DrRacket, then select the
-"Use the language declared in the source" option and add the following
+``Use the language declared in the source'' option and add the following
 to the top of your program:
 
 @racketmod[class/0]

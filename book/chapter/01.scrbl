@@ -34,7 +34,7 @@ objects.}
 
 Since objects are just the combination of two familiar concepts that
 you already use to design programs, you already know how to design
-programs around objects, even if you never heard the term "object"
+programs around objects, even if you never heard the term ``object''
 before.  In short, the better you are at programming with functions,
 the better you will be at programming with objects.}
 
