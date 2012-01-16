@@ -3,7 +3,9 @@
 
 @title[#:tag "Exercises (Ch. 2)"]{Exercises}
 
-@section{Lists}
+@section{Lists of Numbers}
+
+@margin-note{@secref{Lists_of_Numbers_solution}}
 
 Design classes to represent lists of numbers.  Implement the methods
 @tt{length}, @tt{append}, @tt{sum}, @tt{prod}, @tt{contains?},
