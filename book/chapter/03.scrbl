@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class/1 define-struct ... length))
+          (for-label (except-in class/0 define-struct ... length))
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
@@ -9,16 +9,84 @@
 @(define the-eval
   (let ([the-eval (make-base-eval)])
     (the-eval '(require (for-syntax racket/base)))
-    (the-eval '(require class/1))
+    (the-eval '(require class/0))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
+    (the-eval '(require "chapter/03/light.rkt"))
     the-eval))
-
 
 @title{Interfaces}
 
-[This section is still under construction and will be posted soon.  Please
-check back later.]
+Let's take another look at the @tt{Light} data definition we developed
+in @secref{Enumerations}.  We came up with the following data:
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Light is one of:
+  ;; - (new red%)
+  ;; - (new green%)
+  ;; - (new yellow%)
+)
+
+We started with a @racket[next] method that computes the successor for
+each light.  Let's also add a @racket[draw] method and then build a
+@racket[big-bang] animation for a traffic light.
+
+@#reader scribble/comment-reader
+(racketmod
+  class/0
+  (require 2htdp/image)
+  (define LIGHT-RADIUS 20)
+
+  (define-class red%
+    ;; next : -> Light
+    ;; Next light after red
+    (check-expect (send (new red%) next) (new green%))
+    (define (next)
+      (new green%))
+
+    ;; draw : -> Image
+    ;; Draw this red light
+    (check-expect (send (new red%) draw)
+                  (circle LIGHT-RADIUS "solid" "red"))
+    (define (draw)
+      (circle LIGHT-RADIUS "solid" "red")))
+
+  (define-class green%
+    ;; next : -> Light
+    ;; Next light after green
+    (check-expect (send (new green%) next) (new yellow%))
+    (define (next)
+      (new yellow%))
+
+    ;; draw : -> Image
+    ;; Draw this green light
+    (check-expect (send (new green%) draw)
+                  (circle LIGHT-RADIUS "solid" "green"))
+    (define (draw)
+      (circle LIGHT-RADIUS "solid" "green")))
+
+  (define-class yellow%
+    ;; next : -> Light
+    ;; Next light after yellow
+    (check-expect (send (new yellow%) next) (new red%))
+    (define (next)
+      (new red%))
+
+    ;; draw : -> Image
+    ;; Draw this yellow light
+    (check-expect (send (new yellow%) draw)
+                  (circle LIGHT-RADIUS "solid" "yellow"))
+    (define (draw)
+      (circle LIGHT-RADIUS "solid" "yellow"))))
+
+We can now create and view lights:
+
+@interaction[#:eval the-eval
+(send (new green%) draw)
+(send (new yellow%) draw)
+(send (new red%) draw)
+]
 
 @section{Lights, redux}
 
