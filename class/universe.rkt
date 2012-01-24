@@ -6,12 +6,21 @@
                      [universe* universe]))
 (provide (except-out (all-from-out 2htdp/universe) big-bang universe) tick-rate)
 
-(define-syntax-rule 
-  (m on-event i)
-  (if (method-in-interface? 'on-event i)
-      (λ (w . args)
-	 (send/apply w on-event args))
-      (λ (w . _) w)))
+(define-syntax m
+  (syntax-rules ()
+    [(m on-event)
+     (λ (w . args)
+       (if (method-in-interface? 'on-event (object-interface w))
+           (send/apply w on-event args)
+           w))]
+    [(m on-event default)
+     (λ (w . args)
+       (if (method-in-interface? 'on-event (object-interface w))
+           (send/apply w on-event args)
+           (default w)))]))
+
+
+
 
 (define (universe* o)
   (let ((i (object-interface o)))
@@ -29,11 +38,9 @@
                    (error "Must supply an on-msg method.")))
               
               (on-tick
-               (if (method-in-interface? 'on-tick i)                   
-                   (λ (u)
-                     (send u on-tick))
-                   (λ (u)
-                     (make-bundle u empty empty)))
+               (m on-tick 
+                  (λ (u)
+                    (make-bundle u empty empty)))
                (if (method-in-interface? 'tick-rate i)
                    (send o tick-rate)
                    (if (method-in-interface? 'on-tick i)
@@ -41,11 +48,9 @@
                        1000000)))
               
               (on-disconnect
-               (if (method-in-interface? 'on-disconnect i)
-                   (λ (u iw)
-                     (send u on-disconnect iw))
-                   (λ (u iw)
-                     (make-bundle u empty empty))))
+               (m on-disconnect
+                  (λ (u)
+                    (make-bundle u empty empty))))
               
               (state
                (if (method-in-interface? 'state i)
@@ -70,11 +75,8 @@
   (let ((i (object-interface o)))
     (if (method-in-interface? 'register i)
 	(big-bang o
-		  (on-tick
-		   (if (method-in-interface? 'on-tick i)
-		       (λ (w)
-			  (send w on-tick))
-		       (λ (w) w))
+		  (on-tick 
+                   (m on-tick)
 		   (if (method-in-interface? 'tick-rate i)
 		       (send o tick-rate)
 		       1/28))
@@ -83,19 +85,14 @@
 		       (λ (w)
 			  (send w to-draw))
 		       (error "Must supply a to-draw method.")))
-		  (on-key (m on-key i))
-		  (on-release (m on-release i))
-                  (on-mouse (m on-mouse i))
+		  (on-key (m on-key))
+		  (on-release (m on-release))
+                  (on-mouse (m on-mouse))
                   (stop-when
-                   (if (method-in-interface? 'stop-when i)
-                       (λ (w)
-                         (send w stop-when))
-                       (λ (w) false))
-                   (if (method-in-interface? 'last-image i)
-                       (λ (w)
-                         (send w last-image))
-                       (λ (w)
-                         (send w to-draw))))
+                   (m stop-when (λ _ false))
+                   (m last-image
+                      (λ (w)
+                        (send w to-draw))))
 		  ;; check-with
 		  (record? (if (method-in-interface? 'record? i)
 			       (send o record?)
@@ -107,17 +104,11 @@
 			    (send o name)
 			    "World"))
 		  (register (send o register))
-                  (on-receive (if (method-in-interface? 'on-receive i)
-                                  (λ (w m)
-                                    (send w on-receive m))
-                                  (λ (w m) w))))
+                  (on-receive (m on-receive)))
                                     
 	(big-bang o
 		  (on-tick
-		   (if (method-in-interface? 'on-tick i)
-		       (λ (w)
-			  (send w on-tick))
-		       (λ (w) w))
+		   (m on-tick)
 		   (if (method-in-interface? 'tick-rate i)
 		       (send o tick-rate)
 		       1/28))
@@ -126,19 +117,14 @@
 		       (λ (w)
 			  (send w to-draw))
 		       (error "Must supply a to-draw method.")))
-                  (on-key (m on-key i))
-                  (on-release (m on-release i))
-                  (on-mouse (m on-mouse i))
+                  (on-key (m on-key))
+                  (on-release (m on-release))
+                  (on-mouse (m on-mouse))
                   (stop-when
-                   (if (method-in-interface? 'stop-when i)
-                       (λ (w)
-                         (send w stop-when))
-                       (λ (w) false))
-                   (if (method-in-interface? 'last-image i)
-                       (λ (w)
-                         (send w last-image))
-                       (λ (w)
-                         (send w to-draw))))
+                   (m stop-when (λ (w) false))
+                   (m last-image
+                      (λ (w)
+                        (send w to-draw))))
                   ;; check-with
 		  (record? (if (method-in-interface? 'record? i)
 			       (send o record?)
