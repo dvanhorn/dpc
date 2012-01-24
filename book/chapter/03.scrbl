@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require class/utils
-          (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class/0 define-struct ... length))
+          (for-label (only-in lang/htdp-intermediate-lambda check-expect define-struct ...))
+          (for-label (except-in class/0 define-struct ... length check-expect))
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
@@ -12,13 +12,22 @@
     (the-eval '(require class/0))
     (the-eval '(require 2htdp/image))
     (the-eval '(require (prefix-in r: racket)))
-    (the-eval '(require "chapter/03/light.rkt"))
+    (the-eval '(require book/chapter/03/light))
     the-eval))
 
 @title{Interfaces}
 
+In this chapter, we take an alternative perspective on defining sets
+of objects; we can characterize objects not just by their
+construction, as done with a data definition, but also by the methods
+they support.  We call this characterization an interface definition.
+As we'll see, designing to interfaces leads to generic and extensible
+programs.
+
+@section{Lights, revisited}
+
 Let's take another look at the @tt{Light} data definition we developed
-in @secref{Enumerations}.  We came up with the following data:
+in @secref{Enumerations}.  We came up with the following data definition:
 
 @#reader scribble/comment-reader
 (racketblock
@@ -88,72 +97,213 @@ We can now create and view lights:
 (send (new red%) draw)
 ]
 
-@section{Lights, redux}
+To create an animation we can make the following world:
 
-@itemlist[
- @item{a look back at light}
- @item{add a draw method}
- @item{make it a world program that cycles through the lights}
- @item{what does it mean to be a light?  next and draw}
- @item{alternative design of light class}
- @item{Q: what changes in world?  A: nothing.}
- @item{add interface to light design.  both alternatives implement it,
-  and the world will work with anything that implements it}]
+@#reader scribble/comment-reader
+(racketblock
+ (define-class world%
+   (fields light)
+   (define (tick-rate) 5)
+   (define (to-draw)
+     (send (send this light) draw))
+   (define (on-tick)
+     (new world% (send (send this light) switch))))
+ 
+ (require class/universe)
+ (big-bang (new world% (new red%))))
 
+At this point, let's take a step back and ask the question: @emph{what
+is essential to being a light?}  Our data definition gives us one
+perspective, which is that for a value to be a light, that value must
+have been constructed with either @racket[(new red%)], @racket[(new
+yellow%)], or @racket[(new green%)].  But from the world's
+perspective, what matters is not how lights are constructed, but
+rather what can lights compute.  All the world does is call methods on
+the light it contains, namely the @racket[next] and @racket[draw]
+methods.  We can rest assured that the light object understands the
+@racket[next] and @racket[draw] messages because, by definition, a
+light must be one of @racket[(new red%)], @racket[(new yellow%)], or
+@racket[(new green%)], and each of these classes defines @racket[next]
+and @racket[draw] methods.  But it's possible we could relax the
+definition of what it means to be a light by just saying what methods
+an object must implement in order to be considered a light.  We can
+thus take a constructor-agnostic view of objects by defining a set of
+objects in terms of the methods they understand.  We call a set of
+method signatures (i.e., name, contract, and purpose statement) an
+@emph{interface}.
 
-Q: Is it possible to represent the empty list with @racket[empty]?
+@section{A light of a different color}
 
-A: You won't be able to represent the empty list with a value that
- is not an object.  The problem asks you to implement @emph{methods}
- that can be invoked on lists; the requirement to have methods
- dictates that lists are represented as objects since only an object
- can understand method sends.  If the empty list were represented with
- @racket[empty], then @racket[(send empty length)] would blow-up when
- it should instead produce @racket[0].  Moreover, if the empty list
- were not represented as an object, the design of a @racket[cons%] class will
- break too since the template for a method in the @racket[cons%] class
- is something along the lines of:
- @racketblock[
- (define-class cons%
-   (fields first rest)
-   (define (method-template ...)
-     (field first) ...
-     (send (field rest) method-template ...)))
-]
+So let's consider an alternative characterization of lights not in
+terms of @emph{what they are}, but rather @emph{what they do}.
+Well a light does two things: it can render as an image and it can 
+transition to the next light; hence our @emph{interface definition}
+for a light is:
 
-Notice that the method is sent to the rest of this list.  If the rest
-of the list is empty, then this will break unless the empty list is an
-object, and moreover, an object that understands @racket[method-template].
+@#reader scribble/comment-reader
+(racketblock
+ ;; An ILight implements
+ ;; next : -> ILight
+ ;; Next light after this light.
+ ;; draw : -> Image
+ ;; Draw this light.
+)
 
+Now it's clear that every @tt{Light} is an @tt{ILight} because every
+@tt{Light} implements the methods in the @tt{ILight} interface, but we
+can imagine new kinds of implementations of the @tt{ILight} interface
+that are not @tt{Light}s.  For example, here's a class that implements
+the @tt{ILight} interface:
 
-Q: The @racket[define-interface] mechanism is a way of enforcing
-that a class implements a certain set of method names, but is there a
-way of enforcing things like the number of arguments one of these
-methods must accept?
+@#reader scribble/comment-reader
+(racketblock
+ ;; A ModLight is a (new mod-light% Natural)
+ ;; Interp: 0 = green, 1 = yellow, otherwise red.
+ (define-class mod-light%
+   (fields n)
+   ;; next : -> ILight
+   ;; Next light after this light.
+   (define (next)
+     (new mod-light% (modulo (add1 (send this n)) 3)))
+   
+   ;; draw : -> Image
+   ;; Draw this light.
+   (define (draw)
+     (cond [(= (send this n) 0)
+	    (circle LIGHT-RADIUS "solid" "green")]
+	   [(= (send this n) 1)
+	    (circle LIGHT-RADIUS "solid" "yellow")]
+	   [else
+	    (circle LIGHT-RADIUS "solid" "red")]))))
 
-A: There are no linguistic mechanisms, but there are
-@emph{meta}-linguistic mechanisms.  This is no different than our
-approach last semester to enforcing things like the number of
-arguments a function accepts.  Our approach has been to write down
-contracts and purpose statements, which specify these things, and unit
-tests, which check that we've followed the specification.  Our
-language does not enforce these specifications, but that is really
-just a detail of the particulars of the languages we've been using.
-Even though contracts are not a language feature (in the languages
-we've used so far), they are an important concept for organizing
-software components.
+Now clearly a @tt{ModLight} is never a @tt{Light}, but every
+@tt{ModLight} is an @tt{ILight}.  Moreover, any program that is
+written for @tt{ILight}s will work @emph{no matter what implementation
+we use}.  So notice that the world program only assumes that its
+@tt{light} field is an @tt{ILight}; this is easy to inspect---the
+world never assumes the light is constructed in a particular way, it
+just calls @racket[next] and @racket[draw].  Which means that if we were
+to start our program off with 
 
-It is important to keep in mind that an interface is more than a set
-of method names.  Think of this analogously to structures:
-@racket[define-struct] gives you a mechanism for defining structures,
-but a structure does not a data definition make.  We now have
-@racket[define-interface], but an interface is more than a set of
-method names; it is a set of method names with contracts and purpose
-statements.  Only the method name part is enforced, but the concept of
-an interface is what's important.  It is a useful tool for organizing
-and developing software components.  @emph{Even if we didn't have
-@racket[define-interface], interfaces would be a useful conceptual
-tool for writing programs}.
+@#reader scribble/comment-reader
+(racketblock
+  (big-bang (new world% (new mod-light% 2)))
+)
+
+it would work exactly as before.
+
+@section{Representation inpedendence and extensibility}
+
+We've now developed a new concept, that of an @emph{interface}, which
+is a collection of method signatures.  We say that an object @emph{is}
+an instance of an interface whenever it implements the methods of the
+interface.
+
+The idea of an interface is already hinted at in the concept of a
+union of objects since a function over a union of data is naturally
+written as a method in each class variant of the union.  In other
+words, to be an element of the union, an object must implement all the
+methods defined for the union---the object must implement the union's
+interface.  But interfaces are about more than just unions.  By
+focusing on interfaces, we can see there are two important engineering
+principles that can be distilled even from this small program:
+
+@itemlist[#:style 'ordered
+  @item{Representation independence
+
+As we've seen with the simple world program that contains a light,
+when a program is written to use only the methods specified in an
+interface, then the program is @emph{representation independent} with
+respect to the interface; we can swap out any implementation of the
+interface without changing the behavior of the program.}
+
+  @item{Extensibility
+
+When we write interface-oriented programs, it's easy to see that they
+are @emph{extensible} since we can always design new implementations
+of an interface.  Compare this to the construction-oriented view of
+programs, which defines a set of values once and for all.}]
+
+These points become increasingly important as we design larger and
+larger programs.  Real programs consist of multiple interacting
+components, often written by different people.  Representation
+independence allows us to exchange and refine components with some
+confidence that the whole system will still work after the change.
+Extensibility allows us to add functionality to existing programs
+without having to change the code that's already been written; that's
+good since in a larger project, it may not even be possible to edit a
+component written by somebody else.
+
+Let's look at the extensiblity point in more detail.  Imagine we had
+developed the @tt{Light} data definition and its functionality along
+the lines of @emph{HtDP}.  We would have (we omit @racket[draw] for
+now):
+
+@#reader scribble/comment-reader
+(racketblock
+ ;; A Light is one of:
+ ;; - 'Red
+ ;; - 'Green
+ ;; - 'Yellow
+
+ ;; next : Light -> Light
+ ;; Next light after the given light
+ (check-expect (next 'Green) 'Yellow)
+ (check-expect (next 'Red) 'Green)
+ (check-expect (next 'Yellow) 'Red)
+ (define (next l)
+   (cond [(symbol=? 'Red l) 'Green]
+	 [(symbol=? 'Green l) 'Yellow]
+	 [(symbol=? 'Yellow l) 'Red])))
+
+Now imagine if we wanted to add a new kind of light---perhaps to
+represent a blinking yellow light.  For such lights, let's assume
+the next light is just a blinking yellow light:
+
+@#reader scribble/comment-reader
+(racketblock
+  (check-expect (next 'BlinkingYellow) 'BlinkingYellow))
+
+That's no big deal to implement @emph{if we're allowed to revise
+@racket[next]}---we just add another clause to @racket[next] handle
+@racket['BlinkingYellow] lights.  But what if we can't?  What if
+@racket[next] were part of a module provided as a library?  Well then
+life is more complicated; we'd have to write a new function, say
+@racket[fancy-next], that handled blinking lights and used
+@racket[next] for all non-blinking lights.  And while that gets us a
+new function with the desired behavior, that won't do anything for all
+the places the @racket[next] function is used.  If we're able to edit
+the code that uses @racket[next], then we can replace each use of
+@racket[next] with @racket[fancy-next], but what if we can't...?  Well
+then we're just stuck.  If we cannot change the definition of
+@racket[next] or all the places it is used, then it is not possible to
+extend the behavior of @racket[next].
+
+Now let's compare this situation to one in which the original program
+was developed with objects and interfaces.  In this situation we have
+an interface for lights and several classes, namely @racket[red%],
+@racket[yellow%], and @racket[green%] that implement the @racket[next]
+method.  Now what's involved if we want to add a variant of lights
+that represents a blinking yellow light?  We just need to write a
+class that implements @racket[next]:
+
+@#reader scribble/comment-reader
+(racketblock
+ ;; Interp: blinking yellow light
+ (define-class blinking-yellow%
+   ;; next : -> ILight
+   ;; Next light after this blinking yellow light.
+   (check-expect (send (new blinking-yellow%) next)
+		 (new blinking-yellow%))
+   (define (next) this))
+)
+
+Notice how we didn't need to edit @racket[red%], @racket[yellow%], or
+@racket[green%] at all!  So if those things are set in stone, that's
+no problem.  Likewise, programs that were written to use the light
+interface will now work even for blinking lights.  We don't need to
+edit any uses of the @racket[next] method in order to make it work for
+blinking lights.  This program is truly extensible.
 
 @section{Exercises}
 
@@ -170,7 +320,7 @@ tool for writing programs}.
 )
 
 Design an analogous class-based representation of parametric lists.
-Design a @racket[list<%>] interface that includes @racket[cons],
+Design a @tt{List} interface that includes @racket[cons],
 @racket[empty], @racket[length], @racket[append], @racket[reverse],
 @racket[map], @racket[filter], @racket[foldl], and @racket[foldr].
 
@@ -190,22 +340,10 @@ and @racket[empty].}
 Any program that interacts with either of these representations
 according to the interface should not be able to tell them apart.
 
-Use inheritance to lift method definitions to a super class to the
-full extent possible.  (@emph{Hint}: it will help if you realize that many of
-these methods may be expressed in terms of a few "core" methods.)  If
-possible, have both the recursive union representation and the wrapper
-representation share a common super class.
-
-The @racket[cons] and @racket[empty] methods have been added to
-facilitate opportunities for abstraction.  You might find them useful
-to use when you lift methods to a common super class so that the right
-kind of list (either a wrapped or a recursive union list) is
-constructed.
-
-Another hint: the names of methods we have chosen overlap with the
-name of some standard values that you may like to use when defining
-methods, especially in the wrapped list case.  If you refer to these
-names within a class, you refer to the method rather than the built-in
+Hint: the names of methods we have chosen overlap with the name of
+some standard values that you may like to use when defining methods,
+especially in the wrapped list case.  If you refer to these names
+within a class, you refer to the method rather than the built-in
 value.  If you would like to refer to the built-in value, an easy
 work-around is to do something like this:
 
@@ -219,16 +357,16 @@ of the @racket[cons] @emph{method}, you can use the name @racket[ls:cons].
 
 @subsection{Super Zombie!}
 
-Revise your design of the Zombie game to include a @racket[zombie<%>]
-and @racket[player<%>] interface.  Implement a @racket[live-zombie%]
+Revise your design of the Zombie game to include a @tt{Zombie}
+and @tt{Player} interface.  Implement a @racket[live-zombie%]
 and @racket[dead-zombie%] class that both implement your
-@racket[zombie<%>] interface; implement a @racket[player%] class that
-implements your @racket[player<%>] interface.
+@tt{Zombie} interface; implement a @racket[player%] class that
+implements your @tt{Player} interface.
 
- Do not use the functional abstraction recipe.  Instead, if you notice
- code that could be shared between the various classes you've
- designed, design super classes and use inheritance to abstract the
- duplicated code.
+@; Do not use the functional abstraction recipe.  Instead, if you notice
+@; code that could be shared between the various classes you've
+@; designed, design super classes and use inheritance to abstract the
+@; duplicated code.
 
  Design a @racket[world%] class for playing the Zombie game that
  interacts with the zombie and player objects only according to the
@@ -240,7 +378,7 @@ implements your @racket[player<%>] interface.
 
  Using your interface design from the previous problem, design a 
  @racket[modulo-player%] class and a @racket[modulo-live-zombie%]
- class that implement the @racket[player<%>] and @racket[zombie<%>]
+ class that implement the @tt{Player} and @tt{Zombie}
  interfaces, respectively.
 
  These alternative implementations should behave as follows: the
@@ -265,12 +403,12 @@ implements your @racket[player<%>] interface.
 
  @subsection{Mixed Zombie!}
 
- Experiment with different combinations of your classes from part 2
- and 3 (only the player can wrap around; only the zombies can wrap
- around; some of the zombies and the player; some of the zombies, but
- not the player, etc.) until you find a combination you like best.
- Write down an expression that launches the game using this
- combination.
+ Experiment with different combinations of your classes from the
+ previous exercises (only the player can wrap around; only the zombies
+ can wrap around; some of the zombies and the player; some of the
+ zombies, but not the player, etc.) until you find a combination you
+ like best.  Write down an expression that launches the game using
+ this combination.
 
 
 

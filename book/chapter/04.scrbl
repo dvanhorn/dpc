@@ -600,6 +600,23 @@ We arrive at the folllowing final code:
 
 @section{Exercises}
 
+@subsection{Abstracting lists}
+
+Revisit your solution to the @secref{Parametric_lists} exercise.
+
+Use inheritance to lift method definitions to a super class to the
+full extent possible.  (@emph{Hint}: it will help if you realize that many of
+these methods may be expressed in terms of a few "core" methods.)  If
+possible, have both the recursive union representation and the wrapper
+representation share a common super class.
+
+The @racket[cons] and @racket[empty] methods have been added to
+facilitate opportunities for abstraction.  You might find them useful
+to use when you lift methods to a common super class so that the right
+kind of list (either a wrapped or a recursive union list) is
+constructed.
+
+
 @subsection[#:tag "assign_range"]{Shapes}
 
 Here is the signature for a method to compute the area of a 

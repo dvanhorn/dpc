@@ -1,6 +1,7 @@
 #lang class/0
 (provide (all-defined-out))
 (require 2htdp/image)
+
 (define LIGHT-RADIUS 20)
 
 (define-class red%
@@ -44,3 +45,12 @@
 		(circle LIGHT-RADIUS "solid" "yellow"))
   (define (draw)
     (circle LIGHT-RADIUS "solid" "yellow")))
+
+
+ (define-class world%
+   (fields light)
+   (define (tick-rate) 5)
+   (define (to-draw)
+     (send (send this light) draw))
+   (define (on-tick)
+     (new world% (send (send this light) next))))
