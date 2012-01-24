@@ -71,7 +71,7 @@ adapted for functions-as-objects.
 
 
 
-@section{Exercises}
+@section[#:tag "Exercises (Ch 8.)"]{Exercises}
 
 @subsection{Functional programming with objects}
 

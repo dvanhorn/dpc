@@ -1206,5 +1206,5 @@ future.
 )
 
 
-@section{Exercises}
+@section[#:tag "Exercises (Ch 5.)"]{Exercises}
 

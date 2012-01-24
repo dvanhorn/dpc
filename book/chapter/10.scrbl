@@ -648,7 +648,7 @@ should be inserted in the left or right:
 		  (field right))]))
 ]}
 
-@section{Exercises}
+@section[#:tag "Exercises (Ch 10.)"]{Exercises}
 
 @subsection{Queues}
 

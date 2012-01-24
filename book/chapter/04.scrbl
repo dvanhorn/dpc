@@ -598,7 +598,7 @@ We arrive at the folllowing final code:
 			    (empty-scene 40 40)))
 )
 
-@section{Exercises}
+@section[#:tag "Exercises (Ch 4.)"]{Exercises}
 
 @subsection{Abstracting lists}
 
