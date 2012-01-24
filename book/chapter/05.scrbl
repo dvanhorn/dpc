@@ -135,14 +135,14 @@ let's just have the snake move.
 
     (define (on-tick)
       (new world% 
-           (send (field snake) move)
-           (field food)))
+           (send (send this snake) move)
+           (send this food)))
 
     (define (tick-rate) 1/8)
 
     (define (to-draw)
-      (send (field food) draw
-	    (send (field snake) draw MT-SCENE))))
+      (send (send this food) draw
+	    (send (send this snake) draw MT-SCENE))))
 )
 
 @section{Coordinate interface}
@@ -445,7 +445,7 @@ Our template for @racket[seg%] methods is:
 (racketblock
   ;; ? ... -> ?
   (define (seg-template ...)
-    (field x) ... (field y) ...)
+    (send this x) ... (send this y) ...)
 )
 
 We've now made a data definition for segments and committed ourselves
@@ -466,8 +466,8 @@ This satisfies part of our implementation right off the bat: we get an
 @#reader scribble/comment-reader
 (racketblock
   (define (same-pos? c)
-    (and (= (field x) (send c x))
-	 (= (field y) (send c y))))
+    (and (= (send this x) (send c x))
+	 (= (send this y) (send c y))))
 )
 }
 
@@ -509,13 +509,13 @@ And now @racket[move]:
 (racketblock
   (define (move d)
     (cond [(string=? d "up")    
-	   (new seg% (field x) (add1 (field y)))]
+	   (new seg% (send this x) (add1 (send this y)))]
 	  [(string=? d "down")  
-	   (new seg% (field x) (sub1 (field y)))]
+	   (new seg% (send this x) (sub1 (send this y)))]
 	  [(string=? d "left")  
-	   (new seg% (sub1 (field x)) (field y))]
+	   (new seg% (sub1 (send this x)) (send this y))]
 	  [(string=? d "right") 
-	   (new seg% (add1 (field x)) (field y))]))
+	   (new seg% (add1 (send this x)) (send this y))]))
 )
 }
 
@@ -533,8 +533,8 @@ And now @racket[on-board?]:
 @#reader scribble/comment-reader
 (racketblock
   (define (on-board?)
-    (and (<= 0 (field x) (sub1 WIDTH))
-         (<= 0 (field y) (sub1 HEIGHT))))
+    (and (<= 0 (send this x) (sub1 WIDTH))
+         (<= 0 (send this y) (sub1 HEIGHT))))
 )
 }
 
@@ -550,9 +550,9 @@ And finally, the @racket[x-px] and @racket[y-px] methods:
 @#reader scribble/comment-reader
 (racketblock
   (define (x-px)
-    (* (+ 1/2 (field x)) SIZE))
+    (* (+ 1/2 (send this x)) SIZE))
   (define (y-px)
-    (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE)))
+    (- HEIGHT-PX (* (+ 1/2 (send this y)) SIZE)))
 )
 }
 
@@ -575,8 +575,8 @@ design of @racket[seg%], we'll do @racket[food%] quickly:
     (fields x y)
 
     (define (same-pos? c)
-      (and (= (field x) (send c x))
-	   (= (field y) (send c y))))    
+      (and (= (send this x) (send c x))
+	   (= (send this y) (send c y))))    
 
     (define (draw scn)
       (place-image (square SIZE "solid" "green")
@@ -586,22 +586,22 @@ design of @racket[seg%], we'll do @racket[food%] quickly:
 
     (define (move d)
       (cond [(string=? d "up")    
-	     (new food% (field x) (add1 (field y)))]
+	     (new food% (send this x) (add1 (send this y)))]
 	    [(string=? d "down")  
-	     (new food% (field x) (sub1 (field y)))]
+	     (new food% (send this x) (sub1 (send this y)))]
 	    [(string=? d "left")  
-	     (new food% (sub1 (field x)) (field y))]
+	     (new food% (sub1 (send this x)) (send this y))]
 	    [(string=? d "right") 
-	     (new food% (add1 (field x)) (field y))]))
+	     (new food% (add1 (send this x)) (send this y))]))
 
     (define (on-board?)
-      (and (<= 0 (field x) (sub1 WIDTH))
-	   (<= 0 (field y) (sub1 HEIGHT))))
+      (and (<= 0 (send this x) (sub1 WIDTH))
+	   (<= 0 (send this y) (sub1 HEIGHT))))
 
     (define (x-px)
-      (* (+ 1/2 (field x)) SIZE))
+      (* (+ 1/2 (send this x)) SIZE))
     (define (y-px)
-      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+      (- HEIGHT-PX (* (+ 1/2 (send this y)) SIZE))))
 
 )
 
@@ -682,7 +682,7 @@ Now let's implement the interface.  Here's the template:
 (racketblock
   ;; ? ... -> ?
   (define (snake-template ...)
-    (field dir) ... (field segs) ...)
+    (send this dir) ... (send this segs) ...)
 )
 
 The @racket[move] method works by moving the head of the snake and 
@@ -699,9 +699,9 @@ dropping the last element of the list of segments:
 (racketblock
   (define (move)
     (new snake% 
-         (field dir)
-         (cons (send (first (field segs)) move (field dir))
-               (all-but-last (field segs)))))
+         (send this dir)
+         (cons (send (first (send this segs)) move (send this dir))
+               (all-but-last (send this segs)))))
 )
 }
 
@@ -737,9 +737,9 @@ element is dropped from the segments list:
 (racketblock
   (define (grow)
     (new snake% 
-         (field dir)
-         (cons (send (first (field segs)) move (field dir))
-               (field segs))))
+         (send this dir)
+         (cons (send (first (send this segs)) move (send this dir))
+               (send this segs))))
 )
 }
 
@@ -755,7 +755,7 @@ Now let's write the @racket[turn] method:
 @#reader scribble/comment-reader
 (racketblock
   (define (turn d)
-    (new snake% d (field segs)))
+    (new snake% d (send this segs)))
 )
 }
 
@@ -773,7 +773,7 @@ And finally, @racket[draw]:
   (define (draw scn)
     (foldl (λ (s scn) (send s draw scn))
            scn
-           (field segs)))
+           (send this segs)))
 )
 }
 
@@ -803,14 +803,14 @@ interact with it in the interactions window:
 
     (define (on-tick)
       (new world% 
-           (send (field snake) move)
-           (field food)))
+           (send (send this snake) move)
+           (send this food)))
 
     (define (tick-rate) 1/8)
 
     (define (to-draw)
-      (send (field food) draw
-	    (send (field snake) draw MT-SCENE))))
+      (send (send this food) draw
+	    (send (send this snake) draw MT-SCENE))))
 
   ;; A Coord implements:
   
@@ -843,8 +843,8 @@ interact with it in the interactions window:
   (define-class seg%
     (fields x y)
     (define (same-pos? c)
-      (and (= (field x) (send c x))
-	   (= (field y) (send c y))))
+      (and (= (send this x) (send c x))
+	   (= (send this y) (send c y))))
     (define (draw scn)
       (place-image (square SIZE "solid" "red")
 		   (x-px)
@@ -852,20 +852,20 @@ interact with it in the interactions window:
 		   scn))
     (define (move d)
       (cond [(string=? d "up")    
-	     (new seg% (field x) (add1 (field y)))]
+	     (new seg% (send this x) (add1 (send this y)))]
 	    [(string=? d "down")  
-	     (new seg% (field x) (sub1 (field y)))]
+	     (new seg% (send this x) (sub1 (send this y)))]
 	    [(string=? d "left")  
-	     (new seg% (sub1 (field x)) (field y))]
+	     (new seg% (sub1 (send this x)) (send this y))]
 	    [(string=? d "right") 
-	     (new seg% (add1 (field x)) (field y))]))
+	     (new seg% (add1 (send this x)) (send this y))]))
     (define (on-board?)
-      (and (<= 0 (field x) (sub1 WIDTH))
-	   (<= 0 (field y) (sub1 HEIGHT))))
+      (and (<= 0 (send this x) (sub1 WIDTH))
+	   (<= 0 (send this y) (sub1 HEIGHT))))
     (define (x-px)
-      (* (+ 1/2 (field x)) SIZE))
+      (* (+ 1/2 (send this x)) SIZE))
     (define (y-px)
-      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+      (- HEIGHT-PX (* (+ 1/2 (send this y)) SIZE))))
 
   (check-expect (send (new seg% 0 0) same-pos? (new seg% 0 0)) true)
   (check-expect (send (new seg% 0 0) same-pos? (new seg% 1 0)) false)
@@ -890,8 +890,8 @@ interact with it in the interactions window:
     (fields x y)
 
     (define (same-pos? c)
-      (and (= (field x) (send c x))
-	   (= (field y) (send c y))))    
+      (and (= (send this x) (send c x))
+	   (= (send this y) (send c y))))    
 
     (define (draw scn)
       (place-image (square SIZE "solid" "green")
@@ -901,22 +901,22 @@ interact with it in the interactions window:
 
     (define (move d)
       (cond [(string=? d "up")    
-	     (new food% (field x) (add1 (field y)))]
+	     (new food% (send this x) (add1 (send this y)))]
 	    [(string=? d "down")  
-	     (new food% (field x) (sub1 (field y)))]
+	     (new food% (send this x) (sub1 (send this y)))]
 	    [(string=? d "left")  
-	     (new food% (sub1 (field x)) (field y))]
+	     (new food% (sub1 (send this x)) (send this y))]
 	    [(string=? d "right") 
-	     (new food% (add1 (field x)) (field y))]))
+	     (new food% (add1 (send this x)) (send this y))]))
 
     (define (on-board?)
-      (and (<= 0 (field x) (sub1 WIDTH))
-	   (<= 0 (field y) (sub1 HEIGHT))))
+      (and (<= 0 (send this x) (sub1 WIDTH))
+	   (<= 0 (send this y) (sub1 HEIGHT))))
 
     (define (x-px)
-      (* (+ 1/2 (field x)) SIZE))
+      (* (+ 1/2 (send this x)) SIZE))
     (define (y-px)
-      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+      (- HEIGHT-PX (* (+ 1/2 (send this y)) SIZE))))
 
   ;; A Snake implements:
   
@@ -937,23 +937,23 @@ interact with it in the interactions window:
     (fields dir segs)
     (define (move)
       (new snake%
-	   (field dir)
-	   (cons (send (first (field segs)) move (field dir))
-		 (all-but-last (field segs)))))
+	   (send this dir)
+	   (cons (send (first (send this segs)) move (send this dir))
+		 (all-but-last (send this segs)))))
 
     (define (grow)
       (new snake%
-	   (field dir)
-	   (cons (send (first (field segs)) move (field dir))
-		 (field segs))))
+	   (send this dir)
+	   (cons (send (first (send this segs)) move (send this dir))
+		 (send this segs))))
     
     (define (turn d)
-      (new snake% d (field segs)))
+      (new snake% d (send this segs)))
 
     (define (draw scn)
       (foldl (λ (s scn) (send s draw scn))
 	     scn
-	     (field segs))))
+	     (send this segs))))
 
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) move)
 		(new snake% "right" (list (new seg% 1 0))))
@@ -1012,14 +1012,14 @@ future.
 
     (define (on-tick)
       (new world% 
-           (send (field snake) move)
-           (field food)))
+           (send (send this snake) move)
+           (send this food)))
 
     (define (tick-rate) 1/8)
 
     (define (to-draw)
-      (send (field food) draw
-	    (send (field snake) draw MT-SCENE))))
+      (send (send this food) draw
+	    (send (send this snake) draw MT-SCENE))))
 
   ;; A Coord implements:
   
@@ -1052,8 +1052,8 @@ future.
   (define-class seg%
     (fields x y)
     (define (same-pos? c)
-      (and (= (field x) (send c x))
-	   (= (field y) (send c y))))
+      (and (= (send this x) (send c x))
+	   (= (send this y) (send c y))))
     (define (draw scn)
       (place-image (square SIZE "solid" "red")
 		   (x-px)
@@ -1061,20 +1061,20 @@ future.
 		   scn))
     (define (move d)
       (cond [(string=? d "up")    
-	     (new seg% (field x) (add1 (field y)))]
+	     (new seg% (send this x) (add1 (send this y)))]
 	    [(string=? d "down")  
-	     (new seg% (field x) (sub1 (field y)))]
+	     (new seg% (send this x) (sub1 (send this y)))]
 	    [(string=? d "left")  
-	     (new seg% (sub1 (field x)) (field y))]
+	     (new seg% (sub1 (send this x)) (send this y))]
 	    [(string=? d "right") 
-	     (new seg% (add1 (field x)) (field y))]))
+	     (new seg% (add1 (send this x)) (send this y))]))
     (define (on-board?)
-      (and (<= 0 (field x) (sub1 WIDTH))
-	   (<= 0 (field y) (sub1 HEIGHT))))
+      (and (<= 0 (send this x) (sub1 WIDTH))
+	   (<= 0 (send this y) (sub1 HEIGHT))))
     (define (x-px)
-      (* (+ 1/2 (field x)) SIZE))
+      (* (+ 1/2 (send this x)) SIZE))
     (define (y-px)
-      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+      (- HEIGHT-PX (* (+ 1/2 (send this y)) SIZE))))
 
   (check-expect (send (new seg% 0 0) same-pos? (new seg% 0 0)) true)
   (check-expect (send (new seg% 0 0) same-pos? (new seg% 1 0)) false)
@@ -1099,8 +1099,8 @@ future.
     (fields x y)
 
     (define (same-pos? c)
-      (and (= (field x) (send c x))
-	   (= (field y) (send c y))))    
+      (and (= (send this x) (send c x))
+	   (= (send this y) (send c y))))    
 
     (define (draw scn)
       (place-image (square SIZE "solid" "green")
@@ -1110,22 +1110,22 @@ future.
 
     (define (move d)
       (cond [(string=? d "up")    
-	     (new food% (field x) (add1 (field y)))]
+	     (new food% (send this x) (add1 (send this y)))]
 	    [(string=? d "down")  
-	     (new food% (field x) (sub1 (field y)))]
+	     (new food% (send this x) (sub1 (send this y)))]
 	    [(string=? d "left")  
-	     (new food% (sub1 (field x)) (field y))]
+	     (new food% (sub1 (send this x)) (send this y))]
 	    [(string=? d "right") 
-	     (new food% (add1 (field x)) (field y))]))
+	     (new food% (add1 (send this x)) (send this y))]))
 
     (define (on-board?)
-      (and (<= 0 (field x) (sub1 WIDTH))
-	   (<= 0 (field y) (sub1 HEIGHT))))
+      (and (<= 0 (send this x) (sub1 WIDTH))
+	   (<= 0 (send this y) (sub1 HEIGHT))))
 
     (define (x-px)
-      (* (+ 1/2 (field x)) SIZE))
+      (* (+ 1/2 (send this x)) SIZE))
     (define (y-px)
-      (- HEIGHT-PX (* (+ 1/2 (field y)) SIZE))))
+      (- HEIGHT-PX (* (+ 1/2 (send this y)) SIZE))))
 
   ;; A Snake implements:
   
@@ -1146,23 +1146,23 @@ future.
     (fields dir segs)
     (define (move)
       (new snake%
-	   (field dir)
-	   (cons (send (first (field segs)) move (field dir))
-		 (all-but-last (field segs)))))
+	   (send this dir)
+	   (cons (send (first (send this segs)) move (send this dir))
+		 (all-but-last (send this segs)))))
 
     (define (grow)
       (new snake%
-	   (field dir)
-	   (cons (send (first (field segs)) move (field dir))
-		 (field segs))))
+	   (send this dir)
+	   (cons (send (first (send this segs)) move (send this dir))
+		 (send this segs))))
     
     (define (turn d)
-      (new snake% d (field segs)))
+      (new snake% d (send this segs)))
 
     (define (draw scn)
       (foldl (λ (s scn) (send s draw scn))
 	     scn
-	     (field segs))))
+	     (send this segs))))
 
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) move)
 		(new snake% "right" (list (new seg% 1 0))))
