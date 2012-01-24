@@ -107,7 +107,7 @@ To create an animation we can make the following world:
    (define (to-draw)
      (send (send this light) draw))
    (define (on-tick)
-     (new world% (send (send this light) switch))))
+     (new world% (send (send this light) next))))
  
  (require class/universe)
  (big-bang (new world% (new red%))))
