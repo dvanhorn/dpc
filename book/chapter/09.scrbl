@@ -8,36 +8,6 @@
 
 @title{Abstraction, Invariants, Testing}
 
-@section{New language features: @r[check-expect] in new places}
-
-It's now possible to use @r[check-expect] in several places that
-didn't work before.  First, it now works inside functions.  The test
-is run @emph{every} time the function is called.  Second, it works
-inside class definitions. Tests in classes are lifted out of the
-class, so they cannot refer to fields, or directly call methods, or
-refer to @r[this]. 
-
-For example:
-@codeblock{
-#lang class/1
-(define-class c%
-  (fields x y z)
-  
-  ;; works
-  (check-expect ((new c% 1 2 3) . m) 1)
-  ;; doesn't work
-  (check-expect ((new c% 1 2 3) . m) (field x))
-  (define/public (m) 1))
-
-(define (f x)
-  (check-expect 1 1))
-(f 5)
-}
-
-When used in an expression, as in a function, @r[check-expect] does
-not produce any value, and should not be combined with any other
-expressions that do computation.  
-
 @section{Invariants of Data Structures}
 
 Here's an interface for a sorted list of numbers.
