@@ -331,8 +331,8 @@ Implement that interface in two ways:
 objects, i.e.  similar to the way you developed lists of numbers last
 week.}
 
- @item{Using a "wrapper class", i.e. design a class that has a single
-field which contains a "real" list---one built out of @racket[cons]
+ @item{Using a ``wrapper class,'' i.e. design a class that has a single
+field which contains a ``real'' list---one built out of @racket[cons]
 and @racket[empty].}
 
 ]
@@ -382,7 +382,7 @@ implements your @tt{Player} interface.
  interfaces, respectively.
 
  These alternative implementations should behave as follows: the
- player and the zombies may now "wrap around" on the screen.  If a
+ player and the zombies may now ``wrap around'' on the screen.  If a
  player goes off the top of the screen, they should re-appear on the
  bottom; if the go off of the left side, they should appear on the
  right, etc., and likewise for the zombies.  When calculating in which
