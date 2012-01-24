@@ -15,7 +15,7 @@
     (the-eval '(require book/chapter/03/light))
     the-eval))
 
-@title{Interfaces}
+@title[#:tag "Interfaces"]{Classes of Objects: Interface Definitions}
 
 In this chapter, we take an alternative perspective on defining sets
 of objects; we can characterize objects not just by their

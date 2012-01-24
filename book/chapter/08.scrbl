@@ -5,7 +5,7 @@
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
-@title[#:tag "chapter:functions"]{Functions}
+@title[#:tag "chapter:functions"]{Abstraction via Functions}
 
 Functions were a useful abstraction mechanism.
 

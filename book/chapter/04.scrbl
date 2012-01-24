@@ -14,7 +14,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title{Inheritance}
+@title[#:tag "Inheritance"]{Abstraction via Inheritance}
 
 @section{Method inheritance with binary trees}
 

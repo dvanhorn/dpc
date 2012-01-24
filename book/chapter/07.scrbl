@@ -5,11 +5,11 @@
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
-@title[#:tag "chapter:delegation"]{Delegation}
+@title[#:tag "chapter:delegation"]{Abstraction via Delegation}
 
 @section{New language features}
 
-And here.
+Here are some new language features.
 
 @subsection{Interface intheritance}
 

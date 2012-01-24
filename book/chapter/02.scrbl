@@ -12,7 +12,7 @@
     (the-eval '(require 2htdp/image))
     the-eval))
 
-@title{Designing Classes}
+@title{Classes of Objects: Data Definitions}
 
 One of the most important lessons of @emph{How to Design Programs} is
 that the structure of code follows the structure of the data it
