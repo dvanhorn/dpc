@@ -458,3 +458,4 @@ The client stays the same!  You can launch the two players with:
    (big-bang (new guess-world% "guess a number"))
    (big-bang (new guess-world% "guess a number"))))
 
+@include-section{06/exercises.scrbl}
