@@ -14,9 +14,10 @@
  players simultaneously hit each other, or both hit a wall or trail at
  the same time, the game is a tie.
 
- Here's a screenshot of playing the game:
+ @;Here's a screenshot of playing the game:
 
- @image["chapter/06/tron1.png"]
+ @;Doesn't work from web -- how can this be resolved through library paths?
+ @;image["book/chapter/06/tron1.png"]
 
  Here's a
  @link["http://www.classicgamesarcade.com/game/21670/Tron-Game.html"]{flash
