@@ -57,7 +57,10 @@
   (define-syntax-class (member-def names)
     #:literals (define/public define/private)
     (pattern ((~or define/public #;define/private) 
-              ((~var f (member-name names)) x:id ...) e:expr)))
+              ((~var f (member-name names)) x:id ...) e:expr)
+             #:with def this-syntax)
+    (pattern (define ((~var f (member-name names)) x:id ...) e:expr)
+             #:with def #'(define/public (f x ...) e)))
   
   (syntax-parse stx #:literals (super implements fields constructor
                                       isl+:check-expect 
@@ -184,7 +187,7 @@
                 (fprintf p ")"))
                (over (custom-display p) (custom-write p))
 	       
-               <definition>
+               <definition>.def
                ...
                (begin cextra-body ...)))))))]))
 
