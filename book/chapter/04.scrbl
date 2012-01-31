@@ -178,7 +178,7 @@ even though it is only defined in @racket[bt%]:
 At this point, it is worth considering the question: what does a
 @racket[bt%] value represent?  We have arrived at the @racket[bt%]
 class as a means of abstracting identical methods in @racket[leaf%]
-and @racket[node%], but if I say @racket[(new bt%)], as I surely can,
+and @racket[node%], but if we say @racket[(new bt%)], as we surely can,
 what does that @emph{mean}?  The answer is: @emph{nothing}.
 
 Going back to our data definition for @tt{BT}s, it's clear that the
