@@ -34,7 +34,7 @@ identical:
     ...
     ;; Number -> BT
     ;; double the leaf and put the number on top
-    (define/public (double n)
+    (define (double n)
       (new node% n this this)))
   
   (define-class node%
@@ -42,7 +42,7 @@ identical:
     ...
     ;; Number -> BT
     ;; double the node and put the number on top
-    (define/public (double n)
+    (define (double n)
       (new node% n this this)))
   )
 If we think by analogy to the structural version of this code, we have
@@ -93,7 +93,7 @@ we define a third class that contains the method shared among
   (define-class bt%
     ;; -> BT
     ;; Double this tree and put the number on top.
-    (define/public (double n)
+    (define (double n)
       (new node% n this this)))
 )
 
@@ -113,7 +113,7 @@ without actually writing it twice:
     (fields number)
     ;; -> Number
     ;; count the number of numbers in this leaf
-    (define/public (count)
+    (define (count)
       1))
 
   (define-class node%
@@ -121,10 +121,10 @@ without actually writing it twice:
     (fields number left right)
     ;; -> Number
     ;; count the number of numbers in this node
-    (define/public (count)
+    (define (count)
       (+ 1
-	 (send (field left) count)
-	 (send (field right) count))))
+	 (send (send this left) count)
+	 (send (send this right) count))))
 )
 
 To accomodate this new feature---@emph{inheritance}---we need to
@@ -140,7 +140,7 @@ difference is the addition of the @racket[(super _class-name)] form.
      (define-class bt%
        ;; -> BT
        ;; Double this tree and put the number on top.
-       (define/public (double n)
+       (define (double n)
 	 (new node% n this this)))
 
      (define-class node%
@@ -148,17 +148,17 @@ difference is the addition of the @racket[(super _class-name)] form.
        (fields number left right)
        ;; -> Number
        ;; count the number of numbers in this node
-       (define/public (count)
+       (define (count)
 	 (+ 1
-	    (send (field left) count)
-	    (send (field right) count))))
+	    (send (send this left) count)
+	    (send (send this right) count))))
 
      (define-class leaf%
        (super bt%)
        (fields number)
        ;; -> Number
        ;; count the number of numbers in this leaf
-       (define/public (count)
+       (define (count)
 	 1))))
 
 @(the-eval '(require 'm))
@@ -212,14 +212,14 @@ super class and eliminate the duplicated field in the subclasses:
    (fields number)
    ;; -> BT
    ;; Double this tree and put the number on top.
-   (define/public (double n)
+   (define (double n)
      (new node% n this this)))
 
  (define-class leaf%
    (super bt%)
    ;; -> Number
    ;; count the number of numbers in this leaf
-   (define/public (count)
+   (define (count)
      1))
 
  (define-class node%
@@ -227,10 +227,10 @@ super class and eliminate the duplicated field in the subclasses:
    (fields left right)
    ;; -> Number
    ;; count the number of numbers in this node
-   (define/public (count)
+   (define (count)
      (+ 1
-	(send (field left) count)
-	(send (field right) count)))))
+	(send (send this left) count)
+	(send (send this right) count)))))
 
 
 The @racket[leaf%] and @racket[node%] class now inherit both the
@@ -255,7 +255,7 @@ right subtree, and @emph{then} the number at that node:
        (fields number)
        ;; -> BT
        ;; Double this tree and put the number on top.
-       (define/public (double n)
+       (define (double n)
 	 (new node% n this this)))
 
      (define-class node%
@@ -263,16 +263,16 @@ right subtree, and @emph{then} the number at that node:
        (fields left right)
        ;; -> Number
        ;; count the number of numbers in this node
-       (define/public (count)
+       (define (count)
 	 (+ 1
-	    (send (field left) count)
-	    (send (field right) count))))
+	    (send (send this left) count)
+	    (send (send this right) count))))
 
      (define-class leaf%
        (super bt%)
        ;; -> Number
        ;; count the number of numbers in this leaf
-       (define/public (count)
+       (define (count)
 	 1))))
 
 @(the-eval '(require 'n))
@@ -306,37 +306,37 @@ then values for its inherited fields.}
    (fields number)
    ;; -> BT
    ;; Double this tree and put the number on top.
-   (define/public (double n)
+   (define (double n)
      (new node% this this n)))
 
  (define-class leaf%
    (super bt%)
    ;; -> Number
    ;; count the number of numbers in this leaf
-   (define/public (count)
+   (define (count)
      1)
 
    ;; -> Number
    ;; sum all the numbers in this leaf
-   (define/public (sum)
-     (field number)))
+   (define (sum)
+     (send this number)))
 
  (define-class node%
    (super bt%)
    (fields left right)
    ;; -> Number
    ;; count the number of numbers in this node
-   (define/public (count)
+   (define (count)
      (+ 1
-	(send (field left) count)
-	(send (field right) count)))
+	(send (send this left) count)
+	(send (send this right) count)))
 
    ;; -> Number
    ;; sum all the numbers in this node
-   (define/public (sum)
-     (+ (field number)
-	(send (field left) sum)
-	(send (field right) sum))))
+   (define (sum)
+     (+ (send this number)
+	(send (send this left) sum)
+	(send (send this right) sum))))
 )
 
 As you can see, both of the @racket[sum] methods refer to the
@@ -401,15 +401,15 @@ the scene at the appropriate position:
    (fields radius)
    
    ;; -> +Real
-   (define/public (area)
-     (* pi (sqr (field radius))))
+   (define (area)
+     (* pi (sqr (send this radius))))
    
    ;; Scene -> Scene
    ;; Draw this circle on the scene.
-   (define/public (draw-on scn)
-     (place-image (circle (field radius) "solid" "black")
-		  (field x)
-		  (field y)
+   (define (draw-on scn)
+     (place-image (circle (send this radius) "solid" "black")
+		  (send this x)
+		  (send this y)
 		  scn)))
 
  (define-class rect%
@@ -418,16 +418,16 @@ the scene at the appropriate position:
    
    ;; -> +Real
    ;; Compute the area of this rectangle.
-   (define/public (area)
-     (* (field width)
-	(field height)))
+   (define (area)
+     (* (send this width)
+	(send this height)))
    
    ;; Scene -> Scene
    ;; Draw this rectangle on the scene.
-   (define/public (draw-on scn)
-     (place-image (rectangle (field width) (field height) "solid" "black")
-		  (field x)
-		  (field y)
+   (define (draw-on scn)
+     (place-image (rectangle (send this width) (send this height) "solid" "black")
+		  (send this x)
+		  (send this y)
 		  scn)))
 )
 
@@ -441,10 +441,10 @@ the scene at the appropriate position:
        
        ;; Scene -> Scene
        ;; Draw this shape on the scene.
-       (define/public (draw-on scn)
+       (define (draw-on scn)
 	 (place-image (send this img)
-		      (field x)
-		      (field y)
+		      (send this x)
+		      (send this y)
 		      scn)))
 
      (define-class circ%
@@ -452,13 +452,13 @@ the scene at the appropriate position:
        (fields radius)
        
        ;; -> +Real
-       (define/public (area)
-	 (* pi (sqr (field radius))))
+       (define (area)
+	 (* pi (sqr (send this radius))))
        
        ;; -> Image
        ;; Render this circle as an image.
-       (define/public (img)
-	 (circle (field radius) "solid" "black")))
+       (define (img)
+	 (circle (send this radius) "solid" "black")))
 
      (define-class rect%
        (super shape%)
@@ -466,14 +466,14 @@ the scene at the appropriate position:
        
        ;; -> +Real
        ;; Compute the area of this rectangle.
-       (define/public (area)
-	 (* (field width)
-	    (field height)))
+       (define (area)
+	 (* (send this width)
+	    (send this height)))
        
        ;; -> Image
        ;; Render this rectangle as an image.
-       (define/public (img)
-	 (rectangle (field width) (field height) "solid" "black")))))
+       (define (img)
+	 (rectangle (send this width) (send this height) "solid" "black")))))
 
 @(the-eval '(require 'p))
 
@@ -505,10 +505,10 @@ now be lifted to the super class:
 
    ;; Scene -> Scene
    ;; Draw this shape on the scene.
-   (define/public (draw-on scn)
+   (define (draw-on scn)
      (place-image (img)
-		  (field x)
-		  (field y)
+		  (send this x)
+		  (send this y)
 		  scn)))
 )
 
@@ -546,10 +546,10 @@ We arrive at the folllowing final code:
    
    ;; Scene -> Scene
    ;; Draw this shape on the scene.
-   (define/public (draw-on scn)
+   (define (draw-on scn)
      (place-image (send this img)
-		  (field x)
-		  (field y)
+		  (send this x)
+		  (send this y)
 		  scn)))
 
  (define-class circ%
@@ -558,13 +558,13 @@ We arrive at the folllowing final code:
    
    ;; -> +Real
    ;; Compute the area of this circle.
-   (define/public (area)
-     (* pi (sqr (field radius))))
+   (define (area)
+     (* pi (sqr (send this radius))))
    
    ;; -> Image
    ;; Render this circle as an image.
-   (define/public (img)
-     (circle (field radius) "solid" "black")))
+   (define (img)
+     (circle (send this radius) "solid" "black")))
 
  (define-class rect%
    (super shape%)
@@ -572,14 +572,14 @@ We arrive at the folllowing final code:
    
    ;; -> +Real
    ;; Compute the area of this rectangle.
-   (define/public (area)
-     (* (field width)
-	(field height)))
+   (define (area)
+     (* (send this width)
+	(send this height)))
    
    ;; -> Image
    ;; Render this rectangle as an image.
-   (define/public (img)
-     (rectangle (field width) (field height) "solid" "black")))
+   (define (img)
+     (rectangle (send this width) (send this height) "solid" "black")))
 
  (check-expect (send (new rect% 10 20 0 0) area)
 	       200)
