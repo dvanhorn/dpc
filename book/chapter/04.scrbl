@@ -204,7 +204,7 @@ observe that there are data similarities between @racket[leaf%] and
 @racket[node%].  In particular, both @racket[leaf%] and @racket[node%]
 contain a @racket[number] field.  This field can be abstracted just
 like @racket[double] was---we can lift the field to the @racket[bt%]
-super class and elimate the duplicated field in the subclasses:
+super class and eliminate the duplicated field in the subclasses:
 
 @#reader scribble/comment-reader
 (racketblock
