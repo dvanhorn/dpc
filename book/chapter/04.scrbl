@@ -235,8 +235,8 @@ super class and elimate the duplicated field in the subclasses:
 
 The @racket[leaf%] and @racket[node%] class now inherit both the
 @racket[number] field and the @racket[double] method from
-@racket[bt%].  This has a consequence for making new instances.
-Previously it was straightforward to make an object: you write
+@racket[bt%].  This has a consequence for constructing new instances.
+Previously it was straightforward to construct an object: you write
 down @racket[new], the class name, and as many expressions as there
 are fields in the class.  But now that a class may inherit fields, you
 must write down as many expressions as there are fields in the class
@@ -244,7 +244,7 @@ definition itself and in all of the super classes.  What's
 more, the order of arguments is important.  The fields defined in the
 class come first, followed by the fields in the immediate super class,
 followed by the super class's super classes, and so on.  Hence, we
-still instantiate @racket[leaf%]s as before, but the arguments to @racket[new]
+still construct @racket[leaf%]s as before, but the arguments to @racket[new]
 for @racket[node%] are changed: it takes the left subtree, the
 right subtree, and @emph{then} the number at that node:
 
