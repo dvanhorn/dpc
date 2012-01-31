@@ -127,7 +127,7 @@ without actually writing it twice:
 	 (send (send this right) count))))
 )
 
-To accomodate this new feature---@emph{inheritance}---we need to
+To accommodate this new feature---@emph{inheritance}---we need to
 adjust our programming language.  We'll now program in
 @racketmodname[class/1], which is a superset of
 @racketmodname[class/0]---all @racketmodname[class/0] programs are
@@ -348,7 +348,7 @@ Let's consider another example and see how data and method inheritance
 manifests.  This example will raise some interesting issues for how
 super classes can invoke the methods of its subclasses.  Suppose we
 are writing a program that deals with shapes that have position.  To
-keep the example succint, we'll consider two kinds of shapes: circles
+keep the example succinct, we'll consider two kinds of shapes: circles
 and rectangles.  This leads us to a union data definition (and class
 definitions) of the following form:
 
@@ -390,7 +390,7 @@ fields:
    (fields width height))
 )
 
-Now let's add a couple methods: @racket[area] will compute the area of the
+Now let's add a couple of methods: @racket[area] will compute the area of the
 shape, and @racket[draw-on] will take a scene and draw the shape on
 the scene at the appropriate position:
 
@@ -491,7 +491,7 @@ method are largely the same.  If they were @emph{identical}, it would
 be easy to abstract the method, but until the two methods are
 identical, we cannot lift the definition to the super class.  One way
 forward is to rewrite the methods by pulling out the parts that differ
-and making them seperate methods.  What differs between these two
+and making them separate methods.  What differs between these two
 methods is the expression constructing the image of the shape, which
 suggests defining a new method @racket[img] that constructs the image.
 The @racket[draw-on] method can now call @racket[img] and rewriting it
@@ -513,7 +513,7 @@ now be lifted to the super class:
 )
 
 But there is a problem with this code.  While this code makes sense
-when it occurrs inside of @racket[rect%] and @racket[circ%], it
+when it occurs inside of @racket[rect%] and @racket[circ%], it
 doesn't make sense inside of @racket[shape%].  In particular, what
 does @racket[img] mean here?  The @racket[img] method is a method of
 @racket[rect%] and @racket[circ%], but not of @racket[shape%],
@@ -530,7 +530,7 @@ would fail if @racket[this] referred to a @racket[shape%], but remember
 that @racket[shape%]s don't make sense as objects in their own right
 and should never be constructed).
 
-We arrive at the folllowing final code:
+We arrive at the following final code:
 
 @#reader scribble/comment-reader
 (racketmod
