@@ -54,6 +54,8 @@ means exclude.
 ]
 
 @section{Zombie!}
+
+@margin-note{@secref{Zombie_solution}}
        
 Design and develop an interactive game called @emph{Zombie!}.  In this
 game, there are a number of zombies that are coming to eat your
@@ -74,15 +76,15 @@ in @link["http://landoflisp.com/"]{Land of Lisp}.  Unlike the Land of
 Lisp version, this game is graphical and interactive rather than
 text-based.  Hence, our game doesn't suck.)
 
-You can play the game by running:
+@;You can play the game by running:
 
-@#reader scribble/comment-reader
-(racketmod
-class/0
-(require class/0/zombie)
-(require class/universe)
-(big-bang zombie!)
-)
+@;@#reader scribble/comment-reader
+@;(racketmod
+@;class/0
+@;(require class/0/zombie)
+@;(require class/universe)
+@;(big-bang zombie!)
+@;)
 
 Once you have a working version of the game, add the following
 feature: whenever the user does a mouse-click, the player should be
