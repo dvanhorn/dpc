@@ -22,10 +22,12 @@
 
 (define-syntax (my-app stx)
   (syntax-parse stx #:literals (|.|)
-    [(_ rcvr:expr |.| meth:id (~and (~not |.|) args:expr) ...)
-     #'(send rcvr meth args ...)]
-    [(_ rcvr:expr |.| meth:id (~and (~not |.|) args:expr) ... rest:expr ...)
-     #'(my-app (send rcvr meth args ...) rest ...)]
+    [(_ rcvr:expr (~and dot |.|) meth:id (~and (~not |.|) args:expr) ...)
+     (syntax-property #'(send rcvr meth args ...)
+                      'disappeared-use #'dot)]
+    [(_ rcvr:expr (~and dot |.|) meth:id (~and (~not |.|) args:expr) ... rest:expr ...)
+     (syntax-property #'(my-app (send rcvr meth args ...) rest ...)
+                      'disappeared-use #'dot)]
     [(_ e ...)
      #'(#%app e ...)]))
       
