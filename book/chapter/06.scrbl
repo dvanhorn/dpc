@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class/1 define-struct ... length))
+          (for-label (except-in class/0 define-struct ... length))
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
@@ -67,21 +67,21 @@ Let's start with the counting world program:
 
 @#reader scribble/comment-reader
 (racketmod
-  class/1
+  class/0
   (require class/universe)
   (require 2htdp/image)
   
   (define-class counter-world%
     (fields n)
   
-    (define/public (on-tick)
-      (new counter-world% (add1 (field n))))
+    (define (on-tick)
+      (new counter-world% (add1 (send this n))))
   
-    (define/public (tick-rate)
+    (define (tick-rate)
       1)
   
-    (define/public (to-draw)
-      (overlay (text (number->string (field n))
+    (define (to-draw)
+      (overlay (text (number->string (send this n))
                      40
                      "red")
                (empty-scene 300 100))))
@@ -100,7 +100,7 @@ is bound to the address of our computer.)
 @filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
-  (define/public (register) LOCALHOST)
+  (define (register) LOCALHOST)
 )
 }
 
@@ -135,15 +135,15 @@ the @racket[on-msg]:
 
 @#reader scribble/comment-reader
 (racketmod
-  class/1
+  class/0
   (require class/universe)
 
   (define-class universe%
     ;; IWorld -> Bundle
-    (define/public (on-new iw) ...)
+    (define (on-new iw) ...)
   
     ;; IWorld S-Expr -> Bundle
-    (define/public (on-msg iw m) ...))
+    (define (on-msg iw m) ...))
 )
 
 When a world registers, the @racket[on-new] method is called with an
@@ -176,16 +176,16 @@ response, and disconnect no worlds:
 
 @#reader scribble/comment-reader
 (racketmod 
-  class/1
+  class/0
   (require class/universe)
 
   (define-class universe%
     ;; IWorld -> Bundle
-    (define/public (on-new iw) 
+    (define (on-new iw) 
       (make-bundle this empty empty))
     
     ;; IWorld S-Expr -> Bundle
-    (define/public (on-msg iw m)
+    (define (on-msg iw m)
       (make-bundle this empty empty)))
   
   (universe (new universe%)) 
@@ -208,8 +208,8 @@ That requires changing our on-tick method from:
 @filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
-  (define/public (on-tick)
-    (new counter-world% (add1 (field n))))
+  (define (on-tick)
+    (new counter-world% (add1 (send this n))))
 )
 }
 
@@ -218,9 +218,9 @@ to one that constructs a package:
 @filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
-  (define/public (on-tick)
-    (make-package (new counter-world% (add1 (field n)))
-		  (add1 (field n))))
+  (define (on-tick)
+    (make-package (new counter-world% (add1 (send this n)))
+		  (add1 (send this n))))
 )
 }
 
@@ -241,10 +241,10 @@ computation, but only communication:
 @filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
-  (define/public (on-tick)
-    (make-package this (field n)))
+  (define (on-tick)
+    (make-package this (send this n)))
   
-  (define/public (on-receive m)
+  (define (on-receive m)
     (new counter-world% m))
 )
 }
@@ -263,7 +263,7 @@ by the IWorld value consisting of the S-Exp value.
 @filebox[@r[universe%]]{
 @#reader scribble/comment-reader
 (racketblock
-  (define/public (on-msg iw m)
+  (define (on-msg iw m)
     (make-bundle this 
 		 (list (make-mail iw (add1 m))) 
 		 empty))
@@ -311,18 +311,18 @@ Here's the server:
 
 @#reader scribble/comment-reader
 (racketmod
-  class/1
+  class/0
   (require class/universe)
 
   (define-class universe%
     (fields the-number)
     
-    (define/public (on-new iw) 
+    (define (on-new iw) 
       (make-bundle this empty empty))
     
-    (define/public (on-msg iw m)
+    (define (on-msg iw m)
       (make-bundle this 
-		   (list (make-mail iw (respond m (field the-number))))
+		   (list (make-mail iw (respond m (send this the-number))))
 		   empty)))
 
   ;; Number Number -> String
@@ -344,29 +344,29 @@ Here is the client:
 
 @#reader scribble/comment-reader
 (racketmod
-  class/1
+  class/0
   (require class/universe)
   (require 2htdp/image)
 
   (define-class guess-world%
     (fields status)
     
-    (define/public (on-receive m)
+    (define (on-receive m)
       (new guess-world% m))
       
-    (define/public (to-draw)
-      (overlay (text (field status)
+    (define (to-draw)
+      (overlay (text (send this status)
 		     40
 		     "red")
 	       (empty-scene 300 100)))
     
-    (define/public (on-key k)
+    (define (on-key k)
       (local [(define n (string->number k))]
         (if (number? n)
 	    (make-package this n)
 	    this)))                    
   
-    (define/public (register) LOCALHOST))
+    (define (register) LOCALHOST))
 
   (big-bang (new guess-world% "guess a number"))
 )
@@ -389,7 +389,7 @@ Here is the server:
 
 @#reader scribble/comment-reader
 (racketmod
-  class/1
+  class/0
   (require class/universe)
 
   ;; A Universe is a (new universe% [U #f Number] [U #f IWorld] [U #f IWorld]).
@@ -399,42 +399,42 @@ Here is the server:
 	    guesser)
     
     ;; is the given world the picker?
-    (define/public (picker? iw)
-      (and (iworld? (field picker))
-	   (iworld=? iw (field picker))))
+    (define (picker? iw)
+      (and (iworld? (send this picker))
+	   (iworld=? iw (send this picker))))
     
     ;; is the given world the guesser?
-    (define/public (guesser? iw)
-      (and (iworld? (field guesser))
-	   (iworld=? iw (field guesser))))
+    (define (guesser? iw)
+      (and (iworld? (send this guesser))
+	   (iworld=? iw (send this guesser))))
     
-    (define/public (on-new iw)
-      (cond [(false? (field picker))
+    (define (on-new iw)
+      (cond [(false? (send this picker))
 	     (make-bundle
 	      (new universe% false iw false)
 	      (list (make-mail iw "pick a number"))
 	      empty)]          
-	    [(false? (field guesser))
+	    [(false? (send this guesser))
 	     (make-bundle
-	      (new universe% (field number) (field picker) iw)
+	      (new universe% (send this number) (send this picker) iw)
 	      empty
 	      empty)]          
 	    [else
 	     (make-bundle this empty (list iw))]))
     
-    (define/public (on-msg iw m)
+    (define (on-msg iw m)
       (cond [(and (picker? iw)
-		  (false? (field number)))           
+		  (false? (send this number)))           
 	     (make-bundle
-	      (new universe% m (field picker) (field guesser))
+	      (new universe% m (send this picker) (send this guesser))
 	      empty
 	      empty)]
 	    [(picker? iw) ;; already picked a number
 	     (make-bundle this empty empty)]
 	    [(and (guesser? iw)
-		  (number? (field number)))
+		  (number? (send this number)))
 	     (make-bundle this 
-			  (list (make-mail iw (respond m (field number))))
+			  (list (make-mail iw (respond m (send this number))))
 			  empty)]
 	    [(guesser? iw)
 	     (make-bundle this
