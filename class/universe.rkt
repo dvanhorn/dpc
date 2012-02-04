@@ -19,7 +19,10 @@
            (send/apply w on-event args)
            (default w)))]))
 
-
+;; Any -> Bundle
+(define (bundlize v)
+  (cond [(bundle? v) v]
+        [else (make-bundle v empty empty)]))
 
 
 (define (universe* o)
@@ -28,19 +31,23 @@
               (on-new 
                (if (method-in-interface? 'on-new i)
                    (λ (u iw)
-                     (send u on-new iw))
-                   (error "Must supply an on-new method.")))
+                     (bundlize (send u on-new iw)))
+                   (λ (u iw)
+                     (make-bundle u empty empty))))
               
               (on-msg
                (if (method-in-interface? 'on-msg i)
                    (λ (u iw msg)
-                     (send u on-msg iw msg))
-                   (error "Must supply an on-msg method.")))
+                     (bundlize (send u on-msg iw msg)))
+                   (λ (u iw msg)
+                     (make-bundle u empty empty))))
               
               (on-tick
-               (m on-tick 
-                  (λ (u)
-                    (make-bundle u empty empty)))
+               (if (method-in-interface? 'on-tick i)
+                   (λ (u)
+                     (bundlize (send u on-tick)))                   
+                   (λ (u)                   
+                    (make-bundle u empty empty)))               
                (if (method-in-interface? 'tick-rate i)
                    (send o tick-rate)
                    (if (method-in-interface? 'on-tick i)
