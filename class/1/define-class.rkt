@@ -1,6 +1,6 @@
 #lang racket
 (provide (all-defined-out))
-(provide new send define/public define/private this field fields)
+(provide new send this field fields)
 
 (require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
 (require (prefix-in isl+: (only-in "../test-engine/racket-tests.rkt"
@@ -41,10 +41,7 @@
              (memf (λ (id) (eq? (syntax-e id) (syntax-e #'name))) names) 
              "duplicate class member name"))
   (define-syntax-class (member-def names)
-    #:literals (define define/public define/private)
-    (pattern ((~or define/public #;define/private)
-              ((~var f (member-name names)) x:id ...) e:expr)
-             #:with def this-syntax)
+    #:literals (define)
     (pattern (define ((~var f (member-name names)) x:id ...) e:expr)
              #:with def #'(define/public (f x ...) e)))
   
