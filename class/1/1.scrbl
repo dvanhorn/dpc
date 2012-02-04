@@ -15,7 +15,7 @@
 @defform[(require module-name ...)]{
 Imports all the modules named @racket[module-name]s.}
 
-@defform/subs[#:literals (fields implements define/public define/private super)
+@defform/subs[#:literals (fields implements define super)
               (define-class class-name 
                 super-spec
 		implements-spec
@@ -27,9 +27,7 @@ Imports all the modules named @racket[module-name]s.}
 	       			(implements interface-name ...)]
                [fields-spec code:blank
                             (fields field-name ...)]
-               [method-spec (define/public (method-name arg ...)
-                              body)
-                            (define/private (method-name arg ...)
+               [method-spec (define (method-name arg ...)
                               body)])]{
 
 Defines a new class named @racket[class-name], much like as with
@@ -46,11 +44,11 @@ class.
 @interaction[#:eval the-eval
 (define-class c%
   (fields x)
-  (define/public (m) 'm!))
+  (define (m) 'm!))
 (define-class d%
   (super c%)
   (fields y)
-  (define/public (n) 'n!))
+  (define (n) 'n!))
 (define d (new d% 'y! 'x!))
 (send d m)
 (send d n)
@@ -70,8 +68,7 @@ See @racket[define-class] and @racket[define-interface].}
 @deftogether[
 [@defidform[this]
  @defform[(fields id ...)]
- @defform[(define/public (method-name id ...) body)]
- @defform[(define/private (method-name id ...) body)]
+ @defform[(define (method-name id ...) body)]
  @defform[(new class-name arg ...)]
  @defform[(field field-name)]
  @defform[(send object message arg ...)]]]{
