@@ -197,7 +197,7 @@ method to maintain the sorted list invariant:
 
 @racketblock[
 (code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
-(define (build-sorted)
+(define (build-sorted i f)
   (cond [(zero? i) (new smt%)]
 	[else
 	 ((build-sorted (sub1 i) f) #,(racketidfont ".") insert (f i))]))
