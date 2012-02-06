@@ -181,7 +181,7 @@ holds. First, let's build a random sorted list generator.
 
 @racketblock[
 (code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
-(define (build-sorted)
+(define (build-sorted i f)
   (cond [(zero? i) (new smt%)]
 	[else
 	 (new scons% 
