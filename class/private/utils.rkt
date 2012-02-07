@@ -69,3 +69,9 @@
                             (fprintf p " ~v" (acc s))
                             ...
                             (fprintf p ")"))))]))
+
+
+(define-syntax (instanceof stx)
+  (syntax-parse stx
+    [(_ e:expr cls:cls-name)
+     #'(r:is-a? e cls.real-name)]))

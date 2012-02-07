@@ -15,7 +15,7 @@
 
 (define reserved-words
   '(field define super define/public define/private fields
-          constructor))
+          constructor set-field!))
 
 (define-syntax-class (member-name names)    
   (pattern name:id

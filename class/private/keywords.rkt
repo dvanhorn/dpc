@@ -7,4 +7,4 @@
     ...
     (provide id ...)))
 
-(def-kw super implements field fields constructor)
+(def-kw super implements field fields constructor set-field!)
