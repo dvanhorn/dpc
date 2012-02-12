@@ -34,9 +34,7 @@ Makes all of the @racket[id]s available to other modules.}
                             (fields field-name ...)]
                [constructor-spec code:blank
                             (constructor (arg ...) body ...)]
-               [method-spec (define/public (method-name arg ...)
-                              body)
-                            (define/private (method-name arg ...)
+               [method-spec (define (method-name arg ...)
                               body)])]{
 
 Defines a new class named @racket[class-name], much like as with
@@ -47,6 +45,10 @@ interfaces using @racket[(implements interface-name ...)].
 
 When a class definition declares a super class, it inherits all of the
 super class's fields and methods.  
+
+If a method definition defines the same method name as a method in the
+super class, then that method definition @emph{overrides} the
+definition in the super class.  The super class method can be called with 
 
 If no @racket[constructor-spec] is provided, the default constructor simply
 accepts as many  arguments as the class has fields, and initializes

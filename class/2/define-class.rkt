@@ -48,12 +48,13 @@
              (memf (λ (id) (eq? (syntax-e id) (syntax-e #'name))) names) 
              "duplicate class member name"))
   (define-syntax-class (member-def names)
-    #:literals (define define/public define/private)
-    (pattern ((~or define/public #;define/private) 
-              ((~var f (member-name names)) x:id ...) e:expr)
-             #:with def this-syntax)
-    (pattern (define ((~var f (member-name names)) x:id ...) e:expr)
-             #:with def #'(define/public (f x ...) e)))
+    #:literals (define)
+    (pattern (define ((~var f (member-name names)) x:id ...) e:expr)             
+             #:with def (with-syntax ([super (datum->syntax #'e 'super)])
+                          #'(define (f x ...) (let-syntax ([super (syntax-parser
+                                                                   [(_ args (... ...))
+                                                                    #'(r:super f args (... ...))])])
+                                                e)))))
   
   (syntax-parse stx #:literals (super implements fields constructor
                                       isl+:check-expect 
@@ -86,13 +87,27 @@
        ...)
      #:with -class% (datum->syntax #f (syntax-e #'class%))
      (with-syntax* ([field (datum->syntax stx 'field)]
+                    [fake-super (datum->syntax stx 'super)]
+
+                    [fake-this (datum->syntax stx 'this)]
                     [fields (datum->syntax stx 'fields)]
                     [(the-fld ...)
                      (generate-temporaries (syntax (fld ...)))]
                     [(the-fld2 ...)
                      (generate-temporaries (syntax (fld ...)))]
-                    [(super-methods ...) (attribute super%.methods)]
-                    [(meths ...) #'(super-methods ... <definition>.f ...)]
+                    [(super-methods/inherit ...) (for/list ([m (attribute super%.methods)]
+                                                            #:when (not (memf (λ (e) (free-identifier=? m e))
+                                                                              (syntax->list #'(<definition>.f ...)))))
+                                                   m)]
+                    [(super-methods/over ...) (for/list ([m (attribute super%.methods)]
+                                                            #:when (memf (λ (e) (free-identifier=? m e))
+                                                                         (syntax->list #'(<definition>.f ...))))
+                                                   m)]
+                    [(meths/new ...) (for/list ([m (syntax->list #'(<definition>.f ...))]
+                                                #:when (not (memf (λ (e) (free-identifier=? m e))
+                                                                  (syntax->list #'(super-methods/over ...)))))
+                                                   m)]
+                    [(meths ...) #'(super-methods/inherit ... super-methods/over ... <definition>.f ...)]
                     [(inherit-fld ...)
                      (map second (attribute super%.fields))]
                     ;; the real names
@@ -123,21 +138,28 @@
               (r:init cargs ...)
               (r:field (the-fld (void)) ...)
               (r:let-values ([(the-fld2 ... inherit-fld ...)
-                              (let-syntax ([fields (make-rename-transformer #'wrap)])
-				(let ([v cbody])
-				  (if (field-wrapper? v)
-				      (apply values (field-wrapper-vals v))
-				      (error 
-				       'class% 
-				       "constructor must use `fields' to produce result"))))])
+                              (let-syntax ([fields (make-rename-transformer #'wrap)]
+                                           [fake-this
+                                            (λ (stx)
+                                              (raise-syntax-error 
+                                               #f 
+                                               "`this' may not be used before initialization"
+                                               stx))])
+                                (let ([v cbody])
+                                  (if (field-wrapper? v)
+                                      (apply values (field-wrapper-vals v))
+                                      (error 
+                                       'class% 
+                                       "constructor must use `fields' to produce result"))))])
                             (r:set! the-fld the-fld2) ...
                             (r:super-make-object inherit-fld ...))
-              (r:inherit super-methods) ...
+              (r:inherit super-methods/inherit) ...
+              (r:override super-methods/over) ...
               #;(r:super-new)
               (r:define/public (fld) the-fld)
               ...
-              (splicing-let-syntax
-               ([field 
+	      (splicing-let-syntax
+	       ([field 
                   (λ (stx)
                     (syntax-parse stx
                       [(_ arg) 
@@ -158,6 +180,7 @@
                 (fprintf p ")"))
                (over (custom-display p) (custom-write p))
 	       
+               (public meths/new) ...
                <definition>.def
                ...))))))]))
 
