@@ -95,16 +95,22 @@
                      (generate-temporaries (syntax (fld ...)))]
                     [(the-fld2 ...)
                      (generate-temporaries (syntax (fld ...)))]
-                    [(super-methods/inherit ...) (for/list ([m (attribute super%.methods)]
-                                                            #:when (not (memf (λ (e) (free-identifier=? m e))
-                                                                              (syntax->list #'(<definition>.f ...)))))
-                                                   m)]
-                    [(super-methods/over ...) (for/list ([m (attribute super%.methods)]
-                                                            #:when (memf (λ (e) (free-identifier=? m e))
-                                                                         (syntax->list #'(<definition>.f ...))))
-                                                   m)]
+                    [(super-methods/inherit ...) 
+                     (remove-duplicates
+                      (for/list ([m (attribute super%.methods)]
+                                 #:when (not (memf (λ (e) (eq? (syntax-e m) (syntax-e e)))
+                                                   (syntax->list #'(<definition>.f ...)))))
+                        m)
+                      (λ (e m) (eq? (syntax-e m) (syntax-e e))))]
+                    [(super-methods/over ...) 
+                     (remove-duplicates
+                      (for/list ([m (attribute super%.methods)]
+                                 #:when (memf (λ (e) (eq? (syntax-e m) (syntax-e e)))
+                                              (syntax->list #'(<definition>.f ...))))
+                        m)
+                      (λ (e m) (eq? (syntax-e m) (syntax-e e))))]
                     [(meths/new ...) (for/list ([m (syntax->list #'(<definition>.f ...))]
-                                                #:when (not (memf (λ (e) (free-identifier=? m e))
+                                                #:when (not (memf (λ (e) (eq? (syntax-e m) (syntax-e e)))
                                                                   (syntax->list #'(super-methods/over ...)))))
                                                    m)]
                     [(meths ...) #'(super-methods/inherit ... super-methods/over ... <definition>.f ...)]
