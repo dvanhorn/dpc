@@ -30,7 +30,7 @@ Now let's try to implement this class.
 @racketblock[
 (define-class counter%
   (fields called)
-  (define/public (m)
+  (define (m)
     #, @(elem "hmmm")))
 ]
 
@@ -46,7 +46,7 @@ This suggests the following implementation:
 
 @filebox[@r[counter%]]{
 @racketblock[
- (define/public (m)
+ (define (m)
    (add1 (field called)))
 ]}
 
@@ -55,7 +55,7 @@ Now our all of our tests pass.
 @(the-eval '(begin
 	      (define-class counter%
 		(fields called)
-		(define/public (m) (add1 (field called))))
+		(define (m) (add1 (field called))))
 	      ))
 
 However, when we try our a few more examples, we see this:
@@ -81,7 +81,7 @@ One possibility is to change @r[m] to produce both the desired result
 
 (define-class counter%
   (fields called)
-  (define/public (m)
+  (define (m)
     (make-r
      (add1 (field called))
      (counter% (add1 (field called))))))
@@ -138,7 +138,7 @@ method:
 
 @filebox[@r[counter%]]{
 @racketblock[
-(define/public (m accum) (add1 accum))]}
+(define (m accum) (add1 accum))]}
 
 But that's a pretty boring method---it's just a wrapper around
 @r[add1].  And it's not a solution to our problem: instead of the
