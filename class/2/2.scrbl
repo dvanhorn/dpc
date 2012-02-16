@@ -19,7 +19,7 @@ Imports all the modules named @racket[module-name]s.}
 Makes all of the @racket[id]s available to other modules.}
 
 
-@defform/subs[#:literals (fields constructor implements define/public define/private super)
+@defform/subs[#:literals (fields constructor implements define super)
               (define-class class-name 
                 super-spec
 		implements-spec
@@ -68,11 +68,11 @@ class.
 @interaction[#:eval the-eval
 (define-class c%
   (fields x)
-  (define/public (m) 'm!))
+  (define (m) 'm!))
 (define-class d%
   (super c%)
   (fields y)
-  (define/public (n) 'n!))
+  (define (n) 'n!))
 (define d (new d% 'y! 'x!))
 (send d m)
 (send d n)
@@ -98,13 +98,13 @@ See @racket[define-class] and @racket[define-interface].}
 
 @deftogether[
 [@defidform[this]
+ @defidform[|.|]
  @defform[(fields id ...)]
- @defform[(define/public (method-name id ...) body)]
- @defform[(define/private (method-name id ...) body)]
+ @defform[(define (method-name id ...) body)]
  @defform[(new class-name arg ...)]
  @defform[(field field-name)]
  @defform[(send object message arg ...)]]]{
-These have the same meaning as in @racketmodname[class/0].}
+These have the same meaning as in @racketmodname[class/1].}
 
 @defform/subs[#:literals (super)
 (define-interface interface-name 
