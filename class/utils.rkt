@@ -1,11 +1,15 @@
 #lang racket
-(provide indented
+(provide classblock 
+	 indented
          exercise
          plt-filename
          dot
          scheme-from-file
 	 (rename-out [racket r]))
 (require scribble/base)
+
+(define-syntax-rule (classblock arg args ...)
+  (codeblock #:keep-lang-line? #f #:context #'arg "#lang class/2\n" arg args ...))
 
 (define (indented . args)
   (apply nested #:style 'inset args))

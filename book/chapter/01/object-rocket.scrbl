@@ -90,10 +90,11 @@ like a structure, a class definition is like a structure definition.
 @section{A class of rockets}
 
 The way to define a class is with @racket[define-class]:
-@racketblock[
+
+@classblock{
 (define-class rocket%
   (fields dist))
-]
+}
 
 This declares a new class of values, namely @racket[rocket%] objects.
 (By convention, we will use the @tt{%} suffix for the name of
@@ -123,11 +124,10 @@ using the @racket[send] form like so:
 This suggests that we can now re-write the data definition for
 @tt{Rocket}s: 
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
   ;; A Rocket is a (new rocket% NonNegativeNumber)
   ;; Interp: distance from the ground to base of rocket in AU.
-)
+}
 
 @section{The @racket[next] and @racket[render] methods}
 
@@ -135,8 +135,7 @@ To add functionality to our class, we define @emph{methods} using the
 @racket[define] form.  In this case, we want to add two methods
 @racket[next] and @racket[render]: 
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
   ;; A Rocket is a (new rocket% NonNegativeNumber)
   ;; Interp: distance from the ground to base of rocket in AU.
   (define-class rocket% 
@@ -147,7 +146,7 @@ To add functionality to our class, we define @emph{methods} using the
 
     ;; render : ...
     (define (render ...) ...))
-)
+}
 
 We will return to the contracts and code, but now that we've seen how
 to define methods, let's look at how to @emph{apply} them in order to
@@ -155,9 +154,9 @@ actually compute something.  To call a defined method, we again use
 the @racket[send] form, which takes an object, a method name, and any
 arguments to the method:
 
-@racketblock[
+@classblock{
 (send (new rocket% 7) next ...)
-]
+}
 
 This will call the @racket[next] method of the object created with
 @racket[(new rocket% 7)].  This is analogous to applying the
@@ -172,14 +171,13 @@ When we designed the functional analogues of these methods, the
 functions took as input the rocket on which they operated, i.e. they
 had headers like:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
   ;; next : Rocket -> Rocket
   ;; Compute next position of the rocket after one tick of time.
 
   ;; render : Rocket -> Scene
   ;; Render the rocket as a scene.
-)
+}
 
 But in an object, the data and functions are packaged together.
 Consequently, the method does not need to take the world input; that
@@ -195,18 +193,16 @@ refers to a rocket.
 
 That leads us to the following method headers:
 
-@#reader scribble/comment-reader
-(filebox 
- (racket rocket%)
- (racketblock
+@filebox[@racket[rocket%]]{
+@classblock{
   ;; next : -> Rocket
   ;; Compute next position of this rocket after one tick of time.
   (define (next) ...)
   
   ;; render : -> Scene
   ;; Render this rocket as a scene.
-  (define (render) ...))
- )
+  (define (render) ...)
+}}
 
 The @racket[rocket%] box is our way of saying that this code should
 live in the @racket[rocket%] class.
@@ -214,10 +210,9 @@ live in the @racket[rocket%] class.
 Since we now have contracts and have seen how to invoke methods, we
 can now formulate test cases:
 
-@#reader scribble/comment-reader
-(filebox 
- (racket rocket%)
- (racketblock
+
+@filebox[@racket[rocket%]]{
+@classblock{
   ;; next : -> Rocket
   ;; Compute next position of this rocket after one tick of time.
   (check-expect (send (new rocket% 10) next)
@@ -230,36 +225,34 @@ can now formulate test cases:
 				      ROCKET
 				      0 1
 				      MT-SCENE))
-  (define (render) ...))
- )
+  (define (render) ...)
+ }}
 
 Finally, we can write the code from our methods:
 
-@#reader scribble/comment-reader
-(filebox 
- (racket rocket%)
- (racketblock
+@filebox[@racket[rocket%]]{
+@classblock{
   (define (next)
     (new rocket% (+ (send this dist) DELTA)))
   
   (define (render)
-    (send this draw-on MT-SCENE))))
+    (send this draw-on MT-SCENE))
+}}
 
 Just as in the functional design, we choose to defer to a helper to
 draw a rocket on to the empty scene, which we develop as the following
 method:
 
-@#reader scribble/comment-reader
-(filebox 
- (racket rocket%)
- (racketblock
+@filebox[@racket[rocket%]]{
+@classblock{
   ;; draw-on : Scene -> Scene
   ;; Draw this rocket on to scene.
   (define (draw-on scn)
     (overlay/align/offset "center" "bottom" 
 			  ROCKET 
 			  0 (add1 (send this dist))
-			  scn))))
+			  scn))
+}}
 
 At this point, we can construct @racket[rocket%] objects and invoke
 methods.
@@ -289,10 +282,10 @@ objects that is of the generic form of a @|big-bang-id| animation:
 )
 
 We can again define a world as a rocket:
-@#reader scribble/comment-reader
-(racketblock
+
+@classblock{
 ;; A World is a Rocket.
-)
+}
 
 We now need to construct @racket[Rocket -> Rocket] and @racket[Rocket
 -> Scene] functions---but the work of these functions is already taken
@@ -319,8 +312,9 @@ system has an interface more suited to objects.  To import this
 OO-style @racket[big-bang], add the following to the top of your
 program:
 
-@racketblock[
-(require class/universe)]
+@classblock{
+(require class/universe)
+}
 
 In the functional setting, we had to explicitly give a piece of data
 representing the state of the initial world and list which functions
@@ -340,10 +334,8 @@ So to launch our rocket, we simply do the following:
 In order to handle events, we need to add the methods @racket[on-tick]
 and @racket[to-draw] to @racket[rocket%]:
 
-@#reader scribble/comment-reader
-(filebox 
- (racket rocket%)
- (racketblock
+@filebox[@racket[rocket%]]{
+@classblock{
   ;; on-tick : -> World
   ;; Tick this world
   (define (on-tick) ...)
@@ -351,18 +343,16 @@ and @racket[to-draw] to @racket[rocket%]:
   ;; to-draw : -> Scene
   ;; Draw this world
   (define (to-draw) ...)
-  ))
+}}
 
 These methods, for the moment, are synonymous with @racket[next] and
 @racket[render], so their code is simple:
 
-@#reader scribble/comment-reader
-(filebox 
- (racket rocket%)
- (racketblock
+@filebox[@racket[rocket%]]{
+@classblock{
   (define (on-tick) (send this next))
   (define (to-draw) (send this render))
-  ))
+}}
 
 Our complete program is:
 

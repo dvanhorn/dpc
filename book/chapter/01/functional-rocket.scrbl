@@ -71,12 +71,12 @@ subsequent world state.
 
 Generically speaking, to make an animation we must design a program of
 the form:
-@#reader scribble/comment-reader
-(racketblock
+
+@classblock{
 (big-bang <world0>           ; World
 	  (on-tick <tick>)   ; World -> World
 	  (to-draw <draw>))  ; World -> Scene
-)
+}
 
 where @racket[World] is a data definition for world states,
 @racket[<tick>] is an expression whose value is a @racket[World ->
@@ -86,10 +86,10 @@ renders a world state as an image.
 
 For the purposes of a simple animation, the world state can consist of
 just the rocket:
-@#reader scribble/comment-reader
-(racketblock
+
+@classblock{
 ;; A World is a Rocket.
-)
+}
 
 The only relevant piece of information that we need to keep track of
 to represent a rocket lifting off is its height.  That leads us to
@@ -101,22 +101,21 @@ the
 @link["http://en.wikipedia.org/wiki/Astronomical_unit"]{astronomical
 units} (AU):
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; A Rocket is a non-negative Number.
 ;; Interp: distance from the ground to base of rocket in AU.
-)
+}
 
 This dictates that we need to develop two functions that consume
 @tt{Rocket}s:
-@#reader scribble/comment-reader
-(racketblock
+
+@classblock{
 ;; next : Rocket -> Rocket
 ;; Compute next position of the rocket after one tick of time.
 
 ;; render : Rocket -> Scene
 ;; Render the rocket as a scene.
-)
+}
 
 Let's take them each in turn.  
 
@@ -127,11 +126,10 @@ we need to settle on the amount of elapsed time a call to
 @racket[next] embodies and how fast the rocket rises per unit of time.
 For both, we define constants:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 (define CLOCK-SPEED  1/30) ; SEC/TICK
 (define ROCKET-SPEED 1)    ; AU/SEC
-)
+}
 
 The @racket[CLOCK-SPEED] is the rate at which the clock ticks, given
 in seconds per tick, and @racket[ROCKET-SPEED] is the rate at which
@@ -139,31 +137,28 @@ the rocket lifts off, given in AU per second.  We use these two
 constants to define a third, computed, constant that gives change in
 the rocket's distance from the ground per clock tick:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 (define DELTA (* CLOCK-SPEED ROCKET-SPEED)) ; AU/TICK
-)
+}
 
 We can now give examples of how @racket[next] should work.  We are
 careful to write test-cases in terms of the defined constants so that
 if we revise them later our tests will still be correct:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 (check-expect (next 10) (+ 10 DELTA))
-)
+}
 
 Now that we have develop a purpose statement, contract, and example,
 we can write the code, which is made clear from the example:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; next : Rocket -> Rocket
 ;; Compute next position of the rocket after one tick of time.
 (check-expect (next 10) (+ 10 DELTA))
 (define (next r)
   (+ r DELTA))
-)
+}
 
 @section{The @racket[render] function}
 
@@ -198,22 +193,20 @@ you can access the image as follows:
 Since we may want to draw rockets on scenes other than the
 @racket[MT-SCENE], let's develop a helper function:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; draw-on : Rocket Scene -> Scene
 ;; Draw rocket on to scene.
 (define (draw-on r scn) ...)
-)
+}
 
 allowing us to define @racket[render] simpy as:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; render : Rocket -> Scene
 ;; Render the rocket as a scene.
 (define (render r)
   (draw-on r MT-SCENE))
-)
+}
 
 Recall that a rocket is represented by the distance from the ground to
 its @bold{base}.  On the other hand, @racket[place-image] places an
@@ -222,8 +215,7 @@ image's center at a given graphics-coordinate on a scene.  We need
 and to covert from distance from the ground to base of the rocket to
 pixels from the top of the screen to center of the rocket image.
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; draw-on : Rocket Scene -> Scene
 ;; Draw rocket on to scene.
 (define (draw-on r scn)
@@ -231,20 +223,19 @@ pixels from the top of the screen to center of the rocket image.
 			ROCKET 
 			0 (add1 r)
 			scn))
-)
+}
 
 @section{Lift off}
 
 With these functions in place, it is launch a rocket:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; Lift off!
 (big-bang 0
 	  (tick-rate CLOCK-SPEED)
           (on-tick next)
 	  (to-draw render))
-)
+}
 	  
 Our complete BSL program is:
 
