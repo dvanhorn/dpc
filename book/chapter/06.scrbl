@@ -9,12 +9,12 @@
 
 @section{A look at the Universe API}
 
-Today we're going to start looking at the design of multiple,
-concurrently running programs that communicate we each other.  We will
-use the @racket[universe] system as our library for communicating
-programs.
+In this chapter, we're going to start looking at the design of
+multiple, concurrently running programs that communicate we each
+other.  We will use the @racket[universe] system as our library for
+communicating programs.
 
-The basic universe concept is that there is a "universe" program that
+The basic universe concept is that there is a ``universe'' program that
 is the adminstrator of a set of world programs.  The universe and the
 world programs can communicate with each other by sending messages,
 which are represented as S-Expressions.
@@ -55,7 +55,7 @@ The world component is the new world just like the event handler's
 produced for single world programs.  The s-expression component is a
 message that is sent to the universe.
 
-@section[#:tag "counter"]{Simple universe example}
+@section[#:tag "counter"]{Simple world}
 
 As a simple example, let's look at a world program that counts up and
 sends messages to a universe server as it counts.  In this simple
@@ -63,33 +63,87 @@ example there is only one world that communicates with the server, and
 the server does nothing but receive the count message (it sends no
 messages back to the world).
 
-Let's start with the counting world program:
+Let's start with the counting world program, which does not
+communicate with any server, it just counts:
 
 @#reader scribble/comment-reader
 (racketmod
   class/0
   (require class/universe)
   (require 2htdp/image)
-  
-  (define-class counter-world%
+
+  ;; Scene is 300x100 pixels
+  (define WIDTH 300)
+  (define HEIGHT 100)
+
+  ;; A CounterWorld is a (new cw% Natural)
+  ;; and implements
+  ;; - tick-rate : -> Number
+  ;;   Tick rate for counting.
+  ;; - on-tick : -> CounterWorld
+  ;;   Increment counter world state.
+  ;; - to-draw : -> Scene
+  ;;   View counter world state as a scene.
+  (define-class cw%
     (fields n)
-  
+    (define (tick-rate) 1)
     (define (on-tick)
-      (new counter-world% (add1 (send this n))))
-  
-    (define (tick-rate)
-      1)
-  
+      (new cw% (add1 (send this n))))   
     (define (to-draw)
-      (overlay (text (number->string (send this n))
-                     40
-                     "red")
-               (empty-scene 300 100))))
+      (overlay (text (number->string (send this n)) 40 "red")
+               (empty-scene WIDTH HEIGHT))))
   
-  (big-bang (new counter-world% 0))
+  ;; Run, program, run!
+  (big-bang (new cw% 0))
 )
 
 When you run this program, you see the world counting up from zero.
+
+@section{Simple world, broadcasting to server}
+
+Now let's modify our program so that it does some simple communication
+with a server.  As an initial design, we'll make a program that simply
+notifies a server as it counts.  In other words, our program will only 
+engage in one-way communication by broadcasting data to the server.
+
+So what exactly do we want to broadcast?  If we want to communicate
+the current state of the world, we may be tempted to try to
+communicate the current @racket[CounterWorld] value; but remember that
+the current world state is an @emph{object}, which isn't included in
+the data definition of messages.  Moreover, the current state includes
+not only data, but functionality: functionality for handling tick
+events, viewing the current count as an image, etc.---all of which are
+things the server doesn't really need.  To communicate the essence of
+what state the @racket[CounterWorld] is in, all we really need to send
+is the current count: a number, which fortunately does fall under the
+set of message values.
+
+Thinking about the message protocol for this simple scenario, the
+client and server communications will look like this:
+
+@verbatim{
+          Client                        Server
+--------------------------             ---------
+Event     State    Message                        
+
+Bang   (new cw% 0)         =========>  
+Tick   (new cw% 1)   1     --------->
+Tick   (new cw% 2)   2     --------->
+Tick   (new cw% 3)   3     --------->
+...         ...     ...       ...
+}
+
+Here, the @tt{==>} arrow indicates the world registering with the
+server.  This is the one time communication that establishes a
+dialogue (really, in this case, a monologue) between the client and
+server.  After registering with the server, the client will send its
+current count, indicated wtih @tt{-->} arrows, as it ticks along.
+
+In this table we show the state of the client and the events that
+occur.  With each event, which potentially changes the state, we show
+what message is sent to the server.  At this point the server is
+opaque---we don't know or really care what state the server is in and
+we assume that the server doesn't send any message back to the client.
 
 Now to register this program with a universe server, we need to
 implement a @racket[register] method that produces a string that is
@@ -97,9 +151,11 @@ the IP address of the server.  (Since we're going to run the universe
 and world on the same computer, we will use @racket[LOCALHOST] which
 is bound to the address of our computer.)
 
-@filebox[@r[world%]]{
+@filebox[@r[cw%]]{
 @#reader scribble/comment-reader
 (racketblock
+  ;; register : -> String
+  ;; IP address of server
   (define (register) LOCALHOST)
 )
 }
@@ -110,28 +166,43 @@ run---the server, it cannot find the universe.  After a few tries, it
 gives up and continues running without communicating with the
 universe.
 
-Now let's write a seperate simple universe server.  To do this, you
-want to open a new tab or window.
+@section{Simple universe, receiving broadcasts}
 
+Now let's write a simple server that receives the message from the
+counter world client.  We could write the server in the same file as
+the client, but since these are really two separate programs that talk
+to each other, let's emphasize that by writing the server in its own
+tab.
 
-A universe program, much like a world program, consists of a current
-state of the universe and is event-driven, invoking methods to produce
-new universe states.
+A universe program is similar to a world program: it's a program that
+responds to events.  The difference is in the kind of events that can
+occur. The most important events are already shown in our protocol
+diagram: 
+@itemlist[
+@item{a new world starts communicating with the server,}
+@item{a world sends a message.}]
+
+When these events occur, the server reacts by calling the appropriate
+method, in this case @racket[on-new] and @racket[on-msg].
 
 We'll be working with the OO-style universe, but you should read the
 documentation for @racketmodname[2htdp/universe] and translate over
 the concepts to our setting as you've done for @racket[big-bang].
 
-At a minimum, the universe must handle the events of:
+As it turns out, if you leave these methods off, the universe library
+will do something sensible, namely nothing.  So for our simple counter
+program, the following works:
 
-@itemlist[#:style 'ordered
-  @item{a world
-registering with this universe, and }
-  @item{a registered world sending a
-message to the universe.}]
+@codeblock{
+#lang class/0
+(require class/universe)
+(define-class cu%)
 
-The first is handled by the @racket[on-new] method and the second by
-the @racket[on-msg]:
+;; Run, server, run!
+(universe (new cu%))
+}
+
+some text here
 
 @#reader scribble/comment-reader
 (racketmod
@@ -203,13 +274,13 @@ At this point, the world registers, but never sends any message to the
 server.  Now let's modify the world program to notify the server when
 it ticks by sending it's current count as a message.
 
-That requires changing our on-tick method from:
+That requires changing our @racket[on-tick] method from:
 
-@filebox[@r[world%]]{
+@filebox[@r[cw%]]{
 @#reader scribble/comment-reader
 (racketblock
   (define (on-tick)
-    (new counter-world% (add1 (send this n))))
+    (new cw% (add1 (send this n))))
 )
 }
 
@@ -219,7 +290,7 @@ to one that constructs a package:
 @#reader scribble/comment-reader
 (racketblock
   (define (on-tick)
-    (make-package (new counter-world% (add1 (send this n)))
+    (make-package (new cw% (add1 (send this n)))
 		  (add1 (send this n))))
 )
 }
