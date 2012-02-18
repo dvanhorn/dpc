@@ -31,6 +31,6 @@ clean:
 	-rm *~ *log *aux *out *toc pict*png
 	-rm -rf compiled
 	-rm dpc.tex
-	-rm racket.css scribble.css scribble-style.css scribble-common.js
+	-rm racket.css scribble.css scribble-style.css figure.css footnote.css scribble-common.js
 
 
