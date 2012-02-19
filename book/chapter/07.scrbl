@@ -22,47 +22,49 @@ We developed classes for representing binary trees and wrote a couple
 methods for binary trees, but one of the troubling aspects of this
 code is the fact that the two implementations of @racket[double] are
 identical:
-@#reader scribble/comment-reader
-(racketmod
-  class/0
-  ;; A BT is one of:
-  ;; - (new leaf% Number)
-  ;; - (new node% Number BT BT)
 
-  (define-class leaf%
-    (fields number)
-    ...
-    ;; Number -> BT
-    ;; double the leaf and put the number on top
-    (define (double n)
-      (new node% n this this)))
-  
-  (define-class node%
-    (fields number left right)
-    ...
-    ;; Number -> BT
-    ;; double the node and put the number on top
-    (define (double n)
-      (new node% n this this)))
-  )
+@codeblock{
+#lang class/0
+
+;; A BT is one of:
+;; - (new leaf% Number)
+;; - (new node% Number BT BT)
+
+(define-class leaf%
+  (fields number)
+  ...
+  ;; Number -> BT
+  ;; double the leaf and put the number on top
+  (define (double n)
+    (new node% n this this)))
+
+(define-class node%
+  (fields number left right)
+  ...
+  ;; Number -> BT
+  ;; double the node and put the number on top
+  (define (double n)
+    (new node% n this this)))
+}
+
 If we think by analogy to the structural version of this code, we have
 something like this:
 
-@#reader scribble/comment-reader
-(racketmod
- class/0
- ;; A BT is one of:
- ;; - (make-leaf Number)
- ;; - (make-node Number BT BT) 
- (define-struct leaf (number))
- (define-struct node (number left right))
- 
- ;; BT Number -> BT
- ;; Double the given tree and put the number on top.
- (define (double bt n)
-   (cond [(leaf? bt) (make-node n bt bt)]
-	 [(node? bt) (make-node n bt bt)]))
- )
+@codeblock{
+#lang class/0
+
+;; A BT is one of:
+;; - (make-leaf Number)
+;; - (make-node Number BT BT) 
+(define-struct leaf (number))
+(define-struct node (number left right))
+
+;; BT Number -> BT
+;; Double the given tree and put the number on top.
+(define (double bt n)
+  (cond [(leaf? bt) (make-node n bt bt)]
+	[(node? bt) (make-node n bt bt)]))
+}
 
 We would arrive at this code by developing the @racket[double]
 function according to the design recipe; in particular, this code
@@ -73,13 +75,12 @@ code.  All cases of the @racket[cond] clause produce the same result,
 hence the @racket[cond] can be eliminated, replaced by a single
 occurrence of the duplicated answer expressions:
 
-@#reader scribble/comment-reader
-(racketblock
- ;; BT Number -> BT
- ;; Double the given tree and put the number on top.
- (define (double bt n)
-   (make-node n bt bt))
-)
+@classblock{
+;; BT Number -> BT
+;; Double the given tree and put the number on top.
+(define (double bt n)
+  (make-node n bt bt))
+}
 
 But switching back to the object-oriented version of this code, it is
 not so simple to "eliminate the @racket[cond]"---there is no
@@ -88,14 +89,13 @@ identical method defintions to a common @emph{super} class.  That is,
 we define a third class that contains the method shared among
 @racket[leaf%] and @racket[node%]:
 
-@#reader scribble/comment-reader
-(racketblock
-  (define-class bt%
-    ;; -> BT
-    ;; Double this tree and put the number on top.
-    (define (double n)
-      (new node% n this this)))
-)
+@classblock{
+(define-class bt%
+  ;; -> BT
+  ;; Double this tree and put the number on top.
+  (define (double n)
+    (new node% n this this)))
+}
 
 The @racket[double] method can be removed from the @racket[leaf%] and
 @racket[node%] classes and instead these class can rely on the
@@ -106,26 +106,25 @@ establish a relationship between @racket[leaf%], @racket[node%] and
 the @racket[double] method; it is as if the code were duplicated
 without actually writing it twice:
 
-@#reader scribble/comment-reader
-(racketblock
-  (define-class leaf%
-    (super bt%)
-    (fields number)
-    ;; -> Number
-    ;; count the number of numbers in this leaf
-    (define (count)
-      1))
+@classblock{
+(define-class leaf%
+  (super bt%)
+  (fields number)
+  ;; -> Number
+  ;; count the number of numbers in this leaf
+  (define (count)
+    1))
 
-  (define-class node%
-    (super bt%)
-    (fields number left right)
-    ;; -> Number
-    ;; count the number of numbers in this node
-    (define (count)
-      (+ 1
-	 (send (send this left) count)
-	 (send (send this right) count))))
-)
+(define-class node%
+  (super bt%)
+  (fields number left right)
+  ;; -> Number
+  ;; count the number of numbers in this node
+  (define (count)
+    (+ 1
+       (send (send this left) count)
+       (send (send this right) count))))
+}
 
 To accommodate this new feature---@emph{inheritance}---we need to
 adjust our programming language.  We'll now program in
@@ -173,7 +172,7 @@ even though it is only defined in @racket[bt%]:
 (send (send (new leaf% 7) double 8) double 9)
 ]
 
-@section{"Abstract" classes}
+@section{``Abstract'' classes}
 
 At this point, it is worth considering the question: what does a
 @racket[bt%] value represent?  We have arrived at the @racket[bt%]
@@ -206,32 +205,31 @@ contain a @racket[number] field.  This field can be abstracted just
 like @racket[double] was---we can lift the field to the @racket[bt%]
 super class and eliminate the duplicated field in the subclasses:
 
-@#reader scribble/comment-reader
-(racketblock
- (define-class bt%
-   (fields number)
-   ;; -> BT
-   ;; Double this tree and put the number on top.
-   (define (double n)
-     (new node% n this this)))
+@classblock{
+(define-class bt%
+  (fields number)
+  ;; -> BT
+  ;; Double this tree and put the number on top.
+  (define (double n)
+    (new node% n this this)))
 
- (define-class leaf%
-   (super bt%)
-   ;; -> Number
-   ;; count the number of numbers in this leaf
-   (define (count)
-     1))
+(define-class leaf%
+  (super bt%)
+  ;; -> Number
+  ;; count the number of numbers in this leaf
+  (define (count)
+    1))
 
- (define-class node%
-   (super bt%)
-   (fields left right)
-   ;; -> Number
-   ;; count the number of numbers in this node
-   (define (count)
-     (+ 1
-	(send (send this left) count)
-	(send (send this right) count)))))
-
+(define-class node%
+  (super bt%)
+  (fields left right)
+  ;; -> Number
+  ;; count the number of numbers in this node
+  (define (count)
+    (+ 1
+       (send (send this left) count)
+       (send (send this right) count))))
+}
 
 The @racket[leaf%] and @racket[node%] class now inherit both the
 @racket[number] field and the @racket[double] method from
@@ -277,12 +275,11 @@ right subtree, and @emph{then} the number at that node:
 
 @(the-eval '(require 'n))
 
-@#reader scribble/comment-reader
-(racketblock
- ;; A BT is one of:
- ;; - (new leaf% Number)
- ;; - (new node% BT BT Number)
-)
+@classblock{
+;; A BT is one of:
+;; - (new leaf% Number)
+;; - (new node% BT BT Number)
+}
 
 @interaction[#:eval the-eval
 (new leaf% 7)
@@ -300,44 +297,43 @@ of arguments when constructing a new @racket[node%] to reflect the
 fact that the node constructor now takes values for its fields first,
 then values for its inherited fields.}
 
-@#reader scribble/comment-reader
-(racketblock
- (define-class bt%
-   (fields number)
-   ;; -> BT
-   ;; Double this tree and put the number on top.
-   (define (double n)
-     (new node% this this n)))
+@classblock{
+(define-class bt%
+  (fields number)
+  ;; -> BT
+  ;; Double this tree and put the number on top.
+  (define (double n)
+    (new node% this this n)))
 
- (define-class leaf%
-   (super bt%)
-   ;; -> Number
-   ;; count the number of numbers in this leaf
-   (define (count)
-     1)
+(define-class leaf%
+  (super bt%)
+  ;; -> Number
+  ;; count the number of numbers in this leaf
+  (define (count)
+    1)
+  
+  ;; -> Number
+  ;; sum all the numbers in this leaf
+  (define (sum)
+    (send this number)))
 
-   ;; -> Number
-   ;; sum all the numbers in this leaf
-   (define (sum)
-     (send this number)))
-
- (define-class node%
-   (super bt%)
-   (fields left right)
-   ;; -> Number
-   ;; count the number of numbers in this node
-   (define (count)
-     (+ 1
-	(send (send this left) count)
-	(send (send this right) count)))
-
-   ;; -> Number
-   ;; sum all the numbers in this node
-   (define (sum)
-     (+ (send this number)
-	(send (send this left) sum)
-	(send (send this right) sum))))
-)
+(define-class node%
+  (super bt%)
+  (fields left right)
+  ;; -> Number
+  ;; count the number of numbers in this node
+  (define (count)
+    (+ 1
+       (send (send this left) count)
+       (send (send this right) count)))
+  
+  ;; -> Number
+  ;; sum all the numbers in this node
+  (define (sum)
+    (+ (send this number)
+       (send (send this left) sum)
+       (send (send this right) sum))))
+}
 
 As you can see, both of the @racket[sum] methods refer to the
 @racket[number] field, which is inherited from @racket[bt%].
@@ -374,62 +370,60 @@ Already we can see an opportunity for data abstraction since
 @racket[y] fields.  Let's define a super class and inherit these
 fields:
 
-@#reader scribble/comment-reader
-(racketblock
- ;; A Shape is one of:
- ;; - (new circ% +Real Real Real)
- ;; - (new rect% +Real +Real Real Real)
- ;; A +Real is a positive, real number.
- (define-class shape%
-   (fields x y))
- (define-class circ%
-   (super shape%)
-   (fields radius))
- (define-class rect%
-   (super shape%)
-   (fields width height))
-)
+@classblock{
+;; A Shape is one of:
+;; - (new circ% +Real Real Real)
+;; - (new rect% +Real +Real Real Real)
+;; A +Real is a positive, real number.
+(define-class shape%
+  (fields x y))
+(define-class circ%
+  (super shape%)
+  (fields radius))
+(define-class rect%
+  (super shape%)
+  (fields width height))
+}
 
 Now let's add a couple of methods: @racket[area] will compute the area of the
 shape, and @racket[draw-on] will take a scene and draw the shape on
 the scene at the appropriate position:
 
-@#reader scribble/comment-reader
-(racketblock
- (define-class circ%
-   (super shape%)
-   (fields radius)
+@classblock{
+(define-class circ%
+  (super shape%)
+  (fields radius)
+  
+  ;; -> +Real
+  (define (area)
+    (* pi (sqr (send this radius))))
    
-   ;; -> +Real
-   (define (area)
-     (* pi (sqr (send this radius))))
-   
-   ;; Scene -> Scene
-   ;; Draw this circle on the scene.
-   (define (draw-on scn)
-     (place-image (circle (send this radius) "solid" "black")
-		  (send this x)
-		  (send this y)
-		  scn)))
+  ;; Scene -> Scene
+  ;; Draw this circle on the scene.
+  (define (draw-on scn)
+    (place-image (circle (send this radius) "solid" "black")
+		 (send this x)
+		 (send this y)
+		 scn)))
 
- (define-class rect%
-   (super shape%)
-   (fields width height) 
-   
-   ;; -> +Real
-   ;; Compute the area of this rectangle.
-   (define (area)
-     (* (send this width)
-	(send this height)))
-   
-   ;; Scene -> Scene
-   ;; Draw this rectangle on the scene.
-   (define (draw-on scn)
-     (place-image (rectangle (send this width) (send this height) "solid" "black")
-		  (send this x)
-		  (send this y)
-		  scn)))
-)
+(define-class rect%
+  (super shape%)
+  (fields width height) 
+  
+  ;; -> +Real
+  ;; Compute the area of this rectangle.
+  (define (area)
+    (* (send this width)
+       (send this height)))
+  
+  ;; Scene -> Scene
+  ;; Draw this rectangle on the scene.
+  (define (draw-on scn)
+    (place-image (rectangle (send this width) (send this height) "solid" "black")
+		 (send this x)
+		 (send this y)
+		 scn)))
+}
 
 @(the-eval
   '(module p class/1
@@ -498,19 +492,18 @@ The @racket[draw-on] method can now call @racket[img] and rewriting it
 this way makes both @racket[draw-on] methods identical; the method can
 now be lifted to the super class:
 
-@#reader scribble/comment-reader
-(racketblock
- (define-class shape%
-   (fields x y)
-
-   ;; Scene -> Scene
-   ;; Draw this shape on the scene.
-   (define (draw-on scn)
-     (place-image (img)
-		  (send this x)
-		  (send this y)
-		  scn)))
-)
+@classblock{
+(define-class shape%
+  (fields x y)
+  
+  ;; Scene -> Scene
+  ;; Draw this shape on the scene.
+  (define (draw-on scn)
+    (place-image (img)
+		 (send this x)
+		 (send this y)
+		 scn)))
+}
 
 But there is a problem with this code.  While this code makes sense
 when it occurs inside of @racket[rect%] and @racket[circ%], it
@@ -532,71 +525,70 @@ and should never be constructed).
 
 We arrive at the following final code:
 
-@#reader scribble/comment-reader
-(racketmod
- class/1
- (require 2htdp/image)
+@codeblock{
+#lang class/1
+(require 2htdp/image)
 
- ;; A Shape is one of:
- ;; - (new circ% +Real Real Real)
- ;; - (new rect% +Real +Real Real Real)
- ;; A +Real is a positive, real number.
- (define-class shape%
-   (fields x y)
-   
-   ;; Scene -> Scene
-   ;; Draw this shape on the scene.
-   (define (draw-on scn)
-     (place-image (send this img)
-		  (send this x)
-		  (send this y)
-		  scn)))
+;; A Shape is one of:
+;; - (new circ% +Real Real Real)
+;; - (new rect% +Real +Real Real Real)
+;; A +Real is a positive, real number.
+(define-class shape%
+  (fields x y)
+  
+  ;; Scene -> Scene
+  ;; Draw this shape on the scene.
+  (define (draw-on scn)
+    (place-image (send this img)
+		 (send this x)
+		 (send this y)
+		 scn)))
 
- (define-class circ%
-   (super shape%)
-   (fields radius)
-   
-   ;; -> +Real
-   ;; Compute the area of this circle.
-   (define (area)
-     (* pi (sqr (send this radius))))
-   
-   ;; -> Image
-   ;; Render this circle as an image.
-   (define (img)
-     (circle (send this radius) "solid" "black")))
+(define-class circ%
+  (super shape%)
+  (fields radius)
+  
+  ;; -> +Real
+  ;; Compute the area of this circle.
+  (define (area)
+    (* pi (sqr (send this radius))))
+  
+  ;; -> Image
+  ;; Render this circle as an image.
+  (define (img)
+    (circle (send this radius) "solid" "black")))
 
- (define-class rect%
-   (super shape%)
-   (fields width height) 
-   
-   ;; -> +Real
-   ;; Compute the area of this rectangle.
-   (define (area)
-     (* (send this width)
-	(send this height)))
-   
-   ;; -> Image
-   ;; Render this rectangle as an image.
-   (define (img)
-     (rectangle (send this width) (send this height) "solid" "black")))
+(define-class rect%
+  (super shape%)
+  (fields width height) 
+  
+  ;; -> +Real
+  ;; Compute the area of this rectangle.
+  (define (area)
+    (* (send this width)
+       (send this height)))
+  
+  ;; -> Image
+  ;; Render this rectangle as an image.
+  (define (img)
+    (rectangle (send this width) (send this height) "solid" "black")))
 
- (check-expect (send (new rect% 10 20 0 0) area)
-	       200)
- (check-within (send (new circ% 10 0 0) area) 
-	       (* pi 100) 
-	       0.0001)
- (check-expect (send (new rect% 5 10 10 20) draw-on 
-		     (empty-scene 40 40))
-	       (place-image (rectangle 5 10 "solid" "black") 
-			    10 20
-			    (empty-scene 40 40)))
- (check-expect (send (new circ% 4 10 20) draw-on 
-		     (empty-scene 40 40))
-	       (place-image (circle 4 "solid" "black")
-			    10 20
-			    (empty-scene 40 40)))
-)
+(check-expect (send (new rect% 10 20 0 0) area)
+	      200)
+(check-within (send (new circ% 10 0 0) area) 
+	      (* pi 100) 
+	      0.0001)
+(check-expect (send (new rect% 5 10 10 20) draw-on 
+		    (empty-scene 40 40))
+	      (place-image (rectangle 5 10 "solid" "black") 
+			   10 20
+			   (empty-scene 40 40)))
+(check-expect (send (new circ% 4 10 20) draw-on 
+		    (empty-scene 40 40))
+	      (place-image (circle 4 "solid" "black")
+			   10 20
+			   (empty-scene 40 40)))
+}
 
 @section[#:tag "Exercises (Ch 4.)"]{Exercises}
 
@@ -622,18 +614,18 @@ constructed.
 Here is the signature for a method to compute the area of a 
 shape's bounding box---the smallest rectangle that can contain 
 the shape.
-@#reader scribble/comment-reader
-(racketblock
-  ;; bba : -> Number     (short for "bounding-box-area")
-  ;; Compute the area of the smallest bounding box for this shape.
-)
+
+@classblock{
+;; bba : -> Number     (short for "bounding-box-area")
+;; Compute the area of the smallest bounding box for this shape.
+}
 
 Here are some examples of how @r[bba] should work:
-@#reader scribble/comment-reader
-(racketblock
-  (check-expect ((rect% 3 4) . bba) 12)
-  (check-expect ((circ% 1.5) . bba)  9)
-)
+
+@classblock{
+(check-expect ((rect% 3 4) . bba) 12)
+(check-expect ((circ% 1.5) . bba)  9)
+}
 
 @itemlist[
 @item{Design the @r[bba] method for the
