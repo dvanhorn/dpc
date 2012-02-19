@@ -1,18 +1,19 @@
 #lang scribble/manual
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class/0 define-struct ... length))
-	  (for-label 2htdp/image)
+          (for-label (except-in class/0 define-struct ... length quote))
+	  (for-label 2htdp/image)          
+          (for-label (only-in lang/htdp-intermediate quote))
 	  (for-label class/universe))
 
 @title{Universe}
-
-@section{A look at the Universe API}
 
 In this chapter, we're going to start looking at the design of
 multiple, concurrently running programs that communicate we each
 other.  We will use the @racket[universe] system as our library for
 communicating programs.
+
+@section{A look at the Universe API}
 
 The basic universe concept is that there is a ``universe'' program that
 is the adminstrator of a set of world programs.  The universe and the
@@ -46,10 +47,9 @@ an S-expression is one of:
 The way that a world program sends a message to the universe is by
 constructing a package:
 
-@#reader scribble/comment-reader
-(racketblock
-  ;; A Package is a (make-package World SExp).
-)
+@classblock{
+;; A Package is a (make-package World SExp).
+}
 
 The world component is the new world just like the event handler's
 produced for single world programs.  The s-expression component is a
@@ -66,36 +66,35 @@ messages back to the world).
 Let's start with the counting world program, which does not
 communicate with any server, it just counts:
 
-@#reader scribble/comment-reader
-(racketmod
-  class/0
-  (require class/universe)
-  (require 2htdp/image)
+@codeblock{
+#lang class/0
+(require class/universe)
+(require 2htdp/image)
 
-  ;; Scene is 300x100 pixels
-  (define WIDTH 300)
-  (define HEIGHT 100)
+;; Scene is 300x100 pixels
+(define WIDTH 300)
+(define HEIGHT 100)
 
-  ;; A CounterWorld is a (new cw% Natural)
-  ;; and implements
-  ;; - tick-rate : -> Number
-  ;;   Tick rate for counting.
-  ;; - on-tick : -> CounterWorld
-  ;;   Increment counter world state.
-  ;; - to-draw : -> Scene
-  ;;   View counter world state as a scene.
-  (define-class cw%
-    (fields n)
-    (define (tick-rate) 1)
-    (define (on-tick)
-      (new cw% (add1 (send this n))))   
-    (define (to-draw)
-      (overlay (text (number->string (send this n)) 40 "red")
-               (empty-scene WIDTH HEIGHT))))
+;; A CounterWorld is a (new cw% Natural)
+;; and implements
+;; - tick-rate : -> Number
+;;   Tick rate for counting.
+;; - on-tick : -> CounterWorld
+;;   Increment counter world state.
+;; - to-draw : -> Scene
+;;   View counter world state as a scene.
+(define-class cw%
+  (fields n)
+  (define (tick-rate) 1)
+  (define (on-tick)
+    (new cw% (add1 (send this n))))   
+  (define (to-draw)
+    (overlay (text (number->string (send this n)) 40 "red")
+	     (empty-scene WIDTH HEIGHT))))
   
-  ;; Run, program, run!
-  (big-bang (new cw% 0))
-)
+;; Run, program, run!
+(big-bang (new cw% 0))
+}
 
 When you run this program, you see the world counting up from zero.
 
@@ -117,6 +116,17 @@ things the server doesn't really need.  To communicate the essence of
 what state the @racket[CounterWorld] is in, all we really need to send
 is the current count: a number, which fortunately does fall under the
 set of message values.
+
+We can now revise the @racket[on-tick] method to not only produce the
+new state of the world, but additionally a message to be sent to the
+server:
+
+@filebox[@racket[cw%]]{
+@classblock{
+(define (on-tick)
+  (make-package (new cw% (add1 (send this n)))
+                (add1 (send this n))))
+}}
 
 Thinking about the message protocol for this simple scenario, the
 client and server communications will look like this:
@@ -152,19 +162,54 @@ and world on the same computer, we will use @racket[LOCALHOST] which
 is bound to the address of our computer.)
 
 @filebox[@r[cw%]]{
-@#reader scribble/comment-reader
-(racketblock
-  ;; register : -> String
-  ;; IP address of server
-  (define (register) LOCALHOST)
-)
-}
+@classblock{
+;; register : -> String
+;; IP address of server
+(define (register) LOCALHOST)
+}}
 
 Now when you run this program you will see the world program try to
 connect to the universe, but since we have not written---much less
 run---the server, it cannot find the universe.  After a few tries, it
 gives up and continues running without communicating with the
 universe.
+
+Our complete client is:
+
+@codeblock{
+#lang class/0
+(require class/universe)
+(require 2htdp/image)
+
+;; Scene is 300x100 pixels
+(define WIDTH 300)
+(define HEIGHT 100)
+
+;; A CounterWorld is a (new cw% Natural)
+;; and implements
+;; - register : -> String
+;;   IP address of server
+;; - tick-rate : -> Number
+;;   Tick rate for counting.
+;; - on-tick : -> (make-package CounterWorld Number)
+;;   Increment counter world state, broadcast to server.
+;; - to-draw : -> Scene
+;;   View counter world state as a scene.
+(define-class cw%
+  (fields n)
+  (define (register) LOCALHOST)
+  (define (tick-rate) 1)
+  (define (on-tick)
+    (make-package (new cw% (add1 (send this n)))
+		  (add1 (send this n))))
+  (define (to-draw)
+    (overlay (text (number->string (send this n)) 40 "red")
+	     (empty-scene WIDTH HEIGHT))))
+  
+;; Run, program, run!
+(big-bang (new cw% 0))
+}
+
 
 @section{Simple universe, receiving broadcasts}
 
@@ -202,65 +247,47 @@ program, the following works:
 (universe (new cu%))
 }
 
-some text here
+This is equivalent to doing the following:
 
-@#reader scribble/comment-reader
-(racketmod
-  class/0
-  (require class/universe)
+@codeblock{
+#lang class/0
+(require class/universe)
 
-  (define-class universe%
-    ;; IWorld -> Bundle
-    (define (on-new iw) ...)
+(define-class cu%
+  ;; IWorld -> Bundle
+  (define (on-new iw) this)
   
-    ;; IWorld S-Expr -> Bundle
-    (define (on-msg iw m) ...))
-)
+  ;; IWorld S-Expr -> Bundle
+  (define (on-msg iw m) this))
+}
 
 When a world registers, the @racket[on-new] method is called with an
-IWorld value.  An IWorld value opaquely represents a world, that is
-you do not have the ability to examine the contents of the value, but
-you can compare it for equality with other IWorld values using
-@racket[iworld=?].
+@tt{IWorld} value.  An @tt{IWorld} value opaquely represents a world,
+that is you do not have the ability to examine the contents of the
+value, but you can compare it for equality with other @tt{IWorld}
+values using @racket[iworld=?].
 
 When a world sends message, the @racket[on-msg] method is called with
 the IWorld representing the world that sent the message and the S-Exp
 message that was sent.
 
-In both cases, the method must produce a bundle:
+In both cases, the method must either produce a universe or a bundle:
 
-@#reader scribble/comment-reader
-(racketblock
-  ;; A Bundle is a (make-bundle Universe [Listof Mail] [Listof IWorld]).
-)
+@classblock{
+;; A Bundle is a (make-bundle Universe [Listof Mail] [Listof IWorld]).
+;; A Mail is a (make-mail IWorld S-Exp).
+}
 
-The universe component is the new state of the universe; the list of
+A bundle signals communication to some set of worlds.  Within a bundle,
+the universe component is the new state of the universe; the list of
 mail is a list of messages that will be sent back to the worlds (more
 on this in a moment), and the list of worlds are worlds that the
 server has chosen to disconnect from.
 
-
 For the purposes of our example, the universe maintains no state (the
 class has no data).  When a new world registers, we do nothing, and
 when a world sends a message, we also do nothing, send nothing in
-response, and disconnect no worlds:
-
-@#reader scribble/comment-reader
-(racketmod 
-  class/0
-  (require class/universe)
-
-  (define-class universe%
-    ;; IWorld -> Bundle
-    (define (on-new iw) 
-      (make-bundle this empty empty))
-    
-    ;; IWorld S-Expr -> Bundle
-    (define (on-msg iw m)
-      (make-bundle this empty empty)))
-  
-  (universe (new universe%)) 
-) 
+response, and disconnect no worlds.
 
 Running this program launches the universe server, making it ready to
 receive registrations from worlds.  After starting the universe
@@ -268,107 +295,365 @@ server, if we switch back to the world program tab and run it, we'll
 see that it successfully registers with the universe and the universe
 console reports that the world signed up with it.
 
-Thrilling.
+If we examine the server side of the diagram considered above, we
+see:
 
-At this point, the world registers, but never sends any message to the
-server.  Now let's modify the world program to notify the server when
-it ticks by sending it's current count as a message.
-
-That requires changing our @racket[on-tick] method from:
-
-@filebox[@r[cw%]]{
-@#reader scribble/comment-reader
-(racketblock
-  (define (on-tick)
-    (new cw% (add1 (send this n))))
-)
+@verbatim{
+ Client                       Server
+--------             -----------------------
+                     Message   Event   State
+                               Bang    (new cu%)
+         =========>            Join    (new cu%)
+         --------->  1         OnMsg   (new cu%)
+         --------->  2         OnMsg   (new cu%)
+         --------->  3         OnMsg   (new cu%)
+                     ...       ...     ...    
 }
 
-to one that constructs a package:
+From the perspective of the server, the client is opaque---all we can
+observe is the messages sent from the client.
 
-@filebox[@r[world%]]{
-@#reader scribble/comment-reader
-(racketblock
-  (define (on-tick)
-    (make-package (new cw% (add1 (send this n)))
-		  (add1 (send this n))))
-)
+The server, as written, will actually work if more than one client
+connect to the server.  To try it out, just run two clients at the
+same time.  When multiple clients connect, we may see interaction like
+this:
+
+@verbatim{
+  A       B                   Server
+-----   -----        -----------------------
+                     Message   Event   State
+                               Bang    (new cu%)
+         =========>            Join    (new cu%)
+         --------->  1         OnMsg   (new cu%)
+         --------->  2         OnMsg   (new cu%)
+  ================>            Join    (new cu%)
+  ---------------->  1         OnMsg   (new cu%)
+  ---------------->  2         OnMsg   (new cu%)
+         --------->  3         OnMsg   (new cu%)
+  ---------------->  3         OnMsg   (new cu%)
+                     ...       ...     ...    
 }
 
-Now let's re-run the world program.  Notice that messages are being
-received by the server in the console.
+If we would like to rule out this kind of interaction and have the
+server listen only to one client, that's easy to do.  The idea is that
+we can develop a server that accepts no new clients.  Such a server
+would have the following @racket[on-new] method:
 
-@section{Migrating computation from client to server}
+@classblock{
+(define (on-new iw)
+  (make-bundle this empty (list iw)))
+}
 
-Now let's change the system so that "work" of adding is done on the
-server side.  When the world ticks it sends its current count to the
-server; when the server receives the count, it responds by sending a
-message back to the world that is the count plus one.  On the world
-side, that means we must now add the ability to receive messages by
-implementing the @racket[on-receive] method, which will update the
-world state appropriately and the @racket[on-tick] method will do no
-computation, but only communication:
+Now we can have the server start in the accepting universe state that
+will allow a client to join, but as soon as one does, it transitions
+to the unaccepting state that rejects all new clients:
 
-@filebox[@r[world%]]{
-@#reader scribble/comment-reader
-(racketblock
-  (define (on-tick)
-    (make-package this (send this n)))
+@codeblock{
+#lang class/0
+(require class/universe)
+
+;; A Server is one of:
+;; - (new accept%)
+;; - (new reject%)
+
+(define-class accept%
+  (define (on-new iw)
+    (new reject%)))
+
+(define-class reject%
+  (define (on-new iw)
+    (make-bundle this empty (list iw))))
+
+;; Run, server, run!
+(universe (new accept%))
+}
+
+The interaction described above would now look like:
+
+@verbatim{
+  A       B                   Server
+-----   -----        -----------------------
+                     Message   Event   State
+                               Bang    (new accept%)
+         =========>            Join    (new reject%)
+         --------->  1         OnMsg   (new reject%)
+         --------->  2         OnMsg   (new reject%)
+  ================>            Join    (new reject%)
+  <================            Disconn (new reject%)
+         --------->  3         OnMsg   (new reject%)
+                     ...       ...     ...    
+}
+
+We can imagine more sophisticated scenerios such as one where we want
+to enable peer-to-peer communication.  As a simple example, let's
+build a system where one client can broadcast messages to another.
+This server will have to involve some data since it needs to remember
+who to broadcast mail to when it receives a message.  The initial
+state of the server is waiting for the broadcaster to join, after
+which it waits for the broadcastee.  Once both parties have joined,
+every time the broadcaster sends a message, the server relays it to
+the broadcastee:
+
+@codeblock{
+#lang class/0
+(require class/universe)
+
+;; A Server is one of:
+;; - (new wait-caster%)
+;; - (new wait-castee%)
+;; - (new relay% IWorld)
+
+(define-class wait-caster%
+  (define (on-new iw)
+    (new wait-castee%)))
+
+(define-class wait-castee%
+  (define (on-new iw)
+    (new relay% iw)))
+
+(define-class relay%
+  (fields castee)
+  (define (on-new iw)
+    (make-bundle this empty (list iw)))
+  (define (on-msg iw msg)
+    (make-bundle this (make-mail (send this castee) msg) empty)))
+
+;; Run, server, run!
+(universe (new wait-caster%))
+}
+
+Notice how the @racket[relay%] class contains an @tt{IWorld} that it
+broadcasts to when it receives a message.  It also rejects any new
+clients that try to connect. 
+
+An example interaction for this serve is:
+
+@verbatim{
+  A       B                   Server
+-----   -----        -----------------------
+                     Message   Event   State
+                               Bang    (new wait-caster%)
+         =========>            Join    (new wait-castee%)
+         --------->  1         OnMsg   (new wait-castee%)
+         --------->  2         OnMsg   (new wait-castee%)
+  ================>            Join    (new relay% A)
+         --------->  3         OnMsg   (new relay% A)
+  <----------------  3
+         --------->  4         OnMsg   (new relay% A)
+  <----------------  4
+                     ...       ...     ... 
+}
+
+Notice how in this example, @tt{B}, the broadcaster, starts sending
+messages before another client has joined.  Those messages are simply
+ignored.  After a second client joins and the server goes into the
+relay state, subsequent messages will be sent to @tt{A}, the
+broadcastee.
+
+@section{Simple world, receiving messages from the server}
+
+@margin-note{This should be re-written to use the state pattern.}
+
+In the example considered so far, the server sends messages to a
+client, but that requires the client is willing to receive such
+messages.  Let's look at how to adapt our simple broadcasting client
+to one that listens for message from the universe server.
+
+This client is in one of two states: it either hasn't received a
+message yet, so it doesn't know what the current ``count'' is yet, or
+it has received at least one message and so it knows the most recent
+count, relayed from the counting to world to the server to this
+client.  The listener client doesn't need to generate any of its own
+events so we drop the @racket[on-tick] handler and instead add a
+@racket[on-receive] method that handles incoming messages from the
+server.
+
+@codeblock{
+#lang class/0
+(require class/universe)
+(require 2htdp/image)
+
+;; Scene is 300x100 pixels
+(define WIDTH 300)
+(define HEIGHT 100)
+
+;; A ListenerWorld is one of:
+;; - (new wait-first%)         Interp: waiting for first msg.
+;; - (new wait-next% Number)   Interp: waiting for next msg.
+;; and implements
+;; - to-draw : -> Scene
+;;   View counter world state as a scene.
+;; - on-receive : Number -> ListenerWorld
+;;   Receive new counter state from the universe.
+
+(define-class wait-first%
+  (define (register) LOCALHOST)
+  (define (on-receive msg) (new wait-next% msg))
+  (define (to-draw)
+    (overlay (text "Waiting" 40 "red")
+	     (empty-scene WIDTH HEIGHT))))
   
-  (define (on-receive m)
-    (new counter-world% m))
-)
+(define-class wait-next%
+  (fields n)
+  (define (on-receive msg) (new wait-next% msg))
+  (define (to-draw)
+    (overlay (text (number->string (send this n)) 40 "red")
+	     (empty-scene WIDTH HEIGHT))))
+
+;; Run, program, run!
+(big-bang (new wait-first%))
 }
 
-On the server side, we now need to send a message back to the world,
-so we need to consider the data definition for mail:
+We can now run the clients and server and observe the communication,
+but to do so, you have to be careful about the order in which you
+start things.  Our server @emph{assumes} the first client to connect
+is the broadcaster.  This is really a flaw in our design, and we can
+look at eliminating it, but as a work around just be sure to first
+start the server, then the counter world, and then the listener world.
 
-@#reader scribble/comment-reader
-(racketblock
-  ;; A Mail is a (make-mail IWorld S-Exp).
-)
+@section{Rules of engagement: protocols and enforcement}
 
-This constructs a message that will be sent to the world represented
-by the IWorld value consisting of the S-Exp value.
+There are a couple subtle points worth noting about the server and the
+possible interactions it allows.
 
-@filebox[@r[universe%]]{
-@#reader scribble/comment-reader
-(racketblock
-  (define (on-msg iw m)
-    (make-bundle this 
-		 (list (make-mail iw (add1 m))) 
-		 empty))
-)
+First, if the broadcaster and broadcastee don't join in that order,
+nothing works as intended.  While it may be reasonable to think we can
+control the order for simple experiments, when our programs are
+released into the wild and we have @emph{no control} over when and
+where the clients run, this isn't a reasonable assumption to make.  We
+should refine our program to allow the clients to join in any order.
+
+If the clients can join in any order, a client must identify their
+role by sending a message after joining.  But now the protocol, even
+for this simple scenario, becomes fairly complicated.  You can imagine
+a client joins but waits a long time to identify their role.  Another
+client may join in the interim and immediately identify their role.
+What if two clients want to broadcast?  What if two clients want to
+listen?
+
+Second, if the broadcastee ever decides to send a message, rather than just
+passively listening to what's sent its way, we will treat this message
+as though it came from the broadcaster (and thus send it back to the
+broadcastee).  That is, the following scenario is possible:
+
+@verbatim{
+  A       B                   Server
+-----   -----        -----------------------
+                     Message   Event   State
+                               Bang    (new wait-caster%)
+         =========>            Join    (new wait-castee%)
+  ================>            Join    (new relay% A)
+         --------->  1         Msg     (new relay% A)
+  <----------------  1
+         --------->  2         Msg     (new relay% A)
+  <----------------  2
+  ---------------->  7         Msg     (new relay% A)
+  <----------------  7
+                     ...       ...     ... 
 }
 
-If we restart the universe and world, you'll notice that the universe
-console is now showing messages going in both directions.
+This brings up the interesting issue of @emph{protocols}, that is,
+what are the proper rules of conduct for the clients' and server's
+interaction.  First and foremost, it's important to establish and
+document the rules of interaction.  After doing so, we may want to
+@emph{enforce} protocols, either on the client or server side, or
+both.
 
-Now let's see an example of multiple world programs communicating with
-a single server.
+Let's try to develop broadcast and listener clients and a server that
+address these two issues.  In this design, the clients' changes are
+relatively straightforward.  They start by sending an initial message
+identifying their role, either @racket['broadcast] or
+@racket['listen].  
 
-If we were to just write this:
+The server is more involved.  Here we model @emph{connections} with
+worlds as either being an unknown connection, a broadcast connection,
+or a broadcastee connection.  The server starts in a state with no
+connections.  When a world joins, it transitions to a single, unknown
+connection state.  When a second world joins, it transitions to a
+two-connection state.  Any time after a connection has been made the
+server accepts role messages and sends them to the connections.  If
+the connection is in an unknown state and the role came from that
+connections' underlying world, the connection is assigned the
+requested role.  The only issue remaining with this server is handling
+the case of two clients want to both broadcast or both listen, which
+we just ignore for now.
 
-@#reader scribble/comment-reader
-(racketblock
-  (big-bang (new counter-world% 0))
-  (big-bang (new counter-world% 50))
-)
+@codeblock{
+#lang class/0
+;; A Server is 
+;; - (new wait%)
+;; - (new one% Conn)
+;; - (new two% Conn Conn)
 
-the program would wait for the first big-bang expression to finish
-evaluating before moving on the second one.  To make it possible to
-run many worlds at the same time, the universe library provides the
-@racket[launch-many-worlds] form that will evaluate all of its
-subexpressions in parallel:
+(define-class wait%
+  (define (on-new iw)
+    (new one% (new unknown% iw))))
 
-@#reader scribble/comment-reader
-(racketblock
-  (launch-many-worlds
-    (big-bang (new counter-world% 0))
-    (big-bang (new counter-world% 50)))
-)
+(define-class one%
+  (fields conn)
+  (define (on-new iw)
+    (new two% (send this conn) (new unknown% iw)))
+  (define (on-msg iw msg)
+    (cond [(role? msg)
+           (new one% (send (send this conn) ident msg))]
+          [else this])))
 
-Notice that both worlds count independently.
+(define-class two%
+  (fields conn1 conn2)
+  (define (on-msg iw msg)
+    (cond [(role? msg)
+           (new two% 
+                (send (send this conn1) ident msg)
+                (send (send this conn2) ident msg))]
+          [else
+           (make-bundle this
+                        (append (send (send this conn1) mail msg)
+                                (send (send this conn2) mail msg))
+                        empty)])))             
+
+;; A Conn is one of:
+;; - (new unknown% IWorld)
+;; - (new caster% IWorld)
+;; - (new castee% IWorld)
+;; implements
+;; - mail : Msg -> [Maybe Mail]
+;;   Maybe send mail to this connection.
+;; - ident : IWorld Role -> Conn
+;;   Assign given role for this connection.
+
+;; A [Maybe X] is one of:
+;; - empty
+;; - (list X)
+
+;; An Role is one of 'broadcast or 'listen
+(define (role? x) (or (eq? 'broadcast) (eq? 'listen)))
+
+(define-class unknown%
+  (fields iw)
+  (define (mail msg) empty)
+  (define (ident iw role)
+    (cond [(iworld=? (send this iw) iw)
+           (cond [(eq? role 'broadcast)
+                  (new caster% (send this iw))]
+                 [else
+                  (new castee% (send this iw))])]
+          [else this])))
+
+(define-class caster%
+  (fields iw)
+  (define (mail msg) empty)
+  (define (ident iw role) this))
+
+(define-class castee%
+  (fields iw)
+  (define (mail msg)
+    (list (make-mail (send this iw) msg)))
+  (define (ident iw role) this))
+}
+
+Now that we've seen the basics of communicating programs, let's build
+something a little more substantial.
+
 
 @section{Guess my number}
 
@@ -380,32 +665,29 @@ it.
 
 Here's the server:
 
-@#reader scribble/comment-reader
-(racketmod
-  class/0
-  (require class/universe)
+@codeblock{
+#lang class/0
+(require class/universe)
 
-  (define-class universe%
-    (fields the-number)
+(define-class universe%
+  (fields the-number)
     
-    (define (on-new iw) 
-      (make-bundle this empty empty))
-    
-    (define (on-msg iw m)
-      (make-bundle this 
-		   (list (make-mail iw (respond m (send this the-number))))
-		   empty)))
+  (define (on-new iw) this)
+  
+  (define (on-msg iw m)
+    (make-bundle this 
+		 (list (make-mail iw (respond m (send this the-number))))
+		 empty)))
 
-  ;; Number Number -> String
-  (define (respond guess number)
-    (cond [(< guess number) "too small"]
-	  [(> guess number) "too big"]
-	  [else "just right"]))
+;; Number Number -> String
+(define (respond guess number)
+  (cond [(< guess number) "too small"]
+	[(> guess number) "too big"]
+	[else "just right"]))
 
   ;; the universe is thinking of 2.
   (universe (new universe% 2))
-)
-
+}
 
 The universe now has a single peice of data, which is the number it is
 thinking of.  It responds to guesses by sending back a string
@@ -413,34 +695,33 @@ indicating whether the guess is just right, too big, or too small.
 
 Here is the client:
 
-@#reader scribble/comment-reader
-(racketmod
-  class/0
-  (require class/universe)
-  (require 2htdp/image)
+@codeblock{
+#lang class/0
+(require class/universe)
+(require 2htdp/image)
 
-  (define-class guess-world%
-    (fields status)
-    
-    (define (on-receive m)
-      (new guess-world% m))
-      
-    (define (to-draw)
-      (overlay (text (send this status)
-		     40
-		     "red")
-	       (empty-scene 300 100)))
-    
-    (define (on-key k)
-      (local [(define n (string->number k))]
-        (if (number? n)
-	    (make-package this n)
-	    this)))                    
+(define-class guess-world%
+  (fields status)
   
-    (define (register) LOCALHOST))
+  (define (on-receive m)
+    (new guess-world% m))
+  
+  (define (to-draw)
+    (overlay (text (send this status)
+		   40
+		   "red")
+	     (empty-scene 300 100)))
+  
+  (define (on-key k)
+    (local [(define n (string->number k))]
+      (if (number? n)
+	  (make-package this n)
+	  this)))                    
+  
+  (define (register) LOCALHOST))
 
   (big-bang (new guess-world% "guess a number"))
-)
+}
 
 The client has a single peice of data, which represents the status of
 its guess.  It responds to numeric key events by sending the guess to
@@ -458,75 +739,74 @@ of a number and the other player guesses.
 
 Here is the server:
 
-@#reader scribble/comment-reader
-(racketmod
-  class/0
-  (require class/universe)
+@codeblock{
+#lang class/0
+(require class/universe)
 
-  ;; A Universe is a (new universe% [U #f Number] [U #f IWorld] [U #f IWorld]).
-  (define-class universe%
-    (fields number
-	    picker
-	    guesser)
-    
-    ;; is the given world the picker?
-    (define (picker? iw)
-      (and (iworld? (send this picker))
-	   (iworld=? iw (send this picker))))
-    
-    ;; is the given world the guesser?
-    (define (guesser? iw)
-      (and (iworld? (send this guesser))
-	   (iworld=? iw (send this guesser))))
-    
-    (define (on-new iw)
-      (cond [(false? (send this picker))
-	     (make-bundle
-	      (new universe% false iw false)
-	      (list (make-mail iw "pick a number"))
-	      empty)]          
-	    [(false? (send this guesser))
-	     (make-bundle
-	      (new universe% (send this number) (send this picker) iw)
-	      empty
-	      empty)]          
-	    [else
-	     (make-bundle this empty (list iw))]))
-    
-    (define (on-msg iw m)
-      (cond [(and (picker? iw)
-		  (false? (send this number)))           
-	     (make-bundle
-	      (new universe% m (send this picker) (send this guesser))
-	      empty
-	      empty)]
-	    [(picker? iw) ;; already picked a number
-	     (make-bundle this empty empty)]
-	    [(and (guesser? iw)
-		  (number? (send this number)))
-	     (make-bundle this 
-			  (list (make-mail iw (respond m (send this number))))
-			  empty)]
-	    [(guesser? iw)
-	     (make-bundle this
-			  (list (make-mail iw "no number"))
-			  empty)])))
+;; A Universe is a (new universe% [U #f Number] [U #f IWorld] [U #f IWorld]).
+(define-class universe%
+  (fields number
+	  picker
+	  guesser)
   
-  ;; Number Number -> String
-  (define (respond guess number)
-    (cond [(< guess number) "too small"]
-	  [(> guess number) "too big"]
-	  [else "just right"]))
+  ;; is the given world the picker?
+  (define (picker? iw)
+    (and (iworld? (send this picker))
+	 (iworld=? iw (send this picker))))
+  
+  ;; is the given world the guesser?
+  (define (guesser? iw)
+    (and (iworld? (send this guesser))
+	 (iworld=? iw (send this guesser))))
+  
+  (define (on-new iw)
+    (cond [(false? (send this picker))
+	   (make-bundle
+	    (new universe% false iw false)
+	    (list (make-mail iw "pick a number"))
+	    empty)]          
+	  [(false? (send this guesser))
+	   (make-bundle
+	    (new universe% (send this number) (send this picker) iw)
+	    empty
+	    empty)]          
+	  [else
+	   (make-bundle this empty (list iw))]))
+  
+  (define (on-msg iw m)
+    (cond [(and (picker? iw)
+		(false? (send this number)))           
+	   (make-bundle
+	    (new universe% m (send this picker) (send this guesser))
+	    empty
+	    empty)]
+	  [(picker? iw) ;; already picked a number
+	   (make-bundle this empty empty)]
+	  [(and (guesser? iw)
+		(number? (send this number)))
+	   (make-bundle this 
+			(list (make-mail iw (respond m (send this number))))
+			empty)]
+	  [(guesser? iw)
+	   (make-bundle this
+			(list (make-mail iw "no number"))
+			empty)])))
 
-  (universe (new universe% false false false))
-)
+;; Number Number -> String
+(define (respond guess number)
+  (cond [(< guess number) "too small"]
+	[(> guess number) "too big"]
+	[else "just right"]))
+
+(universe (new universe% false false false))
+}
 
 The client stays the same!  You can launch the two players with:
 
-@#reader scribble/comment-reader
-(racketblock
-  (launch-many-worlds
-   (big-bang (new guess-world% "guess a number"))
-   (big-bang (new guess-world% "guess a number"))))
+@classblock{
+(launch-many-worlds
+ (big-bang (new guess-world% "guess a number"))
+ (big-bang (new guess-world% "guess a number")))
+}
 
 @include-section{06/exercises.scrbl}
