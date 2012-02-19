@@ -28,20 +28,18 @@
 (define (universe* o)
   (let ((i (object-interface o)))
     (universe o
-              (on-new 
-               (if (method-in-interface? 'on-new i)
-                   (λ (u iw)
-                     (bundlize (send u on-new iw)))
-                   (λ (u iw)
+              (on-new                
+               (λ (u iw)
+                 (if (method-in-interface? 'on-new (object-interface u))
+                     (bundlize (send u on-new iw))                  
                      (make-bundle u empty empty))))
               
               (on-msg
-               (if (method-in-interface? 'on-msg i)
-                   (λ (u iw msg)
-                     (bundlize (send u on-msg iw msg)))
-                   (λ (u iw msg)
+               (λ (u iw msg)
+                 (if (method-in-interface? 'on-msg (object-interface u))
+                     (bundlize (send u on-msg iw msg))
                      (make-bundle u empty empty))))
-              
+
               (on-tick
                (if (method-in-interface? 'on-tick i)
                    (λ (u)
@@ -64,19 +62,17 @@
                    (send o state)
                    false))
               
-              (to-string
-               (if (method-in-interface? 'to-string i)
-                   (λ (u)
-                     (send u to-string))
-                   (λ (u)
+              (to-string               
+               (λ (u)
+                 (if (method-in-interface? 'to-string (object-interface u))
+                     (send u to-string)                   
                      (format "~a" u))))
               
-              (check-with
-               (if (method-in-interface? 'check-with i)
-                   (λ (u)
-                     (send u check-with))
-                   (λ (u)
-                     true))))))                            
+              (check-with               
+               (λ (u)
+                 (if (method-in-interface? 'check-with (object-interface u))
+                     (send u check-with)
+                     true))))))
   
 (define (big-bang* o)
   (let ((i (object-interface o)))
