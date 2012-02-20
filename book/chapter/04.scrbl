@@ -7,65 +7,6 @@
 
 @title[#:tag "chapter:delegation"]{Abstraction via Delegation}
 
-@section{New language features}
-
-Here are some new language features.
-
-@subsection{Interface intheritance}
-
-Interfaces can now inherit from other interfaces.  In this example,
-the @r[foo%] class promises to implement the methods specified in
-@r[bar<%>], but also the methods listed in the super-interfaces
-@r[baz<%>] and @r[foo<%>].
-
-@#reader scribble/comment-reader
-(racketmod
-  class/1
-  (define-interface baz<%> (blah))
-  (define-interface foo<%> (blah))
-  (define-interface bar<%> 
-    (super foo<%>)
-    (super baz<%>)
-    (x y))
-
-  (define-class foo%
-    (implements bar<%>)
-    (fields x y z blah))
-)
-
-
-@subsection{Dot notation}
-
-To make programming with objects more convenient, we've added new
-syntax to @racketmodname[class/1] to support method calls.  In
-particular, the following now sends method @r[x] to object @r[o] with
-argument @r[arg]:
-
-@racketblock[
-(x #,(racketidfont ".") o arg)
-]
-
-This is equivalent to
-@racketblock[
-(send x o arg)
-]
-
-We can chain method calls like this:
-
-@racketblock[
-(x #,(racketidfont ".") o arg #,(racketidfont ".") m arg*)
-]
-
-This sends the @r[m] method to the @emph{result} of the previous
-expression.  
-This is equivalent to
-@racketblock[
-(send (send x o arg) m arg*)
-]
-
-Although in lecture this didn't work in the interactions window, it
-now works everywhere that you use @racketmodname[class/1]. 
-
 
 @section{Constructor design issue in modulo zombie (Assignment 3,
 Problem 3)}
