@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require class/utils
-          (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class/1 define-struct ... length))
+          (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect check-within ...))
+          (for-label (except-in class/1 define-struct ... length check-expect check-within))
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
@@ -83,11 +83,12 @@ occurrence of the duplicated answer expressions:
 }
 
 But switching back to the object-oriented version of this code, it is
-not so simple to "eliminate the @racket[cond]"---there is no
-@racket[cond]!  The solution, in this context, is to abstract the
-identical method defintions to a common @emph{super} class.  That is,
-we define a third class that contains the method shared among
-@racket[leaf%] and @racket[node%]:
+not so simple to ``eliminate the @racket[cond]''---there is no
+@racket[cond]!  We would like to write this code just once, but the
+real question is @emph{where}?  The solution, in this context, is to
+@emph{lift} the identical method defintions to a common @emph{super}
+class.  That is, we define a third class that contains the method
+shared among @racket[leaf%] and @racket[node%]:
 
 @classblock{
 (define-class bt%
@@ -125,6 +126,8 @@ without actually writing it twice:
        (send (send this left) count)
        (send (send this right) count))))
 }
+
+@section{The @racketmodname[class/1] language}
 
 To accommodate this new feature---@emph{inheritance}---we need to
 adjust our programming language.  We'll now program in
@@ -172,6 +175,22 @@ even though it is only defined in @racket[bt%]:
 (send (send (new leaf% 7) double 8) double 9)
 ]
 
+There are a couple other features of the @racketmodname[class/1]
+language that are worth knowing about.  One is a trivial, but very
+handy shorthand form for writing @racket[send].  The shorthand form is
+to write @racket[(o . m)] to call method @racket[m] on object
+@racket[o], that is, @racket[(o . m)] is equivalent to @racket[(send o
+m)].  Another nice feature of the ``dot notation'' is that it makes it
+easy to stack up a bunch of method calls, so for example @racket[(o
+#,dot m #,dot n x y #,dot p)] is shorthand for 
+
+@classblock{
+(send (send (send o m) n x y) p)
+}
+
+From here on out, the book will use the dot notation since it's so
+nice.
+
 @section{``Abstract'' classes}
 
 At this point, it is worth considering the question: what does a
@@ -189,7 +208,7 @@ representation of a binary tree than does @racket[(new node% "Hello Fred"
 sense for our program to ever construct @racket[bt%] objects---they
 exist purely as an abstraction mechanism.  Some languages, such as
 Java, allow you to enforce this property by declaring a
-class as "abstract"; a class that is declared abstract cannot be
+class as ``abstract''; a class that is declared abstract cannot be
 constructed.  Our language will not enforce this property, much as it
 does not enforce contracts.  Again we rely on data definitions to 
 make sense of data, and @racket[(new bt%)] doesn't make sense.
@@ -227,8 +246,8 @@ super class and eliminate the duplicated field in the subclasses:
   ;; count the number of numbers in this node
   (define (count)
     (+ 1
-       (send (send this left) count)
-       (send (send this right) count))))
+       (this . left . count)
+       (this . right . count))))
 }
 
 The @racket[leaf%] and @racket[node%] class now inherit both the
@@ -315,7 +334,7 @@ then values for its inherited fields.}
   ;; -> Number
   ;; sum all the numbers in this leaf
   (define (sum)
-    (send this number)))
+    (this . number)))
 
 (define-class node%
   (super bt%)
@@ -324,15 +343,15 @@ then values for its inherited fields.}
   ;; count the number of numbers in this node
   (define (count)
     (+ 1
-       (send (send this left) count)
-       (send (send this right) count)))
+       (this . left . count)
+       (this . right . count)))
   
   ;; -> Number
   ;; sum all the numbers in this node
   (define (sum)
-    (+ (send this number)
-       (send (send this left) sum)
-       (send (send this right) sum))))
+    (+ (this . number)
+       (this . left . sum)
+       (this . right . sum))))
 }
 
 As you can see, both of the @racket[sum] methods refer to the
@@ -396,14 +415,14 @@ the scene at the appropriate position:
   
   ;; -> +Real
   (define (area)
-    (* pi (sqr (send this radius))))
+    (* pi (sqr (this . radius))))
    
   ;; Scene -> Scene
   ;; Draw this circle on the scene.
   (define (draw-on scn)
-    (place-image (circle (send this radius) "solid" "black")
-		 (send this x)
-		 (send this y)
+    (place-image (circle (this . radius) "solid" "black")
+		 (this . x)
+		 (this . y)
 		 scn)))
 
 (define-class rect%
@@ -413,15 +432,15 @@ the scene at the appropriate position:
   ;; -> +Real
   ;; Compute the area of this rectangle.
   (define (area)
-    (* (send this width)
-       (send this height)))
+    (* (this . width)
+       (this . height)))
   
   ;; Scene -> Scene
   ;; Draw this rectangle on the scene.
   (define (draw-on scn)
-    (place-image (rectangle (send this width) (send this height) "solid" "black")
-		 (send this x)
-		 (send this y)
+    (place-image (rectangle (this . width) (this . height) "solid" "black")
+		 (this . x)
+		 (this . y)
 		 scn)))
 }
 
@@ -590,6 +609,67 @@ We arrive at the following final code:
 			   (empty-scene 40 40)))
 }
 
+@section{Revisiting the Rocket with Inheritance}
+
+At this point, you may recall that unsettling feeling you had in the
+discussion of @secref{Revisiting_the_Rocket}, in which we wrote
+duplicate, identical methods in both the @racket[landing%] and
+@racket[takeoff%] variants of @tt{Rocket} objects:
+
+@filebox[@elem{@racket[landing%] and @racket[takeoff%]}]{
+@classblock{
+  ;; render : -> Scene
+  ;; Render this rocket as a scene.
+  (define (render)
+    (send this draw-on MT-SCENE))
+ 
+  ; draw-on : Scene -> Scene
+  ; Draw this rocket on to scene.
+  (define (draw-on scn)
+    (overlay/align/offset "center" "bottom"
+                          ROCKET
+                          0 (add1 (send this dist))
+                          scn))
+}}
+
+We now have the mechanism to eliminate this duplication.  We can
+define a super class of @racket[landing%] and @racket[takeoff%] called
+@racket[rocket%] and lift the methods to this class.  Moreover, since
+there is duplication in the data of these classes, we can likewise
+lift the @racket[dist] field to @racket[rocket%]:
+
+@classblock{
+(define-class rocket%
+  (fields dist)
+
+  ;; render : -> Scene
+  ;; Render this rocket as a scene.
+  (define (render)
+    (this . draw-on MT-SCENE))
+ 
+  ;; draw-on : Scene -> Scene
+  ;; Draw this rocket on to scene.
+  (define (draw-on scn)
+    (overlay/align/offset "center" "bottom"
+			  ROCKET
+			  0 (add1 (this . dist))
+			  scn)))
+}
+
+To complete the revised program, the @racket[landing%] and
+@racket[takeoff%] classes should declare @racket[rocket%] as a super
+class and remove the @racket[dist] field and @racket[render] and
+@racket[draw-on] methods:
+
+@classblock{
+(define-class landing%
+  (super rocket%)
+  ...)
+(define-class takeoff%
+  (super rocket%)
+  ...)
+}
+
 @section[#:tag "Exercises (Ch 4.)"]{Exercises}
 
 @subsection{Abstracting lists}
@@ -598,7 +678,7 @@ Revisit your solution to the @secref{Parametric_lists} exercise.
 
 Use inheritance to lift method definitions to a super class to the
 full extent possible.  (@emph{Hint}: it will help if you realize that many of
-these methods may be expressed in terms of a few "core" methods.)  If
+these methods may be expressed in terms of a few ``core'' methods.)  If
 possible, have both the recursive union representation and the wrapper
 representation share a common super class.
 
@@ -609,7 +689,9 @@ kind of list (either a wrapped or a recursive union list) is
 constructed.
 
 
-@subsection[#:tag "assign_range"]{Shapes}
+@subsection[#:tag "assign_shapes"]{Shapes} 
+
+@margin-note{@secref{soln03}}
 
 Here is the signature for a method to compute the area of a 
 shape's bounding box---the smallest rectangle that can contain 
