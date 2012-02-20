@@ -21,15 +21,12 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/08.scrbl}
 @include-section{chapter/09.scrbl}
 @include-section{chapter/10.scrbl}
-@;AI chapter removed for 2012.
-@;include-section{chapter/11.scrbl}
+@include-section{chapter/11.scrbl}
 @include-section{chapter/12.scrbl}
 @include-section{chapter/13.scrbl}
 @include-section{chapter/14.scrbl}
 @include-section{chapter/15.scrbl}
 @include-section{chapter/16.scrbl}
 @include-section{chapter/17.scrbl}
-@include-section{chapter/18.scrbl}
-@include-section{chapter/19.scrbl}
 
 @include-section{solutions.scrbl}

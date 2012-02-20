@@ -16,602 +16,708 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title{Being Smart}
+@title{Constructors}
 
-@section{The 3-In-A-Row Game}
+@section{Canonical forms}
 
-Today we're going to look at this game we made up.  It's called 3-in-a-row.
-The object of the game is to place three peices in a row.  You take
-turns playing against the computer.
+Today we're going to look more at the concept of @emph{invariants}.
+Invariants often let us write code that takes advantage of the fact
+that we know some property, the invariant, of our data.  We saw this
+last class using sorted lists of numbers.  Today we're going to
+examine a new example: fractions.
 
-Here is an example of playing the game. You start with an empty board.
-You can place a peice by pressing a number, which puts the peice at
-the slot with that number (counting from zero).
-
-...
-
-What we're going to work on today is coming up with a smart computer
-player.  In class we'll develop one for the 3-in-a-row game.  On the
-current homework, you
+A fraction can be represented as a compound data that consists of two
+numbers representing the numerator and denominator:
 
 @codeblock{
-;; A Board is a [Listof Color]
-;; A Color is one of 
-;; 'red 
-;; 'black
+  ;; A Fraction is a (new fraction% Integer Integer).
+  (define-class fraction%
+    (fields numerator denominator))
 }
 
-What's wrong with this?  It's hard to represent the current board
-state that is all empty.
-
-We modify our data definition as:
+The problem here is that we'd like to consider the
+fractions:
 
 @codeblock{
-;; A Board is a [Listof Color]
-
-;; A Color is one of:      Interp:
-;; 'red                    - the player
-;; 'black                  - the computer
-;; 'white                  - blank
+  (new fraction% 1 2)
+  (new fraction% 2 4)
 }
 
-What's an important function for us to write to manipulate a board
-like this?  How about determinining who, if anybody, has won the game?
+as representing the same number, namely @racket[1/2], but these are
+different representations of the same information.  The issue with
+fractions is a recurring issue we've seen with information that allows
+for multiple representations (sets are another example).  
 
-Let's write the function:
+There are a couple approaches to solving this issue:
+
+@itemlist[#:style 'ordered
+
+@item{Represents information is some @emph{canonical} way.}
+
+@item{Codify the interpretation of data as a program.}
+]
+
+The first approach basically eliminates the problem of multiple
+representations by picking a unique representation for any given piece
+of information.  For example, with fractions, we might choose to
+represent all fractions in lowest terms.  This means any fraction
+admits only a single representation and therefore any fractions which
+are interpreted as "the same" have exactly the same structure.  (This
+approach is not always possible or feasible.)
+
+The second approach requires us to write a program (a function, a
+method, etc.) that determines when two pieces of data are interpreted
+as representing the same information.  For example, we could write a
+method that converts fractions to numbers and compares them for
+numerical equality; or we simplify the fraction to lowest terms and
+compare them structurally.
+
+Along the lines of the second approach, let's consider adding the
+following method:
+
+@filebox[@r[fraction%]]{
+@#reader scribble/comment-reader
+(racketblock
+  ;; to-number : -> Number
+  ;; Convert this fraction to a number.
+  (define/public (to-number)
+    (/ (field numerator)
+       (field denominator)))
+)}
+
+This method essentially embodies our interpretation of the
+@racket[fraction%] class of data.  It doesn't help with this issues:
 
 @codeblock{
-;; player-win? : Board -> Boolean
-;; Are there three red peices in a row on the board?
+  (check-expect (new fraction% 1 2)
+		(new fraction% 2 4))
 }
 
-Idea: use an accumulator to remember how many red peices in a row
-we've seen so far.  When you see a non-red peice, you reset the
-accumulator.  When you see a red peice you increment the accumulator.
-When the accumulator gets to three, the player has won.
-
-So we define a local function that adds an accumulator argument.
+But of course now we can write our tests to rely on this
+interpretation function:
 
 @codeblock{
-(define (player-win? b)
-  ;; win-helper : Board Number -> Boolean
-  ;; Acc : hom many red peices we've seen so far
-  (local [(define (win-helper b acc)
-            (cond [(= acc WIN) true]
-		  [(empty? b) false]
-		  [else
-		   (cond [(symbol=? 'red (first b))
-			  (win-helper (rest b) (add1 acc))]
-			 [else
-			  (win-helper (rest b) 0)])]))]
-     (win-helper b 0)))
+  (check-expect ((new fraction% 1 2) . to-number)
+		((new fraction% 2 4) . to-number))
 }
 
-Now let's program the computer-win? predicate:
+But what if we wanted to go down the second route?  We could define a
+method that computes a fraction in lowest terms:
+
+@filebox[@r[fraction%]]{
+@#reader scribble/comment-reader
+(racketblock
+  ;; simplify : -> Fraction
+  ;; Simplify a fraction to lowest terms.
+  (check-expect ((new fraction% 3 6) . simplify)
+		(new fraction% 1 2))
+)}
+
+We can use the @racket[gcd] function to compute the greatest common
+denominator of the terms:
+
+@filebox[@r[fraction%]]{
+@#reader scribble/comment-reader
+(racketblock
+  (define/public (simplify)
+    (new fraction%
+	 (/ (field numerator) 
+	    (gcd (field numerator) 
+		 (field denominator)))
+	 (/ (field denominator) 
+	    (gcd (field numerator) 
+		 (field denominator)))))
+)}
+
+This allows us to structurally compare two fractions that have been
+simplified to lowest terms:
 
 @codeblock{
-(define (player-win? b)
-  ;; win-helper : Board Number -> Boolean
-  ;; Acc : hom many red peices we've seen so far
-  (local [(define (win-helper b acc)
-            (cond [(= acc WIN) true]
-		  [(empty? b) false]
-		  [else
-		   (cond [(symbol=? 'red (first b))
-			  (win-helper (rest b) (add1 acc))]
-			 [else
-			  (win-helper (rest b) 0)])]))]
-     (win-helper b 0)))
+  (check-expect ((new fraction% 3 6) . simplify)
+		((new fraction% 1 2) . simplify))
 }
 
-Apply the abstraction recipe and we see to abstract out the symbol and
-make it a parameter to the function:
+But it does not prevent us from constructing fractions that are not in
+lowest terms, which is what we were aiming for --- we want it to be an
+invariant of @racket[fraction%] objects that they are in their
+simplest form.  One possibility is to define a @emph{constructor
+function} that consumes a numerator and denominator and constructs a
+@racket[fraction%] object in lowest terms:
 
 @codeblock{
-(define (win? p b)
-  ;; win-helper : Board Number -> Boolean
-  ;; Acc : hom many red peices we've seen so far
-  (local [(define (win-helper b acc)
-            (cond [(= acc WIN) true]
-		  [(empty? b) false]
-		  [else
-		   (cond [(symbol=? p (first b))
-			  (win-helper (rest b) (add1 acc))]
-			 [else
-			  (win-helper (rest b) 0)])]))]
-     (win-helper b 0)))
-
-(define (win-player? b)
-  (win? 'red b))
-
-(define (win-computer? b)
-  (win? 'black b))
+;; fract-constructor : Number Number -> Fraction
+;; construct a fraction in lowest terms.
+(define (fract-constructor n d)
+  (new fraction%
+       (/ n (gcd n d))
+       (/ d (gcd n d))))
 }
 
-Now...
+So we are able to write a new function with the behavior we want and
+it establishes our invariant.  That's good, but there are still some
+inconveniences:
+
+@itemlist[
+@item{We have to write a function.}
+@item{We have to remember to use it everywhere in place of the constructor.}
+@item{We still have the @racket[fraction%] constructor around, which allows
+users, including ourselves, to violate the invariant.}
+]
+
+If we want to have a stronger guarantee that we maintain the lowest
+term invariant, we need a stronger mechanism for enforcing our
+discipline at construction-time.  The idea is to allow arbitrary
+computation to occur between the call to a constructor and the
+initialization of an object.  To enable this mechanism, we need to
+bump the language level up to @racket[class/2].
+
+All @racket[class/1] programs continue to work in @racket[class/2].  The
+main difference is that we now the ability to write @emph{constructors}.
+
+@filebox[@r[fraction%]]{
+@codeblock{
+  (constructor (n d)
+    ;;...some expression that uses the fields form to return values
+    ;;   for all of the fields...
+    ...)
+}}
+
+The @racket[constructor] form can take any number of arguments
+and must use the @racket[fields] to initialize each of the fields.
+If you leave off the constructor form, a default constructor is
+generated as:
 
 @codeblock{
-;; play : Color Number Board -> Board
-;; place the appropriate piece on the board
+  (constructor (n d)
+    (fields n d))
 }
 
-Is the board going to be a constant size?
-
-Why are you asking?
-
-Because if the board is a constant size, then the board could be
-represented with a vector.
-
-Looking at our win? predicate suggests the list representation is
-good.
-
-But our play function suggests that an @emph{indexed} view of our data
-is a appropriate.
-
-So you can think of a list with two views: one is recursive, the other
-is indexed; each position in the list is numbered and we can refer
-to values in the list according to the index at which they reside.
-
-Why do we need play, when you just call play with the same arguments?
-
-Because what if we changed the representation of the board.
-Also, play has it's own purpose.
+And in general if you have @tt{n} fields, the defaults constructor
+looks like:
 
 @codeblock{
-(define (play c n b)
-  (list-set b n c))
+  (constructor (field1 field2 ... fieldn)
+    (fields field1 field2 ... fieldn))
 }
 
-Game works like this: we play, computer plays, we play, computer
-plays, etc. until someone wins.
-
-
-A World is going to have two things: a board and a representation of
-the computer player.  We'll see the computer data definition later.
+But by writing our own constructor, we can insert computation to
+convert arguments in a canonical form.  For our @racket[fraction%]
+class, we can use the following code:
 
 @codeblock{
-(define-class world%
-  (fields board computer)
-  ;; -> Scene
-  ;; Render this world as a scene.
-  (define/public (to-draw)
-    (overlay 
-     (foldr beside empty-image (map (lambda (clr) (circle 20 "solid" clr))
-				    (field board)))
-     (empty-scene 500 500)))
-
-  ;; KeyEvents
-  ;; Handle number keys by playing and N-key by reseting the game.
-  (define/public (on-key k)
-    (cond [(number? ...) 
-	   (world% (play 'red (string->number k) (field board))
-		   (field computer))]
-	  ...)))
-
-(define INITIAL (build-list SIZE (lambda (_) 'white)))
-
-(big-bang (world% INITIAL 'computer)) 
-; Bogus value for the computer, since we don't use it currently
+  ;; Number Number -> Fraction
+  (constructor (n d)
+    (fields (/ n (gcd n d))
+	    (/ d (gcd n d))))
 }
 
-Now we can play, but the computer never plays.  (The white circles
-don't look great).
+This code is used every time we have a @racket[(new fraction% Number
+Number)] expression.  Since this is the only way to construct a
+fraction, we know that @emph{all fractions are represented in lowest
+terms}.  It is simply impossible, through both error or malice, to
+construct an object that does not have this property.
 
-Now let's think about how the computer is going to play.
+Returning to our @racket[simplify] method; we don't really need it any
+longer.  (We could, if need be, re-write the code to take advantage of
+the invariant and give a correct implementation of
+@racket[simplify] as @racket[(define/public (simplify) this)], since
+all fractions are already simplified.)  Likewise, we no longer need
+the @racket[fract-constructor] function.
 
-What should a computer player do?  What should it's interface be?
-What's the job of a computer player?
+Finally, we get to the point we wanted:
+@codeblock{
+  (check-expect (new fraction% 1 2)
+		(new fraction% 2 4))
+}
 
-Looks at the board and picks a move.
+Q: Can you have multiple constructor?  
 
-Reducing this to a decision problem.  Where do we want to play (OK,
-not a decision problem).
+A: No.  We've been thinking about multiple constructors, but we don't
+have a strong story for them yet.  Remember: you can always write
+functions and you can think of these as alternative constructors.
 
-[Missed the discussion at this point.]
+That brings up another feature in the @racketmodname[class/2] language
+--- constructors and functions are treated more uniformly now: you may
+leave off the @racket[new] keyword when constructing objects.
 
-We've got a new board that represents where the player has played.
+@examples[#:eval the-eval
+  (define-class posn%
+    (fields x y))
+  (new posn% 2 3)
+  (posn% 4 5)]
 
-How can get the computer to choose a place to play?
+Q: Can you have a different number of arguments to the constructor
+than to the number of fields?  
 
-Make a new board, play 'black wherever the computer picks to
-play (giving the board that we just played on.
+A: Yes.  There's no relation between the number of arguments to your
+constructor and the number of fields in the object being constructed.
 
-What would be the problem with the computer returning a board?
+One thing to note is that printing values has changed.  You'll notice
+that @racket[fraction%] values no longer print as @racket[(new
+fraction% Number Number)], but instead as @racket[(object:fraction%
+Number Number)].  This is because by adding arbitrary computation at
+construction-time, there's no longer a close relationship between a 
+call to a constructor and the contents of an object.  So in printing
+values we have a choice to make: either print the constructor call,
+which doesn't tell us about the contents of the object, @emph{or} 
+print the contents of the object, which doesn't tell us about the
+call to the constructor.  We chose the latter.
 
-We want to have a strict seperation of concerns.
+Q: Can you call methods on the object being constructed?  
 
-Chooses a number and we play there.
+A: No.  What would they do?  Suppose you invoked a method that
+referred to fields of @racket[this] object --- those things just
+don't exist yet.
+
+Some languages allow this.  Java for example, will let you invoke
+methods from within constructors and should those methods reference
+fields that are not initialized, bad things happen.  (This is just
+poor language design, and descends from
+@link["http://en.wikipedia.org/wiki/C._A._R._Hoare"]{Sir Tony Hoare}'s
+"Billion Dollar Mistake": the null reference.)
+
+
+@section{Integrity checking}
+
+Beyond computing canonical forms, constructors are also useful for
+checking the integrity of data given to a constructor.  For example,
+suppose we are writing a class to represent dates in terms of their
+year, month, and day of the month.  Now, what if we're given the 67th
+day of March in the year -17?  What should that data represent?  Maybe
+it should be March 40 (because as we heard in class, @racket[(= 40 (-
+67 17))]; maybe it should be May 6th, 17 B.C., maybe it should May
+6th, 17 years before the UNIX epoch of 1970; maybe it should be March
+5, 17 A.D., which we arrive at by mod'ing 67 by the number of days in
+March and making the year positive; or maybe... this data is just
+bogus and we should raise an error and refuse to continue computing.
+
+Let's see how we can implement a simple form of @emph{integrity checking}
+in a constructor.  We will implement a class to represent dates and 
+raise an error in case of a situation like the above.
 
 @codeblock{
-(define-class computer%
-  (define/public (pick brd)
-    ...))
+  ;; A Date is (date% Number Number Number).
+  ;; Interp: Year Month Day.
+  ;; Year must be positive.
+  ;; Month must be in [1,12].
+  ;; Day must be in [1,31].
+  (define-class date%
+    (fields year month day))
 }
 
-Q: Speaking of cheating, what do we do to enforce that the player make
-a legal move?
+We can still construct meaningless dates, so what we would like to do
+is check the inputs to a constructor make some sense.  This let's us
+establish the integrity of all @racket[date%] objects --- if you have 
+your hands on a @racket[date%] object, you can safely assume it
+satisfies the specification we've given in the data definition.
 
-Let's implement the simplest strategy for the computer.  What is the
-simplest strategy for the computer playing?  Play on Zero.
+The simplest way to satisfy the specification is with this constructor:
 
-Now play until player wins.  What happened?  Nothing.  We never used
-the win? predicate even though we wrote it.
-
-Let's do on-key.
-
-What are the possible outcomes?
-
-- Player wins
-- Computer wins
-- It's a draw
-
-When the game is over, should we respond to key board events?  No.
-That world is going to behave pretty differently than this world.  The
-best way to represent that is with another class.
-
+@filebox[@r[date%]]{
 @codeblock{
-;; A DoneWorld
-}
+  (constructor (y m d)
+    (error "I didn't like this date!"))
+}}
 
-What information does a done world need to maintain?
+This is known as a "sound" solution in the program verification
+community.  Notice: if you have your hands on a @racket[date%] object,
+you can safely assume it satisfies the specification we've given in
+the data definition.  Why?  Because you @emph{cannot} construct a
+@racket[date%] object.
 
-- Who won
-- The computer (since the computer is going to learn as it plays)
+We'd like to do better by accepting more legitimate dates.  Here is
+one that accepts all the things deemed acceptable in our specification
+(this is both "sound" and "complete"):
 
-It wouldn't learn much if we reset what it had learned after each
-round.
+@filebox[@r[date%]]{
+@codeblock{
+  (constructor (y m d)
+    (cond [(<= y 0) (error "year was negative or zero")]
+          [(or (> m 12) (< m 1)) (error "month too big or too small")]
+          [(or (> d 31) (< d 1)) (error "day too big or too small")]
+          [else (fields y m d)]))
+}}
 
-We draw by saying who won.  We're going to handle the N-key event by
-start a new game, which will start with the computer we have.
+@(the-eval 
+  '(define-class date%
+     (fields year month day)
+     (constructor (y m d)
+       (cond [(<= y 0) (error "year was negative or zero")]
+	     [(or (> m 12) (< m 1)) (error "month too big or too small")]
+	     [(or (> d 31) (< d 1)) (error "day too big or too small")]
+	     [else (fields y m d)]))))
 
-When we have a tie, go to done, saying there was a tie.
+@examples[#:eval the-eval
+  (date% 2011 3 67)]
 
-Nice design pattern for implementing world games; for example, in tron
-or connect four: the universe has multiple states it could be in (no
-worlds connected, one connected, two connected).  Also comes up in
-local games: states of the world (playing, done).
+@margin-note{It is still possible to construct meaningless dates, such
+as February 31, 2011.  However, more stringent validation is just some
+more code away, and since we are more concerned with the
+@emph{concept} of integrity checking than in a robust date library, we
+won't go into the details.}
 
-State machine, transition system.  Pattern comes up all the time.
+Thus we can @emph{establish} invariants with computation, or we can
+@emph{reject} inputs that don't have the invariant we want to
+maintain.  And we can combine these approaches.  (You may want to
+compute fractions in lowest terms @emph{and} reject @racket[0] as
+a denominator in @racket[fraction%], for example.)
+
+@section{Ordered binary trees}
+
+Now we want to look at a slightly larger program and how we use
+constructors to enforce important invariants.  In this section, we
+want to develop a @emph{representation of sorted lists of numbers},
+which is what we did in @seclink["Invariants_of_Data_Structures"], but
+this time we're going to represent a sorted list of numbers as an
+@emph{ordered binary tree}.
+
+An ordered binary tree looks like this:
 
 @verbatim{
----> PLAY ---------> DONE
-       ^              |
-       +--------------+
+      *
+     / \
+    *   3
+   / \
+  1   2
 }
 
-Models nicely in an OO language.
+Notice that there is data only at the leaves of the tree and that if
+you traverse the leaves in left-to-right order, you recover the sorted
+list of numbers.  Thus there is an important invariant about this data
+structure: whenever we have an ordered binary tree node, the left
+sub-tree is sorted and the right sub-tree is sorted @emph{and} and
+numbers in the left sub-tree are smaller than or equal to all the
+numbers in the right sub-tree.
 
-We no longer need to conditionally something if we're in the done
-state or play state -- we can just rely on the object itself being a
-done object or a play object.  The conditional goes away.
-
-How can we check for a tie?
-
-There are no white pieces.
+Here is our data and class definition for ordered binary trees:
 
 @codeblock{
-(define (tie? b)
-  (not (member 'white b)))
+  ;; A OBT is one of:
+  ;; - (node% OBT OBT)
+  ;; - (leaf% Number)
+  (define-class leaf%
+    (fields number))
+  (define-class node%
+    (fields left right))
 }
 
-Still failing to do a bunch of things:
-
-- Checking that player doesn't cheat.
-- The computer plays in a dumb (and illegal) way
-
-Let's consider how to make the computer smarter.
-
-Start with seven peices.
-
-How can pick a good spot?  How can pick the best spot?
-
-- Pick the first spot that you win?
-
-What if the board is blank?
-
-So *if* you can win, you want to win.
-
-- Block the other player from winning.
-
-Which do we want to do first?
-
-If you can win, win.  If you can't but you can block a win, block.
-Otherwise, ... who knows.
-
-We don't want to think in advance.
-
-Might want to consult our past experience (our predictions).
-
-We got to this situation and played at the end and always lost.
-
-We haven't decided how much to remember from previous plays.
-
-Indexed data and lists (works just fine for small lists).
-
-Play -- you lose your turn if you play off the board, or if you pick
-a spot that has already been played.
-
-First goal: play in an empty space.
-
-How can find an empty space?  Pick a number, see if it's empty.
-
-Idea: iterate through numbers and pick the first one that is empty.
-
-Is there a problem here?  We might go off the end.
-
-Invariant: never asked to play on a full board.  So we don't have to
-worry about that case.
-
-Let's make sure we are maintaining that invariant.  We make sure
-there's an empty spot just before asking the player to pick.
-
-We have the computer play, then not checking to see if the computer
-won -- we just keep on playing.
-
-Let's fix that.
-
-
-EVALUATION
-
-How do we evaluate a position?
-
-W C P P W
-
-What information do we get out?
-
-Summarize by where we should play or false.
-
-Before we do that, we should gather information on all possible plays.
-
-
-We have 5 spots and we need to evaluate each position.
-
-@verbatim{
-_ _ _ _ _
-}
-
-What are the possibilities:
-
-- it's full
-- don't know
-- we win if we play here
-- we lose if we play here
-
-Sufficient to capture everything we could know.
-
-Other more compicated games might need more information.  Which comes
-from refining the unkown bit to reason about "likely" outcomes.
-
-Develop a function that takes a board and evaluates it.
-
-Develop a data definition for an evaluation:
+Some examples:
 
 @codeblock{
-;; An Eval is a [Listof Result].
-;; A Result is one of:
-;; - 'win
-;; - 'lose
-;; - 'full
-;; - 'unkown
-
-;; Board -> Eval
-(define/public (evaluate brd)
-  ...)
+  (leaf% 7)
+  (node% (leaf% 1) (leaf% 2))
 }
 
-Maybe have an evaluate-element function.  It needs the 
-the index and the board.
+Now, is this an example?
 
 @codeblock{
-(local [;; Board Number -> Result
-	(define (eval-elem index) ...)]
-  (build-list SIZE evaluate-elem))
+  (node% (leaf% 7) (leaf% 2))
 }
 
-How do we evaluate a position?
+This example points out that we are currently missing the
+specification of our invariant in the data definition:
 
 @codeblock{
-(local [;; Board Number -> Result
-	(define (eval-elem index) 
-	  (cond [(not (symbol=? 'white (list-ref brd index))) 'full]
-		[(computer-win? (play 'black index brd)) 'win]
-		[(player-win? (play 'red index brd)) 'lose]
-		[else 'unkown]))]
-  (build-list SIZE evaluate-elem))
-}	
-
-Going back to pick:
-
-if there's a win, play there; otherwise if there's a block, play there;
-otherwise play at the first place we can.
-
-We need a function that will tells us the first postion
-
-@codeblock{
-;; find-res : Eval Result -> (U Number False)
-;; find the first occurrence of the given result.
+  ;; A OBT is one of:
+  ;; - (node% OBT OBT)
+  ;; - (leaf% Number)
+  ;; Invariant: numbers are in ascending order from left to right.
 }
 
-But what if the whole board is bad for us?  If we say, where can I
-when, what should we get back.
+What happens if we try to construct something that violates our
+invariant?  Nothing -- we just construct bogus things.  Now how
+could enforce this ascending order invariant?
 
-What if we return -1 instead?  Why is false a better choice?  It is a
-different KIND of value that we won't confuse with other kinds of 
-indexes.
+Well, let's first think about the @racket[leaf%] case.  We are given a
+number and we need to construct an ordered binary tree, meaning all
+the numbers in the tree are in ascending order.  Since we are
+constructing a tree with only one number in it, it's trivial to
+enforce this invariant---it's always true!
 
-Write obvious recursive function.  What's the problem? Might try to
-add one to false.  Avoid doing that.
+Now consider the @racket[node%] case.  We are given two ordered binary
+trees.  What does that mean?  It means the numbers of each tree are in
+ascending order.  But wait---isn't that the property we are trying to
+enforce?  Yes.  Notice that if we @emph{assume} this of the inputs and
+@emph{guarantee} this of the constructed value, then it @emph{must be
+true of all @tt{OBT}s}; i.e. the assumption was valid.  If this
+reasoning seems circular to you, keep in mind this is not unlike "the
+magic of recursion", which is not magic at all, but seems to be since
+it lets you assume the very function you are writing works in
+recursive calls on structurally smaller inputs.  If you do the right
+thing in the base case, and if on that assumption of the recursive
+call, you can construct the correct result, then that assumption about
+the recursive call was valid and your program is correct for all inputs.
 
-Now, let's go back to pick.
+OK, so the challenge at hand is not in verifying that the input
+@tt{OBT}s posses the invariant, but in guaranteeing that the result of
+the constructor possesses it.  If we can do that, than we know the
+given @tt{OBT}s must have the property.
 
-Now play.  Tada: we block the player after it plays two.
+But now this assumption is not sufficient to guarantee that the
+default constructor works:
 
-But we could have done better.  When did the program go wrong?
-With it's first move.
+@filebox[@r[node%]]{
+@codeblock{
+  ;; OBT OBT -> OBT
+  (constructor (a b)
+    (fields a b))
+}}
 
-It makes the mistake again and again.
+Why?  Although we know that the left and right sub-tree are @tt{OBT}s,
+we know nothing about the relationship @emph{between} the left and
+right sub-tree, which was an important part of the invariant.  Consider
+for example, the @tt{OBT}s:
+
+@codeblock{
+  (node% (leaf% 4) (leaf% 5))
+  (node% (leaf% 2) (leaf% 3))
+}
+
+Independently considered, these are definitely @tt{OBT}s.  However, if
+we construct a @racket[node%] out of these two trees, we get:
+
+@codeblock{
+  (node% (node% (leaf% 4) (leaf% 5))
+         (node% (leaf% 2) (leaf% 3)))
+}
+
+which is definitely @emph{not} an @tt{OBT}.  (Thus we have broken the
+stated contract on the constructor.)
+
+We could correctly @emph{compute} an @tt{OBT} by determining that, in
+this example, the first given tree needs to be the right sub-tree and
+the second given tree needs to be the left sub-tree.  We can make such
+a determination based on the maximum and minimum numbers in each of
+the given trees, and that suggest the following constructor:
+
+@filebox[@r[node%]]{
+@codeblock{
+  ;; OBT OBT -> OBT
+  (constructor (a b)
+    (cond [(<= (b . max) (a . min))
+           (fields b a)]
+          [(<= (a . max) (b . min))
+           (fields a b)]
+          [else
+           ...]))
+}}
+
+The @racket[max] and @racket[min] methods are easily dismissed from
+our wish list:
+
+@filebox[@r[leaf%]]{
+@codeblock{
+(define/public (min)
+  (field n))
+(define/public (max)
+  (field n))
+}}
+
+@filebox[@r[node%]]{
+@codeblock{
+(define/public (min)
+  ((field left) . min))
+(define/public (max)
+  ((field right) . max))
+}}
+
+At this point, our constructor does the right thing when given two
+@tt{OBT}s that do not overlap, as in the example we considered, but a
+troubling pair of examples to ponder over is:
+
+@codeblock{
+  (node% (leaf% 2) (leaf% 4))
+  (node% (leaf% 3) (leaf% 5))
+}
+
+Again, considered independently, these are definitely @tt{OBT}s, but
+there's no way to construct an ordered binary tree with one of these
+as the left and the other as the right; either order you pick will be
+wrong.  This case is the @racket[else] clause of our constructor.
+What should we do?  One solution is just to reject this case and raise
+and error:
+
+@filebox[@r[node%]]{
+@codeblock{
+  ;; OBT OBT -> OBT
+  (constructor (a b)
+    (cond [(<= (b . max) (a . min))
+           (fields b a)]
+          [(<= (a . max) (b . min))
+           (fields a b)]
+          [else
+           (error "trees overlap")]))
+}}
+
+But really this again fails to live up to the stated contract since we
+should be able to take any two @tt{OBT}s and construct an @tt{OBT} out
+of them.  We know that if the trees overlap, we can't simple make a
+node with them as sub-trees; we have to do something more sophisticated.
+Here's an idea: insert all of the elements of one into the other.
+So long as we make this insertion do the right thing, our constructor
+will succeed in maintaining the invariant properly.
+
+So if we indulge in some wishful thinking and suppose we have a
+@racket[insert-tree] in our interface:
+
+@codeblock{
+  ;; insert-tree : OBT -> OBT
+  ;; Insert all elements of this tree into the given one.
+}
+
+then we can write the constructor as follows:
+
+@filebox[@r[node%]]{
+@#reader scribble/comment-reader
+@racketblock[
+  ;; OBT OBT -> OBT
+  (constructor (a b)
+    (cond [(<= (b . max) (a . min))
+           (fields b a)]
+          [(<= (a . max) (b . min))
+           (fields a b)]
+          [else
+           (local [(define t (a #,(racketidfont ".") insert-tree b))]
+	     (fields (t . left) (t . right)))]))
+]}
+
+That leaves @racket[insert-tree] to be written.  First let's consider
+the case of inserting a @racket[leaf%] into a tree.  If we again rely
+on some wishful thinking and relegate the work to another method that
+inserts a number into a list, we can easily write @racket[insert-tree]
+for the @racket[leaf%] case:
+
+@filebox[@r[leaf%]]{
+@codeblock{
+  (define/public (insert-tree other)
+    (send other insert (field number)))
+}}
+
+In the @racket[node%] case, if we first consider the template (the
+inventory of what we have available to use), we have:
+
+@filebox[@r[node%]]{
+@racketblock[
+  (define/public (insert-tree other)
+    ((field left) #,(racketidfont ".") insert-tree other) ... 
+    ((field right) #,(racketidfont ".") insert-tree other) ...)
+]}
+
+But here we don't really want to insert the left tree into the other
+and the right into the other.  We want to insert the right tree into
+the other, then insert the left tree into @emph{that one} (other
+permutations of the order of insertions would work, too).  That leads
+us to:
+
+@filebox[@r[node%]]{
+@racketblock[
+  (define/public (insert-tree other)
+    ((field left) #,(racketidfont ".") insert-tree ((field right) #,(racketidfont ".") insert-tree other)))
+]}
+
+We have only a single item remaining on our wish list---we need to
+implement the @racket[insert] method for inserting a single number
+into a tree.
+
+First let's consider the case of inserting a number into a
+@racket[leaf%].  If we have a leaf and we insert a number into it, we
+know we get a node with two leaves.  But where should the inserted
+number go?  One solution is to compare the inserted number against the
+existing number to determine which side the number should go to:
 
 
-Needs to remember that playing in spot 0 is not going to work out
-well.
+@filebox[@r[leaf%]]{
+@codeblock{
+(define/public (insert m)
+  (node% (leaf% (the-real-min n m))
+         (leaf% (the-real-max n m))))
+}}
 
-What does our computer need to do in order to learn things?
+In the case of inserting a number into a node, we compare the number
+against the maximum of the left sub-tree to determine if the number
+should be inserted in the left or right:
 
+@filebox[@r[node%]]{
+@racketblock[
+  (define/public (insert n)
+    (cond [(> n ((field left) . max))
+           (node% (field left)
+		  ((field right) #,(racketidfont ".") insert n))]
+	  [else
+	   (node% ((field left) #,(racketidfont ".") insert n)
+		  (field right))]))
+]}
 
-A list of boards and where it went.
+@section[#:tag "Exercises (Ch 10.)"]{Exercises}
 
-What tells us where to move?  Evaluations.
+@subsection{Queues}
 
-Save previous evaluations.
+The University Registrar is instituting a new course registration
+system, in which each student will wait in a ``Virtual Line'' until
+every student ahead of them has registered.  A simple way to represent
+a line (also known as a @emph{queue}) is by using a list.  But this
+representation makes it slow to add somebody to the end of the line
+(or to take somebody off the front of the line, depending on whether
+the front of the list represents the front or rear of the line).
 
-Tie evaluations to end result of that game.
+In order to provide maximal waiting efficiency, you have been tasked
+with implementing a representation that uses @emph{two} lists!  The
+key idea of this fancy representation is that one list will represent
+some portion of the front of the line, while the other will represent
+the remainder of the line @emph{in reverse order}.  So if you're the
+first element of the first list, you are at the head of the line.  On
+the other hand, if you're the first element of the second list, you
+are the very last person in line.
 
-Idea for next time: mark evaluations as a loss when you lose.
+Here is the interface for queues:
+@codeblock{
+;; A [IQ X] implements:
 
+;; head : -> X
+;; Produce the element at the head of this queue.
+;; Assume: this queue is not empty.
 
-@section{Indexed Views on Data}
+;; deq : -> [IQ X]      (Short for "dequeue")
+;; Produces a new queue like this queue, but without 
+;; this queue's first element.
+;; Assume: this queue is not empty.
 
-@section{State Transition Patterns}
+;; enq : X -> [IQ X]    (Short for "enqueue")
+;; Produce new queue with given element added to the
+;; END of this queue.
 
-@section{Designing a Computer Player}
+;; emp? : -> Boolean
+;; Is this queue empty?
+}
 
-@subsection{A simple player}
-@subsection{Evaluating positions}
-@subsection{Picking a move}
-@subsection{Remembering the past}
+The @r[head] and @r[deq] operations require that the queue be
+non-empty when they are used, but this can be assumed and these
+operations do not need to check for an empty queue.
 
-@section{Completed code}
+Further, the Registrar's office has just learned about
+@emph{invariants}, and insists on maintaining the following invariant
+about all of their queues:
 
-As written in class.
+@centered{
+@emph{if the front of the queue is empty, the whole queue must also be empty.}
+}
 
-@verbatim|{
-#lang class/2
-(require 2htdp/image class/universe)
+The Registrar's office has given you three tasks to prepare their
+Virtual Line for its launch later this semester:
 
-;; A Board is a [Listof Color]
-;; A Color is one of
-;; - 'white - blank
-;; - 'black - the computer
-;; - 'red - the player
-
-(define WIN 3)
-(define SIZE 10)
-
-;; player-win? : Board -> Boolean
-(define (player-win? b)
-  (win-helper 'red b 0))
-
-;; computer-win? : Board -> Boolean
-(define (computer-win? b)
-  (win-helper 'black b 0))
-
-;; tie: Board -> Boolean
-(define (tie? b)
-  (not (member 'white b)))
-
-;; win-helper : Color Board Number ->  Boolean
-;; Acc : how many pieces we've seen so far  
-(define (win-helper sym b acc)
-  (cond [(= acc WIN) true]
-        [(empty? b) false]
-        [else (cond [(symbol=? sym (first b))
-                     (win-helper sym (rest b) (add1 acc))]
-                    [else (win-helper sym (rest b) 0)])]))
-
-;; play : Color Number Board -> Board
-;; place the appropriate piece on the board
-(define (play c n b)
-  (cond 
-    [(> n (add1 SIZE)) b]
-    [(symbol=? 'white (list-ref b n))
-     (list-set b n c)]
-    [else b]))
-
-
-;; list-set : Listof[X] Nat X -> Listof[X]
-;; replaces the kth element of l with e
-(define (list-set l k e)
-  (cond [(= k 0) (cons e (rest l))]
-        [else (cons (first l) (list-set (rest l) (sub1 k) e))]))
-
-;; find-res : Evaluation Result -> Number or False
-;; find the first occurence of this result
-(define (find-res eval r)
-  (cond [(empty? eval) false]
-        [else (cond [(symbol=? r (first eval)) 0]
-                    [else 
-                     (local [(define result (find-res (rest eval) r))]
-                       (cond [(number? result) (add1 result)]
-                             [else false]))])]))
-
-;; A Computer implements:
-;; pick : Board -> Number
-(define-class computer%
-  
-  ;; An Evaluation is a [Listof Result]
-  ;; A Result is one of 'Win 'Block 'Full 'Unk
-  
-  ;; evaluate Board -> Evaluation
-  (define/public (evaluate brd)
-    (local [(define (evaluate-elem index)
-              (cond [(not (symbol=? 'white (list-ref brd index))) 'Full]
-                    [(computer-win? (play 'black index brd)) 'Win]
-                    [(player-win? (play 'red index brd)) 'Block]
-                    [else 'Unk]))]
-      (build-list SIZE evaluate-elem)))
-  
-  ;; Pick a space to play in
-  ;; Invariant : brd is not full
-  ;; Board -> Number
-  (define/public (pick brd)
-    (local [(define eval (evaluate brd))]
-      (cond [(member 'Win eval)
-             (find-res eval 'Win)]
-            [(member 'Block eval)
-             (find-res eval 'Block)]
-            [else
-             (find-res eval 'Unk)]))))
-
-(define SCENE (empty-scene 500 500))
-
-;; A World is (world% Board Computer)
-(define-class world%
-  (fields board computer)
-  (define/public (to-draw)
-    (overlay
-     (foldr beside empty-image (map (λ (clr) (circle 20 "solid" clr)) (field board)))
-     SCENE))
-  
-  (define/public (on-key k)
-    (cond [(number? (string->number k)) 
-           (local [(define new-board (play 'red (string->number k) (field board)))]
-             (cond [(player-win? new-board) (done% "Player Win!" (field computer))]
-                   [(tie? new-board) (done% "Tie!" (field computer))]
-                   [else
-                    (local [(define second-board (play 'black 
-                                                       (send (field computer) pick new-board)
-                                                       new-board))]
-                      (cond [(computer-win? second-board) (done% "Computer Win!" 
-                                                                 (field computer))]
-                            [(tie? second-board) (done% "Tie!" (field computer))]
-                            [else (world% second-board (field computer))]))]))]
-          [(key=? "n" k) (world% INITIAL (field computer))]
-          [else this]))
-  )
-
-;; A DoneWorld is (done% String Computer)
-(define-class done%
-  (fields msg computer)
-  
-  (define/public (to-draw)
-    (overlay (text (field msg) 30 "black")
-             SCENE))
-  
-  (define/public (on-key k)
-    (cond [(key=? "n" k) (world% INITIAL (field computer))]
-          [else this])))
-
-(define INITIAL (build-list SIZE (λ (i) 'white)))
-
-(big-bang (new world% INITIAL (computer%)))
-}|
+@itemlist[
+@item{Design an implementation of the queue data structure to the Registrar's
+  specifications.  You must maintain the invariant stated above, and
+  you should take advantage of the invariant when implementing the
+  operations.}
+@item{Unfortunately, when testing the queue, the Registrar has
+  discovered that some queues with the same elements in the same order
+  can be represented in multiple ways.  Give an example of two
+  different representations of the same queue.  Implement a
+  @r[to-list] operation which produces a list of elements going in
+  order from the front to the rear of the queue. In your tests, you
+  should show how this addresses the problem.}
+@item{The Registrar has a problem with careless data entry.  Design
+  and implement a constructor for queues which, given two input lists
+  of elements, ensures that the invariant is maintained.}
+]
