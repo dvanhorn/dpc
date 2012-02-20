@@ -7,28 +7,30 @@
 
 This is a solution for the @seclink["assign_shapes"]{Shapes} exercise.
 
-@#reader scribble/comment-reader
-(racketmod
-class/1
+@codeblock{
+#lang class/1
+
+;; Solution to part 1.
+#;
 (define-class rect% 
   (fields width height)                
-  (define/public (bba)                 
-    (* (field width) (field height))))
-  
+  (define (bba)                 
+    (* (this . width) (this . height))))
+
+#;
 (define-class circ% 
   (fields radius)                      
-  (define/public (bba)                 
-    (sqr (* 2 (field radius)))))
+  (define (bba)                 
+    (sqr (* 2 (this . radius)))))
 
-;; Part 2 [10pt]
-
-;; implements:
+;; A Shape implements:
 ;; width : -> Number                         
 ;; height : -> Number
 ;; Compute the {width,height} of this shape. 
 
+;; Solution to part 2.
 (define-class shape% 
-  (define/public (bounding-box-area)
+  (define (bba)
     (* (this . width) (this . height))))     
 
 (define-class rect% 
@@ -38,18 +40,19 @@ class/1
 (define-class circ% 
   (super shape%)                             
   (fields radius)
-  (define/public (width)                     
-    (* 2 (field radius)))
-  (define/public (height)                    
-    (width)))
+  (define (width)                     
+    (* 2 (this . radius)))
+  (define (height)                    
+    (this . width)))
 
-;; Part 3 [4pt]
-    
+;; Solution to part 3.   
 (define-class square%
   (super shape%)                             
   (fields width)                             
-  (define/public (height)                    
-    (width)))
+  (define (height)                    
+    (this . width)))
 
-(check-expect ((square% 5) . bba) 25)        
-)
+(check-expect ((new rect% 3 4) . bba) 12)
+(check-expect ((new circ% 1.5) . bba)  9)
+(check-expect ((new square% 5) . bba) 25)
+}

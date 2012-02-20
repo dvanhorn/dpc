@@ -705,11 +705,11 @@ the shape.
 Here are some examples of how @r[bba] should work:
 
 @classblock{
-(check-expect ((rect% 3 4) . bba) 12)
-(check-expect ((circ% 1.5) . bba)  9)
+(check-expect ((new rect% 3 4) . bba) 12)
+(check-expect ((new circ% 1.5) . bba)  9)
 }
 
-@itemlist[
+@itemlist[#:style 'ordered
 @item{Design the @r[bba] method for the
   @r[rect%] and @r[circ%] class.}
 
