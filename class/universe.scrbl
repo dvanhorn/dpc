@@ -12,11 +12,18 @@
   (except-in 2htdp/image image?)))
 @defmodule[class/universe]
 
+@(define-syntax-rule (def-racket big-bang-id universe-id)
+  (begin
+    (require (for-label (only-in 2htdp/universe big-bang universe)))
+    (define big-bang-id (racket big-bang))
+    (define universe-id (racket universe))))
+@(def-racket big-bang-id universe-id)
+
 @section[#:style 'hidden #:tag-prefix 'big-bang]{Big bang}
 
 @defproc[(big-bang [obj World]) World]{
 
-An object-oriented version of @racket[2htdp:big-bang].
+An object-oriented version of @|big-bang-id|.
 
 The given world object should provide some of the methods descibed
 below.  For any methods that are not provided, DrRacket will use a
@@ -130,7 +137,7 @@ class/0
 
 @defproc[(universe [obj Universe]) Universe]{
 
-An object-oriented version of @racket[2htdp:universe].}
+An object-oriented version of @|universe-id|.}
 
 The given universe object should provide some of the methods descibed
 below.  For any methods that are not provided, DrRacket will use a
