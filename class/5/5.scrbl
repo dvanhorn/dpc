@@ -1,5 +1,7 @@
 #lang scribble/manual
-@require["../utils.rkt" (for-label class/5)]
+@require["../utils.rkt" (for-label (except-in class/5 check-expect) 
+				   (only-in lang/htdp-intermediate 
+					    check-expect))]
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval

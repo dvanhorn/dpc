@@ -6,11 +6,11 @@
 
 
 @(require
-  (for-label "tick-rate.rkt" "universe.rkt" 
+  (for-label "universe.rkt" 
   class/0   
   (prefix-in 2htdp: 2htdp/universe)
   (except-in 2htdp/image image?)))
-@defmodule[class/universe #:use-sources ()]
+@defmodule[class/universe]
 
 @section[#:style 'hidden #:tag-prefix 'big-bang]{Big bang}
 
@@ -89,7 +89,6 @@ class/0
   
   Draw this world, producing an image.}
 
-@require[(for-label "tick-rate.rkt")]
 
 @defform[#:id tick-rate
 	 #:literals (send tick-rate)
@@ -159,8 +158,6 @@ default behavior.  The universe @emph{must} at least provide a
   (send a-universe on-tick)]{
 
   Tick this universe, producing a bundle.}
-
-@require[(for-label "tick-rate.rkt")]
 
 @defform/none[;#:id tick-rate
 	 #:literals (send tick-rate)
