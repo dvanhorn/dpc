@@ -130,7 +130,7 @@ runners over 50 years of age:
 (define (old) this)
 }}
 
-@filebox[@racket[mt%]]{
+@filebox[@racket[cons%]]{
 @classblock{
 ;; old : -> LoR
 ;; Runners in this non-empty list with age over 50.
