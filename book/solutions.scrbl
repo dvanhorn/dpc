@@ -10,4 +10,6 @@ This appendix contains solutions to selected exercises.
 @include-section{solution/z.scrbl}
 @include-section{solution/03.scrbl}
 @include-section{solution/04.scrbl}
-@include-section{solution/05.scrbl}
+
+@;This assignment is not in the book, so cut until further notice.
+@;include-section{solution/05.scrbl}

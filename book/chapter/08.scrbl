@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require class/utils
-          (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
-          (for-label (except-in class/1 define-struct ... length))
+          (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect ...))
+          (for-label (except-in class/1 define-struct ... length check-expect))
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
@@ -74,6 +74,8 @@ adapted for functions-as-objects.
 @section[#:tag "Exercises (Ch 8.)"]{Exercises}
 
 @subsection{Functional programming with objects}
+
+@margin-note{@secref{soln04}}
 
 One perspective that unifies the paradigms of programming with
 functions and programming with objects is to view a ``function'' as an

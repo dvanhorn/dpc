@@ -365,11 +365,11 @@ a denominator in @racket[fraction%], for example.)
 @section{Ordered binary trees}
 
 Now we want to look at a slightly larger program and how we use
-constructors to enforce important invariants.  In this section, we want
-to develop a @emph{representation of sorted lists of numbers}, which
-is what we did in the @seclink["lec08"]{last lecture}, but this time
-we're going to represent a sorted list of numbers as an @emph{ordered
-binary tree}.
+constructors to enforce important invariants.  In this section, we
+want to develop a @emph{representation of sorted lists of numbers},
+which is what we did in @seclink["Invariants_of_Data_Structures"], but
+this time we're going to represent a sorted list of numbers as an
+@emph{ordered binary tree}.
 
 An ordered binary tree looks like this:
 

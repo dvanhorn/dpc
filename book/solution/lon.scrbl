@@ -1,6 +1,7 @@
 #lang scribble/manual
 @(require class/utils
-          (for-label class/0))
+          (for-label (except-in class/0 check-expect))
+          (for-label (only-in lang/htdp-intermediate-lambda check-expect)))
 
 @title[#:tag "Lists_of_Numbers_solution"]{Solution:
 @secref{Lists_of_Numbers}}

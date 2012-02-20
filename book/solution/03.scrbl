@@ -1,11 +1,11 @@
 #lang scribble/manual
 @(require class/utils
-          (for-label (only-in lang/htdp-intermediate-lambda define-struct))
-          (for-label (except-in class/1 define-struct)))
+          (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect))
+          (for-label (except-in class/1 define-struct check-expect)))
 
-@title[#:tag "soln03"]{Shapes}
+@title[#:tag "soln03"]{Solution: Shapes}
 
-This is a solution for the @seclink["assign_shape"]{Shape} exercise.
+This is a solution for the @seclink["assign_shapes"]{Shapes} exercise.
 
 @#reader scribble/comment-reader
 (racketmod

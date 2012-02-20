@@ -3,9 +3,10 @@
           (for-label (only-in lang/htdp-intermediate-lambda define-struct))
           (for-label (except-in class/1 define-struct)))
 
-@title[#:tag "soln04"]{Functions}
+@title[#:tag "soln04"]{Solution: Functional programming with objects}
 
-This is a solution for the @seclink["assign_function"]{Function} exercise.
+This is a solution for the
+@secref["Functional_programming_with_objects"] exercise.
 
 @#reader scribble/comment-reader
 (racketmod

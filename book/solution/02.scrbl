@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require class/utils
-          (for-label (only-in lang/htdp-intermediate-lambda define-struct))
-          (for-label (except-in class/0 define-struct)))
+          (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect))
+          (for-label (except-in class/0 define-struct check-expect)))
 
 @title[#:tag "Home_on_the_Range_solution"]{Solution:
 @secref{Home_on_the_Range}}
