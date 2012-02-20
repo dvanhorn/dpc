@@ -1,7 +1,7 @@
 #lang racket/base
 
 (require racket/class
-         "test-info.scm")
+         "test-info.rkt")
 
 (define test-display-textual%
   (class* object% ()

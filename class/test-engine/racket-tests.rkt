@@ -6,7 +6,7 @@
 	 lang/private/continuation-mark-key
          (only scheme/base for memf findf)
          "test-engine.rkt"
-	 "test-info.scm"
+	 "test-info.rkt"
          )
 
 (require-for-syntax stepper/private/shared)
