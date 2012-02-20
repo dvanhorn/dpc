@@ -74,6 +74,10 @@ See @racket[define-class] and @racket[define-interface].}
  @defform[(send object message arg ...)]]]{
 These have the same meaning as in @racketmodname[class/0].}
 
+@defidform[|.|]{
+Shorthand notation for @racket[send].  The expression @racket[(o . m)]
+is equivalent for @racket[(send o m)].}
+
 @defform/subs[#:literals (super)
 (define-interface interface-name 
   (super super-interface) ... 
