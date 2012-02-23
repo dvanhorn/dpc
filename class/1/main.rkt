@@ -16,7 +16,7 @@
 	 quote
          #%module-begin |.| (rename-out [my-app #%app])
          define test require provide define-struct
-         all-defined-out only-in all-from-out except-in
+         all-defined-out only-in all-from-out except-in prefix-in
          (except-out (all-from-out "../test-engine/racket-tests.rkt")
                      test))
 

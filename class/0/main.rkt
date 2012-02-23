@@ -11,7 +11,7 @@
 (provide (all-from-out "define-class.rkt")
          (all-from-out lang/htdp-intermediate-lambda)
          define test require provide
-         all-defined-out only-in all-from-out except-in
+         all-defined-out only-in all-from-out except-in prefix-in
          (except-out (all-from-out "../test-engine/racket-tests.rkt")
                      test))
 
