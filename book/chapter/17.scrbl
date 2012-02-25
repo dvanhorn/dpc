@@ -264,10 +264,10 @@ OK, let's see how it works:
 Look!  We have inheritance!  All istances of subclasses of object%
 understand the hi message!
 
-This almost everything that is going on under the hood in classN,
+This is almost everything that is going on under the hood in classN,
 Java, Ruby, etc.
 
-But does this do overridding?
+But does this do overriding?
 
 @verbatim|{
 (define (square% side)
