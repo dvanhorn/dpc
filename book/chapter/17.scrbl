@@ -193,7 +193,7 @@ This is odd -- we can make squares with different super classes.
 Let's fix that.
 
 @verbatim|{
-(define (square% side super)
+(define (square% side)
   (local [(define (the-square msg)
             (cond [(symbol=? msg 'side) side]
                   [(symbol=? msg 'area) (sqr side)]
@@ -211,11 +211,11 @@ dumb% is actually object%.
 }|
 
 
-How many times are we going to create an object% objecct?  How do we
-have it happen only once.
+How many times are we going to create an object% object?  How do we
+have it happen only once?
 
 @verbatim|{
-(define (square% side super)
+(define (square% side)
   (local [(define super (object%))
           (define (the-square msg)
             (cond [(symbol=? msg 'side) side]
