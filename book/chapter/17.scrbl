@@ -193,7 +193,7 @@ This is odd -- we can make squares with different super classes.
 Let's fix that.
 
 @verbatim|{
-(define (square% side super)
+(define (square% side)
   (local [(define (the-square msg)
             (cond [(symbol=? msg 'side) side]
                   [(symbol=? msg 'area) (sqr side)]
@@ -211,11 +211,11 @@ dumb% is actually object%.
 }|
 
 
-How many times are we going to create an object% objecct?  How do we
-have it happen only once.
+How many times are we going to create an object% object?  How do we
+have it happen only once?
 
 @verbatim|{
-(define (square% side super)
+(define (square% side)
   (local [(define super (object%))
           (define (the-square msg)
             (cond [(symbol=? msg 'side) side]
@@ -264,10 +264,10 @@ OK, let's see how it works:
 Look!  We have inheritance!  All istances of subclasses of object%
 understand the hi message!
 
-This almost everything that is going on under the hood in classN,
+This is almost everything that is going on under the hood in classN,
 Java, Ruby, etc.
 
-But does this do overridding?
+But does this do overriding?
 
 @verbatim|{
 (define (square% side)
@@ -308,7 +308,7 @@ Another approach, revert back to Message = Symbol.
 
 (define (object%)
   (local [(define (the-dumb-object msg args)
-            (cond [(msg-is? 'hi msg) "Howdy"]
+            (cond [(symbol=? 'hi msg) "Howdy"]
                   [else (error "message not understood"))))]
     the-dumb-object))
 }|
