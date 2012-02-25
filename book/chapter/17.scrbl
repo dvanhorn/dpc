@@ -308,7 +308,7 @@ Another approach, revert back to Message = Symbol.
 
 (define (object%)
   (local [(define (the-dumb-object msg args)
-            (cond [(msg-is? 'hi msg) "Howdy"]
+            (cond [(symbol=? 'hi msg) "Howdy"]
                   [else (error "message not understood"))))]
     the-dumb-object))
 }|
