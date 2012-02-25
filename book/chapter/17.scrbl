@@ -351,7 +351,7 @@ We might like to have a nice notation to make it more convenient to
 write programs in this style, but this is really all that is going on.
 
 Suppose we add a field to square%, called area, which is computed at
-construction time and store away in the field.
+construction time and stored away in the field.
 
 @verbatim|{
 (define (square% side)
