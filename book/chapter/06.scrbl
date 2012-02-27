@@ -655,7 +655,7 @@ Now that we've seen the basics of communicating programs, let's build
 something a little more substantial.
 
 
-@section{Guess my number}
+@section[#:tag "guess-my-number-book"]{Guess my number}
 
 Now let's a more interesting game.  We'll start by considering the
 guess my number game.
