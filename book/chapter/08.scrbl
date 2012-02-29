@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect ...))
-          (for-label (except-in class/1 define-struct ... length check-expect filter))
+          (for-label (except-in class/1 define-struct ... length check-expect filter sort))
 	  (for-label 2htdp/image)
 	  (for-label class/universe))
 
@@ -487,48 +487,191 @@ the BAA will cut him some slack.
 
 @section{Functions as objects: abstracting comparisons}
 
+Continuing with the Boston Marathon example, let's develop another
+series of methods.
+
+For sporting events like the Boston Marathon, we're often interesting
+in the ranking of the participants.  With that in mind, let's develop
+a couple sorting methods.  The BAA would like to list the finishers in
+ascending order of time.  They'd also like to like to list runners in
+alphabetic order by name.  They may also have some other orders in the
+future, but let's start with @racket[sort-time] and
+@racket[sort-name]:
+
+
+
+@filebox[@elem{@tt{LoR interface}}]{
+@classblock{
+;; sort-time : -> LoR
+;; Sort this list of runners in ascending order of finish times.
+
+;; sort-name : -> LoR
+;; Sort this list of runners in lexicographic order of names. 
+}}
+
+A straightforward structural recursive design leads us to:
+
+@filebox[@elem{@tt{LoR interface}}]{
+@classblock{
+;; insert-time : Runner -> LoR
+;; Insert given runner into this sorted list of runners by time.
+
+;; insert-name : Runner -> LoR
+;; Insert given runner into this sorted list of runners by name.
+}}
+
+@filebox[@racket[mt%]]{
+@classblock{
+(define (sort-time) this)
+(define (sort-name) this)
+
+(define (insert-time r) (new cons% r this))
+(define (insert-name r) (new cons% r this))
+}}
+
+@filebox[@racket[cons%]]{
+@classblock{
+(define (sort-time)
+  (this . rest . sort-time . insert-time (this . first)))
+(define (sort-name)
+  (this . rest sort-name . insert-name (this . first)))
+
+(define (insert-time r)
+  (cond [(< (r . time) (this . first . time))
+	 (new cons% r this)]
+	[else
+	 (new cons% 
+	      (this . first) 
+	      (this . rest . insert-time r))]))
+
+(define (insert-name r)
+  (cond [(string-<? (r . name) (this . first . name))
+	 (new cons% r this)]
+	[else
+	 (new cons% 
+	      (this . first)
+	      (this . rest . insert-name r))]))
+}}
+ 
+At this point, it's clear much of the code between @racket[sort-time]
+and @racket[sort-name] has been duplicated.  By following the same
+approach as the last section, we can abstract these two methods by
+parameterizing the common code by functional objects that represent
+the differences.  Here though, the crucial difference is not a
+predicate of a single runner, but a comparison between two runners.
+For @racket[sort-time], the comparison is ``is the first runner's
+finish time less than the second's?'' and for @racket[sort-name], the
+comparison is ``does the first runner's name come before the second's,
+alphabetically?''.  We can codify both using a comparison function
+object:
+
+@classblock{
+;; A RunnerComparison implements:
+;; - compare : Runner Runner -> Runner
+;;   Does the first runner compare "better" than the second?
+}
+
+And the two comparisons are:
+
+@classblock{
+(define-class faster% ; implements RunnerComparison
+  ;; Is the first runner faster than the second?
+  (define (compare r1 r2)
+    (< (r1 . time) (r2 . time))))
+
+(define-class alpha% ; implements RunnerComparison
+  ;; Does the first runner's name come before the second?
+  (define (compare r1 r2)
+    (string-<? (r1 . name) (r2 . name))))
+}
+
+The abstraction of @racket[sort-time] and @racket[sort-name] is:
+
+@filebox[@elem{@tt{LoR interface}}]{
+@classblock{
+;; sort : RunnerComparison -> LoR
+;; Sort this list of runners in ascending order by comparison.
+
+;; insert : Runner RunnerComparison -> LoR
+;; Insert given runner into this list of runners sorted by comparison.
+}}
+
+@filebox[@racket[mt%]]{
+@classblock{
+(define (sort c) this)
+(define (insert r c) (new cons% r this))
+}}
+
+@filebox[@racket[cons%]]{
+@classblock{
+(define (sort c)
+  (this . rest . sort c . insert (this . first) c))
+
+(define (insert r c)
+  (cond [(c . compare r (this . first))
+	 (new cons% r this)]
+	[else
+	 (new cons% 
+	      (this . first) 
+	      (this . rest . insert r c))]))
+}}
+
+To recreate the original methods, we can lift the application of
+@racket[sort] to the appropriate function object into the
+@racket[list%] abstract class:
+
+@filebox[@racket[list%]]{
+@classblock{
+(define (sort-time) (sort (new faster%)))
+(define (sort-name) (sort (new alpha%)))
+}}
+
+And, of course, we're not done until we verify that our original tests
+pass.
+
 @section{Functions as data as objects: infinite sequences}
 
-Functions were a useful abstraction mechanism.
+Functions are a useful abstraction mechanism, but they are also a
+useful kind of data definition.  In this section, we explore the use
+of functional objects to represent infinite data.
 
-@#reader scribble/comment-reader
-(racketblock
-  ;; An ISequence implements 
-  ;; - term : Natural -> Number
-  ;;   compute the i^th element of this sequence
+@classblock{
+;; An ISequence implements 
+;; - term : Natural -> Number
+;;   compute the i^th element of this sequence
 
-  (define-class even%
-    ;; term : Natural -> Natural
-    ;; compute the i^th even number
-    (check-expect ((even%) #,(racketidfont ".") term 7) 14)
-    (define/public (term i)
-      (* i 2)))
+(define-class even%
+  ;; term : Natural -> Natural
+  ;; compute the i^th even number
+  (check-expect ((new even%) . term 7) 14)
+  (define (term i)
+    (* i 2)))
 
-  (define-class odd%
-    ;; term : Natural -> Natural
-    ;; compute the i^th odd number
-    (check-expect ((odd%) #,(racketidfont ".") term 7) 15)
-    (define/public (term i)
-      (add1 (* i 2))))
+(define-class odd%
+  ;; term : Natural -> Natural
+  ;; compute the i^th odd number
+  (check-expect ((new odd%) . term 7) 15)
+  (define (term i)
+    (add1 (* i 2))))
 
-  (define-class even-series%
-    ;; term : Natural -> Natural
-    ;; sum up the first n even numbers
-    (check-expect ((even-series%) #,(racketidfont ".") term 10) 90)
-    (define/public (term n)
-      (cond [(zero? n) 0]
-            [else (+ ((even%) #,(racketidfont ".") term (sub1 n))
-		     (term (sub1 n)))])))
+(define-class even-series%
+  ;; term : Natural -> Natural
+  ;; sum up the first n even numbers
+  (check-expect ((new even-series%) . term 10) 90)
+  (define (term n)
+    (cond [(zero? n) 0]
+	  [else (+ ((new even%) . term (sub1 n))
+		   (term (sub1 n)))])))
 
-  (define-class odd-series%
-    ;; term : Natural -> Natural
-    ;; sum up the first n odd numbers
-    (check-expect ((odd-series%) #,(racketidfont ".") term 10) 100)
-    (define/public (term n)
-      (cond [(zero? n) 0]
-            [else (+ ((odd%) #,(racketidfont ".") term (sub1 n))
-		     (term (sub1 n)))])))
-)
+(define-class odd-series%
+  ;; term : Natural -> Natural
+  ;; sum up the first n odd numbers
+  (check-expect ((new odd-series%) . term 10) 100)
+  (define (term n)
+    (cond [(zero? n) 0]
+	  [else (+ ((new odd%) . term (sub1 n))
+		   (term (sub1 n)))])))
+}
 
 We can now apply the process for designing abstractions with 
 functions-as-values from
@@ -536,20 +679,20 @@ functions-as-values from
 @emph{HtDP} Section 22.2}
 adapted for functions-as-objects.
 
-@#reader scribble/comment-reader
-(racketblock  
-  (define-class series%
-    ;; Σ : ISequence -> ISequence
-    ;; Make sequence summing up first n numbers of sequence
-    (check-expect ((series%) #,(racketidfont ".") Σ (even%) #,(racketidfont ".") term 10) 90)
-    (check-expect ((series%) #,(racketidfont ".") Σ (odd%) #,(racketidfont ".") term 10) 100)
-    (define/public (Σ seq)
-      (local [(define-class s%
-                (define/public (term n)
-		  (cond [(zero? n) 0]
-			[else (+ (seq #,(racketidfont ".") term (sub1 n))
-				 (term (sub1 n)))])))]
-        (s%)))))
+@classblock{
+(define-class series%
+  ;; Σ : ISequence -> ISequence
+  ;; Make sequence summing up first n numbers of sequence
+  (check-expect ((new series%) . Σ (new even%) . term 10) 90)
+  (check-expect ((new series%) . Σ (new odd%) . term 10) 100)
+  (define (Σ seq)
+    (local [(define-class s%
+	      (define (term n)
+		(cond [(zero? n) 0]
+		      [else (+ (seq . term (sub1 n))
+			       (term (sub1 n)))])))]
+      (new s%))))
+}
 
 
 
@@ -564,12 +707,11 @@ functions and programming with objects is to view a ``function'' as an
 object that understands a method called @r[apply].  With that in
 mind, we can define an interface for functions-as-objects:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; A [IFun X Y] implements:
 ;; apply : X -> Y
 ;; Apply this function to the given input.
-)
+}
 
 Here we are representing a @tt{X -> Y} function as an object that
 has an @r[apply] method that consumes an @tt{X} and produces a
@@ -587,22 +729,20 @@ has an @r[apply] method that consumes an @tt{X} and produces a
   the interface for a @r[compose] method that composes two functions
   represented as objects:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; [IFun X Y] also implements:
 ;; compose : [IFun Y Z] -> [IFun X Z]
 ;; Produce a function that applies this function to its input, 
 ;; then applies the given function to that result.
-)
+}
 
 For example, if @r[addone] and @r[subone] refer to the objects
 you constructed in part 2, the following check should succeed:
 
-@#reader scribble/comment-reader
-(racketblock
-(check-expect ((addone #,dot compose subone) #,dot apply 5) 5)
-(check-expect ((addone #,dot compose addone) #,dot apply 5) 7)
-)
+@classblock{
+(check-expect ((addone . compose subone) . apply 5) 5)
+(check-expect ((addone . compose addone) . apply 5) 7)
+}
 
 Implement the @r[compose] method for your wrapper class.
 }
