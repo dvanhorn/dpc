@@ -2,8 +2,8 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect ...))
           (for-label (except-in class/1 define-struct ... length check-expect filter sort))
-	  (for-label 2htdp/image)
-	  (for-label class/universe))
+          (for-label 2htdp/image)
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -111,8 +111,8 @@ hours.  That's a straightforward computation:
          (new cons% 
               (this . first)
               (this . rest . fast))]
-	[else
-	 (this . rest . fast)]))                   
+        [else
+         (this . rest . fast)]))                   
 }}
 
 
@@ -139,8 +139,8 @@ runners over 50 years of age:
          (new cons% 
               (this . first)
               (this . rest . old))]
-	[else
-	 (this . rest . old)]))                   
+        [else
+         (this . rest . old)]))                   
 }}
 
 @examples[#:eval the-eval
@@ -232,8 +232,8 @@ the arguments of the abstraction of @racket[fast] and @racket[old]:
          (new cons% 
               (this . first)
               (this . rest . filter q))]
-	[else
-	 (this . rest . filter q)]))
+        [else
+         (this . rest . filter q)]))
 }}
 
 What's more, you'll notice when you recreate @racket[fast] and
@@ -290,17 +290,17 @@ year's marathon.  The BAA qualification standards for 2013 are:
 @verbatim|{
 Age     Men             Women
 -----   ----------      -----------
-18-34 	3hrs 5min 	3 hrs 35min
-35-39 	3hrs 10min 	3 hrs 40min
-40-44 	3hrs 15min 	3 hrs 45min
-45-49 	3hrs 25min 	3 hrs 55min
-50-54 	3hrs 30min 	4 hrs 0min
-55-59 	3hrs 40min 	4 hrs 10min
-60-64 	3hrs 55min 	4 hrs 25min
-65-69 	4hrs 10min 	4 hrs 40min
-70-74 	4hrs 25min 	4 hrs 55min
-75-79 	4hrs 40min 	5 hrs 10min
-80+ 	4hrs 55min 	5 hrs 25min
+18-34   3hrs 5min       3 hrs 35min
+35-39   3hrs 10min      3 hrs 40min
+40-44   3hrs 15min      3 hrs 45min
+45-49   3hrs 25min      3 hrs 55min
+50-54   3hrs 30min      4 hrs 0min
+55-59   3hrs 40min      4 hrs 10min
+60-64   3hrs 55min      4 hrs 25min
+65-69   4hrs 10min      4 hrs 40min
+70-74   4hrs 25min      4 hrs 55min
+75-79   4hrs 40min      5 hrs 10min
+80+     4hrs 55min      5 hrs 25min
 }|
 
 It's tempting to write a monolithic @racket[qualify%] predicate that
@@ -414,14 +414,14 @@ you can define @racket[or%]):
   (check-expect ((new qrow% 18 34 3 05 3 35) . ask johnny) false)
   (define (ask r)
     ((new and% 
-	  (new in-age% (this . lo) (this . hi))
-	  (new or% 
-	       (new and% 
-		    (new is-male%)
-		    (new faster% (this . m-hrs) (this . m-mins)))
-	       (new and%
-		    (new is-female%)
-		    (new faster% (this . f-hrs) (this . f-mins)))))
+          (new in-age% (this . lo) (this . hi))
+          (new or% 
+               (new and% 
+                    (new is-male%)
+                    (new faster% (this . m-hrs) (this . m-mins)))
+               (new and%
+                    (new is-female%)
+                    (new faster% (this . f-hrs) (this . f-mins)))))
      . ask r)))
 }
 
@@ -438,14 +438,14 @@ assume you can define @racket[older%] with the obvious meaning):
   (check-expect ((new lastrow% 80 4 55 5 10) . ask johnny) false)
   (define (ask r)
     ((new and% 
-	  (new older% (this . lo))
-	  (new or% 
-	       (new and% 
-		    (new is-male%)
-		    (new faster% (this . m-hrs) (this . m-mins)))
-	       (new and%
-		    (new is-female%)
-		    (new faster% (this . f-hrs) (this . f-mins)))))
+          (new older% (this . lo))
+          (new or% 
+               (new and% 
+                    (new is-male%)
+                    (new faster% (this . m-hrs) (this . m-mins)))
+               (new and%
+                    (new is-female%)
+                    (new faster% (this . f-hrs) (this . f-mins)))))
      . ask r)))
 }
 
@@ -461,16 +461,16 @@ structure of the BAA's table:
   (check-expect ((new quality%) . ask johnny) true)
   (define (ask r)
     (or ((new qrow% 18 34 3 05 3 35) . ask r)
-	((new qrow% 35 39 3 10 3 40) . ask r)
-	((new qrow% 40 44 3 15 3 45) . ask r)
-	((new qrow% 45 49 3 25 3 55) . ask r)
-	((new qrow% 50 54 3 30 4 00) . ask r)
-	((new qrow% 55 59 3 40 4 10) . ask r)
-	((new qrow% 60 64 3 55 4 25) . ask r)
-	((new qrow% 65 69 4 10 4 40) . ask r)
-	((new qrow% 70 74 4 25 4 55) . ask r)
-	((new qrow% 75 79 4 40 5 10) . ask r)
-	((new lastrow% 80 4 55 5 10) . ask r))))
+        ((new qrow% 35 39 3 10 3 40) . ask r)
+        ((new qrow% 40 44 3 15 3 45) . ask r)
+        ((new qrow% 45 49 3 25 3 55) . ask r)
+        ((new qrow% 50 54 3 30 4 00) . ask r)
+        ((new qrow% 55 59 3 40 4 10) . ask r)
+        ((new qrow% 60 64 3 55 4 25) . ask r)
+        ((new qrow% 65 69 4 10 4 40) . ask r)
+        ((new qrow% 70 74 4 25 4 55) . ask r)
+        ((new qrow% 75 79 4 40 5 10) . ask r)
+        ((new lastrow% 80 4 55 5 10) . ask r))))
 }
 
 Now it's easy to filter the list of runners for those qualifying for
@@ -480,9 +480,9 @@ the BAA will cut him some slack.
 
 @examples[#:eval the-eval
 (eval:alts (rs #,dot filter (new qualify%) #,dot filter (new is-male%)) 
-	   (send (send rs filter (new qualify%)) filter (new is-male%)))
+           (send (send rs filter (new qualify%)) filter (new is-male%)))
 (eval:alts (rs #,dot filter (new qualify%) #,dot filter (new is-female%)) 
-	   (send (send rs filter (new qualify%)) filter (new is-female%)))
+           (send (send rs filter (new qualify%)) filter (new is-female%)))
 ]
 
 @section{Functions as objects: abstracting comparisons}
@@ -538,19 +538,19 @@ A straightforward structural recursive design leads us to:
 
 (define (insert-time r)
   (cond [(< (r . time) (this . first . time))
-	 (new cons% r this)]
-	[else
-	 (new cons% 
-	      (this . first) 
-	      (this . rest . insert-time r))]))
+         (new cons% r this)]
+        [else
+         (new cons% 
+              (this . first) 
+              (this . rest . insert-time r))]))
 
 (define (insert-name r)
   (cond [(string-<? (r . name) (this . first . name))
-	 (new cons% r this)]
-	[else
-	 (new cons% 
-	      (this . first)
-	      (this . rest . insert-name r))]))
+         (new cons% r this)]
+        [else
+         (new cons% 
+              (this . first)
+              (this . rest . insert-name r))]))
 }}
  
 At this point, it's clear much of the code between @racket[sort-time]
@@ -609,11 +609,11 @@ The abstraction of @racket[sort-time] and @racket[sort-name] is:
 
 (define (insert r c)
   (cond [(c . compare r (this . first))
-	 (new cons% r this)]
-	[else
-	 (new cons% 
-	      (this . first) 
-	      (this . rest . insert r c))]))
+         (new cons% r this)]
+        [else
+         (new cons% 
+              (this . first) 
+              (this . rest . insert r c))]))
 }}
 
 To recreate the original methods, we can lift the application of
@@ -660,8 +660,8 @@ of functional objects to represent infinite data.
   (check-expect ((new even-series%) . term 10) 90)
   (define (term n)
     (cond [(zero? n) 0]
-	  [else (+ ((new even%) . term (sub1 n))
-		   (term (sub1 n)))])))
+          [else (+ ((new even%) . term (sub1 n))
+                   (term (sub1 n)))])))
 
 (define-class odd-series%
   ;; term : Natural -> Natural
@@ -669,8 +669,8 @@ of functional objects to represent infinite data.
   (check-expect ((new odd-series%) . term 10) 100)
   (define (term n)
     (cond [(zero? n) 0]
-	  [else (+ ((new odd%) . term (sub1 n))
-		   (term (sub1 n)))])))
+          [else (+ ((new odd%) . term (sub1 n))
+                   (term (sub1 n)))])))
 }
 
 We can now apply the process for designing abstractions with 
@@ -687,10 +687,10 @@ adapted for functions-as-objects.
   (check-expect ((new series%) . Σ (new odd%) . term 10) 100)
   (define (Σ seq)
     (local [(define-class s%
-	      (define (term n)
-		(cond [(zero? n) 0]
-		      [else (+ (seq . term (sub1 n))
-			       (term (sub1 n)))])))]
+              (define (term n)
+                (cond [(zero? n) 0]
+                      [else (+ (seq . term (sub1 n))
+                               (term (sub1 n)))])))]
       (new s%))))
 }
 

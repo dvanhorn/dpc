@@ -1,10 +1,10 @@
 #lang scribble/manual
 @(require scribble/eval
-	  class/utils
+          class/utils
           racket/sandbox
           (for-label (except-in lang/htdp-intermediate-lambda image?))
-	  (for-label 2htdp/image)
-	  (for-label 2htdp/universe))
+          (for-label 2htdp/image)
+          (for-label 2htdp/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -47,15 +47,15 @@
      ;; draw-on : Rocket Scene -> Scene
      ;; Draw rocket on to scene.
      (check-expect (draw-on 0 (empty-scene 100 100))
-		   (overlay/align/offset "center" "bottom"
-					 ROCKET
-					 0 1
-					 (empty-scene 100 100)))
+                   (overlay/align/offset "center" "bottom"
+                                         ROCKET
+                                         0 1
+                                         (empty-scene 100 100)))
      (define (draw-on r scn)
        (overlay/align/offset "center" "bottom" 
-			     ROCKET 
-			     0 (add1 r)
-			     scn))))
+                             ROCKET 
+                             0 (add1 r)
+                             scn))))
      
 @title{Functional rocket}
 
@@ -74,8 +74,8 @@ the form:
 
 @classblock{
 (big-bang <world0>           ; World
-	  (on-tick <tick>)   ; World -> World
-	  (to-draw <draw>))  ; World -> Scene
+          (on-tick <tick>)   ; World -> World
+          (to-draw <draw>))  ; World -> Scene
 }
 
 where @racket[World] is a data definition for world states,
@@ -220,9 +220,9 @@ pixels from the top of the screen to center of the rocket image.
 ;; Draw rocket on to scene.
 (define (draw-on r scn)
   (overlay/align/offset "center" "bottom" 
-			ROCKET 
-			0 (add1 r)
-			scn))
+                        ROCKET 
+                        0 (add1 r)
+                        scn))
 }
 
 @section{Lift off}
@@ -232,11 +232,11 @@ With these functions in place, it is launch a rocket:
 @classblock{
 ;; Lift off!
 (big-bang 0
-	  (tick-rate CLOCK-SPEED)
+          (tick-rate CLOCK-SPEED)
           (on-tick next)
-	  (to-draw render))
+          (to-draw render))
 }
-	  
+          
 Our complete BSL program is:
 
 @#reader scribble/comment-reader
@@ -272,21 +272,21 @@ Our complete BSL program is:
   ;; draw-on : Rocket Scene -> Scene
   ;; Draw rocket on to scene.
   (check-expect (draw-on 0 (empty-scene 100 100))
-		(overlay/align/offset "center" "bottom"
-				      ROCKET
-				      0 1
-				      (empty-scene 100 100)))
+                (overlay/align/offset "center" "bottom"
+                                      ROCKET
+                                      0 1
+                                      (empty-scene 100 100)))
   (define (draw-on r scn)
     (overlay/align/offset "center" "bottom" 
-			  ROCKET 
-			  0 (add1 r)
-			  scn))
+                          ROCKET 
+                          0 (add1 r)
+                          scn))
   
   ;; Lift off!
   (big-bang 0
-	    (tick-rate CLOCK-SPEED)
-	    (on-tick next)
-	    (to-draw render))
+            (tick-rate CLOCK-SPEED)
+            (on-tick next)
+            (to-draw render))
   
 )
 

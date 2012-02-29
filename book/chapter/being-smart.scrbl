@@ -2,10 +2,10 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length
-				numerator denominator))
-	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/universe))
+                                numerator denominator))
+          (for-label 2htdp/image)
+          (for-label (only-in test-engine/racket-tests check-expect))
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -78,12 +78,12 @@ So we define a local function that adds an accumulator argument.
   ;; Acc : hom many red peices we've seen so far
   (local [(define (win-helper b acc)
             (cond [(= acc WIN) true]
-		  [(empty? b) false]
-		  [else
-		   (cond [(symbol=? 'red (first b))
-			  (win-helper (rest b) (add1 acc))]
-			 [else
-			  (win-helper (rest b) 0)])]))]
+                  [(empty? b) false]
+                  [else
+                   (cond [(symbol=? 'red (first b))
+                          (win-helper (rest b) (add1 acc))]
+                         [else
+                          (win-helper (rest b) 0)])]))]
      (win-helper b 0)))
 }
 
@@ -95,12 +95,12 @@ Now let's program the computer-win? predicate:
   ;; Acc : hom many red peices we've seen so far
   (local [(define (win-helper b acc)
             (cond [(= acc WIN) true]
-		  [(empty? b) false]
-		  [else
-		   (cond [(symbol=? 'red (first b))
-			  (win-helper (rest b) (add1 acc))]
-			 [else
-			  (win-helper (rest b) 0)])]))]
+                  [(empty? b) false]
+                  [else
+                   (cond [(symbol=? 'red (first b))
+                          (win-helper (rest b) (add1 acc))]
+                         [else
+                          (win-helper (rest b) 0)])]))]
      (win-helper b 0)))
 }
 
@@ -113,12 +113,12 @@ make it a parameter to the function:
   ;; Acc : hom many red peices we've seen so far
   (local [(define (win-helper b acc)
             (cond [(= acc WIN) true]
-		  [(empty? b) false]
-		  [else
-		   (cond [(symbol=? p (first b))
-			  (win-helper (rest b) (add1 acc))]
-			 [else
-			  (win-helper (rest b) 0)])]))]
+                  [(empty? b) false]
+                  [else
+                   (cond [(symbol=? p (first b))
+                          (win-helper (rest b) (add1 acc))]
+                         [else
+                          (win-helper (rest b) 0)])]))]
      (win-helper b 0)))
 
 (define (win-player? b)
@@ -177,16 +177,16 @@ the computer player.  We'll see the computer data definition later.
   (define/public (to-draw)
     (overlay 
      (foldr beside empty-image (map (lambda (clr) (circle 20 "solid" clr))
-				    (field board)))
+                                    (field board)))
      (empty-scene 500 500)))
 
   ;; KeyEvents
   ;; Handle number keys by playing and N-key by reseting the game.
   (define/public (on-key k)
     (cond [(number? ...) 
-	   (world% (play 'red (string->number k) (field board))
-		   (field computer))]
-	  ...)))
+           (world% (play 'red (string->number k) (field board))
+                   (field computer))]
+          ...)))
 
 (define INITIAL (build-list SIZE (lambda (_) 'white)))
 
@@ -404,7 +404,7 @@ the index and the board.
 
 @codeblock{
 (local [;; Board Number -> Result
-	(define (eval-elem index) ...)]
+        (define (eval-elem index) ...)]
   (build-list SIZE evaluate-elem))
 }
 
@@ -412,13 +412,13 @@ How do we evaluate a position?
 
 @codeblock{
 (local [;; Board Number -> Result
-	(define (eval-elem index) 
-	  (cond [(not (symbol=? 'white (list-ref brd index))) 'full]
-		[(computer-win? (play 'black index brd)) 'win]
-		[(player-win? (play 'red index brd)) 'lose]
-		[else 'unkown]))]
+        (define (eval-elem index) 
+          (cond [(not (symbol=? 'white (list-ref brd index))) 'full]
+                [(computer-win? (play 'black index brd)) 'win]
+                [(player-win? (play 'red index brd)) 'lose]
+                [else 'unkown]))]
   (build-list SIZE evaluate-elem))
-}	
+}       
 
 Going back to pick:
 

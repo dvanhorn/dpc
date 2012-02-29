@@ -60,7 +60,7 @@
  world's best tron player.  We won't grade your assignment based on
  its playing choices, but we encourage you to go wild with your
  choices of how the computer player behaves.  
- }	   
+ }         
 
 
 ]

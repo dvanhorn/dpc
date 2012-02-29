@@ -2,10 +2,10 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length
-				numerator denominator))
-	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/universe))
+                                numerator denominator))
+          (for-label 2htdp/image)
+          (for-label (only-in test-engine/racket-tests check-expect))
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -90,7 +90,7 @@ This method essentially embodies our interpretation of the
 
 @codeblock{
   (check-expect (new fraction% 1 2)
-		(new fraction% 2 4))
+                (new fraction% 2 4))
 }
 
 But of course now we can write our tests to rely on this
@@ -98,7 +98,7 @@ interpretation function:
 
 @codeblock{
   (check-expect ((new fraction% 1 2) . to-number)
-		((new fraction% 2 4) . to-number))
+                ((new fraction% 2 4) . to-number))
 }
 
 But what if we wanted to go down the second route?  We could define a
@@ -110,7 +110,7 @@ method that computes a fraction in lowest terms:
   ;; simplify : -> Fraction
   ;; Simplify a fraction to lowest terms.
   (check-expect ((new fraction% 3 6) . simplify)
-		(new fraction% 1 2))
+                (new fraction% 1 2))
 )}
 
 We can use the @racket[gcd] function to compute the greatest common
@@ -121,12 +121,12 @@ denominator of the terms:
 (racketblock
   (define/public (simplify)
     (new fraction%
-	 (/ (field numerator) 
-	    (gcd (field numerator) 
-		 (field denominator)))
-	 (/ (field denominator) 
-	    (gcd (field numerator) 
-		 (field denominator)))))
+         (/ (field numerator) 
+            (gcd (field numerator) 
+                 (field denominator)))
+         (/ (field denominator) 
+            (gcd (field numerator) 
+                 (field denominator)))))
 )}
 
 This allows us to structurally compare two fractions that have been
@@ -134,7 +134,7 @@ simplified to lowest terms:
 
 @codeblock{
   (check-expect ((new fraction% 3 6) . simplify)
-		((new fraction% 1 2) . simplify))
+                ((new fraction% 1 2) . simplify))
 }
 
 But it does not prevent us from constructing fractions that are not in
@@ -208,7 +208,7 @@ class, we can use the following code:
   ;; Number Number -> Fraction
   (constructor (n d)
     (fields (/ n (gcd n d))
-	    (/ d (gcd n d))))
+            (/ d (gcd n d))))
 }
 
 This code is used every time we have a @racket[(new fraction% Number
@@ -227,7 +227,7 @@ the @racket[fract-constructor] function.
 Finally, we get to the point we wanted:
 @codeblock{
   (check-expect (new fraction% 1 2)
-		(new fraction% 2 4))
+                (new fraction% 2 4))
 }
 
 Q: Can you have multiple constructor?  
@@ -343,9 +343,9 @@ one that accepts all the things deemed acceptable in our specification
      (fields year month day)
      (constructor (y m d)
        (cond [(<= y 0) (error "year was negative or zero")]
-	     [(or (> m 12) (< m 1)) (error "month too big or too small")]
-	     [(or (> d 31) (< d 1)) (error "day too big or too small")]
-	     [else (fields y m d)]))))
+             [(or (> m 12) (< m 1)) (error "month too big or too small")]
+             [(or (> d 31) (< d 1)) (error "day too big or too small")]
+             [else (fields y m d)]))))
 
 @examples[#:eval the-eval
   (date% 2011 3 67)]
@@ -578,7 +578,7 @@ then we can write the constructor as follows:
            (fields a b)]
           [else
            (local [(define t (a #,(racketidfont ".") insert-tree b))]
-	     (fields (t . left) (t . right)))]))
+             (fields (t . left) (t . right)))]))
 ]}
 
 That leaves @racket[insert-tree] to be written.  First let's consider
@@ -642,10 +642,10 @@ should be inserted in the left or right:
   (define/public (insert n)
     (cond [(> n ((field left) . max))
            (node% (field left)
-		  ((field right) #,(racketidfont ".") insert n))]
-	  [else
-	   (node% ((field left) #,(racketidfont ".") insert n)
-		  (field right))]))
+                  ((field right) #,(racketidfont ".") insert n))]
+          [else
+           (node% ((field left) #,(racketidfont ".") insert n)
+                  (field right))]))
 ]}
 
 @section[#:tag "Exercises (Ch 10.)"]{Exercises}

@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require class/utils
           (for-label (except-in class/0 check-expect))
-	  (for-label (only-in lang/htdp-intermediate-lambda check-expect)))
+          (for-label (only-in lang/htdp-intermediate-lambda check-expect)))
 
 @title[#:tag "Zombie_solution"]{Solution:
 @secref{Zombie_}}

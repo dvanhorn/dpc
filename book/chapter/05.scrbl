@@ -2,8 +2,8 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect ...))
           (for-label (except-in class/0 define-struct ... length check-expect))
-	  (for-label 2htdp/image)
-	  (for-label class/universe))
+          (for-label 2htdp/image)
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -142,7 +142,7 @@ let's just have the snake move.
 
     (define (to-draw)
       (send (send this food) draw
-	    (send (send this snake) draw MT-SCENE))))
+            (send (send this snake) draw MT-SCENE))))
 )
 
 @section{Coordinate interface}
@@ -208,20 +208,20 @@ this image.}
      
      (define (add-sq x y scn)
        (place-image (overlay (text (string-append (number->string x)
-						  ","
-						  (number->string y))
-				   6
-				   "black")
-			     (square SIZE "outline" "black"))
-		    (grid->px-x x)
-		    (grid->px-y y)
-		    scn))
+                                                  ","
+                                                  (number->string y))
+                                   6
+                                   "black")
+                             (square SIZE "outline" "black"))
+                    (grid->px-x x)
+                    (grid->px-y y)
+                    scn))
      
      (define MT-SCENE (empty-scene WIDTH-PX HEIGHT-PX))
      
      (for*/fold ([scn MT-SCENE])
        ([i (in-range 0 WIDTH)]
-	[j (in-range 0 HEIGHT)])
+        [j (in-range 0 HEIGHT)])
        (add-sq i j scn))))
 
 But for the sake of our notes, let's develop the game for a much
@@ -255,20 +255,20 @@ now looks like:
        (- HEIGHT-PX (* SIZE (+ 1/2 y))))     
      (define (add-sq x y scn)
        (place-image (overlay (text (string-append (number->string x)
-						  ","
-						  (number->string y))
-				   12
-				   "black")
-			     (square SIZE "outline" "black"))
-		    (grid->px-x x)
-		    (grid->px-y y)
-		    scn))
+                                                  ","
+                                                  (number->string y))
+                                   12
+                                   "black")
+                             (square SIZE "outline" "black"))
+                    (grid->px-x x)
+                    (grid->px-y y)
+                    scn))
      
      (define MT-SCENE (empty-scene WIDTH-PX HEIGHT-PX))
      
      (for*/fold ([scn MT-SCENE])
        ([i (in-range 0 WIDTH)]
-	[j (in-range 0 HEIGHT)])
+        [j (in-range 0 HEIGHT)])
        (add-sq i j scn))))
 
 Now we need to consider the interface for coordinates (henceforth, the
@@ -467,7 +467,7 @@ This satisfies part of our implementation right off the bat: we get an
 (racketblock
   (define (same-pos? c)
     (and (= (send this x) (send c x))
-	 (= (send this y) (send c y))))
+         (= (send this y) (send c y))))
 )
 }
 
@@ -476,7 +476,7 @@ And now @racket[draw]:
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new seg% 0 0) draw MT-SCENE)
-		(place-image (square SIZE "solid" "red")
+                (place-image (square SIZE "solid" "red")
                              (* 1/2 SIZE)
                              (- HEIGHT-PX (* 1/2 SIZE))
                              MT-SCENE))
@@ -487,9 +487,9 @@ And now @racket[draw]:
 (racketblock
   (define (draw scn)
     (place-image (square SIZE "solid" "red")
-		 (x-px)
-		 (y-px)
-		 scn))
+                 (x-px)
+                 (y-px)
+                 scn))
 )
 }
  
@@ -509,13 +509,13 @@ And now @racket[move]:
 (racketblock
   (define (move d)
     (cond [(string=? d "up")    
-	   (new seg% (send this x) (add1 (send this y)))]
-	  [(string=? d "down")  
-	   (new seg% (send this x) (sub1 (send this y)))]
-	  [(string=? d "left")  
-	   (new seg% (sub1 (send this x)) (send this y))]
-	  [(string=? d "right") 
-	   (new seg% (add1 (send this x)) (send this y))]))
+           (new seg% (send this x) (add1 (send this y)))]
+          [(string=? d "down")  
+           (new seg% (send this x) (sub1 (send this y)))]
+          [(string=? d "left")  
+           (new seg% (sub1 (send this x)) (send this y))]
+          [(string=? d "right") 
+           (new seg% (add1 (send this x)) (send this y))]))
 )
 }
 
@@ -576,27 +576,27 @@ design of @racket[seg%], we'll do @racket[food%] quickly:
 
     (define (same-pos? c)
       (and (= (send this x) (send c x))
-	   (= (send this y) (send c y))))    
+           (= (send this y) (send c y))))    
 
     (define (draw scn)
       (place-image (square SIZE "solid" "green")
-		   (x-px)
-		   (y-px)
-		   scn))
+                   (x-px)
+                   (y-px)
+                   scn))
 
     (define (move d)
       (cond [(string=? d "up")    
-	     (new food% (send this x) (add1 (send this y)))]
-	    [(string=? d "down")  
-	     (new food% (send this x) (sub1 (send this y)))]
-	    [(string=? d "left")  
-	     (new food% (sub1 (send this x)) (send this y))]
-	    [(string=? d "right") 
-	     (new food% (add1 (send this x)) (send this y))]))
+             (new food% (send this x) (add1 (send this y)))]
+            [(string=? d "down")  
+             (new food% (send this x) (sub1 (send this y)))]
+            [(string=? d "left")  
+             (new food% (sub1 (send this x)) (send this y))]
+            [(string=? d "right") 
+             (new food% (add1 (send this x)) (send this y))]))
 
     (define (on-board?)
       (and (<= 0 (send this x) (sub1 WIDTH))
-	   (<= 0 (send this y) (sub1 HEIGHT))))
+           (<= 0 (send this y) (sub1 HEIGHT))))
 
     (define (x-px)
       (* (+ 1/2 (send this x)) SIZE))
@@ -729,7 +729,7 @@ element is dropped from the segments list:
 (racketblock
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) grow)
                 (new snake% "right" (list (new seg% 1 0) 
-					  (new seg% 0 0))))
+                                          (new seg% 0 0))))
 )
 
 @filebox[@r[snake%]]{
@@ -764,7 +764,7 @@ And finally, @racket[draw]:
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new snake% "left" (list (new seg% 0 0))) draw MT-SCENE)
-		(send (new seg% 0 0) draw MT-SCENE))
+                (send (new seg% 0 0) draw MT-SCENE))
 )
 
 @filebox[@r[snake%]]{
@@ -810,7 +810,7 @@ interact with it in the interactions window:
 
     (define (to-draw)
       (send (send this food) draw
-	    (send (send this snake) draw MT-SCENE))))
+            (send (send this snake) draw MT-SCENE))))
 
   ;; A Coord implements:
   
@@ -844,24 +844,24 @@ interact with it in the interactions window:
     (fields x y)
     (define (same-pos? c)
       (and (= (send this x) (send c x))
-	   (= (send this y) (send c y))))
+           (= (send this y) (send c y))))
     (define (draw scn)
       (place-image (square SIZE "solid" "red")
-		   (x-px)
-		   (y-px)
-		   scn))
+                   (x-px)
+                   (y-px)
+                   scn))
     (define (move d)
       (cond [(string=? d "up")    
-	     (new seg% (send this x) (add1 (send this y)))]
-	    [(string=? d "down")  
-	     (new seg% (send this x) (sub1 (send this y)))]
-	    [(string=? d "left")  
-	     (new seg% (sub1 (send this x)) (send this y))]
-	    [(string=? d "right") 
-	     (new seg% (add1 (send this x)) (send this y))]))
+             (new seg% (send this x) (add1 (send this y)))]
+            [(string=? d "down")  
+             (new seg% (send this x) (sub1 (send this y)))]
+            [(string=? d "left")  
+             (new seg% (sub1 (send this x)) (send this y))]
+            [(string=? d "right") 
+             (new seg% (add1 (send this x)) (send this y))]))
     (define (on-board?)
       (and (<= 0 (send this x) (sub1 WIDTH))
-	   (<= 0 (send this y) (sub1 HEIGHT))))
+           (<= 0 (send this y) (sub1 HEIGHT))))
     (define (x-px)
       (* (+ 1/2 (send this x)) SIZE))
     (define (y-px)
@@ -891,27 +891,27 @@ interact with it in the interactions window:
 
     (define (same-pos? c)
       (and (= (send this x) (send c x))
-	   (= (send this y) (send c y))))    
+           (= (send this y) (send c y))))    
 
     (define (draw scn)
       (place-image (square SIZE "solid" "green")
-		   (x-px)
-		   (y-px)
-		   scn))
+                   (x-px)
+                   (y-px)
+                   scn))
 
     (define (move d)
       (cond [(string=? d "up")    
-	     (new food% (send this x) (add1 (send this y)))]
-	    [(string=? d "down")  
-	     (new food% (send this x) (sub1 (send this y)))]
-	    [(string=? d "left")  
-	     (new food% (sub1 (send this x)) (send this y))]
-	    [(string=? d "right") 
-	     (new food% (add1 (send this x)) (send this y))]))
+             (new food% (send this x) (add1 (send this y)))]
+            [(string=? d "down")  
+             (new food% (send this x) (sub1 (send this y)))]
+            [(string=? d "left")  
+             (new food% (sub1 (send this x)) (send this y))]
+            [(string=? d "right") 
+             (new food% (add1 (send this x)) (send this y))]))
 
     (define (on-board?)
       (and (<= 0 (send this x) (sub1 WIDTH))
-	   (<= 0 (send this y) (sub1 HEIGHT))))
+           (<= 0 (send this y) (sub1 HEIGHT))))
 
     (define (x-px)
       (* (+ 1/2 (send this x)) SIZE))
@@ -937,26 +937,26 @@ interact with it in the interactions window:
     (fields dir segs)
     (define (move)
       (new snake%
-	   (send this dir)
-	   (cons (send (first (send this segs)) move (send this dir))
-		 (all-but-last (send this segs)))))
+           (send this dir)
+           (cons (send (first (send this segs)) move (send this dir))
+                 (all-but-last (send this segs)))))
 
     (define (grow)
       (new snake%
-	   (send this dir)
-	   (cons (send (first (send this segs)) move (send this dir))
-		 (send this segs))))
+           (send this dir)
+           (cons (send (first (send this segs)) move (send this dir))
+                 (send this segs))))
     
     (define (turn d)
       (new snake% d (send this segs)))
 
     (define (draw scn)
       (foldl (λ (s scn) (send s draw scn))
-	     scn
-	     (send this segs))))
+             scn
+             (send this segs))))
 
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) move)
-		(new snake% "right" (list (new seg% 1 0))))
+                (new snake% "right" (list (new seg% 1 0))))
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) grow)
                 (new snake% "right" (list (new seg% 1 0)
                                           (new seg% 0 0))))
@@ -978,12 +978,12 @@ interact with it in the interactions window:
 
 @examples[#:eval the-eval
   (define w0 (new world% 
-		  (new snake% 
-		       "right" 
-		       (list (new seg% 5 1)
-			     (new seg% 5 0)
-			     (new seg% 4 0)))
-		  (new food% 3 4)))
+                  (new snake% 
+                       "right" 
+                       (list (new seg% 5 1)
+                             (new seg% 5 0)
+                             (new seg% 4 0)))
+                  (new food% 3 4)))
    (send w0 to-draw)
    (send (send w0 on-tick) to-draw)
    (send (send (send w0 on-tick) on-tick) to-draw)]
@@ -1019,7 +1019,7 @@ future.
 
     (define (to-draw)
       (send (send this food) draw
-	    (send (send this snake) draw MT-SCENE))))
+            (send (send this snake) draw MT-SCENE))))
 
   ;; A Coord implements:
   
@@ -1053,24 +1053,24 @@ future.
     (fields x y)
     (define (same-pos? c)
       (and (= (send this x) (send c x))
-	   (= (send this y) (send c y))))
+           (= (send this y) (send c y))))
     (define (draw scn)
       (place-image (square SIZE "solid" "red")
-		   (x-px)
-		   (y-px)
-		   scn))
+                   (x-px)
+                   (y-px)
+                   scn))
     (define (move d)
       (cond [(string=? d "up")    
-	     (new seg% (send this x) (add1 (send this y)))]
-	    [(string=? d "down")  
-	     (new seg% (send this x) (sub1 (send this y)))]
-	    [(string=? d "left")  
-	     (new seg% (sub1 (send this x)) (send this y))]
-	    [(string=? d "right") 
-	     (new seg% (add1 (send this x)) (send this y))]))
+             (new seg% (send this x) (add1 (send this y)))]
+            [(string=? d "down")  
+             (new seg% (send this x) (sub1 (send this y)))]
+            [(string=? d "left")  
+             (new seg% (sub1 (send this x)) (send this y))]
+            [(string=? d "right") 
+             (new seg% (add1 (send this x)) (send this y))]))
     (define (on-board?)
       (and (<= 0 (send this x) (sub1 WIDTH))
-	   (<= 0 (send this y) (sub1 HEIGHT))))
+           (<= 0 (send this y) (sub1 HEIGHT))))
     (define (x-px)
       (* (+ 1/2 (send this x)) SIZE))
     (define (y-px)
@@ -1100,27 +1100,27 @@ future.
 
     (define (same-pos? c)
       (and (= (send this x) (send c x))
-	   (= (send this y) (send c y))))    
+           (= (send this y) (send c y))))    
 
     (define (draw scn)
       (place-image (square SIZE "solid" "green")
-		   (x-px)
-		   (y-px)
-		   scn))
+                   (x-px)
+                   (y-px)
+                   scn))
 
     (define (move d)
       (cond [(string=? d "up")    
-	     (new food% (send this x) (add1 (send this y)))]
-	    [(string=? d "down")  
-	     (new food% (send this x) (sub1 (send this y)))]
-	    [(string=? d "left")  
-	     (new food% (sub1 (send this x)) (send this y))]
-	    [(string=? d "right") 
-	     (new food% (add1 (send this x)) (send this y))]))
+             (new food% (send this x) (add1 (send this y)))]
+            [(string=? d "down")  
+             (new food% (send this x) (sub1 (send this y)))]
+            [(string=? d "left")  
+             (new food% (sub1 (send this x)) (send this y))]
+            [(string=? d "right") 
+             (new food% (add1 (send this x)) (send this y))]))
 
     (define (on-board?)
       (and (<= 0 (send this x) (sub1 WIDTH))
-	   (<= 0 (send this y) (sub1 HEIGHT))))
+           (<= 0 (send this y) (sub1 HEIGHT))))
 
     (define (x-px)
       (* (+ 1/2 (send this x)) SIZE))
@@ -1146,26 +1146,26 @@ future.
     (fields dir segs)
     (define (move)
       (new snake%
-	   (send this dir)
-	   (cons (send (first (send this segs)) move (send this dir))
-		 (all-but-last (send this segs)))))
+           (send this dir)
+           (cons (send (first (send this segs)) move (send this dir))
+                 (all-but-last (send this segs)))))
 
     (define (grow)
       (new snake%
-	   (send this dir)
-	   (cons (send (first (send this segs)) move (send this dir))
-		 (send this segs))))
+           (send this dir)
+           (cons (send (first (send this segs)) move (send this dir))
+                 (send this segs))))
     
     (define (turn d)
       (new snake% d (send this segs)))
 
     (define (draw scn)
       (foldl (λ (s scn) (send s draw scn))
-	     scn
-	     (send this segs))))
+             scn
+             (send this segs))))
 
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) move)
-		(new snake% "right" (list (new seg% 1 0))))
+                (new snake% "right" (list (new seg% 1 0))))
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) grow)
                 (new snake% "right" (list (new seg% 1 0)
                                           (new seg% 0 0))))
@@ -1185,12 +1185,12 @@ future.
                       (all-but-last (rest ls)))]))
 
   (big-bang (new world% 
-		 (new snake% 
-		      "right" 
-		      (list (new seg% 5 1)
-			    (new seg% 5 0)
-			    (new seg% 4 0)))
-		 (new food% 3 4)))
+                 (new snake% 
+                      "right" 
+                      (list (new seg% 5 1)
+                            (new seg% 5 0)
+                            (new seg% 4 0)))
+                 (new food% 3 4)))
 )
 
 

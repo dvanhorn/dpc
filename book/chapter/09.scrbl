@@ -2,9 +2,9 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length))
-	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/universe))
+          (for-label 2htdp/image)
+          (for-label (only-in test-engine/racket-tests check-expect))
+          (for-label class/universe))
 
 @title{Abstraction, Invariants, Testing}
 
@@ -47,12 +47,12 @@ the implementation of the @r[contains?] method.
   (check-expect ((new scons% 5 (new smt%)) . contains? 5) true)
   (check-expect ((new scons% 5 (new smt%)) . contains? 7) false)
   (check-expect ((new scons% 5 (new scons% 7 (new smt%))) . contains? 3)
-		false)
+                false)
   (check-expect ((new scons% 5 (new scons% 7 (new smt%))) . contains? 9)
-		false)
+                false)
   (define/public (contains? n)
     (or (= n (field first))
-	((field rest) . contains? n))))
+        ((field rest) . contains? n))))
 }
 
 
@@ -62,8 +62,8 @@ avoid checking the rest of the list when it isn't necessary.
 @racketblock[
   (define/public (contains? n)
     (cond [(= n (field first)) true]
-	  [(< n (field first)) false]
-	  [else ((field rest) #,(racketidfont ".") contains? n)]))
+          [(< n (field first)) false]
+          [else ((field rest) #,(racketidfont ".") contains? n)]))
 ]
 
 Because the list is always sorted in ascending order, if @r[n] is less
@@ -75,7 +75,7 @@ Now we can implement the remaining methods from the interface. First, @r[insert]
 @filebox[@r[smt%]]{
 @racketblock[
 (check-expect ((new smt%) #,(racketidfont ".") insert 5) 
-	      (new scons% 5 (new smt%)))
+              (new scons% 5 (new smt%)))
 (define/public (insert n)
   (new scons% n (new smt%)))
 ]}
@@ -83,16 +83,16 @@ Now we can implement the remaining methods from the interface. First, @r[insert]
 @filebox[@r[scons%]]{
 @racketblock[
 (check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") insert 7)
-	      (new scons% 5 (new scons% 7 (new smt%))))
+              (new scons% 5 (new scons% 7 (new smt%))))
 (check-expect ((new scons% 7 (new smt%)) #,(racketidfont ".") insert 5)
-	      (new scons% 5 (new scons% 7 (new smt%))))
+              (new scons% 5 (new scons% 7 (new smt%))))
 (define/public (insert n)
   (cond [(< n (field first))
-	 (new scons% n this)]
-	[else
-	 (new scons%
-	      (field first)
-	      ((field rest) #,(racketidfont ".") insert n))]))
+         (new scons% n this)]
+        [else
+         (new scons%
+              (field first)
+              ((field rest) #,(racketidfont ".") insert n))]))
 ]}
 
 Note that we don't have to look at the whole list to insert the
@@ -110,7 +110,7 @@ precondition that we can only call @r[max] when the list is non-empty.
 (check-expect ((new scons% 5 (new scons% 7 (new smt%))) #,(racketidfont ".") max) 7)
 (define/public (max)
   (cond [((field rest) #,(racketidfont ".") empty?) (field first)]
-	[else ((field rest) #,(racketidfont ".") max)]))
+        [else ((field rest) #,(racketidfont ".") max)]))
 ]}
 
 Again, this implementation relies on our data structure invariant.  To
@@ -183,10 +183,10 @@ holds. First, let's build a random sorted list generator.
 (code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
 (define (build-sorted i f)
   (cond [(zero? i) (new smt%)]
-	[else
-	 (new scons% 
-	      (f i)
-	      (build-sorted (sub1 i) f))]))
+        [else
+         (new scons% 
+              (f i)
+              (build-sorted (sub1 i) f))]))
 (build-sorted 5 (lambda (x) x))
 ]
 
@@ -199,10 +199,10 @@ method to maintain the sorted list invariant:
 (code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
 (define (build-sorted i f)
   (cond [(zero? i) (new smt%)]
-	[else
-	 ((build-sorted (sub1 i) f) #,(racketidfont ".") insert (f i))]))
+        [else
+         ((build-sorted (sub1 i) f) #,(racketidfont ".") insert (f i))]))
 (check-expect (build-sorted 3 (lambda (x) x))
-	      (new scons% 1 (new scons% 2 (new scons% 3 (new smt%)))))
+              (new scons% 1 (new scons% 2 (new scons% 3 (new smt%)))))
 
 ]
 
@@ -223,7 +223,7 @@ we can write a test that checks our property.
 
 @racketblock[
 (check-expect (insert-contains? (random-sorted 30) (random 50))
-	      true)
+              true)
 ]
 
 Every time we hit the @tt{Run} button, we generate a random sorted
@@ -240,14 +240,14 @@ First, we write a function to perform some action many times:
 (code:comment "run the function f i times")
 (define (do i f)
   (cond [(zero? i) 'done]
-	[else (f (do (sub1 i) f))]))]
+        [else (f (do (sub1 i) f))]))]
 
 Then we can run our test many times:
 @racketblock[
 (do 1000
     (lambda (_)
       (check-expect (insert-contains? (random-sorted 30) (random 50))
-		    true)))
+                    true)))
 ]
 
 When this says that we've passed 1000 tests, we'll be more sure that

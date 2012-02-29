@@ -4,12 +4,12 @@
                               define-struct
                               or
                               local
-			      check-expect
+                              check-expect
                               <= < * /))
           (for-label (except-in 2htdp/image color))
           (for-label (only-in 2htdp/universe mouse=?))
           (for-label (except-in class/2 
-	  	     		check-expect
+                                check-expect
                                 define-struct)))
 
 @title[#:tag "soln05"]{Networked Connect 4}
@@ -273,12 +273,12 @@ class/2
   (check-expect (send (universe% '(("red")) iworld1 iworld2 "red") on-msg iworld1 0)
                 (make-bundle (universe% '(("red")) iworld1 iworld2 "red") empty empty))
   (check-expect (send (universe% '(("red" "red" "red" #f #f #f)
-				   ( #f #f #f #f #f #f)
-				   ( #f #f #f #f #f #f)
-				   ( #f #f #f #f #f #f)
-				   ( #f #f #f #f #f #f)
-				   ( #f #f #f #f #f #f)
-				   ( #f #f #f #f #f #f)) iworld1 iworld2 "red") on-msg iworld1 0)
+                                   ( #f #f #f #f #f #f)
+                                   ( #f #f #f #f #f #f)
+                                   ( #f #f #f #f #f #f)
+                                   ( #f #f #f #f #f #f)
+                                   ( #f #f #f #f #f #f)
+                                   ( #f #f #f #f #f #f)) iworld1 iworld2 "red") on-msg iworld1 0)
                 (make-bundle (universe% '(("red" "red" "red" "red" #f #f)
                                           ( #f #f #f #f #f #f)
                                           ( #f #f #f #f #f #f)

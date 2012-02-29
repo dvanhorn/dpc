@@ -2,10 +2,10 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length
-				numerator denominator))
-	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/universe))
+                                numerator denominator))
+          (for-label 2htdp/image)
+          (for-label (only-in test-engine/racket-tests check-expect))
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -48,12 +48,12 @@ class C {
     String y;
     String z;
     public C m(Number p, Number q) {
-	...
+        ...
     }
     public C(Number x, String y, String z) {
-	this.x = x;
-	this.y = y;
-	this.z = z;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 }
 }|
@@ -67,12 +67,12 @@ class Pair {
     Number right;
     
     public Pair(Number left, Number right) {
-	this.left = left;
-	this.right = right;
+        this.left = left;
+        this.right = right;
     }
     
     public Pair swap() {
-	return new Pair(this.right, this.left);
+        return new Pair(this.right, this.left);
     }
 }
 }|
@@ -88,17 +88,17 @@ class Pair {
     Integer right;
     
     public Pair(Integer left, Integer right) {
-	this.left = left;
-	this.right = right;
+        this.left = left;
+        this.right = right;
     }
     
     public Pair swap() {
-	return new Pair(this.right, this.left);
+        return new Pair(this.right, this.left);
     }
 }
 }|
 
-									       
+                                                                               
 To test this, we'll import a testing library:
 
 @verbatim{
@@ -113,8 +113,8 @@ and write some examples:
 class Examples {
     public Examples() {}
     public boolean testSwap(Tester t) {
-	return t.checkExpect(new Pair(3,4).swap(), 
-			     new Pair(4,3));
+        return t.checkExpect(new Pair(3,4).swap(), 
+                             new Pair(4,3));
     }
 }
 }|
@@ -130,13 +130,13 @@ This requires installing a @tt{JAR} file from the NU Tester
 The we have to compile the program.  
 
 @itemlist[
-	@item{javac}
-	@item{The classpath and the -cp option}
-	@item{Now we have class files, which are binary and all mashed
-	up}
-	@item{To run this, we use the @tt{java} command, which also
-	has a @tt{-cp} option}
-	@item{If we change things, we have to recompile and then rerun.}
+        @item{javac}
+        @item{The classpath and the -cp option}
+        @item{Now we have class files, which are binary and all mashed
+        up}
+        @item{To run this, we use the @tt{java} command, which also
+        has a @tt{-cp} option}
+        @item{If we change things, we have to recompile and then rerun.}
 ]
 
 @section{A More Complex Example}
@@ -147,16 +147,16 @@ What if we want to represent a union?
 
 @verbatim|{
     class Square {
-	Integer size;
-	public Square(Integer size) {
-	    this.size = size;
-	}
+        Integer size;
+        public Square(Integer size) {
+            this.size = size;
+        }
     }
     class Circ {
-	Integer radius;
-	public Circ(Integer radius) {
-	    this.radius = radius;
-	}
+        Integer radius;
+        public Circ(Integer radius) {
+            this.radius = radius;
+        }
     }
 }|
 
@@ -169,31 +169,31 @@ How do we declare that both of these are @tt{Shape}s?
     interface IShape {}
 
     class Square implements IShape {
-	Integer size;
-	public Square(Integer size) {
-	    this.size = size;
-	}
-	public IShape nothing(IShape i) {
-	    return i;
-	}
+        Integer size;
+        public Square(Integer size) {
+            this.size = size;
+        }
+        public IShape nothing(IShape i) {
+            return i;
+        }
     }
 
     class Circ implements IShape {
-	Integer radius;
-	public Circ(Integer radius) {
-	    this.radius = radius;
-	}
+        Integer radius;
+        public Circ(Integer radius) {
+            this.radius = radius;
+        }
     }
 
     class Examples {
-	Examples () {}
-	public boolean testNothing(Tester t) {
-	    Square s = new Square(5); // A local binding
-	    return t.checkExpect(s.nothing(new Circ(2)), 
-				 new Circ(2));
-	}
+        Examples () {}
+        public boolean testNothing(Tester t) {
+            Square s = new Square(5); // A local binding
+            return t.checkExpect(s.nothing(new Circ(2)), 
+                                 new Circ(2));
+        }
     }
-	
+        
 }|
 
 @section{Recursive Unions}
@@ -201,29 +201,29 @@ How do we declare that both of these are @tt{Shape}s?
 @verbatim|{
     import tester.Tester;
     class Mt implements IList {
-	public Mt() {}
+        public Mt() {}
     }
 
     class Cons implements IList {
-	Integer first;
-	IList rest;
-	
-	public Cons(Integer first, IList rest) {
-	    this.first = first;
-	    this.rest = rest;
-	}
+        Integer first;
+        IList rest;
+        
+        public Cons(Integer first, IList rest) {
+            this.first = first;
+            this.rest = rest;
+        }
     }
 
     interface IList {}
     
     class Examples {
-	public Examples() {}
-	
-	public boolean testList(Tester t) {
-	    return t.checkExpect(new Mt(), new Mt())
-		&& t.checkExpect(new Cons(5, new Mt()), new Cons(5, new Mt()));
-	}
-    }	
+        public Examples() {}
+        
+        public boolean testList(Tester t) {
+            return t.checkExpect(new Mt(), new Mt())
+                && t.checkExpect(new Cons(5, new Mt()), new Cons(5, new Mt()));
+        }
+    }   
 
 }|
 
@@ -242,43 +242,43 @@ In Fundies I, we might have written:
 In Java, we write:
 
 @verbatim|{
-	interface ITitle {}
-	class Dr implements ITitle {
-	    Dr() {}
-	}
-	class Mr implements ITitle {
-	    Mr() {}
-	}
-	class Ms implements ITitle {
-	    Ms() {}
-	}
+        interface ITitle {}
+        class Dr implements ITitle {
+            Dr() {}
+        }
+        class Mr implements ITitle {
+            Mr() {}
+        }
+        class Ms implements ITitle {
+            Ms() {}
+        }
 }|
 
 Why write these silly constructors?
 
 @verbatim|{
-	interface ITitle {}
-	class Dr implements ITitle {
-	    Dr() {}
-	}
-	class Mr implements ITitle {
-	    Mr() {}
-	}
-	class Ms implements ITitle {
-	    Integer x;
-	    Ms() {}
+        interface ITitle {}
+        class Dr implements ITitle {
+            Dr() {}
+        }
+        class Mr implements ITitle {
+            Mr() {}
+        }
+        class Ms implements ITitle {
+            Integer x;
+            Ms() {}
 
-	    public Integer m() {
-		return x+1;
-	    }
-	}
+            public Integer m() {
+                return x+1;
+            }
+        }
 
-	class Main {
-	    public static void main(String[] args) {
-		new Ms().m();
-		return;
-	    }
-	}
+        class Main {
+            public static void main(String[] args) {
+                new Ms().m();
+                return;
+            }
+        }
 }|
 
 
@@ -289,30 +289,30 @@ A discussion of the evils of @tt{null}.
 For example, this compiles:
 
 @verbatim|{
-	interface ITitle {}
-	class Dr implements ITitle {
-	    Dr() {}
-	}
-	class Mr implements ITitle {
-	    Mr() {}
-	}
-	class Ms implements ITitle {
-	    Integer x;
-	    Ms(Integer x) {
-	        this.x = x;
-	    }
+        interface ITitle {}
+        class Dr implements ITitle {
+            Dr() {}
+        }
+        class Mr implements ITitle {
+            Mr() {}
+        }
+        class Ms implements ITitle {
+            Integer x;
+            Ms(Integer x) {
+                this.x = x;
+            }
 
-	    public Integer m() {
-		return null;
-	    }
-	}
+            public Integer m() {
+                return null;
+            }
+        }
 
-	class Main {
-	    public static void main(String[] args) {
-		new Ms().m();
-		return;
-	    }
-	}
+        class Main {
+            public static void main(String[] args) {
+                new Ms().m();
+                return;
+            }
+        }
 }|
 
 Never write @tt{null} in your program!
@@ -329,12 +329,12 @@ class Pair {
     Integer right;
     
     public Pair(Integer left, Integer right) {
-	this.left = left;
-	this.right = right;
+        this.left = left;
+        this.right = right;
     }
     
     public Pair swap() {
-	return new Pair(this.right, this.left);
+        return new Pair(this.right, this.left);
     }
 }
 }|
@@ -347,12 +347,12 @@ class PairString {
     String right;
     
     public Pair(String left, String right) {
-	this.left = left;
-	this.right = right;
+        this.left = left;
+        this.right = right;
     }
     
     public Pair swap() {
-	return new Pair(this.right, this.left);
+        return new Pair(this.right, this.left);
     }
 }
 }|
@@ -366,20 +366,20 @@ class Pair<T,V> {
     V right;
     
     public Pair(T left, V right) {
-	this.left = left;
-	this.right = right;
+        this.left = left;
+        this.right = right;
     }
     
     public Pair<V,T> swap() {
-	return new Pair<V,T>(this.right, this.left);
+        return new Pair<V,T>(this.right, this.left);
     }
 }
 
 class Examples {
     public Examples() {}
     public boolean testSwap(Tester t) {
-	return t.checkExpect(new Pair<Integer,Integer>(3,4).swap(), 
-			     new Pair<Integer,Integer>(4,3));
+        return t.checkExpect(new Pair<Integer,Integer>(3,4).swap(), 
+                             new Pair<Integer,Integer>(4,3));
     }
 }
 
@@ -395,12 +395,12 @@ class C {
     Integer x;
     Integer y;
     C(Integer x, Integer y) {
-	this.x = x;
-	this.y = y;
+        this.x = x;
+        this.y = y;
     }
     
     public Integer sq() {
-	return this.x * this.x;
+        return this.x * this.x;
     }
 }
 
@@ -409,12 +409,12 @@ class D {
     Integer x;
     String z;
     D(Integer x, String z) {
-	this.x = x;
-	this.z = z;
+        this.x = x;
+        this.z = z;
     }
     
     public Integer sq() {
-	return this.x * this.x;
+        return this.x * this.x;
     }
 }
 
@@ -428,18 +428,18 @@ class D {
 class S {
     Integer x;
     public Integer sq() {
-	return this.x * this.x;
+        return this.x * this.x;
     }
     S(Integer x) {
-	this.x = x;
+        this.x = x;
     }
 }
 
 class C extends S {
     Integer y;
     C(Integer x, Integer y) {
-	super(x);
-	this.y = y;
+        super(x);
+        this.y = y;
     }
 }
 
@@ -448,12 +448,12 @@ class D {
     Integer x;
     String z;
     D(Integer x, String z) {
-	this.x = x;
-	this.z = z;
+        this.x = x;
+        this.z = z;
     }
     
     public Integer sq() {
-	return this.x * this.x;
+        return this.x * this.x;
     }
 }
 

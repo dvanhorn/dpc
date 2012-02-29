@@ -2,10 +2,10 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length
-				numerator denominator))
-	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/universe))
+                                numerator denominator))
+          (for-label 2htdp/image)
+          (for-label (only-in test-engine/racket-tests check-expect))
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval

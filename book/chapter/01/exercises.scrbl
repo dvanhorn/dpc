@@ -1,10 +1,10 @@
 #lang scribble/manual
 @(require scribble/eval
-	  class/utils
+          class/utils
           racket/sandbox
           (for-label (except-in class/0 check-expect))
-	  (for-label (only-in lang/htdp-intermediate-lambda check-expect))
-	  (for-label class/universe))
+          (for-label (only-in lang/htdp-intermediate-lambda check-expect))
+          (for-label class/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -77,18 +77,18 @@ numbers.)
    `(begin 
       (define-struct cpx (real imag))
       (define (liftb f) 
-	(lambda (x y) 
-	  (f (to-number x) (to-number y))))
+        (lambda (x y) 
+          (f (to-number x) (to-number y))))
       (define (lift2 f)
-	(lambda (x y)
-	  (from-number (f (to-number x) (to-number y)))))
+        (lambda (x y)
+          (from-number (f (to-number x) (to-number y)))))
       (define (lift1 f)
-	(lambda (x)
-	  (from-number (f (to-number x)))))
+        (lambda (x)
+          (from-number (f (to-number x)))))
       (define (from-number n)
-	(make-cpx (real-part n) (imag-part n)))
+        (make-cpx (real-part n) (imag-part n)))
       (define (to-number c)
-	(+ (cpx-real c) (* +1i (cpx-imag c))))
+        (+ (cpx-real c) (* +1i (cpx-imag c))))
       (define =? (liftb =))
       (define plus (lift2 +))
       (define minus (lift2 -))
@@ -102,33 +102,33 @@ numbers.)
       (define/private (n) (+ (field real) (* +i (field imag))))
       
       (define (=? c)
-	(= (n) (send c to-number)))
+        (= (n) (send c to-number)))
       
       (define (plus c)
-	(from-number (+ (n) (send c to-number))))
+        (from-number (+ (n) (send c to-number))))
       
       (define (minus c)
-	(from-number (- (n) (send c to-number))))
+        (from-number (- (n) (send c to-number))))
       
       (define (times c)
-	(from-number (* (n) (send c to-number))))
+        (from-number (* (n) (send c to-number))))
       
       (define (div c)
-	(from-number (/ (n) (send c to-number))))
+        (from-number (/ (n) (send c to-number))))
       
       (define (sq)
-	(from-number (sqr (n))))
+        (from-number (sqr (n))))
       
       (define (sqroot)
-	(from-number (sqrt (n))))
+        (from-number (sqrt (n))))
       
       (define (mag)
-	(magnitude (n)))
+        (magnitude (n)))
       
       (define/private (from-number c)
-	(new complex% 
-	     (real-part c)
-	     (imag-part c)))
+        (new complex% 
+             (real-part c)
+             (imag-part c)))
       
       (define (to-number) (n)))))
 
@@ -191,13 +191,13 @@ Add accessor methods for extracting the @racket[real] and
   (send c0+0 =? c0+0)
   (send c0+0 =? c2+3)
   (send (send c2+3 plus c4+5) =?
-	(new complex% 6 8))
+        (new complex% 6 8))
   (send (send c2+3 minus c4+5) =?
-	(new complex% -2 -2))
+        (new complex% -2 -2))
   (send (send c2+3 times c4+5) =?
-	(new complex% -7 22))
+        (new complex% -7 22))
   (send (send c2+3 div c4+5) =?
-	(new complex% 23/41 2/41))
+        (new complex% 23/41 2/41))
   (send (new complex% 3 4) mag)
 )
 

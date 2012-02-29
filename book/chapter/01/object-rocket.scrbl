@@ -1,10 +1,10 @@
 #lang scribble/manual
 @(require scribble/eval
-	  class/utils
+          class/utils
           racket/sandbox
           (for-label (except-in class/0 check-expect))
-	  (for-label (only-in lang/htdp-intermediate-lambda check-expect))
-	  (for-label class/universe))
+          (for-label (only-in lang/htdp-intermediate-lambda check-expect))
+          (for-label class/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -27,8 +27,8 @@
        (fields dist)
        ;; next : -> Rocket
        (define (next)
-	 (new rocket% 
-	   (+ (send this dist) DELTA)))
+         (new rocket% 
+           (+ (send this dist) DELTA)))
        
     ;; render : -> Scene
     (define (render)
@@ -38,9 +38,9 @@
     ;; Draw this rocket on to scene.
     (define (draw-on scn)
       (overlay/align/offset "center" "bottom" 
-			    ROCKET 
-			    0 (add1 (send this dist))
-			    scn)))))    
+                            ROCKET 
+                            0 (add1 (send this dist))
+                            scn)))))    
 
 @title{Object-oriented rocket}
 
@@ -216,15 +216,15 @@ can now formulate test cases:
   ;; next : -> Rocket
   ;; Compute next position of this rocket after one tick of time.
   (check-expect (send (new rocket% 10) next)
-		(new rocket% (+ 10 DELTA)))
+                (new rocket% (+ 10 DELTA)))
   (define (next) ...)
   
   ;; render : -> Scene
   (check-expect (send (new rocket% 0) render)
-		(overlay/align/offset "center" "bottom"
-				      ROCKET
-				      0 1
-				      MT-SCENE))
+                (overlay/align/offset "center" "bottom"
+                                      ROCKET
+                                      0 1
+                                      MT-SCENE))
   (define (render) ...)
  }}
 
@@ -249,9 +249,9 @@ method:
   ;; Draw this rocket on to scene.
   (define (draw-on scn)
     (overlay/align/offset "center" "bottom" 
-			  ROCKET 
-			  0 (add1 (send this dist))
-			  scn))
+                          ROCKET 
+                          0 (add1 (send this dist))
+                          scn))
 }}
 
 At this point, we can construct @racket[rocket%] objects and invoke
@@ -277,8 +277,8 @@ objects that is of the generic form of a @|big-bang-id| animation:
 @#reader scribble/comment-reader
 (racketblock
 (#,big-bang-id <world0>           ; World
-	  (on-tick <tick>)   ; World -> World
-	  (to-draw <draw>))  ; World -> Scene
+          (on-tick <tick>)   ; World -> World
+          (to-draw <draw>))  ; World -> Scene
 )
 
 We can again define a world as a rocket:
@@ -296,8 +296,8 @@ given rocket:
 (racketblock
 (require 2htdp/universe)
 (#,big-bang-id (new rocket% 0)
-	  (on-tick (λ (r) (send r next)))
-	  (to-draw (λ (r) (send r render))))
+          (on-tick (λ (r) (send r next)))
+          (to-draw (λ (r) (send r render))))
 )
 
 This creates the desired animation, but something should stick out
@@ -382,17 +382,17 @@ Our complete program is:
     ;; next : -> Rocket
     ;; Compute next position of this rocket after one tick of time.
     (check-expect (send (new rocket% 10) next)
-		  (new rocket% (+ 10 DELTA)))
+                  (new rocket% (+ 10 DELTA)))
     (define (next) 
       (new rocket% (+ (send this dist) DELTA)))
     
     ;; render : -> Scene
     ;; Render this rocket as a scene.
     (check-expect (send (new rocket% 0) render)
-		  (overlay/align/offset "center" "bottom"
-					ROCKET
-					0 1
-					MT-SCENE))
+                  (overlay/align/offset "center" "bottom"
+                                        ROCKET
+                                        0 1
+                                        MT-SCENE))
     (define (render) 
       (send this draw-on MT-SCENE))
 
@@ -400,9 +400,9 @@ Our complete program is:
     ;; Draw this rocket on to scene.
     (define (draw-on scn)
       (overlay/align/offset "center" "bottom"
-			    ROCKET
-			    0 (add1 (send this dist))
-			    scn))    
+                            ROCKET
+                            0 (add1 (send this dist))
+                            scn))    
 
     ;; on-tick : -> World
     ;; Tick this world

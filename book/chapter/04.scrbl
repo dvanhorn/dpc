@@ -2,8 +2,8 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 define-struct ... length))
-	  (for-label 2htdp/image)
-	  (for-label class/universe))
+          (for-label 2htdp/image)
+          (for-label class/universe))
 
 @title[#:tag "chapter:delegation"]{Abstraction via Delegation}
 
@@ -18,11 +18,11 @@ Course staff solution for regular zombie game:
 (racketblock
  (define/public (teleport)
    (new world%
-	(new player%
-	     (random WIDTH)
-	     (random HEIGHT))
-	(field zombies)
-	(field mouse)))
+        (new player%
+             (random WIDTH)
+             (random HEIGHT))
+        (field zombies)
+        (field mouse)))
 )
 }
 
@@ -36,8 +36,8 @@ Bug (pair0MN):
 (racketblock
  (define/public (teleport)
    (new player%
-	(* -1 (random WORLD-SIZE))
-	(* -1 (random WORLD-SIZE))))
+        (* -1 (random WORLD-SIZE))
+        (* -1 (random WORLD-SIZE))))
 )
 }
 
@@ -55,9 +55,9 @@ Lack of abstraction (pair0PQ):
  ;; change the location of this player to the given location
  (define/public (warp x y)
    (new modulo-player%
-	(field dest-x)
-	(field dest-y)
-	x y))
+        (field dest-x)
+        (field dest-y)
+        x y))
 )
 }
 
@@ -68,9 +68,9 @@ Lack of abstraction (pair0PQ):
  ;; change the location of this player to the given location
  (define/public (warp x y)
    (new player%
-	(field dest-x)
-	(field dest-y)
-	x y))
+        (field dest-x)
+        (field dest-y)
+        x y))
 )
 }
 
@@ -216,7 +216,7 @@ first for the recursive union implementation:
 
     (define/public (foldr c b)
       (c (field first)
-	 (send (field rest) foldr c b))))
+         (send (field rest) foldr c b))))
 
   (define-class empty%
     
@@ -278,9 +278,9 @@ And like this for @r[cons%]:
 
 
 @margin-note{In fact, all of
-		them---but
-		that's a topic
-		for another day.}
+                them---but
+                that's a topic
+                for another day.}
 Before we can abstract this method, we must make them all look the
 same. Fortunately, many list operations
 can be expressed using just a few simple operations, of which the most

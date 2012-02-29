@@ -2,10 +2,10 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length
-				numerator denominator))
-	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/universe))
+                                numerator denominator))
+          (for-label 2htdp/image)
+          (for-label (only-in test-engine/racket-tests check-expect))
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -69,16 +69,16 @@ class Point {
     Integer y;
 
     public Point(Integer x, Integer y) {
-	this.x = x;
-	this.y = y;
+        this.x = x;
+        this.y = y;
     }
 
     public Point mv(Integer dx, Integer dy) {
-	return new Point(this.x + dx, this.y + dy);
+        return new Point(this.x + dx, this.y + dy);
     }
 
     public Point double_move(Integer dxy) {
-	return this.mv(dxy,dxy);
+        return this.mv(dxy,dxy);
     }
 
 }
@@ -87,12 +87,12 @@ class CPoint extends Point {
     String color;
     
     public CPoint(String color, Integer x, Integer y) {
-	super(x,y);
-	this.color = color;
+        super(x,y);
+        this.color = color;
     }
 
     public CPoint mv(Integer dx, Integer dy) {
-	return new CPoint(this.color, this.x-dx, this.y-dy);
+        return new CPoint(this.color, this.x-dx, this.y-dy);
     }
     
 }

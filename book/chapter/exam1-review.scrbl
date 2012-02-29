@@ -2,10 +2,10 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length
-				numerator denominator))
-	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/universe))
+                                numerator denominator))
+          (for-label 2htdp/image)
+          (for-label (only-in test-engine/racket-tests check-expect))
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -52,7 +52,7 @@ Let's write the u% class:
   (fields left right) ;; not min/max
   (define/public (in-range? n)
     (or (send (field left) in-range? n)
-	(send (field right) in-range? n))))
+        (send (field right) in-range? n))))
 
 How would we write @r[union]  in @r[co]?
 
@@ -215,34 +215,34 @@ that is with (f% ...), which requires a function as input:
 
 (define/public (compose g)
   (f% (lambda (x)
-	... (field f) 
-	... (g . apply ...)  ...)))
+        ... (field f) 
+        ... (g . apply ...)  ...)))
 
 Now our inventory is extended:
 
 (define/public (compose g)
   (f% (lambda (x)
-	... x ;; contract: X
-	... (field f) ;; contract : X -> Y
-	... (g . apply ...)  ;; contract : Y -> Z
-	...)))
+        ... x ;; contract: X
+        ... (field f) ;; contract : X -> Y
+        ... (g . apply ...)  ;; contract : Y -> Z
+        ...)))
 
 (define/public (compose g)
   (f% (lambda (x)
-	(g . apply ((field f) x)))))
+        (g . apply ((field f) x)))))
 
 
 Possible mistakes:
 
 (define/public (compose g)
   (f% (lambda (x)
-	(g ((field f) x)))))
+        (g ((field f) x)))))
 
 g is not a function, this doesn't work
 
 (define/public (compose g)
   (f% (lambda (x)
-	(g . f ((field f) x)))))
+        (g . f ((field f) x)))))
 
 f is not in the [IFun Y Z] interface, this doesn't work
 
@@ -308,9 +308,9 @@ But what if the queue is empty?  We just broke the invariant.  Whoops.
 
 (define/public (enq x)
   (cond [(emp?)
-	 (q% (list x) empty)]
-	[else
-	 (q% (field front) (cons x (field rear)))]))
+         (q% (list x) empty)]
+        [else
+         (q% (field front) (cons x (field rear)))]))
 
 Now we maintain the invariant in both cases.
 
@@ -331,10 +331,10 @@ We need to distinguish the two possible cases:
 
 (define/public (deq)
   (cond [(empty? (rest (field front)))
-	 (q% (reverse (field rear))
-	     empty)]
-	[else (q% (rest (field front))
-		  (field rear))]))
+         (q% (reverse (field rear))
+             empty)]
+        [else (q% (rest (field front))
+                  (field rear))]))
 part 2:
 
 (q% '(x y z) '(p q r)) has the same interp as
@@ -357,8 +357,8 @@ Write a constructor.
 In the q% class:
 (constructor (f r)
    (cond [(empty? f)
-	  (fields (reverse r) empty)]
-	 [else (fields f r)]))
+          (fields (reverse r) empty)]
+         [else (fields f r)]))
 
 Various other possibilites.  
 
@@ -429,9 +429,9 @@ multiple keys and values.
 (define (2-set/lookup? d n s m t)
   (and 
    (string=? (d . set n s . set m t . lookup n)
-	     s)
+             s)
    (string=? (d . set n s . set m t . lookup m)
-	     t)))
+             t)))
 
 Here's an example where this works:
 

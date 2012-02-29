@@ -1,9 +1,9 @@
 #lang scribble/manual
 @(require scribble/eval
-	  class/utils
+          class/utils
           (for-label (except-in class/0 check-expect))
-	  (for-label (only-in lang/htdp-intermediate-lambda check-expect))
-	  (for-label class/universe))
+          (for-label (only-in lang/htdp-intermediate-lambda check-expect))
+          (for-label class/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -44,9 +44,9 @@
    ;; Draw this rocket on to scene.
    (define (draw-on scn)
      (overlay/align/offset "center" "bottom"
-			   ROCKET
-			   0 (add1 (send this dist))
-			   scn)))
+                           ROCKET
+                           0 (add1 (send this dist))
+                           scn)))
 )
 
 @(the-eval
@@ -56,7 +56,7 @@
    ;; Compute next position of this descending rocket after one tick of time.
    (define (next)
      (cond [(< (send this dist) DELTA-Y) (new takeoff% 0)]
-	   [else (new landing% (- (send this dist) DELTA-Y))]))
+           [else (new landing% (- (send this dist) DELTA-Y))]))
 
    ;; render : -> Scene
    ;; Render this rocket as a scene.
@@ -67,9 +67,9 @@
    ;; Draw this rocket on to scene.
    (define (draw-on scn)
      (overlay/align/offset "center" "bottom"
-			   ROCKET
-			   0 (add1 (send this dist))
-			   scn)))
+                           ROCKET
+                           0 (add1 (send this dist))
+                           scn)))
 )
 
 @(the-eval
@@ -92,17 +92,17 @@
   ;; Draw this satellite on scene.
   (define (draw-on scn)
     (send this draw-on/offset -1
-	  (send this draw-on/offset 0
-		(send this draw-on/offset 1
-		      MT-SCENE))))
+          (send this draw-on/offset 0
+                (send this draw-on/offset 1
+                      MT-SCENE))))
 
   ;; draw-on/offset : Number Scene -> Scene
   ;; Draw this satellite on scene with given day offset.
   (define (draw-on/offset d scn)
     (place-image SATELLITE
-		 (+ (send this dist) (* d WIDTH))
-		 SATELLITE-Y
-		 scn)))
+                 (+ (send this dist) (* d WIDTH))
+                 SATELLITE-Y
+                 scn)))
 )
 
 @(the-eval
@@ -110,13 +110,13 @@
   (fields rocket satellite)
   (define (on-tick)
     (new space% 
-	 (send (send this rocket) next)
-	 (send (send this satellite) next)))
+         (send (send this rocket) next)
+         (send (send this satellite) next)))
   
   (define (to-draw)
     (send (send this rocket) draw-on
-	  (send (send this satellite) draw-on
-		MT-SCENE)))))
+          (send (send this satellite) draw-on
+                MT-SCENE)))))
 
 
 @title{Revisiting the Rocket}
@@ -367,20 +367,20 @@ satellite and implement the methods needed to make an animation:
 
   (define (on-tick)
     (new space% 
-	 (send (send this rocket) next)
-	 (send (send this satellite) next)))
+         (send (send this rocket) next)
+         (send (send this satellite) next)))
   
   (define (to-draw)
     (send (send this rocket) draw-on
-	  (send (send this satellite) draw-on
-		MT-SCENE))))
+          (send (send this satellite) draw-on
+                MT-SCENE))))
 
 }
 
 @examples[#:eval the-eval
 (send (new space% 
-	   (new landing% (quotient HEIGHT 2))
-	   (new satellite% (quotient WIDTH 3)))
+           (new landing% (quotient HEIGHT 2))
+           (new satellite% (quotient WIDTH 3)))
       to-draw)
 ]
 
@@ -389,7 +389,7 @@ with an initial @racket[space%] object:
 
 @classblock{
 (big-bang (new space%
-	       (new landing% HEIGHT)
+               (new landing% HEIGHT)
                (new satellite% 0)))
 }
 

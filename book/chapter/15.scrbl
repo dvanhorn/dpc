@@ -2,10 +2,10 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length
-				numerator denominator))
-	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/universe))
+                                numerator denominator))
+          (for-label 2htdp/image)
+          (for-label (only-in test-engine/racket-tests check-expect))
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -41,7 +41,7 @@ one identical twin, the other one doesn't get a black eye.
   ;; is the given posn the same as this one?
   (define/public (=? p)
     (and (= (field x) (send p x))
-	 (= (field y) (send p y))))
+         (= (field y) (send p y))))
 
   (check-expect (send (posn% 3 4) =? (posn% 3 4)) true)
   (check-expect (send (posn% 3 4) =? (posn% 3 5)) false)
@@ -96,8 +96,8 @@ Now to implement equality for @r[cons%]:
 @codeblock{
 (define/public (=? lop)
   (and (not (send lop empty?)
-	    (send (field first) =? (send lop first))
-	    (send (field rest) =? (send lop rest)))))
+            (send (field first) =? (send lop first))
+            (send (field rest) =? (send lop rest)))))
 }
 
 Note that we're using the @r[=?] method to compare the @r[Posn]s in
@@ -118,12 +118,12 @@ the list.
 (define-class posn2%
   (fields ls)
   (constructor (x y)
-	       (fields (list x y)))
+               (fields (list x y)))
   (define/public (x) (first (field ls)))
   (define/public (y) (second (field ls)))
   (define/public (=? p)
     (and (= (x) (send p x))
-	 (= (y) (send p y)))))
+         (= (y) (send p y)))))
 }
 
 Now we can compare the two different kinds of posns and everything

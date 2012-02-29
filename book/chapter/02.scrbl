@@ -1,10 +1,10 @@
 #lang scribble/manual
 @(require scribble/eval
-	  class/utils
+          class/utils
           racket/sandbox
-  	  (for-label (only-in lang/htdp-intermediate-lambda define-struct ... check-expect))
+          (for-label (only-in lang/htdp-intermediate-lambda define-struct ... check-expect))
           (for-label (except-in class/0 define-struct ... check-expect))
-	  (for-label class/universe))
+          (for-label class/universe))
 
 @(define the-eval
   (let ([the-eval (make-base-eval)])
@@ -92,8 +92,8 @@ functions on @tt{Light}s:
  ;; light-function : Light -> ???
  (define (light-function l)
    (cond [(symbol=? 'Red l) ...]
-	 [(symbol=? 'Green l) ...]
-	 [(symbol=? 'Yellow l) ...]))
+         [(symbol=? 'Green l) ...]
+         [(symbol=? 'Yellow l) ...]))
  )
 
 Finally, we can define functions over @tt{Light}s, following the template.  
@@ -107,8 +107,8 @@ Finally, we can define functions over @tt{Light}s, following the template.
  (check-expect (next 'Yellow) 'Red)
  (define (next l)
    (cond [(symbol=? 'Red l) 'Green]
-	 [(symbol=? 'Green l) 'Yellow]
-	 [(symbol=? 'Yellow l) 'Red])))
+         [(symbol=? 'Green l) 'Yellow]
+         [(symbol=? 'Yellow l) 'Red])))
 
 That's all well and good for a function-oriented design, but we want
 to design this using classes, methods, and objects.
@@ -174,10 +174,10 @@ infinite families of data.  One example is @emph{binary trees}, which can contai
 
 @verbatim[#:indent 2]{
           7         6              8  
-     	           / \            / \ 
+                   / \            / \ 
                   8   4          2   1
-	             / \ 
-	            3   2}
+                     / \ 
+                    3   2}
 
 How would we represent this with classes and objects?
 
@@ -200,13 +200,13 @@ class/0
 
 (define ex1 (new leaf% 7))
 (define ex2 (new node% 6
-		 (new leaf% 8)
-		 (new node% 4
-		      (new leaf% 3)
-		      (new leaf% 2))))
+                 (new leaf% 8)
+                 (new node% 4
+                      (new leaf% 3)
+                      (new leaf% 2))))
 (define ex3 (new node% 8
-		 (new leaf% 2)
-		 (new leaf% 1)))
+                 (new leaf% 2)
+                 (new leaf% 1)))
 )
 
 We then want to design a method @racket[count] which produces the
@@ -282,9 +282,9 @@ the top.  Here is a straightforward implementation for @racket[leaf%]:
   ;; double this leaf and put the number on top
   (define (double n)
     (new node%
-	 n
-	 (new leaf% (send this number))
-	 (new leaf% (send this number))))))
+         n
+         (new leaf% (send this number))
+         (new leaf% (send this number))))))
 
 Note that @racket[(new leaf% (send this number))] is just constructing a
 new @racket[leaf%] object just like the one we started with.
@@ -354,22 +354,22 @@ class/0
 
 (define ex1 (new leaf% 7))
 (define ex2 (new node% 6
-		 (new leaf% 8)
-		 (new node% 4
-		      (new leaf% 3)
-		      (new leaf% 2))))
+                 (new leaf% 8)
+                 (new node% 4
+                      (new leaf% 3)
+                      (new leaf% 2))))
 (define ex3 (new node% 8
-		 (new leaf% 2)
-		 (new leaf% 1)))
+                 (new leaf% 2)
+                 (new leaf% 1)))
 
 (check-expect (send ex1 count) 1)
 (check-expect (send ex2 count) 5)
 (check-expect (send ex3 count) 3)
 
 (check-expect (send ex1 double 5)
-	      (new node% 5 ex1 ex1))
+              (new node% 5 ex1 ex1))
 (check-expect (send ex3 double 0)
-	      (new node% 0 ex3 ex3)))
+              (new node% 0 ex3 ex3)))
 
 @include-section{02/more-rocket.scrbl}
 @include-section{02/exercises.scrbl}

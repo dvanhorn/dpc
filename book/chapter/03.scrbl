@@ -2,8 +2,8 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda check-expect define-struct ...))
           (for-label (except-in class/0 define-struct ... length check-expect))
-	  (for-label 2htdp/image)
-	  (for-label class/universe))
+          (for-label 2htdp/image)
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -170,11 +170,11 @@ the @tt{ILight} interface:
    ;; Draw this light.
    (define (draw)
      (cond [(= (send this n) 0)
-	    (circle LIGHT-RADIUS "solid" "green")]
-	   [(= (send this n) 1)
-	    (circle LIGHT-RADIUS "solid" "yellow")]
-	   [else
-	    (circle LIGHT-RADIUS "solid" "red")]))))
+            (circle LIGHT-RADIUS "solid" "green")]
+           [(= (send this n) 1)
+            (circle LIGHT-RADIUS "solid" "yellow")]
+           [else
+            (circle LIGHT-RADIUS "solid" "red")]))))
 
 Now clearly a @tt{ModLight} is never a @tt{Light}, but every
 @tt{ModLight} is an @tt{ILight}.  Moreover, any program that is
@@ -253,8 +253,8 @@ now):
  (check-expect (next 'Yellow) 'Red)
  (define (next l)
    (cond [(symbol=? 'Red l) 'Green]
-	 [(symbol=? 'Green l) 'Yellow]
-	 [(symbol=? 'Yellow l) 'Red])))
+         [(symbol=? 'Green l) 'Yellow]
+         [(symbol=? 'Yellow l) 'Red])))
 
 Now imagine if we wanted to add a new kind of light---perhaps to
 represent a blinking yellow light.  For such lights, let's assume
@@ -294,7 +294,7 @@ class that implements @racket[next]:
    ;; next : -> ILight
    ;; Next light after this blinking yellow light.
    (check-expect (send (new blinking-yellow%) next)
-		 (new blinking-yellow%))
+                 (new blinking-yellow%))
    (define (next) this))
 )
 

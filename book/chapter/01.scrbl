@@ -1,9 +1,9 @@
 #lang scribble/manual
 @(require scribble/eval
-	  class/utils
+          class/utils
           (for-label (except-in class/0 check-expect))
-	  (for-label (only-in lang/htdp-intermediate-lambda check-expect))
-	  (for-label class/universe))
+          (for-label (only-in lang/htdp-intermediate-lambda check-expect))
+          (for-label class/universe))
 
 @title[#:tag "Object_=_Data_+_Function"]{Objects = Data + Function}
 

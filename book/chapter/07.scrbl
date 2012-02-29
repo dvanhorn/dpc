@@ -2,8 +2,8 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect check-within ...))
           (for-label (except-in class/1 define-struct ... length check-expect check-within))
-	  (for-label 2htdp/image)
-	  (for-label class/universe))
+          (for-label 2htdp/image)
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -63,7 +63,7 @@ something like this:
 ;; Double the given tree and put the number on top.
 (define (double bt n)
   (cond [(leaf? bt) (make-node n bt bt)]
-	[(node? bt) (make-node n bt bt)]))
+        [(node? bt) (make-node n bt bt)]))
 }
 
 We would arrive at this code by developing the @racket[double]
@@ -143,7 +143,7 @@ difference is the addition of the @racket[(super _class-name)] form.
        ;; -> BT
        ;; Double this tree and put the number on top.
        (define (double n)
-	 (new node% n this this)))
+         (new node% n this this)))
 
      (define-class node%
        (super bt%)
@@ -151,9 +151,9 @@ difference is the addition of the @racket[(super _class-name)] form.
        ;; -> Number
        ;; count the number of numbers in this node
        (define (count)
-	 (+ 1
-	    (send (send this left) count)
-	    (send (send this right) count))))
+         (+ 1
+            (send (send this left) count)
+            (send (send this right) count))))
 
      (define-class leaf%
        (super bt%)
@@ -161,7 +161,7 @@ difference is the addition of the @racket[(super _class-name)] form.
        ;; -> Number
        ;; count the number of numbers in this leaf
        (define (count)
-	 1))))
+         1))))
 
 @(the-eval '(require 'm))
 
@@ -273,7 +273,7 @@ right subtree, and @emph{then} the number at that node:
        ;; -> BT
        ;; Double this tree and put the number on top.
        (define (double n)
-	 (new node% n this this)))
+         (new node% n this this)))
 
      (define-class node%
        (super bt%)
@@ -281,16 +281,16 @@ right subtree, and @emph{then} the number at that node:
        ;; -> Number
        ;; count the number of numbers in this node
        (define (count)
-	 (+ 1
-	    (send (send this left) count)
-	    (send (send this right) count))))
+         (+ 1
+            (send (send this left) count)
+            (send (send this right) count))))
 
      (define-class leaf%
        (super bt%)
        ;; -> Number
        ;; count the number of numbers in this leaf
        (define (count)
-	 1))))
+         1))))
 
 @(the-eval '(require 'n))
 
@@ -421,9 +421,9 @@ the scene at the appropriate position:
   ;; Draw this circle on the scene.
   (define (draw-on scn)
     (place-image (circle (this . radius) "solid" "black")
-		 (this . x)
-		 (this . y)
-		 scn)))
+                 (this . x)
+                 (this . y)
+                 scn)))
 
 (define-class rect%
   (super shape%)
@@ -439,9 +439,9 @@ the scene at the appropriate position:
   ;; Draw this rectangle on the scene.
   (define (draw-on scn)
     (place-image (rectangle (this . width) (this . height) "solid" "black")
-		 (this . x)
-		 (this . y)
-		 scn)))
+                 (this . x)
+                 (this . y)
+                 scn)))
 }
 
 @(the-eval
@@ -455,10 +455,10 @@ the scene at the appropriate position:
        ;; Scene -> Scene
        ;; Draw this shape on the scene.
        (define (draw-on scn)
-	 (place-image (send this img)
-		      (send this x)
-		      (send this y)
-		      scn)))
+         (place-image (send this img)
+                      (send this x)
+                      (send this y)
+                      scn)))
 
      (define-class circ%
        (super shape%)
@@ -466,12 +466,12 @@ the scene at the appropriate position:
        
        ;; -> +Real
        (define (area)
-	 (* pi (sqr (send this radius))))
+         (* pi (sqr (send this radius))))
        
        ;; -> Image
        ;; Render this circle as an image.
        (define (img)
-	 (circle (send this radius) "solid" "black")))
+         (circle (send this radius) "solid" "black")))
 
      (define-class rect%
        (super shape%)
@@ -480,13 +480,13 @@ the scene at the appropriate position:
        ;; -> +Real
        ;; Compute the area of this rectangle.
        (define (area)
-	 (* (send this width)
-	    (send this height)))
+         (* (send this width)
+            (send this height)))
        
        ;; -> Image
        ;; Render this rectangle as an image.
        (define (img)
-	 (rectangle (send this width) (send this height) "solid" "black")))))
+         (rectangle (send this width) (send this height) "solid" "black")))))
 
 @(the-eval '(require 'p))
 
@@ -519,9 +519,9 @@ now be lifted to the super class:
   ;; Draw this shape on the scene.
   (define (draw-on scn)
     (place-image (img)
-		 (send this x)
-		 (send this y)
-		 scn)))
+                 (send this x)
+                 (send this y)
+                 scn)))
 }
 
 But there is a problem with this code.  While this code makes sense
@@ -559,9 +559,9 @@ We arrive at the following final code:
   ;; Draw this shape on the scene.
   (define (draw-on scn)
     (place-image (send this img)
-		 (send this x)
-		 (send this y)
-		 scn)))
+                 (send this x)
+                 (send this y)
+                 scn)))
 
 (define-class circ%
   (super shape%)
@@ -593,20 +593,20 @@ We arrive at the following final code:
     (rectangle (send this width) (send this height) "solid" "black")))
 
 (check-expect (send (new rect% 10 20 0 0) area)
-	      200)
+              200)
 (check-within (send (new circ% 10 0 0) area) 
-	      (* pi 100) 
-	      0.0001)
+              (* pi 100) 
+              0.0001)
 (check-expect (send (new rect% 5 10 10 20) draw-on 
-		    (empty-scene 40 40))
-	      (place-image (rectangle 5 10 "solid" "black") 
-			   10 20
-			   (empty-scene 40 40)))
+                    (empty-scene 40 40))
+              (place-image (rectangle 5 10 "solid" "black") 
+                           10 20
+                           (empty-scene 40 40)))
 (check-expect (send (new circ% 4 10 20) draw-on 
-		    (empty-scene 40 40))
-	      (place-image (circle 4 "solid" "black")
-			   10 20
-			   (empty-scene 40 40)))
+                    (empty-scene 40 40))
+              (place-image (circle 4 "solid" "black")
+                           10 20
+                           (empty-scene 40 40)))
 }
 
 @section{Revisiting the Rocket with Inheritance}
@@ -651,9 +651,9 @@ lift the @racket[dist] field to @racket[rocket%]:
   ;; Draw this rocket on to scene.
   (define (draw-on scn)
     (overlay/align/offset "center" "bottom"
-			  ROCKET
-			  0 (add1 (this . dist))
-			  scn)))
+                          ROCKET
+                          0 (add1 (this . dist))
+                          scn)))
 }
 
 To complete the revised program, the @racket[landing%] and

@@ -2,9 +2,9 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/0 define-struct ... length quote))
-	  (for-label 2htdp/image)          
+          (for-label 2htdp/image)          
           (for-label (only-in lang/htdp-intermediate quote))
-	  (for-label class/universe))
+          (for-label class/universe))
 
 @title{Universe}
 
@@ -90,7 +90,7 @@ communicate with any server, it just counts:
     (new cw% (add1 (send this n))))   
   (define (to-draw)
     (overlay (text (number->string (send this n)) 40 "red")
-	     (empty-scene WIDTH HEIGHT))))
+             (empty-scene WIDTH HEIGHT))))
   
 ;; Run, program, run!
 (big-bang (new cw% 0))
@@ -201,10 +201,10 @@ Our complete client is:
   (define (tick-rate) 1)
   (define (on-tick)
     (make-package (new cw% (add1 (send this n)))
-		  (add1 (send this n))))
+                  (add1 (send this n))))
   (define (to-draw)
     (overlay (text (number->string (send this n)) 40 "red")
-	     (empty-scene WIDTH HEIGHT))))
+             (empty-scene WIDTH HEIGHT))))
   
 ;; Run, program, run!
 (big-bang (new cw% 0))
@@ -491,14 +491,14 @@ server.
   (define (on-receive msg) (new wait-next% msg))
   (define (to-draw)
     (overlay (text "Waiting" 40 "red")
-	     (empty-scene WIDTH HEIGHT))))
+             (empty-scene WIDTH HEIGHT))))
   
 (define-class wait-next%
   (fields n)
   (define (on-receive msg) (new wait-next% msg))
   (define (to-draw)
     (overlay (text (number->string (send this n)) 40 "red")
-	     (empty-scene WIDTH HEIGHT))))
+             (empty-scene WIDTH HEIGHT))))
 
 ;; Run, program, run!
 (big-bang (new wait-first%))
@@ -676,14 +676,14 @@ Here's the server:
   
   (define (on-msg iw m)
     (make-bundle this 
-		 (list (make-mail iw (respond m (send this the-number))))
-		 empty)))
+                 (list (make-mail iw (respond m (send this the-number))))
+                 empty)))
 
 ;; Number Number -> String
 (define (respond guess number)
   (cond [(< guess number) "too small"]
-	[(> guess number) "too big"]
-	[else "just right"]))
+        [(> guess number) "too big"]
+        [else "just right"]))
 
   ;; the universe is thinking of 2.
   (universe (new universe% 2))
@@ -708,15 +708,15 @@ Here is the client:
   
   (define (to-draw)
     (overlay (text (send this status)
-		   40
-		   "red")
-	     (empty-scene 300 100)))
+                   40
+                   "red")
+             (empty-scene 300 100)))
   
   (define (on-key k)
     (local [(define n (string->number k))]
       (if (number? n)
-	  (make-package this n)
-	  this)))                    
+          (make-package this n)
+          this)))                    
   
   (define (register) LOCALHOST))
 
@@ -746,57 +746,57 @@ Here is the server:
 ;; A Universe is a (new universe% [U #f Number] [U #f IWorld] [U #f IWorld]).
 (define-class universe%
   (fields number
-	  picker
-	  guesser)
+          picker
+          guesser)
   
   ;; is the given world the picker?
   (define (picker? iw)
     (and (iworld? (send this picker))
-	 (iworld=? iw (send this picker))))
+         (iworld=? iw (send this picker))))
   
   ;; is the given world the guesser?
   (define (guesser? iw)
     (and (iworld? (send this guesser))
-	 (iworld=? iw (send this guesser))))
+         (iworld=? iw (send this guesser))))
   
   (define (on-new iw)
     (cond [(false? (send this picker))
-	   (make-bundle
-	    (new universe% false iw false)
-	    (list (make-mail iw "pick a number"))
-	    empty)]          
-	  [(false? (send this guesser))
-	   (make-bundle
-	    (new universe% (send this number) (send this picker) iw)
-	    empty
-	    empty)]          
-	  [else
-	   (make-bundle this empty (list iw))]))
+           (make-bundle
+            (new universe% false iw false)
+            (list (make-mail iw "pick a number"))
+            empty)]          
+          [(false? (send this guesser))
+           (make-bundle
+            (new universe% (send this number) (send this picker) iw)
+            empty
+            empty)]          
+          [else
+           (make-bundle this empty (list iw))]))
   
   (define (on-msg iw m)
     (cond [(and (picker? iw)
-		(false? (send this number)))           
-	   (make-bundle
-	    (new universe% m (send this picker) (send this guesser))
-	    empty
-	    empty)]
-	  [(picker? iw) ;; already picked a number
-	   (make-bundle this empty empty)]
-	  [(and (guesser? iw)
-		(number? (send this number)))
-	   (make-bundle this 
-			(list (make-mail iw (respond m (send this number))))
-			empty)]
-	  [(guesser? iw)
-	   (make-bundle this
-			(list (make-mail iw "no number"))
-			empty)])))
+                (false? (send this number)))           
+           (make-bundle
+            (new universe% m (send this picker) (send this guesser))
+            empty
+            empty)]
+          [(picker? iw) ;; already picked a number
+           (make-bundle this empty empty)]
+          [(and (guesser? iw)
+                (number? (send this number)))
+           (make-bundle this 
+                        (list (make-mail iw (respond m (send this number))))
+                        empty)]
+          [(guesser? iw)
+           (make-bundle this
+                        (list (make-mail iw "no number"))
+                        empty)])))
 
 ;; Number Number -> String
 (define (respond guess number)
   (cond [(< guess number) "too small"]
-	[(> guess number) "too big"]
-	[else "just right"]))
+        [(> guess number) "too big"]
+        [else "just right"]))
 
 (universe (new universe% false false false))
 }

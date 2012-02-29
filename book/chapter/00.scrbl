@@ -2,7 +2,7 @@
 @(require scribble/eval
           scriblib/figure
           scriblib/footnote
-	  class/utils)
+          class/utils)
 
 @title[#:style 'unnumbered]{Preface}
 

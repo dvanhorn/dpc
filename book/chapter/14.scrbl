@@ -2,10 +2,10 @@
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct ...))
           (for-label (except-in class/1 check-expect define-struct ... length
-				numerator denominator))
-	  (for-label 2htdp/image)
-	  (for-label (only-in test-engine/racket-tests check-expect))
-	  (for-label class/universe))
+                                numerator denominator))
+          (for-label 2htdp/image)
+          (for-label (only-in test-engine/racket-tests check-expect))
+          (for-label class/universe))
 
 @(require scribble/eval racket/sandbox)
 @(define the-eval
@@ -53,10 +53,10 @@ This suggests the following implementation:
 Now our all of our tests pass.
 
 @(the-eval '(begin
-	      (define-class counter%
-		(fields called)
-		(define (m) (add1 (field called))))
-	      ))
+              (define-class counter%
+                (fields called)
+                (define (m) (add1 (field called))))
+              ))
 
 However, when we try our a few more examples, we see this:
 
@@ -168,15 +168,15 @@ We can now revise our defintion of @r[m] to
 @racketblock[
 (define/public (m)
   (begin (set-field! called (add1 (field called)))
-	 (add1 (field called))))]}
+         (add1 (field called))))]}
 
 Note that @r[set-field!] @emph{doesn't produce} a new version of the field,
 instead it @emph{changes} the field named @r[called] to something new.
 
 @margin-note{Question: How would we do something like this in a purely
-		       functional language? 
+                       functional language? 
 
-		       Answer: We would do something similar to the
+                       Answer: We would do something similar to the
 @r[make-r] approach presented above.  In
 @link["http://haskell.org"]{Haskell}, this approach is frequently
 used.}
@@ -294,7 +294,7 @@ Note that we don't need to produce any result at all.
        ;; Effect: increases the field amt by n
        ;; Purpose: add money to this account
        (define/public (deposit n)
-	 (set-field! amt (+ (field amt) n))))
+         (set-field! amt (+ (field amt) n))))
 
      ;; A Person is (person% String Account Number)
      (define-class person%
@@ -303,7 +303,7 @@ Note that we don't need to produce any result at all.
        ;; Deposit the appropriate amount
        ;; Effect: changes the the bank account amt
        (define/public (pay)
-	 (send (field bank) deposit (field paycheck))))))
+         (send (field bank) deposit (field paycheck))))))
 
 @(the-eval '(require 'a))
 
@@ -442,13 +442,13 @@ Now we change our example:
       (provide book% author% rose reign)
       ;; A Book is (book% String Author)
       (define-class book%
-	(fields title author))
+        (fields title author))
       
       ;; An Author is (author% String [Listof Book])
       (define-class author%
-	(fields name books)
-	(define/public (add-book b)
-	  (set-field! books (cons b (field books)))))
+        (fields name books)
+        (define/public (add-book b)
+          (set-field! books (cons b (field books)))))
 
       
       (define rose  (author% "Rose" empty))
