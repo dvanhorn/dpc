@@ -204,9 +204,11 @@ contract is interpreted with @tt{Y} replaced by @tt{String}:
 (eval:alts (ns #,dot map number->string) (send ns map number->string))]
 
 
-@section{Exercises}
+@section[#:tag "Exercises (Ch. 4)"]{Exercises}
 
-@subsection{Parametric lists}
+@subsection{Parametric Lists}
+
+@margin-note{@secref{Parametric_Lists_solution}}
 
 Design an implementation of the @tt{[List X]} interface given in this
 chapter.

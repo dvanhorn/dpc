@@ -674,7 +674,7 @@ class and remove the @racket[dist] field and @racket[render] and
 
 @subsection{Abstracting lists}
 
-Revisit your solution to the @secref{Parametric_lists} exercise.
+Revisit your solution to the @secref{Parametric_Lists} exercise.
 
 Use inheritance to lift method definitions to a super class to the
 full extent possible.  (@emph{Hint}: it will help if you realize that many of

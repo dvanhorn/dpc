@@ -8,6 +8,7 @@ This appendix contains solutions to selected exercises.
 @include-section{solution/lon.scrbl}
 @include-section{solution/02.scrbl}
 @include-section{solution/z.scrbl}
+@include-section{solution/lox.scrbl}
 @include-section{solution/03.scrbl}
 @include-section{solution/04.scrbl}
 
