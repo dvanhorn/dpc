@@ -8,12 +8,13 @@
 @margin-note{@secref{Lists_of_Numbers_solution}}
 
 Design classes to represent lists of numbers.  Implement the methods
-@tt{length}, @tt{append}, @tt{sum}, @tt{prod}, @tt{contains?},
-@tt{reverse}, @tt{map}, and @tt{max}.  Note that @tt{max} raises some
-interesting design decisions in the case of the empty list.  One
-solution is to define the @tt{max} of the empty list as negative
-infinity, @racket[-inf.0], a number smaller than every other number
-(except itself).
+@racket[length], @racket[append], @racket[sum], @racket[prod],
+@racket[contains?], @racket[reverse], @racket[map], and @racket[max].
+Note that @racket[max] raises some interesting design decisions in the
+case of the empty list.  One solution is to define the @racket[max] of
+the empty list as negative infinity, @racket[-inf.0], a number smaller
+than every other number (except itself).  Another solution is to only
+define @racket[max] for non-empty lists of numbers.
 
 @section{Home on the Range}
 
