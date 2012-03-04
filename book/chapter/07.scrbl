@@ -672,7 +672,9 @@ class and remove the @racket[dist] field and @racket[render] and
 
 @section[#:tag "Exercises (Ch 4.)"]{Exercises}
 
-@subsection{Abstracting lists}
+@subsection{Abstract Lists}
+
+@margin-note{@secref{Abstract_Lists_solution}}
 
 Revisit your solution to the @secref{Parametric_Lists} exercise.
 
