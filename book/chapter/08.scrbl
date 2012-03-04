@@ -181,23 +181,41 @@ it may be tempting to thinking of the predicate as something that
 lives in the @tt{Runner} class, and certainly we could define
 @racket[fast?] and @racket[old?] methods in @racket[runner%].  But
 that wouldn't help to define a single @racket[filter] method since we
-cannot parameterize a method by a method @racket[name]---the
-arguments of a method must @emph{values}.
+cannot parameterize a method by a method @racket[name]---the arguments
+of a method must be @emph{values}.  A more fruitful perspective is to
+see a @emph{predicate on runners} as something worth representing in
+its own right.  Once we have a representation of predicates on
+runners, we can recover the original functionality by passing the
+appropriate instance of a predicate to an abstraction of @racket[fast]
+and @racket[old].
 
-We could instead pass in an @emph{object that contains a method}.  In
-other words, we can represent the predicate as an object with a single
-@racket[ask] method that consumes a runner and produces a
-Boolean (just like the functions above).  
+So how should a predicate be represented?  Inspired by the functional
+representation where we might say:
+
+@classblock{
+;; A PredicateRunner is a [Runner -> Boolean].
+}
+
+we could represent predicates on runners with objects having a single
+@tt{Runner -> Booelean} method.  Since we want a uniform interface for
+predicates, we need to decide on the name of this method:
+@racket[apply].  Thus,
+
+@classblock{
+;; A PredicateRunner implements
+;; - apply : Runner -> Boolean
+;;   Does this predicate apply to given runner?
+}
 
 To represent the ``is fast?'' predicate, we define a class:
 
 @classblock{
 (define-class is-fast%
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Is the given runner fast (time less than 250)?  
-  (check-expect ((new is-fast%) . ask johnny) false)
-  (check-expect ((new is-fast%) . ask bobby) true)
-  (define (ask r)
+  (check-expect ((new is-fast%) . apply johnny) false)
+  (check-expect ((new is-fast%) . apply bobby) true)
+  (define (apply r)
     (< (r . time) (* 180 60))))
 }
 
@@ -205,30 +223,31 @@ Likewise, to define the ``is old?'' predicate, we define another class:
 
 @classblock{
 (define-class is-old%
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Is the given runner older than 50?
-  (check-expect ((new is-old%) . ask johnny) true)
-  (check-expect ((new is-old%) . ask roberta) false)  
-  (define (ask r)
+  (check-expect ((new is-old%) . apply johnny) true)
+  (check-expect ((new is-old%) . apply roberta) false)  
+  (define (apply r)
     (> (r . age) 50)))
 }
 
 The @racket[(new is-fast%)] and @racket[(new is-old%)] values can be
 the arguments of the abstraction of @racket[fast] and @racket[old]:
 
+
 @filebox[@racket[mt%]]{
 @classblock{
-;; filter : {ask : Runner -> Boolean} -> LoR
+;; filter : RunnerPredicate -> LoR
 ;; Runners in this empty list satisfying given predicate.
 (define (filter q) this)
 }}
 
 @filebox[@racket[cons%]]{
 @classblock{
-;; filter : {ask : Runner -> Boolean} -> LoR
+;; filter : RunnerPredicate -> LoR
 ;; Runners in this non-empty list satisfying given predicate.
 (define (filter q) 
-  (cond [(q . ask (this . first))
+  (cond [(q . apply (this . first))
          (new cons% 
               (this . first)
               (this . rest . filter q))]
@@ -258,19 +277,19 @@ the list of male or female runners:
 
 @classblock{
 (define-class is-male%
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Is the given runner male?
-  (check-expect ((new is-male%) . ask johnny) true)
-  (check-expect ((new is-male%) . ask roberta) false)
-  (define (ask r)
+  (check-expect ((new is-male%) . apply johnny) true)
+  (check-expect ((new is-male%) . apply roberta) false)
+  (define (apply r)
     (r . gender . is-male?)))
 
 (define-class is-female%
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Is the given runner female?
-  (check-expect ((new is-female%) . ask johnny) false)
-  (check-expect ((new is-female%) . ask roberta) true)
-  (define (ask r)
+  (check-expect ((new is-female%) . apply johnny) false)
+  (check-expect ((new is-female%) . apply roberta) true)
+  (define (apply r)
     (r . gender . is-female?)))
 }
 
@@ -324,9 +343,9 @@ with a functional object that contains data:
 (define-class in-age%
   (fields lo hi)
   ;; Is the given runner within [lo,hi] age?
-  (check-expect ((new in-age% 18 34) . ask roberta) true)
-  (check-expect ((new in-age% 18 34) . ask johnny) false)
-  (define (ask r)
+  (check-expect ((new in-age% 18 34) . apply roberta) true)
+  (check-expect ((new in-age% 18 34) . apply johnny) false)
+  (define (apply r)
     (<= (this . lo) (r . age) (this . hi))))
 }
 
@@ -334,13 +353,14 @@ Likewise we can represent the ``faster than @emph{N} time?'' predicate
 as a functional object with data:
 
 @classblock{
+;; A (new is-faster%) implements PredicateRunner
 (define-class faster%
   (fields hrs mins)
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Is the given runner's time faster than hrs:mins?
-  (check-expect ((new faster% 3 35) . ask roberta) true)
-  (check-expect ((new faster% 3 35) . ask johnny) false)
-  (define (ask r)
+  (check-expect ((new faster% 3 35) . apply roberta) true)
+  (check-expect ((new faster% 3 35) . apply johnny) false)
+  (define (apply r)
     (< (r . time) (* 60 (+ (* 60 (this . hrs)) (this . mins))))))
 }
 
@@ -348,20 +368,22 @@ The ``is the runner male?'' and ``female?'' predicates are
 straightforward:
 
 @classblock{
+;; A (new is-male%) implements PredicateRunner
 (define-class is-male%
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Is the given runner male?
-  (check-expect ((new is-male%) . ask johnny) true)
-  (check-expect ((new is-male%) . ask roberta) false)
-  (define (ask r)
+  (check-expect ((new is-male%) . apply johnny) true)
+  (check-expect ((new is-male%) . apply roberta) false)
+  (define (apply r)
     (r . gender . is-male?)))
 
+;; A (new is-female%) implements PredicateRunner
 (define-class is-female%
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Is the given runner female?
-  (check-expect ((new is-female%) . ask johnny) false)
-  (check-expect ((new is-female%) . ask roberta) true)
-  (define (ask r)
+  (check-expect ((new is-female%) . apply johnny) false)
+  (check-expect ((new is-female%) . apply roberta) true)
+  (define (apply r)
     (r . gender . is-female?)))
 }
 
@@ -374,16 +396,18 @@ are lacking the ability to combine predicates with ``and'', ``or'',
 predicate built out of predicates:
 
 @classblock{
-(define-class and%
+;; A (new and% PredicateRunner PredicateRunner)
+;; implements PredicateRunner
+(define-class and%  
   (fields q1 q2)
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Does the given runner satisfy q1 *and* q2?
-  (check-expect ((new and% f? young?) . ask roberta) true)
-  (check-expect ((new and% f? young?) . ask bobby) false)
-  (check-expect ((new and% f? young?) . ask johnny) false)
-  (define (ask r)
-    (and (this . q1 . ask r)
-         (this . q2 . ask r))))
+  (check-expect ((new and% f? young?) . apply roberta) true)
+  (check-expect ((new and% f? young?) . apply bobby) false)
+  (check-expect ((new and% f? young?) . apply johnny) false)
+  (define (apply r)
+    (and (this . q1 . apply r)
+         (this . q2 . apply r))))
 }
 
 The test cases make use of the following definitions for succinctness:
@@ -397,22 +421,23 @@ Now we can construct the predicate ``is the given runner 18-34, a
 woman, and did she finish in under 3 hours and 35 minutes?'':
 
 @classblock{
-(new and% (new in-age% 18 34) 
-          (new and% (new is-female%) (new faster% 3 35)))
+(new and% 
+     (new in-age% 18 34) 
+     (new and% (new is-female%) (new faster% 3 35)))
 }
 
 And from here, it's easy to express the predicate of a row (assuming
 you can define @racket[or%]):
 
 @classblock{
-(define-class qrow%
+(define-class qrow% ; implements PredicateRunner
   (fields lo hi m-hrs m-mins f-hrs f-mins)
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Does given runner satifisy conditions of this row?
-  (check-expect ((new qrow% 18 34 3 05 3 35) . ask roberta) true)
-  (check-expect ((new qrow% 18 34 3 05 3 35) . ask bobby) true)
-  (check-expect ((new qrow% 18 34 3 05 3 35) . ask johnny) false)
-  (define (ask r)
+  (check-expect ((new qrow% 18 34 3 05 3 35) . apply roberta) true)
+  (check-expect ((new qrow% 18 34 3 05 3 35) . apply bobby) true)
+  (check-expect ((new qrow% 18 34 3 05 3 35) . apply johnny) false)
+  (define (apply r)
     ((new and% 
           (new in-age% (this . lo) (this . hi))
           (new or% 
@@ -422,21 +447,21 @@ you can define @racket[or%]):
                (new and%
                     (new is-female%)
                     (new faster% (this . f-hrs) (this . f-mins)))))
-     . ask r)))
+     . apply r)))
 }
 
 Only the last row, which asks about being 80+ is a different (here, we
 assume you can define @racket[older%] with the obvious meaning):
 
 @classblock{
-(define-class lastrow%
+(define-class lastrow%  ; implements PredicateRunner
   (fields lo m-hrs m-mins f-hrs f-mins)
-  ;; ask : Runner -> Boolean
+  ;; apply : Runner -> Boolean
   ;; Does given runner satifisy conditions of this last row?
-  (check-expect ((new lastrow% 80 4 55 5 10) . ask roberta) false)
-  (check-expect ((new lastrow% 80 4 55 5 10) . ask bobby) false)
-  (check-expect ((new lastrow% 80 4 55 5 10) . ask johnny) false)
-  (define (ask r)
+  (check-expect ((new lastrow% 80 4 55 5 10) . apply roberta) false)
+  (check-expect ((new lastrow% 80 4 55 5 10) . apply bobby) false)
+  (check-expect ((new lastrow% 80 4 55 5 10) . apply johnny) false)
+  (define (apply r)
     ((new and% 
           (new older% (this . lo))
           (new or% 
@@ -446,31 +471,31 @@ assume you can define @racket[older%] with the obvious meaning):
                (new and%
                     (new is-female%)
                     (new faster% (this . f-hrs) (this . f-mins)))))
-     . ask r)))
+     . apply r)))
 }
 
 And now the @racket[qualify%] class is easy and exactly matches the
 structure of the BAA's table:
 
 @classblock{
-(define-class qualify%
-  ;; ask : Runner -> Boolean
+(define-class qualify% ; implements PredicateRunner
+  ;; apply : Runner -> Boolean
   ;; Does given runner qualify for next Boston Marathon?
-  (check-expect ((new qualify%) . ask roberta) true)
-  (check-expect ((new qualify%) . ask bobby) true)
-  (check-expect ((new quality%) . ask johnny) true)
-  (define (ask r)
-    (or ((new qrow% 18 34 3 05 3 35) . ask r)
-        ((new qrow% 35 39 3 10 3 40) . ask r)
-        ((new qrow% 40 44 3 15 3 45) . ask r)
-        ((new qrow% 45 49 3 25 3 55) . ask r)
-        ((new qrow% 50 54 3 30 4 00) . ask r)
-        ((new qrow% 55 59 3 40 4 10) . ask r)
-        ((new qrow% 60 64 3 55 4 25) . ask r)
-        ((new qrow% 65 69 4 10 4 40) . ask r)
-        ((new qrow% 70 74 4 25 4 55) . ask r)
-        ((new qrow% 75 79 4 40 5 10) . ask r)
-        ((new lastrow% 80 4 55 5 10) . ask r))))
+  (check-expect ((new qualify%) . apply roberta) true)
+  (check-expect ((new qualify%) . apply bobby) true)
+  (check-expect ((new quality%) . apply johnny) true)
+  (define (apply r)
+    (or ((new qrow% 18 34 3 05 3 35) . apply r)
+        ((new qrow% 35 39 3 10 3 40) . apply r)
+        ((new qrow% 40 44 3 15 3 45) . apply r)
+        ((new qrow% 45 49 3 25 3 55) . apply r)
+        ((new qrow% 50 54 3 30 4 00) . apply r)
+        ((new qrow% 55 59 3 40 4 10) . apply r)
+        ((new qrow% 60 64 3 55 4 25) . apply r)
+        ((new qrow% 65 69 4 10 4 40) . apply r)
+        ((new qrow% 70 74 4 25 4 55) . apply r)
+        ((new qrow% 75 79 4 40 5 10) . apply r)
+        ((new lastrow% 80 4 55 5 10) . apply r))))
 }
 
 Now it's easy to filter the list of runners for those qualifying for
@@ -509,6 +534,16 @@ future, but let's start with @racket[sort-time] and
 ;; Sort this list of runners in lexicographic order of names. 
 }}
 
+Let's start by defining some expected results examples:
+
+@classblock{
+(define rs-sort-time
+  (new cons% bobby (new cons% roberta (new cons% johnny mt))))
+
+(define rs-sort-name ; Coincidentally the same as above.
+  (new cons% bobby (new cons% roberta (new cons% johnny mt))))
+}
+
 A straightforward structural recursive design leads us to:
 
 @filebox[@elem{@tt{LoR interface}}]{
@@ -522,20 +557,31 @@ A straightforward structural recursive design leads us to:
 
 @filebox[@racket[mt%]]{
 @classblock{
+(check-expect (mt . sort-time) mt)
 (define (sort-time) this)
+
+(check-expect (mt . sort-name) mt)
 (define (sort-name) this)
 
+(check-expect (mt . insert-time bobby) (new cons% bobby mt))
 (define (insert-time r) (new cons% r this))
+
+(check-expect (mt . insert-name bobby) (new cons% bobby mt))
 (define (insert-name r) (new cons% r this))
 }}
 
 @filebox[@racket[cons%]]{
 @classblock{
+(check-expect (rs . sort-time) rs-sort-time)
 (define (sort-time)
   (this . rest . sort-time . insert-time (this . first)))
+
+(check-expect (rs . sort-name) rs-sort-name)
 (define (sort-name)
   (this . rest sort-name . insert-name (this . first)))
 
+(check-expect ((new cons% bobby mt) . insert-time johnny)
+	      (new cons% johnny (new cons% bobby mt)))
 (define (insert-time r)
   (cond [(< (r . time) (this . first . time))
          (new cons% r this)]
@@ -544,6 +590,8 @@ A straightforward structural recursive design leads us to:
               (this . first) 
               (this . rest . insert-time r))]))
 
+(check-expect ((new cons% bobby mt) . insert-name johnny)
+	      (new cons% johnny (new cons% bobby mt)))
 (define (insert-name r)
   (cond [(string-<? (r . name) (this . first . name))
          (new cons% r this)]

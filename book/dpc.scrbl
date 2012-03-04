@@ -14,6 +14,7 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/01.scrbl}
 @include-section{chapter/02.scrbl}
 @include-section{chapter/03.scrbl}
+@include-section{chapter/04a.scrbl}
 @include-section{chapter/04.scrbl}
 @include-section{chapter/05.scrbl}
 @include-section{chapter/06.scrbl}

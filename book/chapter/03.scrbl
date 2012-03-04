@@ -307,54 +307,6 @@ blinking lights.  This program is truly extensible.
 
 @section{Exercises}
 
- @subsection{Parametric lists}
-
- Consider the parametric data definition for lists we studied last
- semester:
-
- @#reader scribble/comment-reader
-(racketblock 
- ;; A [Listof X] is one of:
- ;; - empty
- ;; - (cons X [Listof X])
-)
-
-Design an analogous class-based representation of parametric lists.
-Design a @tt{List} interface that includes @racket[cons],
-@racket[empty], @racket[length], @racket[append], @racket[reverse],
-@racket[map], @racket[filter], @racket[foldl], and @racket[foldr].
-
-Implement that interface in two ways:
-@itemlist[
-
- @item{Using the recipe for a recursive union represented using
-objects, i.e.  similar to the way you developed lists of numbers last
-week.}
-
- @item{Using a ``wrapper class,'' i.e. design a class that has a single
-field which contains a ``real'' list---one built out of @racket[cons]
-and @racket[empty].}
-
-]
-
-Any program that interacts with either of these representations
-according to the interface should not be able to tell them apart.
-
-Hint: the names of methods we have chosen overlap with the name of
-some standard values that you may like to use when defining methods,
-especially in the wrapped list case.  If you refer to these names
-within a class, you refer to the method rather than the built-in
-value.  If you would like to refer to the built-in value, an easy
-work-around is to do something like this:
-
-@#reader scribble/comment-reader
-(racketblock
-  (define ls:cons cons) ; etc.
-)
-
-Now when you want to refer to the @racket[cons] @emph{function} instead
-of the @racket[cons] @emph{method}, you can use the name @racket[ls:cons].
-
 @subsection{Super Zombie!}
 
 Revise your design of the Zombie game to include a @tt{Zombie}
