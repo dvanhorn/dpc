@@ -91,7 +91,7 @@ Here are a few examples of runners:
 
 
 Now let's consider a couple computations the BAA might ask you to
-support in their program.  One taks is to figure calculate a list of
+support in their program.  One task is to figure calculate a list of
 ``fast runners,'' which we'll take as runners finishing in under three
 hours.  That's a straightforward computation:
 
@@ -237,14 +237,14 @@ the arguments of the abstraction of @racket[fast] and @racket[old]:
 
 @filebox[@racket[mt%]]{
 @classblock{
-;; filter : RunnerPredicate -> LoR
+;; filter : PredicateRunner -> LoR
 ;; Runners in this empty list satisfying given predicate.
 (define (filter q) this)
 }}
 
 @filebox[@racket[cons%]]{
 @classblock{
-;; filter : RunnerPredicate -> LoR
+;; filter : PredicateRunner -> LoR
 ;; Runners in this non-empty list satisfying given predicate.
 (define (filter q) 
   (cond [(q . apply (this . first))
@@ -276,7 +276,8 @@ them to filter a list of runners.  For example, if we want to select
 the list of male or female runners:
 
 @classblock{
-(define-class is-male%
+;; A (new is-male%) implements PredicateRunner
+(define-class is-male% 
   ;; apply : Runner -> Boolean
   ;; Is the given runner male?
   (check-expect ((new is-male%) . apply johnny) true)
@@ -284,6 +285,7 @@ the list of male or female runners:
   (define (apply r)
     (r . gender . is-male?)))
 
+;; A (new is-female%) implements PredicateRunner
 (define-class is-female%
   ;; apply : Runner -> Boolean
   ;; Is the given runner female?
@@ -340,7 +342,8 @@ Let's start with the age.  We can represent the age group predicates
 with a functional object that contains data:
 
 @classblock{
-(define-class in-age%
+;; A (new in-age% Natural Natural) implements PredicateRunner
+(define-class in-age% 
   (fields lo hi)
   ;; Is the given runner within [lo,hi] age?
   (check-expect ((new in-age% 18 34) . apply roberta) true)
@@ -353,7 +356,7 @@ Likewise we can represent the ``faster than @emph{N} time?'' predicate
 as a functional object with data:
 
 @classblock{
-;; A (new is-faster%) implements PredicateRunner
+;; A (new is-faster% Natural Natural) implements PredicateRunner
 (define-class faster%
   (fields hrs mins)
   ;; apply : Runner -> Boolean
@@ -430,7 +433,8 @@ And from here, it's easy to express the predicate of a row (assuming
 you can define @racket[or%]):
 
 @classblock{
-(define-class qrow% ; implements PredicateRunner
+;; A (new qrow% Natural^6) implements PredicateRunner
+(define-class qrow% 
   (fields lo hi m-hrs m-mins f-hrs f-mins)
   ;; apply : Runner -> Boolean
   ;; Does given runner satifisy conditions of this row?
@@ -454,7 +458,8 @@ Only the last row, which asks about being 80+ is a different (here, we
 assume you can define @racket[older%] with the obvious meaning):
 
 @classblock{
-(define-class lastrow%  ; implements PredicateRunner
+;; A (new qrow% Natural^5) implements PredicateRunner
+(define-class lastrow% 
   (fields lo m-hrs m-mins f-hrs f-mins)
   ;; apply : Runner -> Boolean
   ;; Does given runner satifisy conditions of this last row?
@@ -478,7 +483,8 @@ And now the @racket[qualify%] class is easy and exactly matches the
 structure of the BAA's table:
 
 @classblock{
-(define-class qualify% ; implements PredicateRunner
+;; A (new qualify%) implements PredicateRunner
+(define-class qualify% 
   ;; apply : Runner -> Boolean
   ;; Does given runner qualify for next Boston Marathon?
   (check-expect ((new qualify%) . apply roberta) true)
@@ -509,6 +515,98 @@ the BAA will cut him some slack.
 (eval:alts (rs #,dot filter (new qualify%) #,dot filter (new is-female%)) 
            (send (send rs filter (new qualify%)) filter (new is-female%)))
 ]
+
+@section{Parametric data and separation of concerns}
+
+One thing that is sure to stand out from the last section is we define
+a class of objects @tt{LoR} rather than @tt{[List Runner]}, despite
+having previously honed a nice parametric list library.  Why?
+
+Consider the methods we were developing, such as
+
+@classblock{
+;; fast : -> LoR
+;; Runners in this list with times less than 3 hours.
+ 
+;; old : -> LoR
+;; Runners in this list with age more than 50 years.
+}
+
+These methods require that this list be a list of runners and will
+probably not work if this list is a list of anything else.  There's no
+mechanism stopping us from defining @racket[fast] and @racket[old]
+within a generic @tt{[List X]} library.  We could define these
+runner-specific methods within the general library and state the
+assumption that this list is a @tt{[List Runner]}.  But this is
+ultimately a losing strategy as we must pollute our list library with
+element-specific methods, which seem out of place in a general-purpose
+library, may have conflicts, and whose requirements can certainly grow
+beyond any anticipated limits.
+
+Instead, we should interpret @tt{[List X]} as requiring all code to be
+totally independent of @tt{X}, in which case methods specific to
+@tt{[List Runner]} are definitely not acceptable.  And at first
+glance, it may appear we've painted ourselves into a corner: how can
+we perform runner-specific computations if we can't be runner-specific
+in the definition of list methods?
+
+The answer is actually enabled by our abstraction of the
+runner-specific computation (the predicate) from the list-specific
+computation (the filter).  Once these computations are disentangled,
+it's easy to design re-usable libraries for lists and runners.
+
+First, let's focus on the @tt{PredicateRunner} interface:
+
+@classblock{
+;; A PredicateRunner implements
+;; - apply : Runner -> Boolean
+;;   Does this predicate apply to given runner?
+}
+
+This interface definition can be parameterized by the class of objects
+in the domain of the predicate:
+
+@classblock{
+;; A [Predicate X] implements
+;; - apply : X -> Boolean
+;;   Does this predicate apply to given X?
+}
+
+And obviously plugging @tt{Runner} in for @tt{X} in @tt{[Predicate
+Runner]} results in the original interface definition.
+
+Next, let's focus on the @racket[filter] method in the @tt{LoR}
+interface:
+
+@classblock{
+;; filter : PredicateRunner -> LoR
+;; Runners in this list satisfying given predicate.
+}
+
+By abstracting over the class of elements, we obtain a more general
+contract for @racket[filter] that only requires the domain of the
+predicate match the class of elements:
+
+@classblock{
+;; filter : [Predicate X] -> [List X]
+;; Elements in this list satisfying given predicate.
+}
+
+On further inspection, we can also see many of our runner-specific
+utilities are actually not runner-specific at all.  For example:
+
+@classblock{
+;; A (new and% PredicateRunner PredicateRunner)
+;; implements PredicateRunner
+}
+
+can be given the more general contract:
+
+@classblock{
+;; A (new and% [Predicate X] [Predicate X]) 
+;; implements [Predicate X]
+}
+
 
 @section{Functions as objects: abstracting comparisons}
 
@@ -795,3 +893,10 @@ you constructed in part 2, the following check should succeed:
 Implement the @r[compose] method for your wrapper class.
 }
 ]
+
+@subsection{Lists and functional objects}
+
+Revisit your solution to the @secref{Abstract_Lists} exercise.  Revise
+the interface to replace any uses of function inputs with function
+object inputs and carry out the necessary changes to your design of
+the implementation.
