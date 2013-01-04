@@ -1,15 +1,16 @@
-#lang mzscheme
+#lang racket/base
 
 (require lang/private/teachprims
-         scheme/class
-         scheme/match
-	 lang/private/continuation-mark-key
-         (only scheme/base for memf findf)
+         (for-syntax racket/base
+                     lang/private/rewrite-error-message)
+         racket/class
+         racket/match
+         lang/private/continuation-mark-key
+         lang/private/rewrite-error-message
          "test-engine.rkt"
-	 "test-info.rkt"
-         )
+         "test-info.scm")
 
-(require-for-syntax stepper/private/shared)
+(require (for-syntax stepper/private/syntax-property))
 
 (provide
  check-expect ;; syntax : (check-expect <expression> <expression>)
@@ -21,40 +22,31 @@
 
 ; for other modules implementing check-expect-like forms
 (provide
- (for-syntax check-expect-maker))
+ (for-syntax check-expect-maker)
+ get-test-engine
+ exn:fail:wish)
 
 (define INEXACT-NUMBERS-FMT
   "check-expect cannot compare inexact numbers. Try (check-within test ~a range).")
 (define FUNCTION-FMT
   "check-expect cannot compare functions.")
 (define CHECK-ERROR-STR-FMT
-  "check-error requires a string for the second argument, representing the expected error message. Given ~s")
+  "check-error expects a string for the second argument, representing the expected error message. Given ~s")
 (define CHECK-WITHIN-INEXACT-FMT
-  "check-within requires an inexact number for the range. ~a is not inexact.")
+  "check-within expects an inexact number for the range. ~a is not inexact.")
 (define CHECK-WITHIN-FUNCTION-FMT
   "check-within cannot compare functions.")
 (define LIST-FMT
-  "check-member-of requires a list for the second argument, containing the possible outcomes. Given ~s")
+  "check-member-of expects a list for the second argument, containing the possible outcomes. Given ~s")
 (define CHECK-MEMBER-OF-FUNCTION-FMT
   "check-member-of cannot compare functions.")
 (define RANGE-MIN-FMT
-  "check-range requires a number for the minimum value. Given ~a")
+  "check-range expects a number for the minimum value. Given ~a")
 (define RANGE-MAX-FMT
-  "check-range requires a number for the maximum value. Given ~a")
+  "check-range expects a number for the maximum value. Given ~a")
 (define CHECK-RANGE-FUNCTION-FMT
   "check-range cannot compare functions.")
 
-
-(define-for-syntax CHECK-EXPECT-STR
-  "check-expect requires two expressions. Try (check-expect test expected).")
-(define-for-syntax CHECK-ERROR-STR
-  "check-error requires at least one expression. Try (check-error test message) or (check-error test).")
-(define-for-syntax CHECK-WITHIN-STR
-  "check-within requires three expressions. Try (check-within test expected range).")
-(define-for-syntax CHECK-MEMBER-OF-STR
-  "check-member-of requires at least two expressions. Try (check-member-of test option options ...).")
-(define-for-syntax CHECK-RANGE-STR
-  "chech-range requires three expressions. Try (check-range test min max).")
 
 (define-for-syntax CHECK-EXPECT-DEFN-STR
   "found a test that is not at the top level")
@@ -80,7 +72,7 @@
       #`(define #,bogus-name
           #,(stepper-syntax-property
              #`(let ([test-engine (namespace-variable-value
-				   'test~object #f builder (current-namespace))])
+                                   'test~object #f builder (current-namespace))])
                  (when test-engine
                    (insert-test test-engine
                                 (lambda ()
@@ -149,6 +141,10 @@
   (let ([c (syntax-local-context)])
     (memq c '(module top-level))))
 
+(define-for-syntax (argcount-error-message/stx arity stx [at-least #f])
+  (define ls (syntax->list stx))
+  (argcount-error-message #f arity (if ls (sub1 (length ls)) 0) at-least))
+
 ;; check-expect
 (define-syntax (check-expect stx)
   (unless (check-context?)
@@ -157,7 +153,7 @@
     [(_ test actual)
      (check-expect-maker stx #'check-values-expected #`test (list #`actual)
                          'comes-from-check-expect)]
-    [_ (raise-syntax-error 'check-expect CHECK-EXPECT-STR stx)]))
+    [_ (raise-syntax-error 'check-expect (argcount-error-message/stx 2 stx) stx)]))
 
 ;; check-values-expected: (-> scheme-val) scheme-val src test-engine -> void
 (define (check-values-expected test actual src test-engine)
@@ -177,7 +173,7 @@
     [(_ test actual within)
      (check-expect-maker stx #'check-values-within #`test (list #`actual #`within)
                          'comes-from-check-within)]
-    [_ (raise-syntax-error 'check-within CHECK-WITHIN-STR stx)]))
+    [_ (raise-syntax-error 'check-within (argcount-error-message/stx 3 stx) stx)]))
 
 ;; check-values-within: (-> scheme-val) scheme-val number src test-engine -> void
 (define (check-values-within test actual within src test-engine)
@@ -199,7 +195,7 @@
     [(_ test)
      (check-expect-maker stx #'check-values-error/no-string #`test null
                          'comes-from-check-error)]
-    [_ (raise-syntax-error 'check-error CHECK-ERROR-STR stx)]))
+    [_ (raise-syntax-error 'check-error (argcount-error-message/stx 1 stx #t) stx)]))
 
 ;; check-values-error: (-> scheme-val) scheme-val src test-engine -> void
 (define (check-values-error test error src test-engine)
@@ -207,9 +203,11 @@
   (send (send test-engine get-info) add-check)
   (let ([result (with-handlers ([exn?
                                  (lambda (e)
-                                   (or (equal? (exn-message e) error)
+                                   (define msg 
+                                     (rewrite-contract-error-message (exn-message e)))
+                                   (or (equal? msg error)
                                        (make-incorrect-error src (test-format) error
-                                                             (exn-message e) e)))])
+                                                             msg e)))])
                   (let ([test-val (test)])
                     (make-expected-error src (test-format) error test-val)))])
     (if (check-fail? result)
@@ -250,7 +248,7 @@
     [(_ test actual actuals ...)
      (check-expect-maker stx #'check-member-of-values-expected #`test (list #`actual #`(list actuals ...))
                          'comes-from-check-member-of)]
-    [_ (raise-syntax-error 'check-member-of CHECK-MEMBER-OF-STR stx)]))
+    [_ (raise-syntax-error 'check-member-of (argcount-error-message/stx 2 stx #t) stx)]))
 
 ;; check-member-of-values-expected: (-> scheme-val) scheme-val src test-engine -> void
 (define (check-member-of-values-expected test first-actual actuals src test-engine)
@@ -268,7 +266,7 @@
     [(_ test min max)
      (check-expect-maker stx #'check-range-values-expected #`test (list #`min #`max)
                          'comes-from-check-range)]
-    [_ (raise-syntax-error 'check-range CHECK-RANGE-STR stx)]))
+    [_ (raise-syntax-error 'check-range (argcount-error-message/stx 3 stx) stx)]))
 
 ;; check-range-values-expected: (-> scheme-val) scheme-val src test-engine -> void
 (define (check-range-values-expected test min max src test-engine)
@@ -287,11 +285,17 @@
 ;;                ( -> scheme-val) scheme-val scheme-val test-engine symbol? -> void
 (define (run-and-check check maker test expect range src test-engine kind)
   (match-let ([(list result result-val exn)
-               (with-handlers ([exn:fail?
+               (with-handlers ([exn:fail:wish?
+                                (lambda (e)
+                                  (let ([display (error-display-handler)])
+                                    (list (unimplemented-wish src (test-format) (exn:fail:wish-name e) (exn:fail:wish-args e))
+                                          'error
+                                          #f)))]
+                               [exn:fail?
                                 (lambda (e)
                                   (let ([display (error-display-handler)])
                                     (list (make-unexpected-error src (test-format) expect
-                                                                 (exn-message e) 
+                                                                 (get-rewriten-error-message e)
                                                                  e)
                                           'error
                                           e)))])
@@ -301,11 +305,11 @@
                           (list (maker src (test-format) test-val expect range) test-val #f)])))])
     (cond [(check-fail? result)
            (send (send test-engine get-info) check-failed result (check-fail-src result) exn)
-           (if exn
-	       (raise exn)
-	       #f)]
-          [else
-           #t])))
+           (if exn (raise exn) #f)]
+          [else #t])))
+
+;;Wishes
+(struct exn:fail:wish exn:fail (name args))
 
 (define (reset-tests)
   (let ([test-engine (namespace-variable-value
@@ -317,6 +321,9 @@
   (let ([te (build-test-engine)])
     (namespace-set-variable-value! 'test~object te (current-namespace))
     te))
+
+(define (get-test-engine)
+  (namespace-variable-value 'test~object #f builder (current-namespace)))
 
 (define-syntax (test stx) 
   (syntax-case stx ()
@@ -375,6 +382,8 @@
 	 
     (define signature-violations '())
 
+    (inherit report-failure)
+
     (define/pubment (signature-failed obj signature message blame)
 
       (let* ((cms
@@ -399,17 +408,26 @@
 	(set! signature-violations
 	      (cons (make-signature-violation obj signature message srcloc blame)
 		    signature-violations)))
+      (report-failure)
       (inner (void) signature-failed obj signature message))
 
     (define/public (failed-signatures) (reverse signature-violations))
     
     (inherit add-check-failure)
     (define/pubment (property-failed result src-info)
+      (report-failure)
       (add-check-failure (make-property-fail src-info (test-format) result) #f))
 
     (define/pubment (property-error exn src-info)
+      (report-failure)
       (add-check-failure (make-property-error src-info (test-format) (exn-message exn) exn) exn))
 
+    (super-instantiate ())))
+
+(define wish-test-info%
+  (class* test-info-base% ()
+    (inherit add-check-failure)
+    
     (super-instantiate ())))
 
 (define scheme-test%

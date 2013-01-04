@@ -1,7 +1,23 @@
 #lang racket/base
 
 (require racket/class
-         "test-info.rkt")
+         "test-info.scm")
+
+(define test-display-base%
+  (class* object% ()
+    
+    (init-field (current-rep #f))
+    (define test-info #f)
+    
+    (define/pubment (install-info t)
+      (set! test-info t)
+      (inner (void) install-info t))
+    (define/public (get-info) test-info)
+    
+    (define/public (display-results)
+      '...)
+    
+    (super-instantiate ())))
 
 (define test-display-textual%
   (class* object% ()
@@ -126,7 +142,8 @@
     (define display-rep #f)
     (define display-event-space #f)
     (define silent-mode #t)
-    (define test-run-since-last-display? #f)
+    (define initial-report-done #f)
+    (define unreported-tests #f)
 
     (super-instantiate ())
 
@@ -137,6 +154,7 @@
     (define/public (add-analysis a) (send test-info add-analysis a))
 
     (define/public (setup-info style)
+      (set! initial-report-done #f)
       (set! test-info (make-object (info-class) style)))
     (define/pubment (setup-display cur-rep event-space)
       (set! test-display (make-object display-class cur-rep))
@@ -157,6 +175,9 @@
 
     (define/public (summarize-results port)
       (cond
+       ((and initial-report-done
+	     (not unreported-tests)
+	     (not (send test-info has-unreported-failures))))
        ((test-execute)
         (unless test-display (setup-display #f #f))
 	(send test-display install-info test-info)
@@ -171,15 +192,16 @@
 					       (+ (send test-info tests-run)
 						  (send test-info checks-run)))]
 		[(mixed-results)
-		 (display-results display-rep display-event-space)]))))
+		 (display-results display-rep display-event-space)])))
+	(send test-info clear-unreported-failures)
+	(set! initial-report-done #t)
+	(set! unreported-tests #f))
        (else
-	(display-disabled port)))
-      (set! test-run-since-last-display? #f))
+	(display-disabled port))))
 
     (define/private (display-success port event-space count)
-      (when test-run-since-last-display?
-	(clear-results event-space)
-	(send test-display display-success-summary port count)))
+      (clear-results event-space)
+      (send test-display display-success-summary port count))
 
     (define/public (display-results rep event-space)
       (cond
@@ -193,19 +215,17 @@
        [else (send test-display display-results)]))
 
     (define/public (display-untested port)
-      (when (and test-run-since-last-display?
-		 (not silent-mode))
+      (when (not silent-mode)
 	(send test-display display-untested-summary port)))
 
     (define/public (display-disabled port)
-      (when test-run-since-last-display?
-	(send test-display display-disabled-summary port)))
+      (send test-display display-disabled-summary port))
 
     (define/pubment (initialize-test test)
       (inner (void) initialize-test test))
 
     (define/pubment (run-test test)
-      (set! test-run-since-last-display? #t)
+      (set! unreported-tests #t)
       (inner (void) run-test test))
 
     (define/pubment (run-testcase testcase)
