@@ -16,13 +16,13 @@ Course staff solution for regular zombie game:
 @filebox[@r[world%]]{
 @#reader scribble/comment-reader
 (racketblock
- (define/public (teleport)
+ (define (teleport)
    (new world%
         (new player%
              (random WIDTH)
              (random HEIGHT))
-        (field zombies)
-        (field mouse)))
+        (send this zombies)
+        (send this mouse)))
 )
 }
 
@@ -34,7 +34,7 @@ Bug (pair0MN):
 @filebox[@r[modulo-player%]]{
 @#reader scribble/comment-reader
 (racketblock
- (define/public (teleport)
+ (define (teleport)
    (new player%
         (* -1 (random WORLD-SIZE))
         (* -1 (random WORLD-SIZE))))
@@ -53,10 +53,10 @@ Lack of abstraction (pair0PQ):
 (racketblock
  ;; warp : Real Real -> ModuloPlayer
  ;; change the location of this player to the given location
- (define/public (warp x y)
+ (define (warp x y)
    (new modulo-player%
-        (field dest-x)
-        (field dest-y)
+        (send this dest-x)
+        (send this dest-y)
         x y))
 )
 }
@@ -66,10 +66,10 @@ Lack of abstraction (pair0PQ):
 (racketblock
  ;; warp : Real Real -> Player
  ;; change the location of this player to the given location
- (define/public (warp x y)
+ (define (warp x y)
    (new player%
-        (field dest-x)
-        (field dest-y)
+        (send this dest-x)
+        (send this dest-y)
         x y))
 )
 }
@@ -93,14 +93,14 @@ a new method of the appropriate class.  So, we add this method to the
 @racket[player%] class:
 
 @racketblock[
-(define/public (move x y)
+(define (move x y)
   (new player% x y))
 ]
 
 And this method to the @racket[modulo-player%] class:
 
 @racketblock[
-(define/public (move x y)
+(define (move x y)
   (new modulo-player% x y))
 ]
 
@@ -117,12 +117,12 @@ Here's an example of the technique in full.  We start with these classes:
 
 (define-class c%
   (super s%)
-  (define/public (make x y) (new c% x y))
-  (define/public (origin) (new c% 0 0)))
+  (define (make x y) (new c% x y))
+  (define (origin) (new c% 0 0)))
 (define-class d%
   (super s%)
-  (define/public (make x y) (new d% x y))
-  (define/public (origin) (new d% 0 0)))
+  (define (make x y) (new d% x y))
+  (define (origin) (new d% 0 0)))
 }
 
 
@@ -142,11 +142,11 @@ it becomes identical in both classes, avoiding the code duplication.
 
 (define-class c%
   (super s%)
-  (define/public (make x y)
+  (define (make x y)
     (new c% x y)))
 (define-class d%
   (super s%)
-  (define/public (make x y) 
+  (define (make x y) 
     (new d% x y)))
 
 (new c% 50 100)
@@ -205,31 +205,31 @@ first for the recursive union implementation:
   (define-class cons%
     (fields first rest)
     
-    (define/public (cons x)
+    (define (cons x)
       (new cons% x this))
     
-    (define/public (empty)
+    (define (empty)
       (new empty%))
 
-    (define/public (length)
-      (add1 (send (field rest) length)))
+    (define (length)
+      (add1 (send (send this rest) length)))
 
-    (define/public (foldr c b)
-      (c (field first)
-         (send (field rest) foldr c b))))
+    (define (foldr c b)
+      (c (send this first)
+         (send (send this rest) foldr c b))))
 
   (define-class empty%
     
-    (define/public (cons x)
+    (define (cons x)
       (new cons% x this))
     
-    (define/public (empty)
+    (define (empty)
       this)
 
-    (define/public (length)
+    (define (length)
       0)
 
-    (define/public (foldr c b)
+    (define (foldr c b)
       b)))
 
 And for the wrapper list implementation:
@@ -239,17 +239,17 @@ And for the wrapper list implementation:
   (define-class wlist%
     (fields ls)
     
-    (define/public (cons x)
-      (new wlist% (ls:cons x (field ls))))
+    (define (cons x)
+      (new wlist% (ls:cons x (send this ls))))
     
-    (define/public (empty)
+    (define (empty)
       (new wlist% ls:empty))
 
-    (define/public (length)
-      (ls:length (field ls)))
+    (define (length)
+      (ls:length (send this ls)))
 
-    (define/public (foldr c b)
-      (ls:foldr c b (field ls))))
+    (define (foldr c b)
+      (ls:foldr c b (send this ls))))
 )
 
 None of these look the same, so how can we abstract?  Our abstraction
@@ -259,22 +259,22 @@ for example, the @r[length] method looks like this for @r[wlist%]:
 
 @#reader scribble/comment-reader
 (racketblock
-    (define/public (length)
-      (ls:length (field ls))))
+    (define (length)
+      (ls:length (send this ls))))
 
 Like this for @r[empty%]:
 
 @#reader scribble/comment-reader
 (racketblock
-    (define/public (length)
+    (define (length)
       0))
 
 And like this for @r[cons%]:
 
 @#reader scribble/comment-reader
 (racketblock
-    (define/public (length)
-      (add1 (send (field rest) length))))
+    (define (length)
+      (add1 (send (send this rest) length))))
 
 
 @margin-note{In fact, all of
@@ -289,7 +289,7 @@ just uses @r[foldr] and simple arithmetic.
 
 @#reader scribble/comment-reader
 (racketblock
-    (define/public (length)
+    (define (length)
       (send this foldr (λ (a b) (add1 b)) 0))
 )
 
@@ -302,7 +302,7 @@ our common code:
 @#reader scribble/comment-reader
 (racketblock
  (define-class list%
-    (define/public (length)
+    (define (length)
       (send this foldr (λ (a b) (add1 b)) 0))
     (code:comment "other methods here"))
 )
@@ -341,13 +341,13 @@ write a binary tree class like this:
   (define-class leaf%
     (fields number)
     
-    (define/public (double n)
+    (define (double n)
       (new node% n this this)))
 
   (define-class node%
     (fields number left right)
     
-    (define/public (double n)
+    (define (double n)
       (new node% n this this)))
 )
 
@@ -363,20 +363,20 @@ of doing the doubling to it.  Below is an example of this:
   (define-class helper%
     ;; Number BT -> BT
     ;; Double the given tree and puts the number on top.
-    (define/public (double-helper number bt)
+    (define (double-helper number bt)
       (new node% number bt bt)))
   (define tutor (new helper%))
 
   (define-class leaf%
     (fields number)
     
-    (define/public (double n)
+    (define (double n)
       (send tutor double-helper n this)))
 
   (define-class node%
     (fields number left right)
     
-    (define/public (double n)
+    (define (double n)
       (send tutor double-helper n this)))
 )
 
