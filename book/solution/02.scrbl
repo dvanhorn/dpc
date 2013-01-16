@@ -27,10 +27,10 @@ This is a solution for the @secref{Home_on_the_Range} exercise.
   (fields lo hi)
   (check-expect ((range% 0 1) #,dot in-range? 0) true)      
   (check-expect ((range% 0 1) #,dot in-range? 1) false)
-  (define/public (in-range? n)                          
-    (and (>= n (field lo)) (< n (field hi))))
+  (define (in-range? n)                          
+    (and (>= n (send this lo)) (< n (send this hi))))
     
-  (define/public (union r)
+  (define (union r)
     (union-range% this r)))
 
 ;; Part 2:
@@ -49,10 +49,10 @@ This is a solution for the @secref{Home_on_the_Range} exercise.
   (check-expect ((hi-range% 0 1) #,dot in-range? 0) false)  
   (check-expect ((hi-range% 0 1) #,dot in-range? 0.5) true)
   (check-expect ((hi-range% 0 1) #,dot in-range? 1) true)
-  (define/public (in-range? n)                          
-    (and (> n (field lo)) (<= n (field hi))))
+  (define (in-range? n)                          
+    (and (> n (send this lo)) (<= n (send this hi))))
     
-  (define/public (union r)
+  (define (union r)
     (union-range% this r)))
 
 ;; Part 3:
@@ -70,11 +70,11 @@ This is a solution for the @secref{Home_on_the_Range} exercise.
 
 (define-class union-range%                              
   (fields left right)
-  (define/public (in-range? n)                          
-    (or ((field left) #,dot in-range? n)
-        ((field right) #,dot in-range? n)))
+  (define (in-range? n)                          
+    (or ((send this left) #,dot in-range? n)
+        ((send this right) #,dot in-range? n)))
 
-  (define/public (union r)                              
+  (define (union r)                              
     (union-range% this r)))
 
 (define r1 (range% 0 1))
