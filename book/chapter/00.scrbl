@@ -143,4 +143,4 @@ Asumu Takikawa (2012), and Nicholas Labich (2013), our tutors: Alex
 Lee, Nikko Patten, Jim Shargo, Trevor Sontag (2011), Spencer Florence,
 Sarah Laplante, Ryan Plessner (2012), Becca MacKenzie, and Kathleen
 Mullins (2013), and the Northeastern students we have had the
-privilege of teaching in 2011 and 2012.
+privilege of teaching in 2011, 2012, and 2013.
