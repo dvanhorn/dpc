@@ -45,15 +45,15 @@ of @racket[class-name] understands.  When an object is sent a
 @racket[method-name] message and some values, the @racket[body] of the
 method definition is evaluated with the values of the arguments in
 place of the @racket[variable]s.  Within a method, @racket[this]
-refers to the current object, i.e. the object whose method was called,
-and @racket[(field field-name)] refers to the value of the field named
-@racket[field-name] of the current object.
+refers to the current object, i.e. the object whose method was called.
+Every class implicitly defines an @emph{accessor methods} for each field,
+so @racket[(send this field-name)] refers to the value of the field
+named @racket[field-name] of @racket[this].
 
 A @racket[test] can be any form of @racket[check-expect].
 Conceptually, each @racket[test] is lifted out of the class definition
 and does not exist inside any instance of @racket[class-name],
-therefore @racket[test]s cannot reference fields using @racket[field]
-or use @racket[this].}
+therefore @racket[test]s cannot reference @racket[this].}
 
 @defform[(new class-name expression ...)]{ 
 
@@ -71,22 +71,19 @@ arguments.}
 
 @defform[(define (method-name variable ...) body)]{
 Within a class definition, this form defines a method.
+When a method is invoked, occurrences of @racket[this]
+within @racket[body] are bound to the receiver object.
+
 Outside of a class definition, this form defines a function;
 it is equivalent to @|define-id| in ISL/λ.}
 
-@deftogether[
-[@defidform[this]
- @defform[(fields id ...)]
- @defform[(field field-name)]]]{
-
-See @racket[define-class].  These forms are not allowed outside of a
+@defidform[this]{
+See @racket[define-class].  This form is not allowed outside of a
 method definition.
+}
 
-@deftogether[
-[@defform[(define/public (method-name variable ...) body)]
- @defform[(define/private (method-name variable ...) body)]]]{
-These forms are deprecated and should not be used in new code.
-Use @racket[define] instead.}
-
+@defform[(fields id ...)]{
+See @racket[define-class].  This form is not allowed outside of a
+class definition.
 }
 
