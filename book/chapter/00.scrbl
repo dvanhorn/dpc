@@ -11,8 +11,8 @@ Computer Science II (Honors): Introduction to Class-Based Program
 Design at Northeastern
 University.@note{@url{http://www.ccs.neu.edu/course/cs2510h/}} It
 began its life as a series of course notes from the Spring 2011
-incarnation of the class and is now being revised throughout the
-Spring 2012 semester.
+incarnation of the class, evolved during Spring 2012, and is now being
+revised throughout the Spring 2013 semester.
 
 The ``book'' is very much a work in progress, which means there are
 large omissions and numerous errors.  Moreover, it's certain to change
@@ -138,5 +138,9 @@ Desk and search for @tt{class/0} to get started.
 
 @section[#:style 'unnumbered]{Acknowledgments}
 
-We are grateful to Matthias Felleisen, Dan Brown, and the Northeastern
-students we have had the privilege of teaching in 2011 and 2012.
+We are grateful to Matthias Felleisen, our TAs: Dan Brown (2011),
+Asumu Takikawa (2012), and Nicholas Labich (2013), our tutors: Alex
+Lee, Nikko Patten, Jim Shargo, Trevor Sontag (2011), Spencer Florence,
+Sarah Laplante, Ryan Plessner (2012), Becca MacKenzie, and Kathleen
+Mullins (2013), and the Northeastern students we have had the
+privilege of teaching in 2011 and 2012.
