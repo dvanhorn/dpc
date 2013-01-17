@@ -117,3 +117,43 @@ For example, if a method takes an input @r[a-list] which is specified in the
 contract to be an @tt{IList}, then we know that @r[(send a-list empty?)],
 @r[(send a-list length)], and so on.  
 
+
+@section{Design Choices}
+
+Q: Which is considered a better design: a union with two
+variants, or a single variant with a Boolean field that indicates
+"which part of the union this data belongs to"?  For example, is it
+better to have a @racket[live-zombie%] and @racket[dead-zombie%] class
+or a single @racket[zombie%] class with a @racket[dead?] field.
+
+A: One of the themes of this and last semester is that @emph{once you
+have settled on choice for the representation of information in your
+program, the structure of your program follows the structure of that
+data}.  We've trained you to systematically derive code structure from
+data structure; there's a recipe---you don't even have to think.
+That's great because it frees up significant quantities of the most
+precious and limited resource in computing: your brain.  But
+unfortunately, that recipe kicks in only after you've chosen how
+information will be represented, i.e. after you've written down data
+definitions.  Much of the hard work in writing programs, and where
+your creative energy and brain power is really needed, is going from
+information to representation.  There is no recipe for this part of
+program design.  You need to develop the ability to analyze problems,
+take an account of what knowledge needs to be represented to solve a
+problem, and practice making decisions about how that knowledge can be
+represented computationally.  The good news is you don't have to be
+struck by divine inspiration to manage this step.  Program design is a
+process of iterative refinement: make some choices, follow the recipe.
+You will discover ways to improve your initial choices, so go back and
+revise, then carry out the changes in code structure those design
+decision entail.  Rinse and repeat.
+
+This is a long winded way of saying: there is no universal "right"
+answer to this question.  It will depend on the larger context.  That
+said, there are some important things to take into account for this
+particular question.  It is much easier to add new variants to a union
+than it is to create Boolean values other than @racket[true] and
+@racket[false].  Good program design is often based on anticipating
+future requirements.  If you think it's possible that there might be
+some other kind of zombie down the road, the union design will be less
+painful to extend and maintain.

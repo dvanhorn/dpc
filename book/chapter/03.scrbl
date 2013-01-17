@@ -305,7 +305,52 @@ interface will now work even for blinking lights.  We don't need to
 edit any uses of the @racket[next] method in order to make it work for
 blinking lights.  This program is truly extensible.
 
+@section{Sharing Interfaces}
+
+@verbatim{
+A Posn implements
+move-by : Real Real -> Posn
+move-to : Real Real -> Posn
+dist-to : Posn -> Real
+
+A Segment implements
+draw-on : Scene -> Scene
+move-by : Real Real -> Segment
+move-to : Real Real -> Segment
+dist-to : Posn -> Real
+}
+
+Notice that any object that is a @tt{Segment} is also a @tt{Posn}.
+
 @section{Exercises}
+
+@subsection{Beings, Zombies, and You}
+
+Q: I've designed a single interface @tt{Being} that subsumes both
+@tt{Zombie} and @tt{Player} in the current assignment.  Do I still
+have to design a @tt{Zombie} and @tt{Player} interface?
+
+A: Yes.  There are a couple reasons for this.  One is that there
+really are some differences between the operations that should be
+supported by a player versus a zombie.  For example, zombies eat
+brains; players don't.  Another is that, as you are probably noticing,
+much of this course is about interface specification and
+implementation.  As we build larger and larger programs, interfaces
+become a much more important engineering tool.  An interface can be
+viewed as a contract---an agreement on the terms of
+engagement---between the @emph{implementor} and the @emph{consumer} of
+a software component.  In this assignment, even though you are acting
+simultaneously as both of these parties, we are asking you to write
+down the agreement you are making between the world program that uses
+zombies and players and the classes that implement zombies and
+players.  Part of our agreement with you, is that you'll write
+separate specifications; so that's what you need to do.
+
+That said, if really believe that there should be a single uniform
+interface that all zombies @emph{and} players should adhere to, you
+can write a @tt{Being interface and program to it}.
+
+Revise your Zombie! program.
 
 @subsection{Super Zombie!}
 

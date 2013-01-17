@@ -16,97 +16,14 @@
 
 @title{Larger system design: Snakes on a plane}
 
-
-@section[#:tag-prefix "lec05"]{Questions and answers}
-
-@itemlist[
-
-@item{Q: I've designed a single interface @racket[being<%>] that
-subsumes both @racket[zombie<%>] and @racket[player<%>] in the current
-assignment.  Do I still have to design a @racket[zombie<%>] and
-@racket[player<%>] interface?
-
-A: Yes.  There are a couple reasons for this.  One is that there
-really are some differences between the operations that should be
-supported by a player versus a zombie.  For example, zombies eat
-brains; players don't.  Another is that, as you are probably noticing,
-much of this course is about interface specification and
-implementation.  As we build larger and larger programs, interfaces
-become a much more important engineering tool.  An interface can be
-viewed as a contract---an agreement on the terms of
-engagement---between the @emph{implementor} and the @emph{consumer} of
-a software component.  In this assignment, even though you are acting
-simultaneously as both of these parties, we are asking you to write
-down the agreement you are making between the world program that uses
-zombies and players and the classes that implement zombies and
-players.  Part of our agreement with you, is that you'll write
-separate specifications; so that's what you need to do.
-
-That said, if really believe that there should be a single uniform
-interface that all zombies @emph{and} players should adhere to, you
-can write a @racket[being<%>] interface.  You still need to write down
-the @racket[zombie<%>] and @racket[player<%>] interfaces, but if
-you're careful, you may be able to arrange things so that your classes
-that implement zombies and players declare to implement the
-@racket[being<%>] interface which @emph{implies} they also implement
-the @racket[zombie<%>] and @racket[player<%>] interface, respectively.
-We will cover this topic in more depth next Monday.}
-
-@item{Q: Interfaces often have overlapping sets of behaviors. For
-example, zombies and players share much of the same functionality.  Is
-there a way to do abstraction at the interface level?  
-
-A: In @racketmodname[class/1], there is currently no way to express
-this kind of abstraction.  We will consider adding this feature and
-covering it in future lectures.}
-
-@item{Q: Which is considered a better design: a union with two
-variants, or a single variant with a Boolean field that indicates
-"which part of the union this data belongs to"?  For example, is it
-better to have a @racket[live-zombie%] and @racket[dead-zombie%] class
-or a single @racket[zombie%] class with a @racket[dead?] field.
-
-A: One of the themes of this and last semester is that @emph{once you
-have settled on choice for the representation of information in your
-program, the structure of your program follows the structure of that
-data}.  We've trained you to systematically derive code structure from
-data structure; there's a recipe---you don't even have to think.
-That's great because it frees up significant quantities of the most
-precious and limited resource in computing: your brain.  But
-unfortunately, that recipe kicks in only after you've chosen how
-information will be represented, i.e. after you've written down data
-definitions.  Much of the hard work in writing programs, and where
-your creative energy and brain power is really needed, is going from
-information to representation.  There is no recipe for this part of
-program design.  You need to develop the ability to analyze problems,
-take an account of what knowledge needs to be represented to solve a
-problem, and practice making decisions about how that knowledge can be
-represented computationally.  The good news is you don't have to be
-struck by divine inspiration to manage this step.  Program design is a
-process of iterative refinement: make some choices, follow the recipe.
-You will discover ways to improve your initial choices, so go back and
-revise, then carry out the changes in code structure those design
-decision entail.  Rinse and repeat.
-
-This is a long winded way of saying: there is no universal "right"
-answer to this question.  It will depend on the larger context.  That
-said, there are some important things to take into account for this
-particular question.  It is much easier to add new variants to a union
-than it is to create Boolean values other than @racket[true] and
-@racket[false].  Good program design is often based on anticipating
-future requirements.  If you think it's possible that there might be
-some other kind of zombie down the road, the union design will be less
-painful to extend and maintain.}
-]
-
-@section{Information in the Snake Game}
-
 So far, we have introduced a lot of important new concepts such as
 interfaces and data and method inheritance for class-based
 abstraction.  In this chapter, we are going to see these concepts
 being applied in the context of a larger program design.  It's a game
 we've all seen and designed before; we're going to develop a
 class-based version of the Snake Game.
+
+@section{Information in the Snake Game}
 
 Our first task in designing the Snake Game is to take an account of
 the information that our program will need to represent.  This
@@ -282,7 +199,7 @@ approximation:
 @;item{Convert to pixel-based graphics-coordinates.}
 @item{Draw something at a coordinate on to a scene.}
 @item{Move a coordinate.}
-@item{Check that a coordinate is on the board.}
+@item{Determine whether a coordinate is on the board.}
 ]
 
 This list suggest the following interface for coordinates:
@@ -291,7 +208,7 @@ This list suggest the following interface for coordinates:
 (racketblock
  ;; A Coord implements
  
- ;; compare : Coord -> Boolean
+ ;; same-pos? : Coord -> Boolean
  ;; Is this coordinate at the same position as the given one?
  
  ;; draw : Scene -> Scene
@@ -300,7 +217,7 @@ This list suggest the following interface for coordinates:
  ;; move : -> Coord
  ;; Move this coordinate.
 
- ;; check : -> Boolean
+ ;; on-board? : -> Boolean
  ;; Is this coordinate on the board?
  )
 
@@ -329,8 +246,8 @@ there is nothing in the interface that gives us that capability,
 suggests we should revise the interface to include this needed
 behavior.
 
-Similarly, if we consider how to write the @racket[compare] method, we
-will want to compare the @emph{x}- and @emph{y}-components of the
+Similarly, if we consider how to write the @racket[same-pos?] method,
+we will want to compare the @emph{x}- and @emph{y}-components of the
 given coordinate with the @emph{x}- and @emph{y}-components of this
 coordinate.  Again, there is nothing in the interface as given that
 allows this, so we need to revise.
@@ -345,13 +262,6 @@ needed information.  For the purposes of our game, a position needs to
 be able to move one grid unit in one of four directions.  Let's design
 the representation of a direction and a directional input to the
 @racket[move] method.
-
-Finally, the names @racket[check] and @racket[compare] are less
-informative than they could be.  The @racket[compare] method answers
-the question "are two coordinates at the same position?", so let's
-instead call it @racket[same-pos?].  The @racket[check] method answers
-the question "is this coordinate on the board?", so let's instead call
-it @racket[on-board?].
 
 Interface design is incredibly important, especially when, unlike in
 our current situation, it is not easy to revise in the future.  Modern
@@ -456,15 +366,11 @@ This satisfies part of our implementation right off the bat: we get an
 @racket[x] and @racket[y] method by definition.  Let's now do
 @racket[same-pos?]:
 
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new seg% 0 0) same-pos? (new seg% 0 0)) true)
   (check-expect (send (new seg% 0 0) same-pos? (new seg% 1 0)) false)
-)
-
-@filebox[@r[seg%]]{
-@#reader scribble/comment-reader
-(racketblock
   (define (same-pos? c)
     (and (= (send this x) (send c x))
          (= (send this y) (send c y))))
@@ -473,6 +379,7 @@ This satisfies part of our implementation right off the bat: we get an
 
 And now @racket[draw]:
 
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new seg% 0 0) draw MT-SCENE)
@@ -480,15 +387,10 @@ And now @racket[draw]:
                              (* 1/2 SIZE)
                              (- HEIGHT-PX (* 1/2 SIZE))
                              MT-SCENE))
-)
-
-@filebox[@r[seg%]]{
-@#reader scribble/comment-reader
-(racketblock
   (define (draw scn)
     (place-image (square SIZE "solid" "red")
-                 (x-px)
-                 (y-px)
+                 (send this x-px)
+                 (send this y-px)
                  scn))
 )
 }
@@ -496,17 +398,13 @@ And now @racket[draw]:
 
 And now @racket[move]:
 
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new seg% 0 0) move "up")    (new seg%  0  1))
   (check-expect (send (new seg% 0 0) move "down")  (new seg%  0 -1))
   (check-expect (send (new seg% 0 0) move "left")  (new seg% -1  0))
   (check-expect (send (new seg% 0 0) move "right") (new seg%  1  0))
-)
-
-@filebox[@r[seg%]]{
-@#reader scribble/comment-reader
-(racketblock
   (define (move d)
     (cond [(string=? d "up")    
            (new seg% (send this x) (add1 (send this y)))]
@@ -521,17 +419,13 @@ And now @racket[move]:
 
 And now @racket[on-board?]:
 
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new seg% 0  0) on-board?) true)
   (check-expect (send (new seg% 0 -1) on-board?) false)
   (check-expect (send (new seg% 0 (sub1 HEIGHT)) on-board?) true)
   (check-expect (send (new seg% 0 HEIGHT) on-board?) false)
-)
-
-@filebox[@r[seg%]]{
-@#reader scribble/comment-reader
-(racketblock
   (define (on-board?)
     (and (<= 0 (send this x) (sub1 WIDTH))
          (<= 0 (send this y) (sub1 HEIGHT))))
@@ -540,15 +434,11 @@ And now @racket[on-board?]:
 
 And finally, the @racket[x-px] and @racket[y-px] methods:
 
+@filebox[@r[seg%]]{
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new seg% 0 0) x-px) (* 1/2 SIZE))
   (check-expect (send (new seg% 0 0) y-px) (- HEIGHT-PX (* 1/2 SIZE)))
-)
-
-@filebox[@r[seg%]]{
-@#reader scribble/comment-reader
-(racketblock
   (define (x-px)
     (* (+ 1/2 (send this x)) SIZE))
   (define (y-px)
@@ -580,8 +470,8 @@ design of @racket[seg%], we'll do @racket[food%] quickly:
 
     (define (draw scn)
       (place-image (square SIZE "solid" "green")
-                   (x-px)
-                   (y-px)
+                   (send this x-px)
+                   (send this y-px)
                    scn))
 
     (define (move d)
@@ -725,16 +615,12 @@ list):
 The @racket[grow] method is much like @racket[move], except that no
 element is dropped from the segments list:
 
+@filebox[@r[snake%]]{
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) grow)
                 (new snake% "right" (list (new seg% 1 0) 
                                           (new seg% 0 0))))
-)
-
-@filebox[@r[snake%]]{
-@#reader scribble/comment-reader
-(racketblock
   (define (grow)
     (new snake% 
          (send this dir)
@@ -745,15 +631,11 @@ element is dropped from the segments list:
 
 Now let's write the @racket[turn] method:
 
+@filebox[@r[snake%]]{
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new snake% "left" (list (new seg% 0 0))) turn "up")
                 (new snake% "up" (list (new seg% 0 0))))
-)
-
-@filebox[@r[snake%]]{
-@#reader scribble/comment-reader
-(racketblock
   (define (turn d)
     (new snake% d (send this segs)))
 )
@@ -761,15 +643,11 @@ Now let's write the @racket[turn] method:
 
 And finally, @racket[draw]:
 
+@filebox[@r[snake%]]{
 @#reader scribble/comment-reader
 (racketblock
   (check-expect (send (new snake% "left" (list (new seg% 0 0))) draw MT-SCENE)
                 (send (new seg% 0 0) draw MT-SCENE))
-)
-
-@filebox[@r[snake%]]{
-@#reader scribble/comment-reader
-(racketblock
   (define (draw scn)
     (foldl (λ (s scn) (send s draw scn))
            scn
@@ -847,8 +725,8 @@ interact with it in the interactions window:
            (= (send this y) (send c y))))
     (define (draw scn)
       (place-image (square SIZE "solid" "red")
-                   (x-px)
-                   (y-px)
+                   (send this x-px)
+                   (send this y-px)
                    scn))
     (define (move d)
       (cond [(string=? d "up")    
@@ -895,8 +773,8 @@ interact with it in the interactions window:
 
     (define (draw scn)
       (place-image (square SIZE "solid" "green")
-                   (x-px)
-                   (y-px)
+                   (send this x-px)
+                   (send this y-px)
                    scn))
 
     (define (move d)
@@ -1051,13 +929,15 @@ future.
   ;; Interp: represents a segment grid-coordinate.
   (define-class seg%
     (fields x y)
+    (check-expect (send origin same-pos? (new seg% 0 0)) true)
+    (check-expect (send origin same-pos? (new seg% 1 0)) false)
     (define (same-pos? c)
       (and (= (send this x) (send c x))
            (= (send this y) (send c y))))
     (define (draw scn)
       (place-image (square SIZE "solid" "red")
-                   (x-px)
-                   (y-px)
+                   (send this x-px)
+                   (send this y-px)
                    scn))
     (define (move d)
       (cond [(string=? d "up")    
@@ -1076,8 +956,6 @@ future.
     (define (y-px)
       (- HEIGHT-PX (* (+ 1/2 (send this y)) SIZE))))
 
-  (check-expect (send (new seg% 0 0) same-pos? (new seg% 0 0)) true)
-  (check-expect (send (new seg% 0 0) same-pos? (new seg% 1 0)) false)
   (check-expect (send (new seg% 0 0) draw MT-SCENE)
                 (place-image (square SIZE "solid" "red")
                              (* 1/2 SIZE)
@@ -1104,8 +982,8 @@ future.
 
     (define (draw scn)
       (place-image (square SIZE "solid" "green")
-                   (x-px)
-                   (y-px)
+                   (send this x-px)
+                   (send this y-px)
                    scn))
 
     (define (move d)
@@ -1164,6 +1042,7 @@ future.
              scn
              (send this segs))))
 
+  (define origin (new seg% 0 0))
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) move)
                 (new snake% "right" (list (new seg% 1 0))))
   (check-expect (send (new snake% "right" (list (new seg% 0 0))) grow)
@@ -1196,3 +1075,16 @@ future.
 
 @section[#:tag "Exercises (Ch 5.)"]{Exercises}
 
+@subsection{Different representation of Snakes}
+
+Consider the alternative data definition suggested for Snakes:
+
+@#reader scribble/comment-reader
+(racketblock
+  ;; A Snake is a (new snake% Dir Seg [Listof Seg])
+  (define-class snake%
+    (fields dir head segs))
+)
+
+Revise the Snake Game to use this definition and carry out all the
+changes it implies.
