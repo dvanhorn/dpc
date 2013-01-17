@@ -139,6 +139,7 @@ Desk and search for @tt{class/0} to get started.
 
 @section[#:style 'unnumbered]{Acknowledgments}
 
+<<<<<<< HEAD
 We are grateful to @index["Felleisen, Matthias"]{Matthias Felleisen},
 our TAs: @index["Brown, Daniel"]{Daniel Brown} (2011),
 @index["Takikawa, Asumu"]{Asumu Takikawa} (2012), and @index["Labich,
@@ -151,3 +152,11 @@ Ryan"]{Ryan Plessner} (2012), @index["MacKenzie, Becca"]{Becca
 MacKenzie}, and @index["Mullins, Kathleen"]{Kathleen Mullins} (2013),
 and the Northeastern students we have had the privilege of teaching in
 2011 and 2012.
+=======
+We are grateful to Matthias Felleisen, our TAs: Dan Brown (2011),
+Asumu Takikawa (2012), and Nicholas Labich (2013), our tutors: Alex
+Lee, Nikko Patten, Jim Shargo, Trevor Sontag (2011), Spencer Florence,
+Sarah Laplante, Ryan Plessner (2012), Becca MacKenzie, and Kathleen
+Mullins (2013), and the Northeastern students we have had the
+privilege of teaching in 2011, 2012, and 2013.
+>>>>>>> cabcaa8eb1326c1e6476c3be5266cfbfc716670b
