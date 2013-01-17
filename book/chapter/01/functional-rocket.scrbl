@@ -60,17 +60,19 @@
 @title{Functional rocket}
 
 In this section, let's develop a simple program that animates the
-lift-off of a rocket.
+lift-off of a @as-index{rocket}.
 
-The animation will be carried out by using the @racket[big-bang]
-system of the @racketmodname[2htdp/universe] library.  For an
-animation, @racket[big-bang] requires settling on a representation of
-@emph{world-states} and two functions: one that renders a world state
-as an image, and one that consumes a world state and produce the
-subsequent world state.  
+The animation will be carried out by using the
+@as-index{@racket[big-bang]} system of the
+@as-index{@racketmodname[2htdp/universe]} library.  For an
+@as-index{animation}, @racket[big-bang] requires settling on a
+representation of @deftech{world states} and two functions: one that
+renders a world state as an image, and one that consumes a world state
+and produce the subsequent world state.
 
 Generically speaking, to make an animation we must design a program of
-the form:
+the form: @index*['("on-tick") (list @racket[on-tick])]{}
+@index*['("to-draw") (list @racket[to-draw])]{}
 
 @classblock{
 (big-bang <world0>           ; World
@@ -96,10 +98,10 @@ to represent a rocket lifting off is its height.  That leads us to
 using a single number to represent rockets.  Since rockets only go up
 in our simple model, we can use non-negative numbers.  We'll interpret
 a non-negative number as meaning the distance between the ground and
-the
-(base of the) rocket measured in
-@link["http://en.wikipedia.org/wiki/Astronomical_unit"]{astronomical
-units} (AU):
+the (base of the) rocket measured in
+@link["http://en.wikipedia.org/wiki/Astronomical_unit"]{@deftech{astronomical
+units}} (@index*['("AU" "astronomical units") (list "AU"
+@tech{astronomical units})]{AU}):
 
 @classblock{
 ;; A Rocket is a non-negative Number.
@@ -121,8 +123,11 @@ Let's take them each in turn.
 
 @section{The @racket[next] function}
 
-For @racket[next], in order to compute the next position of a rocket
-we need to settle on the amount of elapsed time a call to
+@index*['("next") (list @racket[next])]{}
+
+For @index*['("rocket" "next") (list "rocket"
+@racket[next])]{@racket[next]}, in order to compute the next position
+of a rocket we need to settle on the amount of elapsed time a call to
 @racket[next] embodies and how fast the rocket rises per unit of time.
 For both, we define constants:
 
@@ -131,15 +136,20 @@ For both, we define constants:
 (define ROCKET-SPEED 1)    ; AU/SEC
 }
 
-The @racket[CLOCK-SPEED] is the rate at which the clock ticks, given
-in seconds per tick, and @racket[ROCKET-SPEED] is the rate at which
-the rocket lifts off, given in AU per second.  We use these two
-constants to define a third, computed, constant that gives change in
-the rocket's distance from the ground per clock tick:
+The @index*['("rocket" "CLOCK-SPEED") (list "rocket"
+@racket[CLOCK-SPEED])]{@racket[CLOCK-SPEED]} is the rate at which the
+clock ticks, given in seconds per tick, and @index*['("rocket"
+"ROCKET-SPEED") (list "rocket"
+@racket[ROCKET-SPEED])]{@racket[ROCKET-SPEED]} is the rate at which
+the rocket lifts off, given in @as-index{AU} per second.  We use these
+two constants to define a third, computed, constant that gives change
+in the rocket's distance from the ground per clock tick:
 
 @classblock{
 (define DELTA (* CLOCK-SPEED ROCKET-SPEED)) ; AU/TICK
 }
+
+@index*['("rocket" "DELTA") (list "rocket" @racket[DELTA])]{}
 
 We can now give examples of how @racket[next] should work.  We are
 careful to write test-cases in terms of the defined constants so that
@@ -162,7 +172,10 @@ we can write the code, which is made clear from the example:
 
 @section{The @racket[render] function}
 
-The purpose of @racket[render] is visualize a rocket a scene.
+@index*['("render") (list @racket[render])]{}
+
+The purpose of @index*['("render") (list
+@racket[render])]@racket[render] is visualize a rocket a scene.
 Remember that rockets are represented by the distance between the
 ground and their base, so a rocket at height @racket[0] should sitting
 at the bottom of a scene.  We want it to look something like:
@@ -173,7 +186,8 @@ at the bottom of a scene.  We want it to look something like:
 
 To do so we need to settle on the size of the sceen and the look of
 the rocket.  Again, we define constants for this.  We use the
-@racketmodname[2htdp/image] library for constructing images.
+@as-index{@racketmodname[2htdp/image]} library for constructing
+@as-index{images}.
 
 @#reader scribble/comment-reader
 (racketblock
@@ -183,12 +197,20 @@ the rocket.  Again, we define constants for this.  We use the
 (define MT-SCENE (empty-scene WIDTH HEIGHT))
 )
 
+@index*['("ROCKET") 
+(list (image (string-append (path->string (collection-path "class/0")) "/rocket.png")))]{}
+@index*['("ROCKET") (list @racket[ROCKET])]{}
+
+@index*['("empty-scene") (list @racket[empty-scene])]{}
+
 You can copy and paste the rocket image from this program, or
 you can access the image as follows:
 
 @interaction[#:eval the-eval
 (bitmap class/0/rocket.png)
 ]
+
+@index*['("bitmap") (list @racket[bitmap])]{}
 
 Since we may want to draw rockets on scenes other than the
 @racket[MT-SCENE], let's develop a helper function:
@@ -198,6 +220,8 @@ Since we may want to draw rockets on scenes other than the
 ;; Draw rocket on to scene.
 (define (draw-on r scn) ...)
 }
+
+@index*['("draw-on") (list @racket[draw-on])]{}
 
 allowing us to define @racket[render] simpy as:
 
@@ -209,11 +233,15 @@ allowing us to define @racket[render] simpy as:
 }
 
 Recall that a rocket is represented by the distance from the ground to
-its @bold{base}.  On the other hand, @racket[place-image] places an
-image's center at a given graphics-coordinate on a scene.  We need
-@racket[draw-on] to establish the mapping between AU and pixels (PX)
-and to covert from distance from the ground to base of the rocket to
-pixels from the top of the screen to center of the rocket image.
+its @bold{base}.  On the other hand, the
+@as-index{@racket[2htdp/image]} library works in terms of
+@deftech{pixels} (@index*['("PX" "pixels") (list "PX"
+@tech{pixels})]{PX}) and @deftech{graphics coordinates}.  We need
+@racket[draw-on] to establish the mapping between @as-index{AU}.  For
+simplicity, we assume 1 PX equals 1 AU.  Using
+@racket[overlay/align/offset], the @racket[draw-on] functions places
+the rocket on the scene on the center, bottom of the scene, offset
+vertically by the height of the rocket:
 
 @classblock{
 ;; draw-on : Rocket Scene -> Scene
@@ -225,9 +253,11 @@ pixels from the top of the screen to center of the rocket image.
                         scn))
 }
 
+@index*['("overlay/align/offset") (list @racket[overlay/align/offset])]{}
+
 @section{Lift off}
 
-With these functions in place, it is launch a rocket:
+With these functions in place, let's @index['("rocket" "launch")]{launch a rocket}:
 
 @classblock{
 ;; Lift off!
@@ -236,7 +266,12 @@ With these functions in place, it is launch a rocket:
           (on-tick next)
           (to-draw render))
 }
-          
+
+@index*['("big-bang") (list @racket[big-bang])]{}
+@index*['("tick-rate") (list @racket[tick-rate])]{}
+@index*['("on-tick") (list @racket[on-tick])]{}
+@index*['("to-draw") (list @racket[to-draw])]{}
+
 Our complete BSL program is:
 
 @#reader scribble/comment-reader

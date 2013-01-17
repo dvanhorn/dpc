@@ -16,9 +16,9 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/03.scrbl}
 @include-section{chapter/04a.scrbl}
 @include-section{chapter/04b.scrbl}
-@include-section{chapter/04.scrbl}
 @include-section{chapter/05.scrbl}
 @include-section{chapter/06.scrbl}
+@include-section{chapter/04.scrbl}
 @include-section{chapter/07.scrbl}
 @include-section{chapter/08.scrbl}
 @include-section{chapter/09.scrbl}
@@ -32,3 +32,4 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/17.scrbl}
 
 @include-section{solutions.scrbl}
+@index-section[]

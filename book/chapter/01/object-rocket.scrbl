@@ -68,6 +68,8 @@ to the top of your program:
 
 @racketmod[class/0]
 
+@index*['("class/0") (list @racketmodname[class/0])]{}
+
 The constants of the rocket program remain the same, so our new
 program still includes a set of constant definitions:
 
@@ -82,25 +84,27 @@ program still includes a set of constant definitions:
  (define HEIGHT 200)  ;; PX
  (define MT-SCENE (empty-scene WIDTH HEIGHT)))
 
-A set of objects is defined by a @emph{class}, which determines the
+A set of objects is defined by a @deftech{class}, which determines the
 number and name of fields and the name and meaning of each behavior
 that every object is the set contains.  By analogy, while an object is
 like a structure, a class definition is like a structure definition.
 
 @section{A class of rockets}
 
-The way to define a class is with @racket[define-class]:
+The way to define a class is with @as-index{@racket[define-class]}:
 
 @classblock{
 (define-class rocket%
   (fields dist))
 }
 
-This declares a new class of values, namely @racket[rocket%] objects.
-(By convention, we will use the @tt{%} suffix for the name of
-classes.)  For the moment, @racket[rocket%] objects consist only of
-data: they have one @emph{field}, the @racket[dist] between the rocket
-and the ground.
+@index*['("rocket" "rocket%") (list "rocket" @racket[rocket%])]{}
+
+This declares a new class of values, namely
+@as-index{@racket[rocket%]} objects.  (By convention, we will use the
+@tt{%} suffix for the name of classes.)  For the moment,
+@racket[rocket%] objects consist only of data: they have one
+@deftech{field}, the @racket[dist] between the rocket and the ground.
 
 Like a structure definition, this class definition defines a new kind
 of data, but it does not make any particular instance of that data.
@@ -114,9 +118,10 @@ produce a value for each field of the new object.  Since a
 This creates a @racket[rocket%] representing a rocket with height
 @racket[7].
 
-In order to access the data, we can invoke the @racket[dist] accessor
-method.  Methods are like functions for objects and they are called by
-using the @racket[send] form like so:
+In order to access the data, we can invoke the
+@as-index{@racket[dist]} accessor method.  Methods are like functions
+for objects and they are called by using the @as-index{@racket[send]}
+form like so:
 
 @interaction[#:eval the-eval
 (send (new rocket% 7) dist)]
@@ -131,9 +136,9 @@ This suggests that we can now re-write the data definition for
 
 @section{The @racket[next] and @racket[render] methods}
 
-To add functionality to our class, we define @emph{methods} using the
-@racket[define] form.  In this case, we want to add two methods
-@racket[next] and @racket[render]: 
+To add functionality to our class, we define @deftech{methods} using
+the @as-index{@racket[define] form}.  In this case, we want to add two
+methods @as-index{@racket[next]} and @as-index{@racket[render]}:
 
 @classblock{
   ;; A Rocket is a (new rocket% NonNegativeNumber)
@@ -186,12 +191,13 @@ accessible using accessors.  In other words, methods have an implicit
 input that does not show up in their header---it is the object that
 has called the method.  That value, since it is not available as an
 explicit parameter of the method, is made available through the
-@racket[this] variable.  We likewise revise the purpose statements to
-reflect the fact ``the rocket'' is the object calling the method, so
-we instead write ``this rocket'', emphasizing that @racket[this]
-refers to a rocket.
+@as-index{@racket[this] variable}.  We likewise revise the purpose
+statements to reflect the fact ``the rocket'' is the object calling
+the method, so we instead write ``this rocket'', emphasizing that
+@racket[this] refers to a rocket.
 
-That leads us to the following method headers:
+That leads us to the following @index['("method" "headers")]{method
+headers}:
 
 @filebox[@racket[rocket%]]{
 @classblock{
@@ -254,6 +260,8 @@ method:
                           scn))
 }}
 
+@index*['("overlay/align/offset") (list @racket[overlay/align/offset])]{}
+
 At this point, we can construct @racket[rocket%] objects and invoke
 methods.
 
@@ -272,7 +280,8 @@ methods.
 @(def-racket big-bang-id)
 
 It's now fairly easy to construct a program using @racket[rocket%]
-objects that is of the generic form of a @|big-bang-id| animation:
+objects that is of the generic form of a @as-index{@|big-bang-id|}
+animation:
 
 @#reader scribble/comment-reader
 (racketblock
@@ -309,12 +318,14 @@ like... @emph{an object!}  It's almost as if the interface for
 
 Now that we have objects proper, we can use a new @racket[big-bang]
 system has an interface more suited to objects.  To import this
-OO-style @racket[big-bang], add the following to the top of your
-program:
+OO-style @as-index{@racket[big-bang]}, add the following to the top of
+your program:
 
 @classblock{
 (require class/universe)
 }
+
+@index*['("class/universe") (list @racketmodname[class/universe])]{}
 
 In the functional setting, we had to explicitly give a piece of data
 representing the state of the initial world and list which functions
@@ -331,8 +342,13 @@ So to launch our rocket, we simply do the following:
 @racketblock[
 (big-bang (new rocket% 0))]
 
-In order to handle events, we need to add the methods @racket[on-tick]
-and @racket[to-draw] to @racket[rocket%]:
+In order to handle events, we need to add the methods
+@index*['("on-tick" "method") (list @racket[on-tick]
+"method")]{@racket[on-tick]} and @index*['("to-draw" "method") (list
+@racket[to-draw] "method")]{@racket[to-draw]} to @racket[rocket%]:
+
+@index*['("rocket%" "on-tick") (list @racket[racket%] @racket[on-tick])]{}
+@index*['("rocket%" "to-draw") (list @racket[racket%] @racket[to-draw])]{}
 
 @filebox[@racket[rocket%]]{
 @classblock{

@@ -21,32 +21,34 @@
 @margin-note{@secref{Complex_with_class_solution}}
        
 For this exercise, you will develop a class-based representation of
-complex numbers, which are used in several fields, including:
-engineering, electromagnetism, quantum physics, applied mathematics,
-and chaos theory.
+@index["complex numbers" "class-based representation of"]{complex
+numbers}, which are used in several fields, including: engineering,
+electromagnetism, quantum physics, applied mathematics, and chaos
+theory.
         
-A @emph{complex number} is a number consisting of a real and imaginary
-part. It can be written in the mathematical notation @emph{a+bi},
-where @emph{a} and @emph{b} are real numbers, and @emph{i} is the
-standard imaginary unit with the property @emph{i@superscript{2} =
-−1}.
+A @deftech{complex number} is a number consisting of a @deftech{real
+part} and an @deftech{imaginary part}. It can be written in the
+mathematical notation @index['("complex number" "mathematical
+notation")]{@emph{a+bi}}, where @emph{a} and @emph{b} are real
+numbers, and @emph{i} is the standard imaginary unit with the property
+@emph{i@superscript{2} = −1}.
         
 @margin-note{You can read more about the sophisticated number system
 of Racket in the @other-manual['(lib "scribblings/guide/guide.scrbl")]
 section on @secref["numbers" #:doc '(lib
 "scribblings/guide/guide.scrbl")].}  Complex numbers are so useful, it
 turns out they are included in the set of numeric values that Racket
-supports.  The Racket notation for writing down complex numbers is
-@racket[5+3i], where this number has a real part of @racketresult[5]
-and an imaginery part of @racketresult[3]; @racket[4-2i] has a real
-part of @racketresult[4] and imaginary part of @racketresult[-2].
-(Notice that complex numbers @emph{generalize} the real numbers since
-any real number can be expressed as a complex number with an imaginery
-part of @racketresult[0].)  Arithmetic operations on complex numbers
-work as they should, so for example, you can add, subtract, multiply,
-and divide complex numbers.  (One thing you can't do is @emph{order}
-the complex numbers, so @racket[<] and friends work only on real
-numbers.)
+supports.  The @index["complex number" "Racket notation"]{Racket
+notation} for writing down complex numbers is @racket[5+3i], where
+this number has a real part of @racketresult[5] and an imaginery part
+of @racketresult[3]; @racket[4-2i] has a real part of @racketresult[4]
+and imaginary part of @racketresult[-2].  (Notice that complex numbers
+@emph{generalize} the real numbers since any real number can be
+expressed as a complex number with an imaginery part of
+@racketresult[0].)  Arithmetic operations on complex numbers work as
+they should, so for example, you can add, subtract, multiply, and
+divide complex numbers.  (One thing you can't do is @emph{order} the
+complex numbers, so @racket[<] and friends work only on real numbers.)
         
 @#reader scribble/comment-reader
 (examples
