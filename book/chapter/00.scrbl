@@ -95,17 +95,18 @@ very systematic and very modest programming languages.}
 ``@link["http://www.cs.utexas.edu/users/EWD/transcriptions/EWD03xx/EWD340.html"]{The
 Humble Programmer}'', @as-index{Turing Award} Lecture, 1972}
 
-In support of this book, we have a developed a series of pared-down
+In support of this book, we have a developed a series of modest
 programming languages that emphasize the principles of object-oriented
 design.  We use these languages throughout the first part of the book.
 They are deliberately not industrial strength programming languages,
 complete with full-featured libraries, convenience mechanisms, and the
-usual idiosyncrasies that accompany ``real'' languages.  Instead we have
-designed simple and consistent languages which embody the common core
-of all modern object-oriented languages.  The idea is that by focusing
-on the conceptual basis of object-oriented programming, students can
-apply their design knowledge regardless of whatever linguistic context
-they happen to find themselves in down the road.
+usual idiosyncrasies that accompany ``real'' languages.  Instead we
+have designed a progression of simple and consistent languages which
+embody the common core of modern object-oriented languages.  The idea
+is that by focusing on the conceptual basis of object-oriented
+programming, students can apply their design knowledge regardless of
+whatever linguistic context they happen to find themselves in down the
+road.
 
 In the second part, we transition to @as-index{Java}, a widely used
 industrial language that has been developed over more than 15 years.
