@@ -40,14 +40,14 @@ class/0
 (define-class counter-world%
   (fields n)
   
-  (define/public (on-tick)
-    (new counter-world% (add1 (field n))))
+  (define (on-tick)
+    (new counter-world% (add1 (send this n))))
   
-  (define/public (tick-rate)
+  (define (tick-rate)
     1)
   
-  (define/public (to-draw)
-    (overlay (text (number->string (field n))
+  (define (to-draw)
+    (overlay (text (number->string (send this n))
 		   40
 		   "red")
 	     (empty-scene 300 100))))
