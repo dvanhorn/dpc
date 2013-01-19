@@ -19,7 +19,7 @@ Imports all the modules named @racket[module-name]s.}
 Makes all of the @r[id]s available to other modules.}
 
 
-@defform/subs[#:literals (fields constructor implements define/public define/private super)
+@defform/subs[#:literals (fields constructor implements super define)
               (define-class class-name 
                 super-spec
 		implements-spec
@@ -34,9 +34,7 @@ Makes all of the @r[id]s available to other modules.}
                             (fields field-name ...)]
                [constructor-spec code:blank
                             (constructor (arg ...) body ...)]
-               [method-spec (define/public (method-name arg ...)
-                              body)
-                            (define/private (method-name arg ...)
+               [method-spec (define (method-name arg ...)
                               body)])]{
 
 Defines a new class named @racket[class-name], just as with
