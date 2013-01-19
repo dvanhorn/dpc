@@ -1073,18 +1073,4 @@ future.
 )
 
 
-@section[#:tag "Exercises (Ch 5.)"]{Exercises}
-
-@subsection{Different representation of Snakes}
-
-Consider the alternative data definition suggested for Snakes:
-
-@#reader scribble/comment-reader
-(racketblock
-  ;; A Snake is a (new snake% Dir Seg [Listof Seg])
-  (define-class snake%
-    (fields dir head segs))
-)
-
-Revise the Snake Game to use this definition and carry out all the
-changes it implies.
+@include-section{05/exercises.scrbl}
