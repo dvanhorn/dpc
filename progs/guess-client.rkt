@@ -5,23 +5,23 @@
 (define-class guess-world%
   (fields status)
   
-  (define/public (on-receive m)
+  (define (on-receive m)
     (new guess-world% m))
  
   
-  (define/public (to-draw)
-    (overlay (text (field status)
+  (define(to-draw)
+    (overlay (text (this . status)
                    40
                    "red")
              (empty-scene 300 100)))
   
-  (define/public (on-key k)
+  (define (on-key k)
     (local [(define n (string->number k))]
       (if (number? n)
           (make-package this n)
           this)))                    
   
-  (define/public (register) LOCALHOST))
+  (define (register) LOCALHOST))
 
 (launch-many-worlds
  (big-bang (new guess-world% "guess a number"))

@@ -8,42 +8,42 @@
           guesser)
   
   ;; is the given world the picker?
-  (define/public (picker? iw)
-    (and (iworld? (field picker))
-         (iworld=? iw (field picker))))
+  (define (picker? iw)
+    (and (iworld? (this . picker))
+         (iworld=? iw (this . picker))))
   
   ;; is the given world the guesser?
-  (define/public (guesser? iw)
-    (and (iworld? (field guesser))
-         (iworld=? iw (field guesser))))
+  (define (guesser? iw)
+    (and (iworld? (this . guesser))
+         (iworld=? iw (this . guesser))))
     
-  (define/public (on-new iw)
-    (cond [(false? (field picker))
+  (define (on-new iw)
+    (cond [(false? (this . picker))
            (make-bundle
             (new universe% false iw false)
             (list (make-mail iw "pick a number"))
             empty)]          
-          [(false? (field guesser))
+          [(false? (this . guesser))
            (make-bundle
-            (new universe% (field number) (field picker) iw)
+            (new universe% (this . number) (this . picker) iw)
             empty
             empty)]          
           [else
            (make-bundle this empty (list iw))]))
   
-  (define/public (on-msg iw m)
+  (define (on-msg iw m)
     (cond [(and (picker? iw)
-                (false? (field number)))           
+                (false? (this . number)))           
            (make-bundle
-            (new universe% m (field picker) (field guesser))
+            (new universe% m (this . picker) (this . guesser))
             empty
             empty)]
           [(picker? iw) ;; already picked a number
            (make-bundle this empty empty)]
           [(and (guesser? iw)
-                (number? (field number)))
+                (number? (this . number)))
            (make-bundle this 
-                        (list (make-mail iw (respond m (field number))))
+                        (list (make-mail iw (respond m (this . number))))
                         empty)]
           [(guesser? iw)
            (make-bundle this
