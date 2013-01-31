@@ -3,7 +3,7 @@
 ;; TODO after 2012: Kill function application syntax for method calls
 ;; within method definitions and bring back only after inheritance.
 (provide (all-defined-out))
-(provide send define/public define/private this)
+(provide send this)
 
 (require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define))
          (prefix-in isl+: (only-in "../test-engine/racket-tests.rkt"
@@ -27,25 +27,13 @@
   (define-syntax-class (member-name names)
     (pattern name:id
              #:fail-when 
-             (eq? (syntax-e #'name) 'field) 
-             "class members may not be named `field'" 
-             #:fail-when 
              (eq? (syntax-e #'name) 'define) 
              "class members may not be named `define'"
-             #:fail-when 
-             (eq? (syntax-e #'name) 'define/public) 
-             "class members may not be named `define/public'"
-             #:fail-when 
-             (eq? (syntax-e #'name) 'define/private) 
-             "class members may not be named `define/private'"
              #:fail-when 
              (memf (λ (id) (eq? (syntax-e id) (syntax-e #'name))) names)
              "duplicate class member name"))
   (define-syntax-class (member-def names)
-    #:literals (define define/public define/private)
-    (pattern ((~or define/public define/private) 
-              ((~var f (member-name names)) x:id ...) e:expr)
-             #:with def this-syntax)
+    #:literals (define)
     (pattern (define ((~var f (member-name names)) x:id ...) e:expr)
              #:with def #'(define/public (f x ...) e)))
   
