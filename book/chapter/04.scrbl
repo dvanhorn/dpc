@@ -14,17 +14,15 @@ Problem 3)}
 Course staff solution for regular zombie game:
 
 @filebox[@r[world%]]{
-@#reader scribble/comment-reader
-(racketblock
- (define (teleport)
-   (new world%
-        (new player%
-             (random WIDTH)
-             (random HEIGHT))
-        (send this zombies)
-        (send this mouse)))
-)
-}
+@classblock{
+(define (teleport)
+  (new world%
+       (new player%
+            (random WIDTH)
+            (random HEIGHT))
+       (send this zombies)
+       (send this mouse)))
+}}
 
 This has a significant bug: it always produces a plain
 @racket[player%], not a @racket[modulo-player%].
@@ -32,14 +30,12 @@ This has a significant bug: it always produces a plain
 Bug (pair0MN):
 
 @filebox[@r[modulo-player%]]{
-@#reader scribble/comment-reader
-(racketblock
- (define (teleport)
-   (new player%
-        (* -1 (random WORLD-SIZE))
-        (* -1 (random WORLD-SIZE))))
-)
-}
+@classblock{
+(define (teleport)
+  (new player%
+       (* -1 (random WORLD-SIZE))
+       (* -1 (random WORLD-SIZE))))
+}}
 
 This has a similar bug: it always produces a plain
 @racket[player%], not a @racket[modulo-player%].  However, it's in the
@@ -49,35 +45,31 @@ the @tt{modulo-player%} file, so there's an easy fix.
 Lack of abstraction (pair0PQ):
 
 @filebox[@r[modulo-player%]]{
-@#reader scribble/comment-reader
-(racketblock
- ;; warp : Real Real -> ModuloPlayer
- ;; change the location of this player to the given location
- (define (warp x y)
-   (new modulo-player%
-        (send this dest-x)
-        (send this dest-y)
-        x y))
-)
-}
+@classblock{
+;; warp : Real Real -> ModuloPlayer
+;; change the location of this player to the given location
+(define (warp x y)
+  (new modulo-player%
+       (send this dest-x)
+       (send this dest-y)
+       x y))
+}}
 
 @filebox[@r[player%]]{
-@#reader scribble/comment-reader
-(racketblock
- ;; warp : Real Real -> Player
- ;; change the location of this player to the given location
- (define (warp x y)
-   (new player%
-        (send this dest-x)
-        (send this dest-y)
-        x y))
-)
-}
+@classblock{
+;; warp : Real Real -> Player
+;; change the location of this player to the given location
+(define (warp x y)
+  (new player%
+       (send this dest-x)
+       (send this dest-y)
+       x y))
+}}
 
 This works correctly (this is the fix for the bug in Pair0MN's
-solution), but it duplicates code.  
+solution), but it duplicates code.
 
-We want to fix these bugs without duplicating code.  
+We want to fix these bugs without duplicating code.
 
 Possible solutions (suggested in class):
 @itemlist[
@@ -89,20 +81,20 @@ Unfortunately, this doesn't work because the class name in
 ]
 
 The solution is to add a new method to the interface, which constructs
-a new method of the appropriate class.  So, we add this method to the
+a new instance of the appropriate class.  So, we add this method to the
 @racket[player%] class:
 
-@racketblock[
+@classblock{
 (define (move x y)
   (new player% x y))
-]
+}
 
 And this method to the @racket[modulo-player%] class:
 
-@racketblock[
+@classblock{
 (define (move x y)
   (new modulo-player% x y))
-]
+}
 
 Here's an example of the technique in full.  We start with these classes:
 
@@ -200,81 +192,80 @@ Here is the list interface from the last homework assignment:
 Here's the usual implementation of a small subset of this interface,
 first for the recursive union implementation:
 
-@#reader scribble/comment-reader
-(racketblock
-  (define-class cons%
-    (fields first rest)
+@classblock{
+(define-class cons%
+  (fields first rest)
     
-    (define (cons x)
-      (new cons% x this))
+  (define (cons x)
+    (new cons% x this))
     
-    (define (empty)
-      (new empty%))
+  (define (empty)
+    (new empty%))
 
-    (define (length)
-      (add1 (send (send this rest) length)))
+  (define (length)
+    (add1 (send (send this rest) length)))
 
-    (define (foldr c b)
-      (c (send this first)
-         (send (send this rest) foldr c b))))
+  (define (foldr c b)
+    (c (send this first)
+       (send (send this rest) foldr c b))))
 
-  (define-class empty%
+(define-class empty%
     
-    (define (cons x)
-      (new cons% x this))
+  (define (cons x)
+    (new cons% x this))
     
-    (define (empty)
-      this)
+  (define (empty)
+    this)
 
-    (define (length)
-      0)
+  (define (length)
+    0)
 
-    (define (foldr c b)
-      b)))
+  (define (foldr c b)
+    b))
+}
 
 And for the wrapper list implementation:
 
-@#reader scribble/comment-reader
-(racketblock
-  (define-class wlist%
-    (fields ls)
+@classblock{
+(define-class wlist%
+  (fields ls)
     
-    (define (cons x)
-      (new wlist% (ls:cons x (send this ls))))
+  (define (cons x)
+    (new wlist% (ls:cons x (send this ls))))
     
-    (define (empty)
-      (new wlist% ls:empty))
+  (define (empty)
+    (new wlist% ls:empty))
 
-    (define (length)
-      (ls:length (send this ls)))
+  (define (length)
+    (ls:length (send this ls)))
 
-    (define (foldr c b)
-      (ls:foldr c b (send this ls))))
-)
+  (define (foldr c b)
+    (ls:foldr c b (send this ls))))
+}
 
 None of these look the same, so how can we abstract?  Our abstraction
 design recipe for using inheritance requires that methods look
 identical in order to abstract them into a common super class.  But,
 for example, the @r[length] method looks like this for @r[wlist%]:
 
-@#reader scribble/comment-reader
-(racketblock
-    (define (length)
-      (ls:length (send this ls))))
+@classblock{
+(define (length)
+  (ls:length (send this ls)))
+}
 
 Like this for @r[empty%]:
 
-@#reader scribble/comment-reader
-(racketblock
-    (define (length)
-      0))
+@classblock{
+(define (length)
+  0)
+}
 
 And like this for @r[cons%]:
 
-@#reader scribble/comment-reader
-(racketblock
-    (define (length)
-      (add1 (send (send this rest) length))))
+@classblock{
+(define (length)
+  (add1 (send (send this rest) length)))
+}
 
 
 @margin-note{In fact, all of
@@ -287,25 +278,23 @@ can be expressed using just a few simple operations, of which the most
 important is @r[foldr].  Here's an implementation of @r[length] which
 just uses @r[foldr] and simple arithmetic.  
 
-@#reader scribble/comment-reader
-(racketblock
-    (define (length)
-      (send this foldr (λ (a b) (add1 b)) 0))
-)
+@classblock{
+(define (length)
+  (send this foldr (λ (a b) (add1 b)) 0))
+}
 
 Note that this isn't specific to any one implementation of lists---in
 fact, we can use it for any of them.  This means that we can now
 abstract the method, creating a new @r[list%] class to share all of
 our common code:
 
-
-@#reader scribble/comment-reader
-(racketblock
- (define-class list%
-    (define (length)
-      (send this foldr (λ (a b) (add1 b)) 0))
-    (code:comment "other methods here"))
-)
+@classblock{
+(define-class list%
+  (define (length)
+    (send this foldr (λ (a b) (add1 b)) 0))
+  ;; other methods here
+  )
+}
 
 The only methods that need to be implemented differently for different
 list versions are @r[empty] and @r[cons], because they construct new
@@ -325,31 +314,30 @@ superclass.
 However, can we still abstract common code without @emph{either} of these
 mechanisms?  Yes.  
 
-Consider the @racketmodname[class/0], @emph{without} helper functions.  We can
-write a binary tree class like this:
+Consider the @racketmodname[class/0] language, @emph{without} helper
+functions.  We can write a binary tree class like this:
 
-@#reader scribble/comment-reader
-(racketmod
-  class/0
-  ;; A BT is one of:
-  ;; - (new leaf% Number)
-  ;; - (new node% Number BT BT)
+@codeblock{
+#lang class/0
+;; A BT is one of:
+;; - (new leaf% Number)
+;; - (new node% Number BT BT)
 
-  ;; double : Number -> BT
-  ;; Double this tree and put the number on top.
+;; double : Number -> BT
+;; Double this tree and put the number on top.
 
-  (define-class leaf%
-    (fields number)
-    
-    (define (double n)
-      (new node% n this this)))
+(define-class leaf%
+  (fields number)
+  
+  (define (double n)
+    (new node% n this this)))
 
-  (define-class node%
-    (fields number left right)
-    
-    (define (double n)
-      (new node% n this this)))
-)
+(define-class node%
+  (fields number left right)
+  
+  (define (double n)
+    (new node% n this this)))
+}
 
 Unfortunately, the @r[double] method is identical in both the @r[leaf%] and
 @r[node%] classes.  How can we abstract this without using inheritance or a
@@ -358,27 +346,27 @@ helper function?
 One solution is to create a new class, and @emph{delegate} the responsibility
 of doing the doubling to it.  Below is an example of this:
 
-@#reader scribble/comment-reader
-(racketblock
-  (define-class helper%
-    ;; Number BT -> BT
-    ;; Double the given tree and puts the number on top.
-    (define (double-helper number bt)
-      (new node% number bt bt)))
-  (define tutor (new helper%))
+@classblock{
+(define-class helper%
+  ;; Number BT -> BT
+  ;; Double the given tree and puts the number on top.
+  (define (double-helper number bt)
+    (new node% number bt bt)))
 
-  (define-class leaf%
-    (fields number)
-    
-    (define (double n)
-      (send tutor double-helper n this)))
+(define tutor (new helper%))
 
-  (define-class node%
-    (fields number left right)
+(define-class leaf%
+  (fields number)
     
-    (define (double n)
-      (send tutor double-helper n this)))
-)
+  (define (double n)
+    (send tutor double-helper n this)))
+
+(define-class node%
+  (fields number left right)
+    
+  (define (double n)
+    (send tutor double-helper n this)))
+}
 
 The @r[helper%] class has just one method, although we could add as many as we
 wanted.  We also need only one instance of @r[helper%], called @r[tutor],
