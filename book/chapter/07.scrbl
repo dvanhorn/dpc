@@ -372,17 +372,16 @@ kinds of numbers that are allowable to make for a sensible notion of a
 shape.  A circle with radius @racket[-5] or @racket[3+2i] doesn't make
 a whole lot of sense.}
 
-@#reader scribble/comment-reader
-(racketblock
- ;; A Shape is one of:
- ;; - (new circ% +Real Real Real)
- ;; - (new rect% +Real +Real Real Real)
- ;; A +Real is a positive, real number.
- (define-class circ%
-   (fields radius x y))
- (define-class rect%
-   (fields width height x y))
-)
+@classblock{
+;; A Shape is one of:
+;; - (new circ% +Real Real Real)
+;; - (new rect% +Real +Real Real Real)
+;; A +Real is a positive, real number.
+(define-class circ%
+  (fields radius x y))
+(define-class rect%
+  (fields width height x y))
+}
 
 Already we can see an opportunity for data abstraction since
 @racket[circ%]s and @racket[rect%]s both have @racket[x] and
