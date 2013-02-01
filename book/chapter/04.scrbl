@@ -149,45 +149,43 @@ it becomes identical in both classes, avoiding the code duplication.
 
 @section{Abstracting list methods with different representations}
 
-Here is the list interface from the last homework assignment:
+Here is a parametric list interface definition:
 
-@#reader scribble/comment-reader
-(racketblock
-; ==========================================================
-; Parametric lists
+@classblock{
+;; ==========================================================
+;; Parametric lists
 
-; A [Listof X] implements list<%>.
-(define-interface list<%>
-  [; X -> [Listof X]
-   ; Add the given element to the front of the list.
-   cons
-   ; -> [Listof X]
-   ; Produce the empty list.
-   empty
-   ; -> Nat
-   ; Count the number of elements in this list.
-   length
-   ; [Listof X] -> [Listof X]
-   ; Append the given list to the end of this list.
-   append
-   ; -> [Listof X]
-   ; Reverse the order of elements in this list.
-   reverse
-   ; [X -> Y] -> [Listof Y]
-   ; Construct the list of results of applying the function
-   ; to elements of this list.
-   map
-   ; [X -> Boolean] -> [Listof X]
-   ; Construct the list of elements in this list that
-   ; satisfy the predicate.
-   filter
-   ; [X Y -> Y] Y -> Y
-   ; For elements x_0...x_n, (f x_0 ... (f x_n b)).
-   foldr
-   ; [X Y -> Y] Y -> Y
-   ; For elements x_0...x_n, (f x_n ... (f x_0 b)).
-   foldl])
-)
+;; A [Listof X] implements
+;;
+;; cons : X -> [Listof X]
+;; Add the given element to the front of the list.
+;;
+;; empty : -> [Listof X]
+;; Produce the empty list.
+;;
+;; length : -> Nat
+;; Count the number of elements in this list.
+;;
+;; append : [Listof X] -> [Listof X]
+;; Append the given list to the end of this list.
+;;
+;; reverse : -> [Listof X]
+;; Reverse the order of elements in this list.
+;;
+;; map : [X -> Y] -> [Listof Y]
+;; Construct the list of results of applying the function
+;; to elements of this list.
+;;
+;; filter : [X -> Boolean] -> [Listof X]
+;; Construct the list of elements in this list that
+;; satisfy the predicate.
+;;
+;; foldr : [X Y -> Y] Y -> Y
+;; For elements x_0...x_n, (f x_0 ... (f x_n b)).
+;;
+;; foldl : [X Y -> Y] Y -> Y
+;; For elements x_0...x_n, (f x_n ... (f x_0 b)).
+}
 
 Here's the usual implementation of a small subset of this interface,
 first for the recursive union implementation:
