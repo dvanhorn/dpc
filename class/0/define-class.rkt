@@ -17,8 +17,6 @@
 
 (define-syntax object% (class-name #'r:object%))
 
-(define-syntax (field stx)
-  (raise-syntax-error #f "can only be used inside define-class" stx))
 (define-syntax (fields stx) 
   (raise-syntax-error #f "can only be used inside define-class" stx))
 
@@ -72,28 +70,16 @@
               (r:super-new)
               (r:define/public (fld) the-fld)
               ...
-              (splicing-let-syntax
-               ([field (λ (stx)
-                         (syntax-parse stx
-                           [(_ arg) 
-                            (let ([r (assf (λ (id) (eq? id (syntax-e #'arg)))
-                                           (list (list 'fld #'the-fld) ...))])
-                              (if r
-                                  (second r)
-                                  (raise-syntax-error #f 
-                                                      "no field by that name" 
-                                                      stx 
-                                                      #'arg)))]))])
-               (void)
-               (define/public (custom-write p) 
-                (fprintf p "(new ~a" 'class%)
-                (for ([i (list #,@(syntax->list #'(the-fld ...)))])                                  
-                  (fprintf p " ~v" i))
-                (fprintf p ")"))
-               (define/public (custom-display p) (custom-write p))
+              (void)
+              (define/public (custom-write p) 
+               (fprintf p "(new ~a" 'class%)
+               (for ([i (list #,@(syntax->list #'(the-fld ...)))])                                  
+                 (fprintf p " ~v" i))
+               (fprintf p ")"))
+              (define/public (custom-display p) (custom-write p))
 	       
-               <definition>.def
-               ...))))))]))
+              <definition>.def
+              ...)))))]))
 
 (define-syntax (new stx)
   (syntax-parse stx

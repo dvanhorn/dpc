@@ -1,13 +1,13 @@
 #lang racket
 (provide (all-defined-out))
-(provide new send define/public define/private this field fields)
+(provide new send define/public define/private this fields)
 
 (require (prefix-in isl+: (only-in lang/htdp-intermediate-lambda define)))
 (require (prefix-in isl+: (only-in "../test-engine/racket-tests.rkt"
                                    check-expect check-within 
                                    check-error check-member-of
                                    check-range)))
-(require (only-in "../0/define-class.rkt" field fields))
+(require (only-in "../0/define-class.rkt" fields))
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
                      unstable/syntax racket/syntax
@@ -38,9 +38,6 @@
 (define-syntax (define-class stx)
   (define-syntax-class (member-name names)
     (pattern name:id
-             #:fail-when 
-             (eq? (syntax-e #'name) 'field) 
-             "class members may not be named `field'" 
              #:fail-when 
              (eq? (syntax-e #'name) 'define/public) 
              "class members may not be named `define/public'"
@@ -86,8 +83,7 @@
                           (isl+:check-range <act> <lo> <hi>))))
        ...)
      #:with -class% (datum->syntax #f (syntax-e #'class%))
-     (with-syntax* ([field (datum->syntax stx 'field)]
-                    [fake-super (datum->syntax stx 'super)]
+     (with-syntax* ([fake-super (datum->syntax stx 'super)]
 
                     [fake-this (datum->syntax stx 'this)]
                     [fields (datum->syntax stx 'fields)]
@@ -164,20 +160,7 @@
               #;(r:super-new)
               (r:define/public (fld) the-fld)
               ...
-	      (splicing-let-syntax
-	       ([field 
-                  (λ (stx)
-                    (syntax-parse stx
-                      [(_ arg) 
-                       (let ([r (assf (λ (id) (eq? id (syntax-e #'arg)))
-                                      (list (list 'all-flds #'all-field-names) ...))])
-                         (if r
-                             (second r)
-                             (raise-syntax-error #f 
-                                                 "no field by that name" 
-                                                 stx 
-                                                 #'arg)))]))])
-               (void)
+	       (void)
                (over (custom-write p) 
                 (fprintf p "(object:~a" 'class%)
                 (for ([i (list #,@(append (syntax->list #'(the-fld ...))
@@ -188,7 +171,7 @@
 	       
                (public meths/new) ...
                <definition>.def
-               ...))))))]))
+               ...)))))]))
 
 (define-syntax (new stx)
   (syntax-parse stx

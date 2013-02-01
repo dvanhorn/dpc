@@ -47,7 +47,7 @@ This suggests the following implementation:
 @filebox[@r[counter%]]{
 @racketblock[
  (define (m)
-   (add1 (field called)))
+   (add1 (send this called)))
 ]}
 
 Now our all of our tests pass.
@@ -55,7 +55,7 @@ Now our all of our tests pass.
 @(the-eval '(begin
               (define-class counter%
                 (fields called)
-                (define (m) (add1 (field called))))
+                (define (m) (add1 (send this called))))
               ))
 
 However, when we try our a few more examples, we see this:
@@ -83,8 +83,8 @@ One possibility is to change @r[m] to produce both the desired result
   (fields called)
   (define (m)
     (make-r
-     (add1 (field called))
-     (counter% (add1 (field called))))))
+     (add1 (send this called))
+     (counter% (add1 (send this called))))))
 (define c (counter% 0))
 
 (send c m)
@@ -167,8 +167,8 @@ We can now revise our defintion of @r[m] to
 @filebox[@r[counter%]]{
 @racketblock[
 (define (m)
-  (begin (set-field! called (add1 (field called)))
-         (add1 (field called))))]}
+  (begin (set-field! called (add1 (send this called)))
+         (add1 (send this called))))]}
 
 Note that @r[set-field!] @emph{doesn't produce} a new version of the field,
 instead it @emph{changes} the field named @r[called] to something new.
@@ -197,8 +197,8 @@ language.  For example, we can simulate @r[begin] using @r[local].
 For example:
 
 @racketblock[
-(local [(define dummy (set-field! called (add1 (field called))))]
-  (add1 (field called)))
+(local [(define dummy (set-field! called (add1 (send this called))))]
+  (add1 (send this called)))
 ]
 
 This is very verbose, and requires creating new variables like
@@ -230,8 +230,8 @@ method/function that has an effect.
 ;; Produce the number of times m has been called
 ;; Effect : increment the called field
 (define (m)
-  (begin (set-field! called (add1 (field called)))
-         (add1 (field called))))
+  (begin (set-field! called (add1 (send this called)))
+         (add1 (send this called))))
 )}
 
 We've lost a lot of reasoning power but gained expressiveness.
@@ -249,7 +249,7 @@ afterwards.
   
   ;; Number -> Account
   (define (deposit n)
-    (account% (+ (field amt) n))))
+    (account% (+ (send this amt) n))))
 }
 
 But this doesn't model bank accounts properly.  
@@ -267,7 +267,7 @@ New version:
   ;; Effect: increases the field amt by n
   ;; Purpose: add money to this account
   (define (deposit n)
-    (set-field! amt (+ (field amt) n))))
+    (set-field! amt (+ (send this amt) n))))
 }
 Note that we don't need to produce any result at all.  
 
@@ -280,7 +280,7 @@ Note that we don't need to produce any result at all.
   ;; Deposit the appropriate amount
   ;; Effect: changes the the bank account amt
   (define (pay)
-    (send (field bank) deposit (field paycheck))))
+    (send (send this bank) deposit (send this paycheck))))
 }
 
 @(the-eval
@@ -294,7 +294,7 @@ Note that we don't need to produce any result at all.
        ;; Effect: increases the field amt by n
        ;; Purpose: add money to this account
        (define (deposit n)
-         (set-field! amt (+ (field amt) n))))
+         (set-field! amt (+ (send this amt) n))))
 
      ;; A Person is (person% String Account Number)
      (define-class person%
@@ -303,7 +303,7 @@ Note that we don't need to produce any result at all.
        ;; Deposit the appropriate amount
        ;; Effect: changes the the bank account amt
        (define (pay)
-         (send (field bank) deposit (field paycheck))))))
+         (send (send this bank) deposit (send this paycheck))))))
 
 @(the-eval '(require 'a))
 
@@ -427,7 +427,7 @@ Let's add a new method for modifying the author after a book is
 written:
 @codeblock{
 (define (add-book b)
-  (set-field! books (cons b (field books))))
+  (set-field! books (cons b (send this books))))
 }
 
 Now we change our example:
@@ -448,7 +448,7 @@ Now we change our example:
       (define-class author%
         (fields name books)
         (define (add-book b)
-          (set-field! books (cons b (field books)))))
+          (set-field! books (cons b (send this books)))))
 
       
       (define rose  (author% "Rose" empty))
@@ -501,7 +501,7 @@ As an example, recall our counter world program from @secref{counter}:
     ...
     ;; on-tick : -> Counter
     (define (on-tick)
-      (new counter-world% (add1 (field n)))))
+      (new counter-world% (add1 (send this n)))))
   
   (big-bang (new counter-world% 0))
 )
@@ -519,7 +519,7 @@ back-channel.
      ...
      ;; on-tick : -> Counter
      (define (on-tick)
-       (begin (set-field! n (add1 (field n)))
+       (begin (set-field! n (add1 (send this n)))
               this)))
 
   (big-bang (new counter-world% 0))
