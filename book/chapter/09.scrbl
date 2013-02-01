@@ -59,12 +59,12 @@ the implementation of the @r[contains?] method.
 However, we can write a new implementation that uses our invariant to
 avoid checking the rest of the list when it isn't necessary.  
 
-@racketblock[
+@classblock{
   (define (contains? n)
     (cond [(= n (field first)) true]
           [(< n (field first)) false]
-          [else ((field rest) #,(racketidfont ".") contains? n)]))
-]
+          [else ((field rest) . contains? n)]))
+}
 
 Because the list is always sorted in ascending order, if @r[n] is less
 than the first element, it must be less than every other element, and
@@ -73,18 +73,18 @@ therefore can't possibly be equal to any element in the list.
 Now we can implement the remaining methods from the interface. First, @r[insert]
 
 @filebox[@r[smt%]]{
-@racketblock[
-(check-expect ((new smt%) #,(racketidfont ".") insert 5) 
+@classblock{
+(check-expect ((new smt%) . insert 5) 
               (new scons% 5 (new smt%)))
 (define (insert n)
   (new scons% n (new smt%)))
-]}
+}}
 
 @filebox[@r[scons%]]{
-@racketblock[
-(check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") insert 7)
+@classblock{
+(check-expect ((new scons% 5 (new smt%)) . insert 7)
               (new scons% 5 (new scons% 7 (new smt%))))
-(check-expect ((new scons% 7 (new smt%)) #,(racketidfont ".") insert 5)
+(check-expect ((new scons% 7 (new smt%)) . insert 5)
               (new scons% 5 (new scons% 7 (new smt%))))
 (define (insert n)
   (cond [(< n (field first))
@@ -92,8 +92,8 @@ Now we can implement the remaining methods from the interface. First, @r[insert]
         [else
          (new scons%
               (field first)
-              ((field rest) #,(racketidfont ".") insert n))]))
-]}
+              ((field rest) . insert n))]))
+}}
 
 Note that we don't have to look at the whole list to insert the
 elements.  This is again a benefit of programming using the
@@ -104,45 +104,44 @@ We don't have to do anything for the empty list, because we have a
 precondition that we can only call @r[max] when the list is non-empty.
 
 @filebox[@r[scons%]]{
-@racketblock[
+@classblock{
 (define real-max max)
-(check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") max) 5)
-(check-expect ((new scons% 5 (new scons% 7 (new smt%))) #,(racketidfont ".") max) 7)
+(check-expect ((new scons% 5 (new smt%)) . max) 5)
+(check-expect ((new scons% 5 (new scons% 7 (new smt%))) . max) 7)
 (define (max)
-  (cond [((field rest) #,(racketidfont ".") empty?) (field first)]
-        [else ((field rest) #,(racketidfont ".") max)]))
-]}
+  (cond [((field rest) . empty?) (field first)]
+        [else ((field rest) . max)]))
+}}
 
 Again, this implementation relies on our data structure invariant.  To
 make this work, though, we need to implement @r[empty?].
 
 @filebox[@r[smt%]]{
-@racketblock[
-(check-expect ((new smt%) #,(racketidfont ".") empty?) true)
+@classblock{
+(check-expect ((new smt%) . empty?) true)
 (define (empty?) true)
-]}
+}}
 
 @filebox[@r[scons%]]{
-@racketblock[
-(check-expect ((new scons% 1 (new smt%)) #,(racketidfont ".") empty?) false)
+@classblock{
+(check-expect ((new scons% 1 (new smt%)) . empty?) false)
 (define (empty?) false)
-]}
+}}
 
 The final two methods are similar.  Again, we don't implement @r[min]
 in @r[smt%], because of the precondition in the interface.  
 @filebox[@r[smt%]]{
-@racketblock[
-(code:comment "no min method")
+@classblock{
+;; no min method
 (define (->list) empty)
-]
-}
+}}
 
 @filebox[@r[scons%]]{
-@racketblock[
+@classblock{
 (define (min) (field first))
 (define (->list)
-  (cons (field first) ((field rest) #,(racketidfont ".") ->list)))
-]}
+  (cons (field first) ((field rest) . ->list)))
+}}
 
 
 @section{Properties of Programs and  Randomized Testing}
@@ -169,18 +168,18 @@ true, with just a bit of programming effort.
 First, we want to write a program that asks the question associated
 with this property.
 
-@racketblock[
-(code:comment "Property: forall sorted lists and numbers, this predicate holds")
-(code:comment  "insert-contains? : ISorted Number -> Boolean")
+@classblock{
+;; Property: forall sorted lists and numbers, this predicate holds
+;; insert-contains? : ISorted Number -> Boolean
 (define (insert-contains? sls n)
-  ((sls #,(racketidfont ".") insert n) #,(racketidfont ".") contains? n))
-]
+  ((sls . insert n) . contains? n))
+}
 
 Now we make lots of randomly generated tests, and see if the predicate
 holds. First, let's build a random sorted list generator.
 
-@racketblock[
-(code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
+@classblock{
+;; build-sorted : Nat (Nat -> Number) -> Sorted
 (define (build-sorted i f)
   (cond [(zero? i) (new smt%)]
         [else
@@ -188,23 +187,22 @@ holds. First, let's build a random sorted list generator.
               (f i)
               (build-sorted (sub1 i) f))]))
 (build-sorted 5 (lambda (x) x))
-]
+}
 
 Oh no!  We broke the invariant.  The @r[scons%] constructor allows you
 to break the invariant, and now all of our methods don't work.
 Fortunately, we can implement a fixed version that uses the @r[insert]
 method to maintain the sorted list invariant:
 
-@racketblock[
-(code:comment  "build-sorted : Nat (Nat -> Number) -> Sorted")
+@classblock{
+;; build-sorted : Nat (Nat -> Number) -> Sorted
 (define (build-sorted i f)
   (cond [(zero? i) (new smt%)]
         [else
-         ((build-sorted (sub1 i) f) #,(racketidfont ".") insert (f i))]))
+         ((build-sorted (sub1 i) f) . insert (f i))]))
 (check-expect (build-sorted 3 (lambda (x) x))
               (new scons% 1 (new scons% 2 (new scons% 3 (new smt%)))))
-
-]
+}
 
 Now @r[build-sorted] produces the correct answer, which we can easily
 verify at the Interactions window.
@@ -254,12 +252,12 @@ When this says that we've passed 1000 tests, we'll be more sure that
 we've gotten our function right.  
 
 What if we change our property to this untrue statement?
-@racketblock[
-(code:comment "Property: forall sorted lists and numbers, this predicate holds")
-(code:comment "insert-contains? : ISorted Number -> Boolean")
+@classblock{
+;; Property: forall sorted lists and numbers, this predicate holds
+;; insert-contains? : ISorted Number -> Boolean
 (define (insert-contains? sls n)
-  (sls #,(racketidfont ".") contains? n))
-]
+  (sls . contains? n))
+}
 
 Now we get lots of test failures, but the problem is @emph{not} in our
 implementation of sorted lists, it's in our property definition.  If
@@ -314,12 +312,12 @@ Therefore, the @emph{only} part of our code that the rest of the world
 can see is the @r[smt] value.  To add new elements, the rest of the
 world has to use the @r[insert] method.  
 
-@racketmod[
-class/1
+@codeblock{
+#lang class/1
 (require "sorted-list.rkt")
 
-(smt #,(racketidfont ".") insert 4)
-]
+(smt . insert 4)
+}
 
 Here, we've used @r[require], which we've used to refer to libraries
 that come with DrRacket.  However, we can specify the name of a file,
