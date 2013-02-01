@@ -48,22 +48,20 @@ Stepping back, we can see that the way to represent some fixed number
 position can be represented by a pair (@emph{x},@emph{y}) of real
 numbers:
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; A Posn is (new posn% Real Real)
 (define-class posn%
   (fields x y))
-)
-
+}
 
 Methods can compute with any given arguments and the object that
 calling the method, thus the template for a @racket[posn%] method is:
 
-@#reader scribble/comment-reader
-(racketblock
- ;; posn%-method : Z ... -> ???
- (define (posn%-method z ...)
-   ... (send this x) (send this y) z ...))
+@classblock{
+;; posn%-method : Z ... -> ???
+(define (posn%-method z ...)
+  ... (send this x) (send this y) z ...)
+}
 
 Here we see that our template lists the available parts of the
 @racket[posn%] object, in particular the two fields @racket[x] and
@@ -76,8 +74,7 @@ possibilities.  For example, we can represent a traffic light like the
 ones on Huntington Avenue with a finite set of symbols, as we did in
 Fundies I:
 
-@codeblock[#:keep-lang-line? #f]{
-#lang class/0
+@classblock{
 ;; A Light is one of:
 ;; - 'Red
 ;; - 'Green
@@ -87,28 +84,26 @@ Fundies I:
 Following the design recipe, we can construct the template for
 functions on @tt{Light}s:
 
-@#reader scribble/comment-reader
-(racketblock
- ;; light-function : Light -> ???
- (define (light-function l)
-   (cond [(symbol=? 'Red l) ...]
-         [(symbol=? 'Green l) ...]
-         [(symbol=? 'Yellow l) ...]))
- )
+@classblock{
+;; light-function : Light -> ???
+(define (light-function l)
+  (cond [(symbol=? 'Red l) ...]
+        [(symbol=? 'Green l) ...]
+        [(symbol=? 'Yellow l) ...]))
+}
 
 Finally, we can define functions over @tt{Light}s, following the template.  
-
-@#reader scribble/comment-reader
-(racketblock
- ;; next : Light -> Light
- ;; Next light after the given light
- (check-expect (next 'Green) 'Yellow)
- (check-expect (next 'Red) 'Green)
- (check-expect (next 'Yellow) 'Red)
- (define (next l)
-   (cond [(symbol=? 'Red l) 'Green]
-         [(symbol=? 'Green l) 'Yellow]
-         [(symbol=? 'Yellow l) 'Red])))
+@classblock{
+;; next : Light -> Light
+;; Next light after the given light
+(check-expect (next 'Green) 'Yellow)
+(check-expect (next 'Red) 'Green)
+(check-expect (next 'Yellow) 'Red)
+(define (next l)
+  (cond [(symbol=? 'Red l) 'Green]
+        [(symbol=? 'Green l) 'Yellow]
+        [(symbol=? 'Yellow l) 'Red]))
+}
 
 That's all well and good for a function-oriented design, but we want
 to design this using classes, methods, and objects.
@@ -214,11 +209,11 @@ number of numbers stored in a @tt{BT}.
 
 Here are our examples:
 
-@racketblock[
+@classblock{
 (check-expect (send ex1 count) 1)
 (check-expect (send ex2 count) 5)
 (check-expect (send ex3 count) 3)
-]
+}
 
 Next, we write down the
 templates for methods of our two classes.
@@ -236,83 +231,77 @@ The template for @racket[leaf%]:
 
 The template for @racket[node%]:
 
-@#reader scribble/comment-reader
-(filebox 
+@filebox[
  (racket node%)
- (racketblock
+ @classblock{
   ;; count : -> Number
   ;; count the number of numbers in this node
   (define (count)
     (send this number) ...
     (send (send this left) count) ...
-    (send (send this right) count) ...)))
+    (send (send this right) count) ...)}]
 
 Now we provide a definition of the @racket[count] method for each of
 our classes.
 
-@#reader scribble/comment-reader
-(filebox 
+@filebox[
  (racket leaf%)
- (racketblock
+ @classblock{
   ;; count : -> Number
   ;; count the number of numbers in this leaf
   (define (count)
-    1)))
+    1)}]
 
-@#reader scribble/comment-reader
-(filebox 
+@filebox[
  (racket node%)
- (racketblock
+ @classblock{
   ;; count : -> Number
   ;; count the number of numbers in this node
   (define (count)
     (+ 1
        (send (send this left) count)
-       (send (send this right) count)))))
+       (send (send this right) count)))}]
 
 Next, we want to write the @racket[double] function, which takes a
 number and produces two copies of the @tt{BT} with the given number at
 the top.  Here is a straightforward implementation for @racket[leaf%]:
 
-@#reader scribble/comment-reader
-(filebox 
+@filebox[
  (racket leaf%)
- (racketblock
+ @classblock{
   ;; double : Number -> BT
   ;; double this leaf and put the number on top
   (define (double n)
     (new node%
          n
          (new leaf% (send this number))
-         (new leaf% (send this number))))))
+         (new leaf% (send this number))))}]
 
 Note that @racket[(new leaf% (send this number))] is just constructing a
 new @racket[leaf%] object just like the one we started with.
 Fortunately, we have a way of referring to ourselves, using the
 identifier @racket[this].  We can thus write the method as:
 
-@#reader scribble/comment-reader
-(filebox 
+@filebox[
  (racket leaf%)
- (racketblock
+ @classblock{
   ;; double : Number -> BT
   ;; double this leaf and put the number on top
   (define (double n)
-    (new node% n this this))))
+    (new node% n this this))}]
 
 For @racket[node%], the method is very similar:
 @margin-note{Since these two methods are so similar, you may wonder if
 they can be abstracted to avoid duplication.  We will see how to do
 this in a subsequent class.}
 
-@#reader scribble/comment-reader
-(filebox 
+@filebox[
  (racket node%)
- (racketblock
+ @classblock{
   ;; double : Number -> BT
   ;; double this node and put the number on top
   (define (double n)
-    (new node% n this this))))
+    (new node% n this this))}]
 
 The full @tt{BT} code is now:
 @#reader scribble/comment-reader
