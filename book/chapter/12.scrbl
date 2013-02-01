@@ -147,19 +147,19 @@ the visitor on its data and recur where needed:
 (define-class lo-range%
   (fields lo hi)
  
-  (define/public (visit v)
+  (define (visit v)
     (v . lo-range (field lo) (field hi))))
 
 (define-class hi-range%
   (fields lo hi)
 
-  (define/public (visit v)
+  (define (visit v)
     (v . hi-range (field lo) (field hi))))
 
 (define-class union-range%
   (fields left right)
 
-  (define/public (visit v)
+  (define (visit v)
     (v . union-range ((field left) . visit v) 
                      ((field right) . visit v))))
 }|
@@ -215,12 +215,12 @@ class/2
 (define-class world%
   (fields generator num)
   ;; to-draw : -> Scene
-  (define/public (to-draw)
+  (define (to-draw)
     (overlay
      (text (number->string (field num)) 20 "black")
      (empty-scene 500 500)))
   ;; on-key : Key -> World
-  (define/public (on-key k)
+  (define (on-key k)
     (world% (field generator)
             ((field generator) #,dot pick))))
 
@@ -230,7 +230,7 @@ class/2
 ;; produce a number to show that isn't in bad
 (define-class generator%
   (fields bad)
-  (define/public (pick)
+  (define (pick)
     (local [(define x (random 10))]
       (cond [(member x (field bad)) (pick)]
             [else x]))))
@@ -252,12 +252,12 @@ class/2
 (define-class world%
   (fields generator num)
   ;; to-draw : -> Scene
-  (define/public (to-draw)
+  (define (to-draw)
     (overlay
      (text (number->string (field num)) 20 "black")
      (empty-scene 500 500)))
   ;; on-key : Key -> World
-  (define/public (on-key k)
+  (define (on-key k)
     (cond [(key=? k "x")
            (local [(define g ((field generator) #,dot add-bad (field num)))]
              (world% g (g #,dot pick)))]
@@ -273,9 +273,9 @@ class/2
 ;; produce a generator like that with an additional bad number
 (define-class generator%
   (fields bad)
-  (define/public (add-bad n)
+  (define (add-bad n)
     (generator% (cons n (field bad))))
-  (define/public (pick)
+  (define (pick)
     (local [(define x (random 10))]
       (cond [(member x (field bad)) (pick)]
             [else x]))))
@@ -298,12 +298,12 @@ class/3
 (define-class world%
   (fields generator num)
   ;; to-draw : -> Scene
-  (define/public (to-draw)
+  (define (to-draw)
     (overlay
      (text (number->string (field num)) 20 "black")
      (empty-scene 500 500)))
   ;; on-key : Key -> World
-  (define/public (on-key k)
+  (define (on-key k)
     (cond [(key=? "x" k)
            (begin ((field generator) #,dot tell-bad)
                   (world% (field generator)
@@ -322,9 +322,9 @@ class/3
 ;; effect : changes the generator to add the last number picked to the bad list
 (define-class generator%
   (fields bad last)
-  (define/public (tell-bad)
+  (define (tell-bad)
     (set-field! bad (cons (field last) (field bad))))
-  (define/public (pick)
+  (define (pick)
     (local [(define rnd (random 10))]
       (cond [(member rnd (field bad)) (pick)]
             [else (begin
@@ -358,12 +358,12 @@ class/3
 (define-class world%
   (fields generator num)
   ;; to-draw : -> Scene
-  (define/public (to-draw)
+  (define (to-draw)
     (overlay
      (text (number->string (field num)) 20 "black")
      (empty-scene 500 500)))
   ;; on-key : Key -> World
-  (define/public (on-key k)
+  (define (on-key k)
     (cond [(key=? k "x")
            (world% (field generator)
                    ((field generator) #,dot pick-bad))]
@@ -380,10 +380,10 @@ class/3
 ;; pick a number to show, and remember that the last one was bad
 (define-class generator%
   (fields bad last)
-  (define/public (pick-bad)
+  (define (pick-bad)
     (begin (set-field! bad (cons (field last) (field bad)))
            (pick)))
-  (define/public (pick)
+  (define (pick)
     (local [(define x (random 10))]
       (cond [(member x (field bad)) (pick)]
             [else (begin (set-field! last x)

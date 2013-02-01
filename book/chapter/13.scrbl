@@ -38,7 +38,7 @@ different syntax and with types.
 (define-class C
   (fields x y z)
   (code:comment "Number Number -> C")
-  (define/public (m p q)
+  (define (m p q)
     ...))
 ]
 

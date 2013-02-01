@@ -39,7 +39,7 @@ the implementation of the @r[contains?] method.
 ;; - (new scons% Number Sorted)
 (define-class smt%
   (check-expect ((new smt%) . contains? 5) false)
-  (define/public (contains? n)
+  (define (contains? n)
     false))
 
 (define-class scons%
@@ -50,7 +50,7 @@ the implementation of the @r[contains?] method.
                 false)
   (check-expect ((new scons% 5 (new scons% 7 (new smt%))) . contains? 9)
                 false)
-  (define/public (contains? n)
+  (define (contains? n)
     (or (= n (field first))
         ((field rest) . contains? n))))
 }
@@ -60,7 +60,7 @@ However, we can write a new implementation that uses our invariant to
 avoid checking the rest of the list when it isn't necessary.  
 
 @racketblock[
-  (define/public (contains? n)
+  (define (contains? n)
     (cond [(= n (field first)) true]
           [(< n (field first)) false]
           [else ((field rest) #,(racketidfont ".") contains? n)]))
@@ -76,7 +76,7 @@ Now we can implement the remaining methods from the interface. First, @r[insert]
 @racketblock[
 (check-expect ((new smt%) #,(racketidfont ".") insert 5) 
               (new scons% 5 (new smt%)))
-(define/public (insert n)
+(define (insert n)
   (new scons% n (new smt%)))
 ]}
 
@@ -86,7 +86,7 @@ Now we can implement the remaining methods from the interface. First, @r[insert]
               (new scons% 5 (new scons% 7 (new smt%))))
 (check-expect ((new scons% 7 (new smt%)) #,(racketidfont ".") insert 5)
               (new scons% 5 (new scons% 7 (new smt%))))
-(define/public (insert n)
+(define (insert n)
   (cond [(< n (field first))
          (new scons% n this)]
         [else
@@ -108,7 +108,7 @@ precondition that we can only call @r[max] when the list is non-empty.
 (define real-max max)
 (check-expect ((new scons% 5 (new smt%)) #,(racketidfont ".") max) 5)
 (check-expect ((new scons% 5 (new scons% 7 (new smt%))) #,(racketidfont ".") max) 7)
-(define/public (max)
+(define (max)
   (cond [((field rest) #,(racketidfont ".") empty?) (field first)]
         [else ((field rest) #,(racketidfont ".") max)]))
 ]}
@@ -119,13 +119,13 @@ make this work, though, we need to implement @r[empty?].
 @filebox[@r[smt%]]{
 @racketblock[
 (check-expect ((new smt%) #,(racketidfont ".") empty?) true)
-(define/public (empty?) true)
+(define (empty?) true)
 ]}
 
 @filebox[@r[scons%]]{
 @racketblock[
 (check-expect ((new scons% 1 (new smt%)) #,(racketidfont ".") empty?) false)
-(define/public (empty?) false)
+(define (empty?) false)
 ]}
 
 The final two methods are similar.  Again, we don't implement @r[min]
@@ -133,14 +133,14 @@ in @r[smt%], because of the precondition in the interface.
 @filebox[@r[smt%]]{
 @racketblock[
 (code:comment "no min method")
-(define/public (->list) empty)
+(define (->list) empty)
 ]
 }
 
 @filebox[@r[scons%]]{
 @racketblock[
-(define/public (min) (field first))
-(define/public (->list)
+(define (min) (field first))
+(define (->list)
   (cons (field first) ((field rest) #,(racketidfont ".") ->list)))
 ]}
 

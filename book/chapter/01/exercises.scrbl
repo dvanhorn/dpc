@@ -101,7 +101,7 @@ complex numbers, so @racket[<] and friends work only on real numbers.)
   (the-eval
    `(define-class complex%
       (fields real imag)                 
-      (define/private (n) (+ (field real) (* +i (field imag))))
+      (define (n) (+ (send this real) (* +i (send this imag))))
       
       (define (=? c)
         (= (n) (send c to-number)))
@@ -127,7 +127,7 @@ complex numbers, so @racket[<] and friends work only on real numbers.)
       (define (mag)
         (magnitude (n)))
       
-      (define/private (from-number c)
+      (define (from-number c)
         (new complex% 
              (real-part c)
              (imag-part c)))

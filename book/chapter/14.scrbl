@@ -166,7 +166,7 @@ We can now revise our defintion of @r[m] to
 
 @filebox[@r[counter%]]{
 @racketblock[
-(define/public (m)
+(define (m)
   (begin (set-field! called (add1 (field called)))
          (add1 (field called))))]}
 
@@ -229,7 +229,7 @@ method/function that has an effect.
 ;; m : -> Number
 ;; Produce the number of times m has been called
 ;; Effect : increment the called field
-(define/public (m)
+(define (m)
   (begin (set-field! called (add1 (field called)))
          (add1 (field called))))
 )}
@@ -248,7 +248,7 @@ afterwards.
   (fields amt)
   
   ;; Number -> Account
-  (define/public (deposit n)
+  (define (deposit n)
     (account% (+ (field amt) n))))
 }
 
@@ -266,7 +266,7 @@ New version:
   ;; Number -> Void
   ;; Effect: increases the field amt by n
   ;; Purpose: add money to this account
-  (define/public (deposit n)
+  (define (deposit n)
     (set-field! amt (+ (field amt) n))))
 }
 Note that we don't need to produce any result at all.  
@@ -279,7 +279,7 @@ Note that we don't need to produce any result at all.
   ;; -> Void
   ;; Deposit the appropriate amount
   ;; Effect: changes the the bank account amt
-  (define/public (pay)
+  (define (pay)
     (send (field bank) deposit (field paycheck))))
 }
 
@@ -293,7 +293,7 @@ Note that we don't need to produce any result at all.
        ;; Number -> 
        ;; Effect: increases the field amt by n
        ;; Purpose: add money to this account
-       (define/public (deposit n)
+       (define (deposit n)
          (set-field! amt (+ (field amt) n))))
 
      ;; A Person is (person% String Account Number)
@@ -302,7 +302,7 @@ Note that we don't need to produce any result at all.
        ;; -> Void
        ;; Deposit the appropriate amount
        ;; Effect: changes the the bank account amt
-       (define/public (pay)
+       (define (pay)
          (send (field bank) deposit (field paycheck))))))
 
 @(the-eval '(require 'a))
@@ -426,7 +426,7 @@ the same @r[rose]?  Answer: always the same, because we use the name
 Let's add a new method for modifying the author after a book is
 written:
 @codeblock{
-(define/public (add-book b)
+(define (add-book b)
   (set-field! books (cons b (field books))))
 }
 
@@ -447,7 +447,7 @@ Now we change our example:
       ;; An Author is (author% String [Listof Book])
       (define-class author%
         (fields name books)
-        (define/public (add-book b)
+        (define (add-book b)
           (set-field! books (cons b (field books)))))
 
       
@@ -500,7 +500,7 @@ As an example, recall our counter world program from @secref{counter}:
     (fields n)
     ...
     ;; on-tick : -> Counter
-    (define/public (on-tick)
+    (define (on-tick)
       (new counter-world% (add1 (field n)))))
   
   (big-bang (new counter-world% 0))
@@ -518,7 +518,7 @@ back-channel.
      (fields n)
      ...
      ;; on-tick : -> Counter
-     (define/public (on-tick)
+     (define (on-tick)
        (begin (set-field! n (add1 (field n)))
               this)))
 

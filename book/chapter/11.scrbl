@@ -80,9 +80,9 @@ following method:
 (racketblock
   ;; to-number : -> Number
   ;; Convert this fraction to a number.
-  (define/public (to-number)
-    (/ (field numerator)
-       (field denominator)))
+  (define (to-number)
+    (/ (this #,(racketidfont ".") numerator)
+       (this #,(racketidfont ".") denominator)))
 )}
 
 This method essentially embodies our interpretation of the
@@ -119,14 +119,14 @@ denominator of the terms:
 @filebox[@r[fraction%]]{
 @#reader scribble/comment-reader
 (racketblock
-  (define/public (simplify)
+  (define (simplify)
     (new fraction%
-         (/ (field numerator) 
-            (gcd (field numerator) 
-                 (field denominator)))
-         (/ (field denominator) 
-            (gcd (field numerator) 
-                 (field denominator)))))
+         (/ (this . numerator) 
+            (gcd (this . numerator) 
+                 (this . denominator)))
+         (/ (this . denominator) 
+            (gcd (this . numerator) 
+                 (this . denominator)))))
 )}
 
 This allows us to structurally compare two fractions that have been
@@ -220,7 +220,7 @@ construct an object that does not have this property.
 Returning to our @racket[simplify] method; we don't really need it any
 longer.  (We could, if need be, re-write the code to take advantage of
 the invariant and give a correct implementation of
-@racket[simplify] as @racket[(define/public (simplify) this)], since
+@racket[simplify] as @racket[(define (simplify) this)], since
 all fractions are already simplified.)  Likewise, we no longer need
 the @racket[fract-constructor] function.
 
@@ -507,18 +507,18 @@ our wish list:
 
 @filebox[@r[leaf%]]{
 @codeblock{
-(define/public (min)
-  (field n))
-(define/public (max)
-  (field n))
+(define (min)
+  (this . n))
+(define (max)
+  (this . n))
 }}
 
 @filebox[@r[node%]]{
 @codeblock{
-(define/public (min)
-  ((field left) . min))
-(define/public (max)
-  ((field right) . max))
+(define (min)
+  (this . left . min))
+(define (max)
+  (this . right . max))
 }}
 
 At this point, our constructor does the right thing when given two
@@ -589,8 +589,8 @@ for the @racket[leaf%] case:
 
 @filebox[@r[leaf%]]{
 @codeblock{
-  (define/public (insert-tree other)
-    (send other insert (field number)))
+  (define (insert-tree other)
+    (send other insert (this . number)))
 }}
 
 In the @racket[node%] case, if we first consider the template (the
@@ -598,9 +598,9 @@ inventory of what we have available to use), we have:
 
 @filebox[@r[node%]]{
 @racketblock[
-  (define/public (insert-tree other)
-    ((field left) #,(racketidfont ".") insert-tree other) ... 
-    ((field right) #,(racketidfont ".") insert-tree other) ...)
+  (define (insert-tree other)
+    (this #,(racketidfont ".") left #,(racketidfont ".") insert-tree other) ... 
+    (this #,(racketidfont ".") right #,(racketidfont ".") insert-tree other) ...)
 ]}
 
 But here we don't really want to insert the left tree into the other
@@ -611,8 +611,8 @@ us to:
 
 @filebox[@r[node%]]{
 @racketblock[
-  (define/public (insert-tree other)
-    ((field left) #,(racketidfont ".") insert-tree ((field right) #,(racketidfont ".") insert-tree other)))
+  (define (insert-tree other)
+    (this #,(racketidfont ".") left #,(racketidfont ".") insert-tree (this #,(racketidfont ".") right #,(racketidfont ".") insert-tree other)))
 ]}
 
 We have only a single item remaining on our wish list---we need to
@@ -628,7 +628,7 @@ existing number to determine which side the number should go to:
 
 @filebox[@r[leaf%]]{
 @codeblock{
-(define/public (insert m)
+(define (insert m)
   (node% (leaf% (the-real-min n m))
          (leaf% (the-real-max n m))))
 }}
@@ -639,13 +639,13 @@ should be inserted in the left or right:
 
 @filebox[@r[node%]]{
 @racketblock[
-  (define/public (insert n)
-    (cond [(> n ((field left) . max))
-           (node% (field left)
-                  ((field right) #,(racketidfont ".") insert n))]
+  (define (insert n)
+    (cond [(> n (this . left . max))
+           (node% (this . left)
+                  (this #,(racketidfont ".") right #,(racketidfont ".") insert n))]
           [else
-           (node% ((field left) #,(racketidfont ".") insert n)
-                  (field right))]))
+           (node% (this #,(racketidfont ".") left #,(racketidfont ".") insert n)
+                  (this . right))]))
 ]}
 
 @section[#:tag "Exercises (Ch 10.)"]{Exercises}

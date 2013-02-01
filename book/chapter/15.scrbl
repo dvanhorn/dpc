@@ -39,7 +39,7 @@ one identical twin, the other one doesn't get a black eye.
 
   ;; =? : Posn -> Bool
   ;; is the given posn the same as this one?
-  (define/public (=? p)
+  (define (=? p)
     (and (= (field x) (send p x))
          (= (field y) (send p y))))
 
@@ -67,7 +67,7 @@ In @r[mt%]:
 
 @codeblock{
 ;; LoP -> Boolean 
-(define/public (=? lop)
+(define (=? lop)
   (send lop empty?))
 }
 
@@ -83,18 +83,18 @@ So we need to add @r[empty?] to our interface definition.
 
 In @r[mt%]:
 @codeblock{
-(define/public (empty?) true)
+(define (empty?) true)
 }
 
 In @r[cons%]:
 @codeblock{
-(define/public (empty?) false)
+(define (empty?) false)
 }
 
 Now to implement equality for @r[cons%]:
 
 @codeblock{
-(define/public (=? lop)
+(define (=? lop)
   (and (not (send lop empty?)
             (send (field first) =? (send lop first))
             (send (field rest) =? (send lop rest)))))
@@ -119,9 +119,9 @@ the list.
   (fields ls)
   (constructor (x y)
                (fields (list x y)))
-  (define/public (x) (first (field ls)))
-  (define/public (y) (second (field ls)))
-  (define/public (=? p)
+  (define (x) (first (field ls)))
+  (define (y) (second (field ls)))
+  (define (=? p)
     (and (= (x) (send p x))
          (= (y) (send p y)))))
 }
@@ -150,15 +150,15 @@ What about multiple representations for lists of posns?
  (constructor (x0 y0)
    (fields (list x0 y0)))
 
- (define/public (x)
+ (define (x)
    (first (field ls)))
 
- (define/public (y)
+ (define (y)
    (second (field ls)))
 
  (check-expect (send (posn2% 3 4) =? (posn2% 3 4)) true)
  (check-expect (send (posn2% 3 4) =? (posn2% 3 5)) false)
- (define/public (=? p)
+ (define (=? p)
    (and (= (send this x) (send p x))
         (= (send this y) (send p y)))))
 
@@ -177,7 +177,7 @@ What about multiple representations for lists of posns?
  ;; Is the given posn the same as this?
  (check-expect (send (posn% 3 4) =? (posn% 3 4)) true)
  (check-expect (send (posn% 3 4) =? (posn% 3 5)) false)
- (define/public (=? p)
+ (define (=? p)
    (and (equal? (field x) (send p x))
         (equal? (field y) (send p y)))))
 
@@ -198,16 +198,16 @@ What about multiple representations for lists of posns?
 
 (define-class list%
  (fields ls)
- (define/public (empty?)
+ (define (empty?)
    (the-real-empty? (field ls)))
 
- (define/public (first)
+ (define (first)
    (the-real-first (field ls)))
 
- (define/public (rest)
+ (define (rest)
    (list% (the-real-rest (field ls))))
 
- (define/public (=? lop)
+ (define (=? lop)
    (cond [(send this empty?) (send lop empty?)]
          [else
           (and (not (send lop empty?))
@@ -231,21 +231,21 @@ What about multiple representations for lists of posns?
 
  ;; [Listof X] -> Boolean
  ;; Is the given list of posns the same as this?
- (define/public (=? lop)
+ (define (=? lop)
    (send lop empty?))
 
- (define/public (empty?)
+ (define (empty?)
    true))
 
 (define-class cons%
  (fields first rest)
 
- (define/public (=? lop)
+ (define (=? lop)
    (and (not (send lop empty?))
         (send (field first) =? (send lop first))
         (send (field rest) =? (send lop rest))))
 
- (define/public (empty?)
+ (define (empty?)
    false))
 
 (check-expect (send (mt%) =? (mt%)) true)
@@ -315,7 +315,7 @@ Now we need some operation to perform on @r[p1].
 @filebox[@tt{posn%}]{
 @codeblock{
 ;; -> (posn% 'black-eye Number)
-(define/public (punch!)
+(define (punch!)
   (begin
     (set-field! x 'black-eye)
     this))

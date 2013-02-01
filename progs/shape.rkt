@@ -10,10 +10,10 @@
   
   ;; Scene -> Scene
   ;; Draw this shape on the scene.
-  (define/public (draw-on scn)
+  (define (draw-on scn)
     (place-image (send this img)
-                 (field x)
-                 (field y)
+                 (this . x)
+                 (this . y)
                  scn)))
 
 (define-class circ%
@@ -21,13 +21,13 @@
   (fields radius)
   
   ;; -> +Real
-  (define/public (area)
-    (* pi (sqr (field radius))))
+  (define (area)
+    (* pi (sqr (this . radius))))
   
   ;; -> Image
   ;; Render this circle as an image.
-  (define/public (img)
-    (circle (field radius) "solid" "black")))
+  (define (img)
+    (circle (this . radius) "solid" "black")))
 
 (define-class rect%
   (super shape%)
@@ -35,14 +35,14 @@
   
   ;; -> +Real
   ;; Compute the area of this rectangle.
-  (define/public (area)
-    (* (field width)
-       (field height)))
+  (define (area)
+    (* (this . width)
+       (this . height)))
   
   ;; -> Image
   ;; Render this rectangle as an image.
-  (define/public (img)
-    (rectangle (field width) (field height) "solid" "black")))
+  (define (img)
+    (rectangle (this . width) (this . height) "solid" "black")))
 
 
   

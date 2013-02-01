@@ -112,10 +112,10 @@ Overriding in @racket[class/4]:
 ;; move both x and y by the given amount
 (define-class point%
   (fields x y)
-  (define/public (mv dx dy)
-    (point% (+ dx (field x)) 
-            (+ dy (field y))))
-  (define/public (double-move dxy)
+  (define (mv dx dy)
+    (point% (+ dx (send this x)) 
+            (+ dy (send this y))))
+  (define (double-move dxy)
     (mv dxy dxy))
   
   (check-expect (send (point% 1 2) mv 3 3) (point% 4 5))
@@ -125,10 +125,10 @@ Overriding in @racket[class/4]:
 (define-class color-point%
   (super point%)
   (fields color)
-  (define/public (mv dx dy)
-    (color-point% (field color) 
-                  (+ dx (field x))
-                  (+ dy (field y)))))
+  (define (mv dx dy)
+    (color-point% (send this color) 
+                  (+ dx (send this x))
+                  (+ dy (send this y)))))
 
 (check-expect (send (color-point% "red" 1 2) mv 2 2)
               (color-point% "red" 3 4))
@@ -147,17 +147,17 @@ Delegation in @racket[class/4]:
 ;; moves the point by this much in each direction
 (define-class point%
   (fields x y)
-  (define/public (mv dx dy)
-    (point% (+ dx (field x))
-            (+ dy (field y))))
+  (define (mv dx dy)
+    (point% (+ dx (send this x))
+            (+ dy (send this y))))
   (check-expect (send (point% 1 2) mv 3 3) (point% 4 5))
   )
 
 (define-class color-point
   (fields color pt)
-  (define/public (mv dx dy)
-    (color-point% (field color)
-                  (send (field pt) mv dx dy))))
+  (define (mv dx dy)
+    (color-point% (send this color)
+                  (send (send this pt) mv dx dy))))
 }
 
 A default World:
@@ -172,9 +172,9 @@ A default World:
 ;; to-draw : DWorld -> Scene
 ;; ...
 (define-class default-world%
-  (define/public (on-tick)
+  (define (on-tick)
     this)
-  (define/public (to-draw)
+  (define (to-draw)
     (empty-scene 300 300
                  )
     )
@@ -182,7 +182,7 @@ A default World:
 
 (define-class circle-world%
   (super default-world%)
-  (define/public (to-draw)
+  (define (to-draw)
     (overlay (circle 20 "solid" "red")
              (empty-scene 300 300))))
 
