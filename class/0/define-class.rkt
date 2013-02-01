@@ -1,5 +1,4 @@
 #lang racket
-;; TODO after 2012: Kill define/public, define/private.
 ;; TODO after 2012: Kill function application syntax for method calls
 ;; within method definitions and bring back only after inheritance.
 (provide (all-defined-out))
