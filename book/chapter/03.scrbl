@@ -29,13 +29,12 @@ programs.
 Let's take another look at the @tt{Light} data definition we developed
 in @secref{Enumerations}.  We came up with the following data definition:
 
-@#reader scribble/comment-reader
-(racketblock
-  ;; A Light is one of:
-  ;; - (new red%)
-  ;; - (new green%)
-  ;; - (new yellow%)
-)
+@classblock{
+;; A Light is one of:
+;; - (new red%)
+;; - (new green%)
+;; - (new yellow%)
+}
 
 We started with a @racket[next] method that computes the successor for
 each light.  Let's also add a @racket[draw] method and then build a
@@ -99,18 +98,18 @@ We can now create and view lights:
 
 To create an animation we can make the following world:
 
-@#reader scribble/comment-reader
-(racketblock
- (define-class world%
-   (fields light)
-   (define (tick-rate) 5)
-   (define (to-draw)
-     (send (send this light) draw))
-   (define (on-tick)
-     (new world% (send (send this light) next))))
- 
- (require class/universe)
- (big-bang (new world% (new red%))))
+@classblock{
+(define-class world%
+  (fields light)
+  (define (tick-rate) 5)
+  (define (to-draw)
+    (send (send this light) draw))
+  (define (on-tick)
+    (new world% (send (send this light) next))))
+
+(require class/universe)
+(big-bang (new world% (new red%)))
+}
 
 At this point, let's take a step back and ask the question: @emph{what
 is essential to being a light?}  Our data definition gives us one
@@ -140,14 +139,13 @@ Well a light does two things: it can render as an image and it can
 transition to the next light; hence our @emph{interface definition}
 for a light is:
 
-@#reader scribble/comment-reader
-(racketblock
- ;; An ILight implements
- ;; next : -> ILight
- ;; Next light after this light.
- ;; draw : -> Image
- ;; Draw this light.
-)
+@classblock{
+;; An ILight implements
+;; next : -> ILight
+;; Next light after this light.
+;; draw : -> Image
+;; Draw this light.
+}
 
 Now it's clear that every @tt{Light} is an @tt{ILight} because every
 @tt{Light} implements the methods in the @tt{ILight} interface, but we
@@ -155,26 +153,26 @@ can imagine new kinds of implementations of the @tt{ILight} interface
 that are not @tt{Light}s.  For example, here's a class that implements
 the @tt{ILight} interface:
 
-@#reader scribble/comment-reader
-(racketblock
- ;; A ModLight is a (new mod-light% Natural)
- ;; Interp: 0 = green, 1 = yellow, otherwise red.
- (define-class mod-light%
-   (fields n)
-   ;; next : -> ILight
-   ;; Next light after this light.
-   (define (next)
-     (new mod-light% (modulo (add1 (send this n)) 3)))
-   
-   ;; draw : -> Image
-   ;; Draw this light.
-   (define (draw)
-     (cond [(= (send this n) 0)
-            (circle LIGHT-RADIUS "solid" "green")]
-           [(= (send this n) 1)
-            (circle LIGHT-RADIUS "solid" "yellow")]
-           [else
-            (circle LIGHT-RADIUS "solid" "red")]))))
+@classblock{
+;; A ModLight is a (new mod-light% Natural)
+;; Interp: 0 = green, 1 = yellow, otherwise red.
+(define-class mod-light%
+  (fields n)
+  ;; next : -> ILight
+  ;; Next light after this light.
+  (define (next)
+    (new mod-light% (modulo (add1 (send this n)) 3)))
+
+  ;; draw : -> Image
+  ;; Draw this light.
+  (define (draw)
+    (cond [(= (send this n) 0)
+           (circle LIGHT-RADIUS "solid" "green")]
+          [(= (send this n) 1)
+           (circle LIGHT-RADIUS "solid" "yellow")]
+          [else
+           (circle LIGHT-RADIUS "solid" "red")])))
+}
 
 Now clearly a @tt{ModLight} is never a @tt{Light}, but every
 @tt{ModLight} is an @tt{ILight}.  Moreover, any program that is
@@ -185,10 +183,9 @@ world never assumes the light is constructed in a particular way, it
 just calls @racket[next] and @racket[draw].  Which means that if we were
 to start our program off with 
 
-@#reader scribble/comment-reader
-(racketblock
-  (big-bang (new world% (new mod-light% 2)))
-)
+@classblock{
+(big-bang (new world% (new mod-light% 2)))
+}
 
 it would work exactly as before.
 
@@ -239,30 +236,30 @@ developed the @tt{Light} data definition and its functionality along
 the lines of @emph{HtDP}.  We would have (we omit @racket[draw] for
 now):
 
-@#reader scribble/comment-reader
-(racketblock
- ;; A Light is one of:
- ;; - 'Red
- ;; - 'Green
- ;; - 'Yellow
+@classblock{
+;; A Light is one of:
+;; - 'Red
+;; - 'Green
+;; - 'Yellow
 
- ;; next : Light -> Light
- ;; Next light after the given light
- (check-expect (next 'Green) 'Yellow)
- (check-expect (next 'Red) 'Green)
- (check-expect (next 'Yellow) 'Red)
- (define (next l)
-   (cond [(symbol=? 'Red l) 'Green]
-         [(symbol=? 'Green l) 'Yellow]
-         [(symbol=? 'Yellow l) 'Red])))
+;; next : Light -> Light
+;; Next light after the given light
+(check-expect (next 'Green) 'Yellow)
+(check-expect (next 'Red) 'Green)
+(check-expect (next 'Yellow) 'Red)
+(define (next l)
+  (cond [(symbol=? 'Red l) 'Green]
+        [(symbol=? 'Green l) 'Yellow]
+        [(symbol=? 'Yellow l) 'Red]))
+}
 
 Now imagine if we wanted to add a new kind of light---perhaps to
 represent a blinking yellow light.  For such lights, let's assume
 the next light is just a blinking yellow light:
 
-@#reader scribble/comment-reader
-(racketblock
-  (check-expect (next 'BlinkingYellow) 'BlinkingYellow))
+@classblock{
+(check-expect (next 'BlinkingYellow) 'BlinkingYellow)
+}
 
 That's no big deal to implement @emph{if we're allowed to revise
 @racket[next]}---we just add another clause to @racket[next] handle
@@ -287,16 +284,15 @@ method.  Now what's involved if we want to add a variant of lights
 that represents a blinking yellow light?  We just need to write a
 class that implements @racket[next]:
 
-@#reader scribble/comment-reader
-(racketblock
- ;; Interp: blinking yellow light
- (define-class blinking-yellow%
-   ;; next : -> ILight
-   ;; Next light after this blinking yellow light.
-   (check-expect (send (new blinking-yellow%) next)
-                 (new blinking-yellow%))
-   (define (next) this))
-)
+@classblock{
+;; Interp: blinking yellow light
+(define-class blinking-yellow%
+  ;; next : -> ILight
+  ;; Next light after this blinking yellow light.
+  (check-expect (send (new blinking-yellow%) next)
+                (new blinking-yellow%))
+  (define (next) this))
+}
 
 Notice how we didn't need to edit @racket[red%], @racket[yellow%], or
 @racket[green%] at all!  So if those things are set in stone, that's
@@ -307,17 +303,17 @@ blinking lights.  This program is truly extensible.
 
 @section{Sharing Interfaces}
 
-@verbatim{
-A Posn implements
-move-by : Real Real -> Posn
-move-to : Real Real -> Posn
-dist-to : Posn -> Real
+@classblock{
+;; A Posn implements
+;; move-by : Real Real -> Posn
+;; move-to : Real Real -> Posn
+;; dist-to : Posn -> Real
 
-A Segment implements
-draw-on : Scene -> Scene
-move-by : Real Real -> Segment
-move-to : Real Real -> Segment
-dist-to : Posn -> Real
+;; A Segment implements
+;; draw-on : Scene -> Scene
+;; move-by : Real Real -> Segment
+;; move-to : Real Real -> Segment
+;; dist-to : Posn -> Real
 }
 
 Notice that any object that is a @tt{Segment} is also a @tt{Posn}.
