@@ -29,7 +29,7 @@ examine a new example: fractions.
 A fraction can be represented as a compound data that consists of two
 numbers representing the numerator and denominator:
 
-@codeblock{
+@classblock{
   ;; A Fraction is a (new fraction% Integer Integer).
   (define-class fraction%
     (fields numerator denominator))
@@ -38,7 +38,7 @@ numbers representing the numerator and denominator:
 The problem here is that we'd like to consider the
 fractions:
 
-@codeblock{
+@classblock{
   (new fraction% 1 2)
   (new fraction% 2 4)
 }
@@ -76,19 +76,18 @@ Along the lines of the second approach, let's consider adding the
 following method:
 
 @filebox[@r[fraction%]]{
-@#reader scribble/comment-reader
-(racketblock
-  ;; to-number : -> Number
-  ;; Convert this fraction to a number.
-  (define (to-number)
-    (/ (this #,(racketidfont ".") numerator)
-       (this #,(racketidfont ".") denominator)))
-)}
+@classblock{
+;; to-number : -> Number
+;; Convert this fraction to a number.
+(define (to-number)
+  (/ (this . numerator)
+     (this . denominator)))
+}}
 
 This method essentially embodies our interpretation of the
 @racket[fraction%] class of data.  It doesn't help with this issues:
 
-@codeblock{
+@classblock{
   (check-expect (new fraction% 1 2)
                 (new fraction% 2 4))
 }
@@ -96,7 +95,7 @@ This method essentially embodies our interpretation of the
 But of course now we can write our tests to rely on this
 interpretation function:
 
-@codeblock{
+@classblock{
   (check-expect ((new fraction% 1 2) . to-number)
                 ((new fraction% 2 4) . to-number))
 }
@@ -105,36 +104,34 @@ But what if we wanted to go down the second route?  We could define a
 method that computes a fraction in lowest terms:
 
 @filebox[@r[fraction%]]{
-@#reader scribble/comment-reader
-(racketblock
-  ;; simplify : -> Fraction
-  ;; Simplify a fraction to lowest terms.
-  (check-expect ((new fraction% 3 6) . simplify)
-                (new fraction% 1 2))
-)}
+@classblock{
+;; simplify : -> Fraction
+;; Simplify a fraction to lowest terms.
+(check-expect ((new fraction% 3 6) . simplify)
+              (new fraction% 1 2))
+}}
 
 We can use the @racket[gcd] function to compute the greatest common
 denominator of the terms:
 
 @filebox[@r[fraction%]]{
-@#reader scribble/comment-reader
-(racketblock
-  (define (simplify)
-    (new fraction%
-         (/ (this . numerator) 
-            (gcd (this . numerator) 
-                 (this . denominator)))
-         (/ (this . denominator) 
-            (gcd (this . numerator) 
-                 (this . denominator)))))
-)}
+@classblock{
+(define (simplify)
+  (new fraction%
+       (/ (this . numerator) 
+          (gcd (this . numerator) 
+               (this . denominator)))
+       (/ (this . denominator) 
+          (gcd (this . numerator) 
+               (this . denominator)))))
+}}
 
 This allows us to structurally compare two fractions that have been
 simplified to lowest terms:
 
-@codeblock{
-  (check-expect ((new fraction% 3 6) . simplify)
-                ((new fraction% 1 2) . simplify))
+@classblock{
+(check-expect ((new fraction% 3 6) . simplify)
+              ((new fraction% 1 2) . simplify))
 }
 
 But it does not prevent us from constructing fractions that are not in
@@ -144,7 +141,7 @@ simplest form.  One possibility is to define a @emph{constructor
 function} that consumes a numerator and denominator and constructs a
 @racket[fraction%] object in lowest terms:
 
-@codeblock{
+@classblock{
 ;; fract-constructor : Number Number -> Fraction
 ;; construct a fraction in lowest terms.
 (define (fract-constructor n d)
@@ -175,7 +172,7 @@ All @racket[class/1] programs continue to work in @racket[class/2].  The
 main difference is that we now the ability to write @emph{constructors}.
 
 @filebox[@r[fraction%]]{
-@codeblock{
+@classblock{
   (constructor (n d)
     ;;...some expression that uses the fields form to return values
     ;;   for all of the fields...
@@ -187,7 +184,7 @@ and must use the @racket[fields] to initialize each of the fields.
 If you leave off the constructor form, a default constructor is
 generated as:
 
-@codeblock{
+@classblock{
   (constructor (n d)
     (fields n d))
 }
@@ -195,7 +192,7 @@ generated as:
 And in general if you have @tt{n} fields, the defaults constructor
 looks like:
 
-@codeblock{
+@classblock{
   (constructor (field1 field2 ... fieldn)
     (fields field1 field2 ... fieldn))
 }
@@ -204,7 +201,7 @@ But by writing our own constructor, we can insert computation to
 convert arguments in a canonical form.  For our @racket[fraction%]
 class, we can use the following code:
 
-@codeblock{
+@classblock{
   ;; Number Number -> Fraction
   (constructor (n d)
     (fields (/ n (gcd n d))
@@ -225,7 +222,7 @@ all fractions are already simplified.)  Likewise, we no longer need
 the @racket[fract-constructor] function.
 
 Finally, we get to the point we wanted:
-@codeblock{
+@classblock{
   (check-expect (new fraction% 1 2)
                 (new fraction% 2 4))
 }
@@ -295,7 +292,7 @@ Let's see how we can implement a simple form of @emph{integrity checking}
 in a constructor.  We will implement a class to represent dates and 
 raise an error in case of a situation like the above.
 
-@codeblock{
+@classblock{
   ;; A Date is (date% Number Number Number).
   ;; Interp: Year Month Day.
   ;; Year must be positive.
@@ -314,7 +311,7 @@ satisfies the specification we've given in the data definition.
 The simplest way to satisfy the specification is with this constructor:
 
 @filebox[@r[date%]]{
-@codeblock{
+@classblock{
   (constructor (y m d)
     (error "I didn't like this date!"))
 }}
@@ -330,7 +327,7 @@ one that accepts all the things deemed acceptable in our specification
 (this is both "sound" and "complete"):
 
 @filebox[@r[date%]]{
-@codeblock{
+@classblock{
   (constructor (y m d)
     (cond [(<= y 0) (error "year was negative or zero")]
           [(or (> m 12) (< m 1)) (error "month too big or too small")]
@@ -391,7 +388,7 @@ numbers in the right sub-tree.
 
 Here is our data and class definition for ordered binary trees:
 
-@codeblock{
+@classblock{
   ;; A OBT is one of:
   ;; - (node% OBT OBT)
   ;; - (leaf% Number)
@@ -403,21 +400,21 @@ Here is our data and class definition for ordered binary trees:
 
 Some examples:
 
-@codeblock{
+@classblock{
   (leaf% 7)
   (node% (leaf% 1) (leaf% 2))
 }
 
 Now, is this an example?
 
-@codeblock{
+@classblock{
   (node% (leaf% 7) (leaf% 2))
 }
 
 This example points out that we are currently missing the
 specification of our invariant in the data definition:
 
-@codeblock{
+@classblock{
   ;; A OBT is one of:
   ;; - (node% OBT OBT)
   ;; - (leaf% Number)
@@ -457,7 +454,7 @@ But now this assumption is not sufficient to guarantee that the
 default constructor works:
 
 @filebox[@r[node%]]{
-@codeblock{
+@classblock{
   ;; OBT OBT -> OBT
   (constructor (a b)
     (fields a b))
@@ -468,7 +465,7 @@ we know nothing about the relationship @emph{between} the left and
 right sub-tree, which was an important part of the invariant.  Consider
 for example, the @tt{OBT}s:
 
-@codeblock{
+@classblock{
   (node% (leaf% 4) (leaf% 5))
   (node% (leaf% 2) (leaf% 3))
 }
@@ -476,7 +473,7 @@ for example, the @tt{OBT}s:
 Independently considered, these are definitely @tt{OBT}s.  However, if
 we construct a @racket[node%] out of these two trees, we get:
 
-@codeblock{
+@classblock{
   (node% (node% (leaf% 4) (leaf% 5))
          (node% (leaf% 2) (leaf% 3)))
 }
@@ -491,7 +488,7 @@ a determination based on the maximum and minimum numbers in each of
 the given trees, and that suggest the following constructor:
 
 @filebox[@r[node%]]{
-@codeblock{
+@classblock{
   ;; OBT OBT -> OBT
   (constructor (a b)
     (cond [(<= (b . max) (a . min))
@@ -506,7 +503,7 @@ The @racket[max] and @racket[min] methods are easily dismissed from
 our wish list:
 
 @filebox[@r[leaf%]]{
-@codeblock{
+@classblock{
 (define (min)
   (this . n))
 (define (max)
@@ -514,7 +511,7 @@ our wish list:
 }}
 
 @filebox[@r[node%]]{
-@codeblock{
+@classblock{
 (define (min)
   (this . left . min))
 (define (max)
@@ -525,7 +522,7 @@ At this point, our constructor does the right thing when given two
 @tt{OBT}s that do not overlap, as in the example we considered, but a
 troubling pair of examples to ponder over is:
 
-@codeblock{
+@classblock{
   (node% (leaf% 2) (leaf% 4))
   (node% (leaf% 3) (leaf% 5))
 }
@@ -538,7 +535,7 @@ What should we do?  One solution is just to reject this case and raise
 and error:
 
 @filebox[@r[node%]]{
-@codeblock{
+@classblock{
   ;; OBT OBT -> OBT
   (constructor (a b)
     (cond [(<= (b . max) (a . min))
@@ -560,7 +557,7 @@ will succeed in maintaining the invariant properly.
 So if we indulge in some wishful thinking and suppose we have a
 @racket[insert-tree] in our interface:
 
-@codeblock{
+@classblock{
   ;; insert-tree : OBT -> OBT
   ;; Insert all elements of this tree into the given one.
 }
@@ -568,18 +565,17 @@ So if we indulge in some wishful thinking and suppose we have a
 then we can write the constructor as follows:
 
 @filebox[@r[node%]]{
-@#reader scribble/comment-reader
-@racketblock[
-  ;; OBT OBT -> OBT
-  (constructor (a b)
-    (cond [(<= (b . max) (a . min))
-           (fields b a)]
-          [(<= (a . max) (b . min))
-           (fields a b)]
-          [else
-           (local [(define t (a #,(racketidfont ".") insert-tree b))]
-             (fields (t . left) (t . right)))]))
-]}
+@classblock{
+;; OBT OBT -> OBT
+(constructor (a b)
+  (cond [(<= (b . max) (a . min))
+         (fields b a)]
+        [(<= (a . max) (b . min))
+         (fields a b)]
+        [else
+         (local [(define t (a . insert-tree b))]
+           (fields (t . left) (t . right)))]))
+}}
 
 That leaves @racket[insert-tree] to be written.  First let's consider
 the case of inserting a @racket[leaf%] into a tree.  If we again rely
@@ -588,20 +584,20 @@ inserts a number into a list, we can easily write @racket[insert-tree]
 for the @racket[leaf%] case:
 
 @filebox[@r[leaf%]]{
-@codeblock{
-  (define (insert-tree other)
-    (send other insert (this . number)))
+@classblock{
+(define (insert-tree other)
+  (send other insert (this . number)))
 }}
 
 In the @racket[node%] case, if we first consider the template (the
 inventory of what we have available to use), we have:
 
 @filebox[@r[node%]]{
-@racketblock[
-  (define (insert-tree other)
-    (this #,(racketidfont ".") left #,(racketidfont ".") insert-tree other) ... 
-    (this #,(racketidfont ".") right #,(racketidfont ".") insert-tree other) ...)
-]}
+@classblock{
+(define (insert-tree other)
+  (this . left . insert-tree other) ... 
+  (this . right . insert-tree other) ...)
+}}
 
 But here we don't really want to insert the left tree into the other
 and the right into the other.  We want to insert the right tree into
@@ -610,10 +606,10 @@ permutations of the order of insertions would work, too).  That leads
 us to:
 
 @filebox[@r[node%]]{
-@racketblock[
-  (define (insert-tree other)
-    (this #,(racketidfont ".") left #,(racketidfont ".") insert-tree (this #,(racketidfont ".") right #,(racketidfont ".") insert-tree other)))
-]}
+@classblock{
+(define (insert-tree other)
+  (this . left . insert-tree (this . right . insert-tree other)))
+}}
 
 We have only a single item remaining on our wish list---we need to
 implement the @racket[insert] method for inserting a single number
@@ -627,7 +623,7 @@ existing number to determine which side the number should go to:
 
 
 @filebox[@r[leaf%]]{
-@codeblock{
+@classblock{
 (define (insert m)
   (node% (leaf% (the-real-min n m))
          (leaf% (the-real-max n m))))
@@ -638,15 +634,15 @@ against the maximum of the left sub-tree to determine if the number
 should be inserted in the left or right:
 
 @filebox[@r[node%]]{
-@racketblock[
-  (define (insert n)
-    (cond [(> n (this . left . max))
-           (node% (this . left)
-                  (this #,(racketidfont ".") right #,(racketidfont ".") insert n))]
-          [else
-           (node% (this #,(racketidfont ".") left #,(racketidfont ".") insert n)
-                  (this . right))]))
-]}
+@classblock{
+(define (insert n)
+  (cond [(> n (this . left . max))
+         (node% (this . left)
+                (this . right . insert n))]
+        [else
+         (node% (this . left . insert n)
+                (this . right))]))
+}}
 
 @section[#:tag "Exercises (Ch 10.)"]{Exercises}
 
@@ -670,7 +666,7 @@ the other hand, if you're the first element of the second list, you
 are the very last person in line.
 
 Here is the interface for queues:
-@codeblock{
+@classblock{
 ;; A [IQ X] implements:
 
 ;; head : -> X

@@ -60,7 +60,7 @@ calling the method, thus the template for a @racket[posn%] method is:
 @classblock{
 ;; posn%-method : Z ... -> ???
 (define (posn%-method z ...)
-  ... (send this x) (send this y) z ...)
+  (... (send this x) (send this y) z ...))
 }
 
 Here we see that our template lists the available parts of the
@@ -117,34 +117,34 @@ light can be in.  Each of the three classes will have their own
 implementation of the @racket[next] method, producing the appropriate
 @tt{Light}.
 
-@#reader scribble/comment-reader
-(racketmod
-  class/0
-  ;; A Light is one of:
-  ;; - (new red%)
-  ;; - (new green%)
-  ;; - (new yellow%)
+@codeblock{
+#lang class/0
+;; A Light is one of:
+;; - (new red%)
+;; - (new green%)
+;; - (new yellow%)
 
-  (define-class red%
-    ;; next : -> Light
-    ;; Next light after red
-    (check-expect (send (new red%) next) (new green%))
-    (define (next)
-      (new green%)))
+(define-class red%
+  ;; next : -> Light
+  ;; Next light after red
+  (check-expect (send (new red%) next) (new green%))
+  (define (next)
+    (new green%)))
 
-  (define-class green%
-    ;; next : -> Light
-    ;; Next light after green
-    (check-expect (send (new green%) next) (new yellow%))
-    (define (next)
-      (new yellow%)))
+(define-class green%
+  ;; next : -> Light
+  ;; Next light after green
+  (check-expect (send (new green%) next) (new yellow%))
+  (define (next)
+    (new yellow%)))
 
-  (define-class yellow%
-    ;; next : -> Light
-    ;; Next light after yellow
-    (check-expect (send (new yellow%) next) (new red%))
-    (define (next)
-      (new red%))))
+(define-class yellow%
+  ;; next : -> Light
+  ;; Next light after yellow
+  (check-expect (send (new yellow%) next) (new red%))
+  (define (next)
+    (new red%)))
+}
 
 If you have a @tt{Light}, @racket[L], how do you get the next light?
 
@@ -176,9 +176,8 @@ infinite families of data.  One example is @emph{binary trees}, which can contai
 
 How would we represent this with classes and objects?
 
-@#reader scribble/comment-reader
-(racketmod
-class/0
+@codeblock{
+#lang class/0
 ;;   +- - - - - - - - - - - - - - +
 ;;   | +- - - - - - - - - - - - + |
 ;;   V V                        | |
@@ -202,7 +201,7 @@ class/0
 (define ex3 (new node% 8
                  (new leaf% 2)
                  (new leaf% 1)))
-)
+}
 
 We then want to design a method @racket[count] which produces the
 number of numbers stored in a @tt{BT}.  
@@ -220,14 +219,13 @@ templates for methods of our two classes.
 
 The template for @racket[leaf%]:
 
-@#reader scribble/comment-reader
-(filebox 
+@filebox[
  (racket leaf%)
- (racketblock
+ @classblock{
   ;; count : -> Number
   ;; count the number of numbers in this leaf
   (define (count)
-    ... (send this number) ...)))
+    (... (send this number) ...))}]
 
 The template for @racket[node%]:
 
@@ -267,15 +265,15 @@ number and produces two copies of the @tt{BT} with the given number at
 the top.  Here is a straightforward implementation for @racket[leaf%]:
 
 @filebox[
- (racket leaf%)
- @classblock{
-  ;; double : Number -> BT
-  ;; double this leaf and put the number on top
-  (define (double n)
-    (new node%
-         n
-         (new leaf% (send this number))
-         (new leaf% (send this number))))}]
+(racket leaf%)
+@classblock{
+ ;; double : Number -> BT
+ ;; double this leaf and put the number on top
+ (define (double n)
+   (new node%
+        n
+        (new leaf% (send this number))
+        (new leaf% (send this number))))}]
 
 Note that @racket[(new leaf% (send this number))] is just constructing a
 new @racket[leaf%] object just like the one we started with.
@@ -304,9 +302,8 @@ this in a subsequent class.}
     (new node% n this this))}]
 
 The full @tt{BT} code is now:
-@#reader scribble/comment-reader
-(racketmod
-class/0
+@codeblock{
+#lang class/0
 ;;   +- - - - - - - - - - - - - - +
 ;;   | +- - - - - - - - - - - - + |
 ;;   V V                        | |
@@ -358,7 +355,8 @@ class/0
 (check-expect (send ex1 double 5)
               (new node% 5 ex1 ex1))
 (check-expect (send ex3 double 0)
-              (new node% 0 ex3 ex3)))
+              (new node% 0 ex3 ex3))
+}
 
 @include-section{02/more-rocket.scrbl}
 @include-section{02/exercises.scrbl}

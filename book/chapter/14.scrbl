@@ -20,7 +20,7 @@
 
 We want to design a class, @r[counter%], with the following interface
 
-@codeblock{
+@classblock{
 ;; m : -> Number
 ;; Produce the number of times `m' has been called
 }
@@ -37,18 +37,18 @@ Now let's try to implement this class.
 Unfortunately, it's not immediately clear what to put in the body of
 @r[m]. We can understand our task better by writing examples.  
 
-@racketblock[
- (check-expect ((counter% 0) #,(racketidfont ".") m) 1)
- (check-expect ((counter% 4) #,(racketidfont ".") m) 5)
-]
+@classblock{
+(check-expect ((counter% 0) . m) 1)
+(check-expect ((counter% 4) . m) 5)
+}
 
 This suggests the following implementation:
 
 @filebox[@r[counter%]]{
-@racketblock[
- (define (m)
-   (add1 (send this called)))
-]}
+@classblock{
+(define (m)
+  (add1 (this . called)))
+}}
 
 Now our all of our tests pass.
 
@@ -224,15 +224,14 @@ Now we write effect statements.  Have to write them for every
 method/function that has an effect.
 
 @filebox[@r[counter%]]{
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 ;; m : -> Number
 ;; Produce the number of times m has been called
 ;; Effect : increment the called field
 (define (m)
   (begin (set-field! called (add1 (send this called)))
          (add1 (send this called))))
-)}
+}}
 
 We've lost a lot of reasoning power but gained expressiveness.
 
@@ -242,14 +241,14 @@ Imagine that you're modeling bank financial systems.  You want to
 deposit money into the account, and then the money should be there
 afterwards.  
 
-@codeblock{
+@classblock{
 ;; An Account is (account% Number)
 (define-class account%
   (fields amt)
   
   ;; Number -> Account
   (define (deposit n)
-    (account% (+ (send this amt) n))))
+    (account% (+ (this . amt) n))))
 }
 
 But this doesn't model bank accounts properly.  
@@ -258,7 +257,7 @@ I deposit, my valentine deposits, I deposit -- whoops!
 
 New version:
 
-@codeblock{
+@classblock{
 ;; An Account is (account% Number)
 (define-class account%
   (fields amt)
@@ -267,12 +266,12 @@ New version:
   ;; Effect: increases the field amt by n
   ;; Purpose: add money to this account
   (define (deposit n)
-    (set-field! amt (+ (send this amt) n))))
+    (set-field! amt (+ (this . amt) n))))
 }
 Note that we don't need to produce any result at all.  
 
 
-@codeblock{
+@classblock{
 ;; A Person is (person% String Account Number)
 (define-class person%
   (fields name bank paycheck)
@@ -280,7 +279,7 @@ Note that we don't need to produce any result at all.
   ;; Deposit the appropriate amount
   ;; Effect: changes the the bank account amt
   (define (pay)
-    (send (send this bank) deposit (send this paycheck))))
+    (this . bank . deposit (this . paycheck))))
 }
 
 @(the-eval
@@ -425,16 +424,16 @@ the same @r[rose]?  Answer: always the same, because we use the name
 
 Let's add a new method for modifying the author after a book is
 written:
-@codeblock{
+@classblock{
 (define (add-book b)
-  (set-field! books (cons b (send this books))))
+  (set-field! books (cons b (this . books))))
 }
 
 Now we change our example:
-@codeblock{
+@classblock{
 (define rose  (author% "Rose" empty))
 (define reign (book% "Reign of Roquet" rose))
-(send rose add-book reign)
+(rose . add-book reign)
 }
 
 @(the-eval
@@ -493,37 +492,35 @@ between computations via @emph{shared} mutable data.
 
 As an example, recall our counter world program from @secref{counter}:
 
-@#reader scribble/comment-reader
-(racketblock
-  ;; A Counter is a (counter-world% Natural)
-  (define-class counter-world%
-    (fields n)
-    ...
-    ;; on-tick : -> Counter
-    (define (on-tick)
-      (new counter-world% (add1 (send this n)))))
-  
-  (big-bang (new counter-world% 0))
-)
+@classblock{
+;; A Counter is a (counter-world% Natural)
+(define-class counter-world%
+  (fields n)
+  ...
+  ;; on-tick : -> Counter
+  (define (on-tick)
+    (new counter-world% (add1 (this . n)))))
+
+(big-bang (new counter-world% 0))
+}
 
 To illustrate how mutable data provides alternative channels of
 communication, let's develop a variant of the program that
 communicates the state of the world through an implicit stateful
 back-channel.
 
-@#reader scribble/comment-reader
-(racketblock
-  ;; A Counter is a (counter-world% Natural)
-  (define-class counter-world%
-     (fields n)
-     ...
-     ;; on-tick : -> Counter
-     (define (on-tick)
-       (begin (set-field! n (add1 (send this n)))
-              this)))
+@classblock{
+;; A Counter is a (counter-world% Natural)
+(define-class counter-world%
+   (fields n)
+   ...
+   ;; on-tick : -> Counter
+   (define (on-tick)
+     (begin (set-field! n (add1 (send this n)))
+            this)))
 
-  (big-bang (new counter-world% 0))
-)
+(big-bang (new counter-world% 0))
+}
 
 Notice how the new @r[on-tick] method doesn't produce a new
 @r[counter-world%] object with an incremented counter; instead it
@@ -534,18 +531,16 @@ version, but backchannels open up new forms of interaction (and
 interference) that may not be intended.  For example, can you predict
 what thise program will do?
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 (launch-many-worlds (big-bang (new counter-world% 0))
                     (big-bang (new counter-world% 0)))
-)
+}
 
 How about this (seemingly equivalent) one?
 
-@#reader scribble/comment-reader
-(racketblock
+@classblock{
 (define w (new counter-world% 0))
 (launch-many-worlds (big-bang w)
                     (big-bang w))
-)
+}
 

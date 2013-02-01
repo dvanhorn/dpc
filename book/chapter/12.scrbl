@@ -205,9 +205,8 @@ of the @tt{in-range?%} class:
 
 @tt{generator-bad.rkt}
 
-@#reader scribble/comment-reader
-(racketmod
-class/2
+@codeblock{
+#lang class/2
 (require 2htdp/image class/universe)
 
 ;; A World is (world% Generator Number)
@@ -222,7 +221,7 @@ class/2
   ;; on-key : Key -> World
   (define (on-key k)
     (world% (field generator)
-            ((field generator) #,dot pick))))
+            ((field generator) . pick))))
 
 ;; A Generator is a (generator% [Listof Number])
 ;; and implements
@@ -234,17 +233,16 @@ class/2
     (local [(define x (random 10))]
       (cond [(member x (field bad)) (pick)]
             [else x]))))
-(check-expect (<= 0 ((generator% empty) #,dot pick) 10) true)
-(check-expect (= ((generator% (list 4)) #,dot pick) 4) false)
+(check-expect (<= 0 ((generator% empty) . pick) 10) true)
+(check-expect (= ((generator% (list 4)) . pick) 4) false)
 
 (big-bang (world% (generator% empty) 0))
-)
+}
 
 @tt{generator-register.rkt}
 
-@#reader scribble/comment-reader
-(racketmod
-class/2
+@codeblock{
+#lang class/2
 (require 2htdp/image class/universe)
 
 ;; A World is (world% Generator Number)
@@ -259,11 +257,11 @@ class/2
   ;; on-key : Key -> World
   (define (on-key k)
     (cond [(key=? k "x")
-           (local [(define g ((field generator) #,dot add-bad (field num)))]
-             (world% g (g #,dot pick)))]
+           (local [(define g ((field generator) . add-bad (field num)))]
+             (world% g (g . pick)))]
           [else
            (world% (field generator)
-                   ((field generator) #,dot pick))])))
+                   ((field generator) . pick))])))
 
 ;; A Generator is a (generator% [Listof Number])
 ;; and implements
@@ -279,18 +277,17 @@ class/2
     (local [(define x (random 10))]
       (cond [(member x (field bad)) (pick)]
             [else x]))))
-(check-expect (<= 0 ((generator% empty) #,dot pick) 10) true)
-(check-expect (= ((generator% (list 4)) #,dot pick) 4) false)
-(check-expect (= (((generator% empty) #,dot add-bad 4) #,dot pick) 4) false)
+(check-expect (<= 0 ((generator% empty) . pick) 10) true)
+(check-expect (= ((generator% (list 4)) . pick) 4) false)
+(check-expect (= (((generator% empty) . add-bad 4) . pick) 4) false)
 
 (big-bang (world% (generator% empty) 0))
-)
+}
 
 @tt{generator-initial.rkt}
 
-@#reader scribble/comment-reader
-(racketmod
-class/3
+@codeblock{
+#lang class/3
 (require 2htdp/image class/universe)
 
 ;; A World is (world% Generator Number)
@@ -305,12 +302,12 @@ class/3
   ;; on-key : Key -> World
   (define (on-key k)
     (cond [(key=? "x" k)
-           (begin ((field generator) #,dot tell-bad)
+           (begin ((field generator) . tell-bad)
                   (world% (field generator)
-                          ((field generator) #,dot pick)))]
+                          ((field generator) . pick)))]
           [else
            (world% (field generator)
-                   ((field generator) #,dot pick))])))
+                   ((field generator) . pick))])))
 
 ;; A Generator is a (generator% [Listof Number] Number)
 ;; interp: the list of bad numbers, and the last number picked
@@ -330,27 +327,26 @@ class/3
             [else (begin
                     (set-field! last rnd)
                     rnd)]))))
-(check-expect (<= 0 ((generator% (list 2 4 6) 0) #,dot pick) 100) true)
+(check-expect (<= 0 ((generator% (list 2 4 6) 0) . pick) 100) true)
 
 (big-bang (world% (generator% (list 2 4 6) 0) 0))
 
-(check-expect (member ((generator% (list 2 4 6) 0) #,dot pick)
+(check-expect (member ((generator% (list 2 4 6) 0) . pick)
                       (list 2 4 6))
               false)
 
 (define (tell-bad-prop g)
-  (local [(define picked (g #,dot pick))]
-    (begin (g #,dot tell-bad)
-           (not (= picked (g #,dot pick))))))
+  (local [(define picked (g . pick))]
+    (begin (g . tell-bad)
+           (not (= picked (g . pick))))))
 
 (check-expect (tell-bad-prop (generator% (list 1 2 3) 0)) true)
-)
+}
 
 @tt{generator-mutate.rkt}
 
-@#reader scribble/comment-reader
-(racketmod
-class/3
+@codeblock{
+#lang class/3
 (require 2htdp/image class/universe)
 
 ;; A World is (world% Generator Number)
@@ -366,10 +362,11 @@ class/3
   (define (on-key k)
     (cond [(key=? k "x")
            (world% (field generator)
-                   ((field generator) #,dot pick-bad))]
+                   ((field generator) . pick-bad))]
           [else
            (world% (field generator)
-                   ((field generator) #,dot pick))])))
+                   ((field generator) . pick))])))
+}
 
 ;; A Generator is a (generator% [Listof Number] Number)
 ;; interp: numbers not to pick, last number picked
@@ -389,8 +386,8 @@ class/3
             [else (begin (set-field! last x)
                          x)]))))
 
-(check-expect (<= 0 ((generator% empty 0) #,dot pick) 10) true)
-(check-expect (= ((generator% (list 4) 0) #,dot pick) 4) false)
+(check-expect (<= 0 ((generator% empty 0) . pick) 10) true)
+(check-expect (= ((generator% (list 4) 0) . pick) 4) false)
 
 (big-bang (world% (generator% empty 0) 0))
 )
