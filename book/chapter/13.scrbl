@@ -33,14 +33,14 @@ different syntax and with types.
 
 @subsection{Java Syntax}
 
-@racketblock[
-(code:comment "A C is (C Number String String)")
+@classblock{
+;; A C is (C Number String String)
 (define-class C
   (fields x y z)
-  (code:comment "Number Number -> C")
+  ;; Number Number -> C
   (define (m p q)
     ...))
-]
+}
 
 @verbatim|{
 class C {

@@ -94,7 +94,9 @@ methods.  In the past, we've seen many contracts that refer to data
 defintions.  In this class, we've also seen contracts that refer to interface
 defintions, like so:
 
-@racketblock[(code:comment "[IList Number] -> [IList Number]")]
+@classblock{
+;; [IList Number] -> [IList Number]
+}
 
 When describing the contract of a function or method, it's almost always
 preferable to refer to an interface definition instead of a data defintion that

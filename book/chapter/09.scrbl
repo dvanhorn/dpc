@@ -210,19 +210,19 @@ verify at the Interactions window.
 Using @r[build-sorted], we can develop @r[random-sorted], which
 generates a sorted list of random numbers.:
 
-@racketblock[
-(code:comment "Nat -> Sorted")
+@classblock{
+;; Nat -> Sorted
 (define (random-sorted i)
   (build-sorted i (lambda (_) (random 100))))
-]
+}
 
 Given these building blocks,
 we can write a test that checks our property.  
 
-@racketblock[
+@classblock{
 (check-expect (insert-contains? (random-sorted 30) (random 50))
               true)
-]
+}
 
 Every time we hit the @tt{Run} button, we generate a random sorted
 list of numbers, and check if a particular random integer behaves
@@ -233,20 +233,21 @@ could have just gotten lucky.
 
 
 First, we write a function to perform some action many times:
-@racketblock[
-(code:comment "Nat (Any -> Any) -> 'done")
-(code:comment "run the function f i times")
+@classblock{
+;; Nat (Any -> Any) -> 'done
+;; run the function f i times
 (define (do i f)
   (cond [(zero? i) 'done]
-        [else (f (do (sub1 i) f))]))]
+        [else (f (do (sub1 i) f))]))
+}
 
 Then we can run our test many times:
-@racketblock[
+@classblock{
 (do 1000
     (lambda (_)
       (check-expect (insert-contains? (random-sorted 30) (random 50))
                     true)))
-]
+}
 
 When this says that we've passed 1000 tests, we'll be more sure that
 we've gotten our function right.  
