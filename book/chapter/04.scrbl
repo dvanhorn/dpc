@@ -20,8 +20,8 @@ Course staff solution for regular zombie game:
        (new player%
             (random WIDTH)
             (random HEIGHT))
-       (send this zombies)
-       (send this mouse)))
+       (this . zombies)
+       (this . mouse)))
 }}
 
 This has a significant bug: it always produces a plain
@@ -50,8 +50,8 @@ Lack of abstraction (pair0PQ):
 ;; change the location of this player to the given location
 (define (warp x y)
   (new modulo-player%
-       (send this dest-x)
-       (send this dest-y)
+       (this . dest-x)
+       (this . dest-y)
        x y))
 }}
 
@@ -61,8 +61,8 @@ Lack of abstraction (pair0PQ):
 ;; change the location of this player to the given location
 (define (warp x y)
   (new player%
-       (send this dest-x)
-       (send this dest-y)
+       (this . dest-x)
+       (this . dest-y)
        x y))
 }}
 
@@ -126,7 +126,7 @@ it becomes identical in both classes, avoiding the code duplication.
 #lang class/1
 (define-class s%
   (fields x y)
-  (send this make 0 0))
+  (this . make 0 0))
 
 ;; A Foo is one of:
 ;; - (new c% Number Number)
@@ -142,7 +142,7 @@ it becomes identical in both classes, avoiding the code duplication.
     (new d% x y)))
 
 (new c% 50 100)
-(send (new c% 50 100) origin)
+((new c% 50 100) . origin)
 }
 
 
@@ -201,11 +201,11 @@ first for the recursive union implementation:
     (new empty%))
 
   (define (length)
-    (add1 (send (send this rest) length)))
+    (add1 (this . rest . length)))
 
   (define (foldr c b)
-    (c (send this first)
-       (send (send this rest) foldr c b))))
+    (c (this . first)
+       (this . rest . foldr c b))))
 
 (define-class empty%
     
@@ -229,16 +229,16 @@ And for the wrapper list implementation:
   (fields ls)
     
   (define (cons x)
-    (new wlist% (ls:cons x (send this ls))))
+    (new wlist% (ls:cons x (this . ls))))
     
   (define (empty)
     (new wlist% ls:empty))
 
   (define (length)
-    (ls:length (send this ls)))
+    (ls:length (this . ls)))
 
   (define (foldr c b)
-    (ls:foldr c b (send this ls))))
+    (ls:foldr c b (this . ls))))
 }
 
 None of these look the same, so how can we abstract?  Our abstraction
@@ -248,7 +248,7 @@ for example, the @r[length] method looks like this for @r[wlist%]:
 
 @classblock{
 (define (length)
-  (ls:length (send this ls)))
+  (ls:length (this . ls)))
 }
 
 Like this for @r[empty%]:
@@ -262,7 +262,7 @@ And like this for @r[cons%]:
 
 @classblock{
 (define (length)
-  (add1 (send (send this rest) length)))
+  (add1 (this . rest . length)))
 }
 
 
@@ -278,7 +278,7 @@ just uses @r[foldr] and simple arithmetic.
 
 @classblock{
 (define (length)
-  (send this foldr (λ (a b) (add1 b)) 0))
+  (this . foldr (λ (a b) (add1 b)) 0))
 }
 
 Note that this isn't specific to any one implementation of lists---in
@@ -289,7 +289,7 @@ our common code:
 @classblock{
 (define-class list%
   (define (length)
-    (send this foldr (λ (a b) (add1 b)) 0))
+    (this . foldr (λ (a b) (add1 b)) 0))
   ;; other methods here
   )
 }
@@ -357,13 +357,13 @@ of doing the doubling to it.  Below is an example of this:
   (fields number)
     
   (define (double n)
-    (send tutor double-helper n this)))
+    (tutor . double-helper n this)))
 
 (define-class node%
   (fields number left right)
     
   (define (double n)
-    (send tutor double-helper n this)))
+    (tutor . double-helper n this)))
 }
 
 The @r[helper%] class has just one method, although we could add as many as we
