@@ -6,7 +6,7 @@
           (for-label (only-in test-engine/racket-tests check-expect))
           (for-label class/universe))
 
-@title{Abstraction, Invariants, Testing}
+@title{Invariants, Testing, and Abstraction Barriers}
 
 @section{Invariants of Data Structures}
 

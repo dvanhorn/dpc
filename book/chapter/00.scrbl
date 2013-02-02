@@ -4,7 +4,7 @@
           scriblib/footnote
           class/utils)
 
-@title[#:style 'unnumbered]{Preface}
+@title[#:style '(grouper unnumbered)]{Preface}
 
 This book is a @bold{draft} textbook to accompany Fundamentals of
 Computer Science II (Honors): Introduction to Class-Based Program
