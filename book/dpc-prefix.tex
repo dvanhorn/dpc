@@ -1,20 +1,22 @@
-\documentclass{article}
+\documentclass{book}
 \usepackage{sectsty}
 \usepackage{fontspec}
 \usepackage{fancyhdr}
 \defaultfontfeatures{Mapping=tex-text}
 
-\let\oldtableofcontents=\tableofcontents
-\renewcommand\tableofcontents{
-\newlength\tmpparskip
-\setlength{\tmpparskip}{\parskip}
-\thispagestyle{empty}
-\setlength{\parskip}{2pt}
-\oldtableofcontents
-\setlength{\parskip}{\tmpparskip}
-}
+%% \let\oldtableofcontents=\tableofcontents
+%% \renewcommand\tableofcontents{
+%% \newlength\tmpparskip
+%% \setlength{\tmpparskip}{\parskip}
+%% \thispagestyle{empty}
+%% \setlength{\parskip}{2pt}
+%% \oldtableofcontents
+%% \setlength{\parskip}{\tmpparskip}
+%% }
 
-\allsectionsfont{\fontspec{Latin Modern Roman Caps}}
+% FIXME
+%\allsectionsfont{\fontspec{Latin Modern Roman Caps}}
+
 %\allsectionsfont{\centering\fontspec{Optima Regular}\mdseries}
 %\setromanfont{Cochin}
 

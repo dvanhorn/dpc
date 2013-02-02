@@ -9,12 +9,13 @@ scrbls := $(wildcard *.scrbl) \
 class:
 	raco setup class
 
-dpc.tex: $(scrbls)
+dpc.tex: $(scrbls) dpc-prefix.tex dpc-style.tex
 	env STUDENTS=1 raco make dpc.scrbl
 	env STUDENTS=1 raco scribble --latex \
 		++xref-in setup/xref load-collections-xref \
 		--prefix dpc-prefix.tex \
-		--style dpc-style.tex dpc.scrbl
+		--style dpc-style.tex \
+		dpc.scrbl
 
 dpc.pdf: dpc.tex
 	xelatex dpc; xelatex dpc

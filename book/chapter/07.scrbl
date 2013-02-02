@@ -127,7 +127,7 @@ without actually writing it twice:
        (send (send this right) count))))
 }
 
-@section{The @racketmodname[class/1] language}
+@section{The @tt{class/1} language}
 
 To accommodate this new feature---@emph{inheritance}---we need to
 adjust our programming language.  We'll now program in

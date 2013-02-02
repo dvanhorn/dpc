@@ -1,4 +1,5 @@
-#lang scribble/manual
+#lang scribble/book
+@(require scribble/manual)
 
 @title[#:tag "book" #:version "" #:style '(toc unnumbered)]{Designing Programs with Class}
 @author{Sam Tobin-Hochstadt and David Van Horn}
