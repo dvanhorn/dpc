@@ -20,7 +20,8 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/04b.scrbl}
 @section[#:style 'grouper]{Schemes of a Larger Design}
 @include-section{chapter/05.scrbl}
-@include-section{chapter/06.scrbl}
+@include-section{chapter/universe.scrbl}
+@include-section{chapter/guess-my-number.scrbl}
 @section[#:style 'grouper]{Abstraction with Objects}
 @include-section{chapter/04.scrbl}
 @include-section{chapter/07.scrbl}
