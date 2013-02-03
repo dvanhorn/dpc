@@ -15,6 +15,7 @@
 (require (prefix-in r: racket))
 
 (define-syntax object% (class-name #'r:object% null null))
+(define-syntax this% (class-name #'r:this% null null))
 
 (define-syntax (super stx) 
   (raise-syntax-error #f "can only be used inside define-class" stx))
