@@ -420,12 +420,13 @@ key is pressed:
 
 The code in both cases is:
 
+@filebox[@elem{@racket[no-guess%] and @racket[inform%]}]{
 @classblock{
 (define (on-key ke)
   (cond [(number? (string->number ke))
          (new continue% ke)]
         [else this]))
-}
+}}
 
 Now try this out:
 
