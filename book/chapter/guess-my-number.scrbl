@@ -13,11 +13,12 @@
 In this chapter, we'll take an in-depth look at small, but interesting
 distributed game: the ``Guess my Number'' game.
 
-@section{One player Guess my Number}
+@section{One Player Guess my Number}
 
 Let's start by considering a slimmed-down version of guess my number
 in which there is just one player, the client, who tries to guess the
 number the server is thinking of.
+
 
 @subsection{The GmN server}
 
@@ -27,9 +28,29 @@ needs to do:
 @item{it should remember what number it is thinking of,}
 @item{and it should respond to guesses made by the player.}]
 
-Thus a natural representation of the server is an object with a single
-field, which will hold the number being thought of, and an
-@racket[on-msg] method that will respond to a guess made by the
+From the server's point of view, the interactions look like the
+following, supposing the server is thinking of @racket[5]:
+
+@verbatim{
+ Client               Server
+--------             ---------
+                      Message
+          =========>
+          --------->
+          <--------- "too small"
+          ---------> 9
+          <--------- "too big"
+          ---------> 6
+          <--------- "too big"
+          ---------> 5
+          <--------- "just right"
+}
+
+In order to respond with ``too big'', ``too small'', or ``just
+right'', the state of the server will need to include the number that
+the server has in mind.  Thus a natural representation of the state of
+the server is an object with a single field that contains the number,
+and an @racket[on-msg] method that will respond to a guess made by the
 player:
 
 @classblock{
@@ -106,6 +127,24 @@ So we arrive at the interface definitions:
 ;; - on-key : SExp -> Client
 }
 
+So from the client's perspective, interactions with the server will
+look like the following:
+
+@verbatim{
+    Client                      Server
+------------------             ---------
+Event    State
+Bang     Accepting  =========>
+Key "3"  Waiting    ---------> 3
+Msg      Accepting  <--------- "too small"
+Key "9"  Waiting    ---------> 9
+Msg      Accepting  <--------- "too big"
+Key "6"  Waiting    ---------> 6
+Msg      Accepting  <--------- "too big"
+Key "5"  Waiting    ---------> 5
+Msg      Accepting  <--------- "just right"
+}
+
 On further reflection, you should discover that there are in fact two
 different kinds of @tt{Accepting} states the client could be in: one
 in which no guess has been made---so client is waiting to accept what
@@ -134,6 +173,21 @@ different behaviour and data:
   (fields n msg)
   (define (to-draw) ...)
   (define (on-key msg) ...))
+}
+
+Here is the interactions diagram, revised slightly to be more precise
+about the state of the client:
+
+@verbatim{
+      Client                             Server
+----------------------------            ---------
+Event    State
+Bang     (new no-guess%)      =========>
+Key "3"  (new waiting% 3)     ---------> 3
+Msg      (new inform% 3 ...)  <--------- "too small"
+Key "9"  (new waiting% 9)     ---------> 9
+Msg      (new inform% 9 ...)  <--------- "too big"
+...
 }
 
 First, let's fix the dimensions of the background image
@@ -260,6 +314,26 @@ Now we can play the game with:
 (launch-many-worlds (big-bang (new no-guess%))
                     (universe (new thinking-of% (random 10))))
 }
+
+@subsection{Many Players, One Number}
+
+Although we've developed this program under the simplifying assumption
+that there's only one client, the server works just as well when there
+are multiple clients.  Under this scenario, all of the clients are
+trying to guess the one number the server is thinking of in parallel.
+For example, try this out:
+
+@classblock{
+(launch-many-worlds (big-bang (new no-guess%))
+                    (big-bang (new no-guess%))
+                    (big-bang (new no-guess%))
+                    (universe (new thinking-of% (random 10))))
+}
+
+It would take more work and a redesign of the server if we wanted to
+have the server think of a number for each of the clients
+independently.  We'll examine such a redesign later in the chapter,
+but first, let's look at how to implement a better client.
 
 @subsection{Guessing Big}
 
