@@ -6,7 +6,7 @@
           (for-label (only-in test-engine/racket-tests check-expect))
           (for-label class/universe))
 
-@title{Invariants, Testing, and Abstraction Barriers}
+@title[#:tag "programinvariants"]{Invariants, Testing, and Abstraction Barriers}
 
 @section{Invariants of Data Structures}
 

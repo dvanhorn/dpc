@@ -31,7 +31,7 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @section[#:style 'grouper]{Invariants}
 @include-section{chapter/09.scrbl}
 @include-section{chapter/11.scrbl}
-@section[#:style 'grouper]{Java}
+@section[#:tag "Part_Java" #:style 'grouper]{Java}
 @include-section{chapter/13.scrbl}
 @section[#:style 'grouper]{Equality}
 @include-section{chapter/14.scrbl}
@@ -39,6 +39,6 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/16.scrbl}
 @section[#:style 'grouper]{A Class of Your Own}
 @include-section{chapter/17.scrbl}
-@section[#:style 'grouper]{Solutions}
+@section[#:tag "Part_Solutions" #:style 'grouper]{Solutions}
 @include-section{solutions.scrbl}
 @index-section[]
