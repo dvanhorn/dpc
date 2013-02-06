@@ -29,8 +29,8 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/10.scrbl}
 @include-section{chapter/12.scrbl}
 @section[#:style 'grouper]{Invariants}
-@include-section{chapter/09.scrbl}
-@include-section{chapter/11.scrbl}
+@include-section{chapter/invariants.scrbl}
+@include-section{chapter/constructors.scrbl}
 @section[#:tag "Part_Java" #:style 'grouper]{Java}
 @include-section{chapter/13.scrbl}
 @section[#:style 'grouper]{Equality}
