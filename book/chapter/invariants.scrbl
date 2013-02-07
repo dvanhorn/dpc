@@ -399,15 +399,16 @@ we're used to, so for example, these tests should all pass if
 So now let's talk about Van Horn's idea.
 
 Van Horn thinks if instead of representing a list as a ``list of
-elements'' you could do better by representing a list as a ``forest
-of trees of elements''.  Moreover, the trees will get bigger and
-bigger as you go deeper into the forest, and the trees will always be
-@emph{full}, meaning if a tree has a left and right subtree, both will
-be the same size and full. (For the moment, don't worry about
-@emph{why} this makes @racket[list-ref] fast---think about that after
-you've implemented Van Horn's idea.)
+elements'' you could do better by representing a list as a ``forest of
+trees of elements''. (A @deftech{forest} is just an arbitrarily long
+sequence of trees.)  Moreover, the trees will get bigger and bigger as
+you go deeper into the forest, and every tree is full. (A
+@deftech{full tree} is a binary in which every node has a left and
+right subtree that are full and of the same.) For the moment, don't
+worry about @emph{why} this makes @racket[list-ref] fast---think about
+that after you've implemented Van Horn's idea.
 
-So here are the key invariants of a @emph{quick list}:
+So here are the key invariants of a @deftech{quick list}:
 
 @itemlist[
   @item{A quick list is a forest of increasingly large full binary trees.}
@@ -512,6 +513,7 @@ bad code, not so much.
 
 This is a nice little exercise in data structure design and
 implementation, and although Van Horn @emph{wishes} this were really
-his idea, he actually got it from reading a book by Chris Okasaki, who
-has designed a bunch of these kinds of data structures.  Go forth, and
-may your @racket[list-ref] never be slow again.
+his idea, he actually got it from reading a book by @index["Okasaki,
+Chris"]{Chris Okasaki}, who has designed a bunch of these kinds of
+data structures.  Go forth, and may your @racket[list-ref] never be
+slow again.

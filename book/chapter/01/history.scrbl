@@ -12,7 +12,7 @@ developed at @as-index{Xerox PARC} by @index["Kay, Alan"]{Alan Kay}
 and others.  Smalltalk and Lisp and their descendants have influenced
 each other ever since.  Object-oriented programming became one of the
 predominant programming styles in the 1990s.  This coincided with the
-rise of @index["graphical user interface" "GUI"]{graphical user
+rise of @index['("graphical user interface" "GUI")]{graphical user
 interfaces (GUIs)}, which objects model well.  The use of object and
 classes to organize interactive, graphical programs continues today
 with libraries such as the @as-index{Cocoa framework} for
