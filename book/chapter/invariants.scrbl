@@ -460,13 +460,13 @@ forest of full binary trees where the first two trees have the same
 height:
 
 @centered{
-@image[#:scale .4]{figures/quick-lists1.pdf}}
+@image[#:scale .4 #:suffixes '(".pdf" ".png")]{figures/quick-lists1}}
 
 To cons on the new element, we make a node that contains the element
 and the first two trees as its left and right subtree:
 
 @centered{
-@image[#:scale .4]{figures/quick-lists2.pdf}}
+@image[#:scale .4 #:suffixes '(".pdf" ".png")]{figures/quick-lists2}}
 
 Notice how this first tree is necessarily full, since the first two
 trees were full and the same height; notice how this new first tree in
@@ -479,13 +479,13 @@ list in this case.}
 strictly increasing:
 
 @centered{
-@image[#:scale .4]{figures/quick-lists3.pdf}}
+@image[#:scale .4 #:suffixes '(".pdf" ".png")]{figures/quick-lists3}}
 
 Therefore, we can just make a new tree with one element and make it
 the first tree in the forest:
 
 @centered{
-@image[#:scale .4]{figures/quick-lists4.pdf}}
+@image[#:scale .4 #:suffixes '(".pdf" ".png")]{figures/quick-lists4}}
 
 Notice how the one element tree is obviously full and that it is no
 larger than the (now) second tree in the forest, so the invariant
@@ -496,7 +496,7 @@ To take the @racket[rest] of a list, there must be at least one tree
 in the forest (since the list is non-empty):
 
 @centered{
-@image[#:scale .4]{figures/quick-lists2.pdf}}
+@image[#:scale .4 #:suffixes '(".pdf" ".png")]{figures/quick-lists2}}
 
 We want to split this tree into its left and right and make these the
 first two trees in the forest.  The element that was on top is dropped
@@ -504,7 +504,7 @@ on the floor and we're left with a representation of the rest of the
 list:
 
 @centered{
-@image[#:scale .4]{figures/quick-lists1.pdf}}
+@image[#:scale .4 #:suffixes '(".pdf" ".png")]{figures/quick-lists1}}
 
 And that's that.  When writing your code you want to make sure the
 invariants are always true.  Good code should make this fact obvious;
