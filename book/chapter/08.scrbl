@@ -161,7 +161,7 @@ than 3 hours?''}
 than 50?''}
 ]
 
-One natural design is to take write a method that encapsulates the
+One natural design is to write a method that encapsulates the
 similarities of @racket[fast] or @racket[old], say @racket[filter],
 and add a parameter that consumes the differences, that is, the
 predicate, represented as a function @tt{[Runner -> Boolean]}.  The
