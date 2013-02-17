@@ -173,7 +173,7 @@ function to the @racket[filter] method, respectively:
 @item{@racket[(λ (r) (> (this #,dot age) 50))]}
 ]
 
-But what if we wanted to reresent these predicates with @emph{objects}?
+But what if we wanted to represent these predicates with @emph{objects}?
 Is such a thing possible?
 
 Since both of these predicates are really asking questions of runners,
