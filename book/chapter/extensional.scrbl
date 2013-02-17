@@ -264,17 +264,17 @@ reasoning, we can define the correct implementation of @racket[=?] for
 
 @classblock{
 (define-class mt%
+  (define (=? that) (that . =-empty? this))
   (define (=-empty? that) true)
-  (define (=-cons? that) false)
-  (define (=? that) (that . =-empty? this)))
+  (define (=-cons? that) false))
 
 (define-class cons%
   (fields first rest)
+  (define (=? that) (that . =-cons? this))
   (define (=-empty? that) false)
   (define (=-cons? that)
     (and (this . first . =? (that . first))
-         (this . rest . =? (that . rest))))
-  (define (=? that) (that . =-cons? this)))
+         (this . rest . =? (that . rest)))))
 }
 
 Notice that this correctly defines equality for lists of positions and
@@ -353,16 +353,16 @@ equality method of @tt{ListPosn} using this approach:
 
 (define-class mt%
   (super alist%)
-  (define (=-empty? that) true)
-  (define (=? that) (that . =-empty? this)))
+  (define (=? that) (that . =-empty? this))
+  (define (=-empty? that) true))
 
 (define-class cons%
   (super alist%)
   (fields first rest)
+  (define (=? that) (that . =-cons? this))
   (define (=-cons? that)
     (and (this . first . =? (that . first))
-         (this . rest . =? (that . rest))))
-  (define (=? that) (that . =-cons? this)))
+         (this . rest . =? (that . rest)))))
 }
 
 Because there are only two variants for a list, the overall size of
