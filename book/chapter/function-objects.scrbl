@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require class/utils
           (for-label (only-in lang/htdp-intermediate-lambda define-struct check-expect ...))
-          (for-label (except-in class/1 define-struct ... length check-expect filter sort))
+          (for-label (except-in class/1 define-struct ... length check-expect filter sort apply first rest))
           (for-label 2htdp/image)
           (for-label class/universe))
 
@@ -854,7 +854,7 @@ object that understands a method called @r[apply].  With that in
 mind, we can define an interface for functions-as-objects:
 
 @classblock{
-;; A [IFun X Y] implements:
+;; A [Fun X Y] implements:
 ;; apply : X -> Y
 ;; Apply this function to the given input.
 }
@@ -866,18 +866,18 @@ has an @r[apply] method that consumes an @tt{X} and produces a
 @itemlist[
 
 @item{Design a class that wraps a real function with contract @tt{(X
--> Y)} to implement @tt{[IFun X Y]}.}
+-> Y)} to implement @tt{[Fun X Y]}.}
 
 @item{Using your wrapper class, construct the objects representing the
   ``add 1'' function and ``sub 1'' function.}
 
 @item{Another useful operation on functions is composition.  Here is
-  the interface for a @r[compose] method that composes two functions
+  the interface for a @r[∘] method that composes two functions
   represented as objects:
 
 @classblock{
-;; [IFun X Y] also implements:
-;; compose : [IFun Y Z] -> [IFun X Z]
+;; [Fun X Y] also implements:
+;; ∘ : [Fun Y Z] -> [Fun X Z]
 ;; Produce a function that applies this function to its input, 
 ;; then applies the given function to that result.
 }
@@ -886,11 +886,11 @@ For example, if @r[addone] and @r[subone] refer to the objects
 you constructed in part 2, the following check should succeed:
 
 @classblock{
-(check-expect ((addone . compose subone) . apply 5) 5)
-(check-expect ((addone . compose addone) . apply 5) 7)
+(check-expect ((addone . ∘ subone) . apply 5) 5)
+(check-expect ((addone . ∘ addone) . apply 5) 7)
 }
 
-Implement the @r[compose] method for your wrapper class.
+Implement the @r[∘] method for your wrapper class.
 }
 ]
 
@@ -900,3 +900,17 @@ Revisit your solution to the @secref{Abstract_Lists} exercise.  Revise
 the interface to replace any uses of function inputs with function
 object inputs and carry out the necessary changes to your design of
 the implementation.
+
+@subsection{Searching JSON with String predicates}
+
+Suppose you have a large library of string predicates, which implement
+the @tt{[Predicate String]} interface.  You can put these predicates
+to use in searching large collections of JSON data (@secref{JSON}). To
+accomodate this, design the following method for JSON objects:
+
+@classblock{
+;; Find the first string in this JSON value satisfying
+;; given predicate, or #f if there's no such string.
+;; find : [Predicate String] -> String or #f
+}
+

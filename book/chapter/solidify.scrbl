@@ -206,26 +206,7 @@ an array of two strings, and the third is a string.
 
 @item{Design a method for counting the number of strings in a JSON,
 Jr. value.}
-
-@item{Suppose you have a large library of string predicates, which
-implement the @tt{StringPred} interface:
-
-@classblock{
-;; A StringPred implements
-;; - apply : String -> Boolean
-}
-
-These objects represent predicates on strings.
-
-Now that your JSON, Jr. library is in place, you can put these
-predicates to use in searching large collections of JSON data. To
-accomodate this, design the following method for JSON, Jr. objects:
-
-@classblock{
-;; Find the first string in this JSON, Jr. value satisfying
-;; given predicate, or #f if there's no such string.
-;; find : StringPred -> String or #f
-}}]
+]
 
 @subsection{JSON}
 
@@ -257,10 +238,6 @@ or @racket[false] if no such value exists.}
 
 @item{A method that restricts an object by subtracting a given
 name/value pair from an object.}
-
-@item{A method for determining if a given JSON value is the same as an
-object.}
-
 ]
 
 Design the following methods for JSON arrays:

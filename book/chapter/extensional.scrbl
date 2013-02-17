@@ -300,3 +300,11 @@ restriction, but only to things that can be compared for equality.
 
 
 
+@section{Exercises}
+
+@subsection{Extensional equality JSON}
+
+Revisit your solution to the JSON representation problem
+(@secref{JSON}) and develop a method for determining if a given JSON
+value is extensionally equal to another.  Note that this method must
+respect the set interpretation of JSON objects.
