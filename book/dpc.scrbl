@@ -17,7 +17,7 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/02.scrbl}
 @include-section{chapter/03.scrbl}
 @include-section{chapter/04a.scrbl}
-@include-section{chapter/04b.scrbl}
+@include-section{chapter/solidify.scrbl}
 @section[#:style 'grouper]{Schemes of a Larger Design}
 @include-section{chapter/05.scrbl}
 @include-section{chapter/universe.scrbl}
