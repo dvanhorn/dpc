@@ -27,16 +27,20 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/07.scrbl}
 @include-section{chapter/08.scrbl}
 @include-section{chapter/10.scrbl}
-@include-section{chapter/12.scrbl}
+@include-section{chapter/15.scrbl}
+@include-section{chapter/visitors.scrbl}
 @section[#:style 'grouper]{Invariants}
 @include-section{chapter/invariants.scrbl}
 @include-section{chapter/constructors.scrbl}
+@section[#:style 'grouper]{Mutation}
+@include-section{chapter/mutate.scrbl}
+@include-section{chapter/circular.scrbl}
+@include-section{chapter/back-channel.scrbl}
+@include-section{chapter/intensional.scrbl}
 @section[#:tag "Part_Java" #:style 'grouper]{Java}
 @include-section{chapter/13.scrbl}
-@section[#:style 'grouper]{Equality}
-@include-section{chapter/14.scrbl}
-@include-section{chapter/15.scrbl}
-@include-section{chapter/16.scrbl}
+@include-section{chapter/java-types.scrbl}
+@include-section{chapter/java-extensional.scrbl}
 @section[#:style 'grouper]{A Class of Your Own}
 @include-section{chapter/17.scrbl}
 @section[#:tag "Part_Solutions" #:style 'grouper]{Solutions}

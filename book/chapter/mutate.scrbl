@@ -16,7 +16,7 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title{Mutation}
+@title{Ch-Ch-Ch-Ch-Changes}
 
 We want to design a class, @r[counter%], with the following interface
 
@@ -146,8 +146,7 @@ But that's a pretty boring method---it's just a wrapper around
 times we've called @r[m], we have to remember it ourselves, and
 provide it as input every time we call @r[m].  
 
-
-@section{Ch-Ch-Ch-Ch-Changes}
+@;SOLN
 
 To truly solve our problem, and implement @r[m], we need new language
 support.  This support is provided in @racketmodname[class/3].
@@ -368,179 +367,4 @@ objects.
 
 Testing is hard with mutation.  Give an example in the notes.  
 
-
-@section{Circular Data}
-
-Books & Authors
-
-Books have:
-title : String
-author : Author
-
-Authors have:
-name : String
-books : [Listof Book]
-
-As data def:
-@codeblock{
-;; A Book is (book% String Author)
-;; An Author is (author% String [Listof Book])
-}
-
-Can we make an @tt{Author}?
-@codeblock{
-(author% "Rose" empty)
-(book% "Reign of Roquet" (author% "Rose" empty))
-}
-
-But this is wrong: the Rose has written a book, but the author object
-doesn't know about it.
-
-Do we need books to know the author? Yes.
-
-We've seen this before with graph structure.  We represented graphs as
-association lists, using symbolic names. 
-@codeblock{
-;; A Book is (book% String Author)
-(define-class book%
-  (fields title author))
-
-;; An Author is (author% String [Listof Book])
-(define-class author%
-  (fields name books))
-
-(define rose  (author% "Rose" empty))
-(define reign (book% "Reign of Roquet" rose))
-}
-But:
-@codeblock{
-reign
-rose
-}
-
-Question: Does @r[reign] contain a copy of @r[rose], or are they all
-the same @r[rose]?  Answer: always the same, because we use the name
-@r[rose], we didn't construct a new one.
-
-Let's add a new method for modifying the author after a book is
-written:
-@classblock{
-(define (add-book b)
-  (set-field! books (cons b (this . books))))
-}
-
-Now we change our example:
-@classblock{
-(define rose  (author% "Rose" empty))
-(define reign (book% "Reign of Roquet" rose))
-(rose . add-book reign)
-}
-
-@(the-eval
-   '(module b class/3
-      (provide book% author% rose reign)
-      ;; A Book is (book% String Author)
-      (define-class book%
-        (fields title author))
-      
-      ;; An Author is (author% String [Listof Book])
-      (define-class author%
-        (fields name books)
-        (define (add-book b)
-          (set-field! books (cons b (send this books)))))
-
-      
-      (define rose  (author% "Rose" empty))
-      (define reign (book% "Reign of Roquet" rose))
-      (send rose add-book reign)))
-
-@(the-eval '(require 'b))
-
-How does it print? 
-
-@interaction[#:eval the-eval
-rose
-reign
-]
-
-See graph-style printing.
-
-But every times we construct a book with an author, we want to use
-@r[add-book].  So, let's use the constructor.  
-
-@codeblock{
-(constructor (t a)
-  (fields t a)
-  (send a add-book this))
-}
-
-In the first expression, we @emph{cannot} use @r[this], and we must produce
-the result using @r[fields].  Later, we can use @r[this], and we get the
-desired result. 
-
-@section{Yet another kind of equality}
-
-Mutation exposes yet another sense in which two things may be consider
-@emph{"the same"}: two things are the same if mutating one mutates the
-other.
-
-@section{Back-channels}
-
-Up until this point, computations communicate by consuming arguments
-and producing values.  Mutation enables more channels of communication
-between computations via @emph{shared} mutable data.
-
-As an example, recall our counter world program from @secref{counter}:
-
-@classblock{
-;; A Counter is a (counter-world% Natural)
-(define-class counter-world%
-  (fields n)
-  ...
-  ;; on-tick : -> Counter
-  (define (on-tick)
-    (new counter-world% (add1 (this . n)))))
-
-(big-bang (new counter-world% 0))
-}
-
-To illustrate how mutable data provides alternative channels of
-communication, let's develop a variant of the program that
-communicates the state of the world through an implicit stateful
-back-channel.
-
-@classblock{
-;; A Counter is a (counter-world% Natural)
-(define-class counter-world%
-   (fields n)
-   ...
-   ;; on-tick : -> Counter
-   (define (on-tick)
-     (begin (set-field! n (add1 (send this n)))
-            this)))
-
-(big-bang (new counter-world% 0))
-}
-
-Notice how the new @r[on-tick] method doesn't produce a new
-@r[counter-world%] object with an incremented counter; instead it
-@emph{mutates} its own counter and returns its (mutilated) self.
-
-You'll find that this program appears to behave just like the old
-version, but backchannels open up new forms of interaction (and
-interference) that may not be intended.  For example, can you predict
-what thise program will do?
-
-@classblock{
-(launch-many-worlds (big-bang (new counter-world% 0))
-                    (big-bang (new counter-world% 0)))
-}
-
-How about this (seemingly equivalent) one?
-
-@classblock{
-(define w (new counter-world% 0))
-(launch-many-worlds (big-bang w)
-                    (big-bang w))
-}
 

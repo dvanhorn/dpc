@@ -16,34 +16,8 @@
     (the-eval '(require (prefix-in r: racket)))
     the-eval))
 
-@title{More about Equality}
+@title{Extensional Equality in Java}
 
-@section[#:tag "lec20-announce"]{Announcements}
-
-@itemlist[
-@item{Exam 2 is in 5 days, 3/22, in Room 110 WVH}
-@item{Next homework is out, due on @emph{Friday 3/25}.}
-]
-
-
-
-@section{Types in Java}
-
-What sorts of things count as @emph{types} in Java? 
-
-@itemlist[
-@item{Class names}
-@item{Interface names}
-@item{Other stuff: @tt{int}, @tt{boolean}, ...}
-]
-
-What should be a part of the contract and purpose in Java? Well, we
-don't need to write down things that are already part of the type.  If
-the contract corresponds to the type, you don't have to repeat it.
-However, some contracts can't be checked by the type system---you
-should still write those down.
-
-@section{Returning to the code from last time}
 
 @verbatim|{
 interface LoP {
