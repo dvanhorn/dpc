@@ -197,7 +197,7 @@ representation where we might say:
 }
 
 we could represent predicates on runners with objects having a single
-@tt{Runner -> Booelean} method.  Since we want a uniform interface for
+@tt{Runner -> Boolean} method.  Since we want a uniform interface for
 predicates, we need to decide on the name of this method:
 @racket[apply].  Thus,
 
