@@ -18,6 +18,85 @@
 
 @title{Extensional Equality in Java}
 
+@section{Posn}
+
+@section{Equality in Java}
+
+@verbatim|{
+
+class Posn {
+   Integer x;
+   Integer y;
+   Posn(Integer x, Integer y) {
+       this.x = x;
+       this.y = y;
+   }
+
+   public Boolean isEqual(Posn p) {
+       return this.x == p.x
+           && this.y == p.y;
+   }
+}
+
+interface LoP {
+   Boolean isEmpty();
+   Posn getFirst();
+   LoP getRest();
+}
+
+class MT implements LoP {
+   MT() {}
+
+   public Posn getFirst() {
+       return null;
+   }
+
+   public LoP getRest() {
+       return ????;
+   }
+
+   public Boolean isEmpty() {
+       return true;
+   }
+
+   public Boolean isEqual(LoP lop) {
+       return lop.isEmpty();
+   }
+}
+
+class Cons implements LoP {
+   Posn first;
+   LoP rest;
+
+   Cons(Posn first, LoP rest) {
+       this.first = first;
+       this.rest = rest;
+   }
+
+   public Boolean isEmpty() {
+       return false;
+   }
+
+   public Boolean isEqual(LoP lop) {
+       return (!lop.isEmpty())
+           && this.first.isEqual(lop.getFirst())
+           && this.rest.isEqual(lop.getRest());
+   }
+
+   public Posn getFirst() {
+       return this.first;
+   }
+
+   public LoP getRest() {
+       return this.rest;
+   }
+
+
+}
+
+}|
+
+@section{List of Posn}
 
 @verbatim|{
 interface LoP {

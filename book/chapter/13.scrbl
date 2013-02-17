@@ -18,10 +18,6 @@
 
 @title{Java}
 
-@section{EWD's rules for science}
-
-Van Horn presented some slides.
-
 @section{Two Ideas: Java and Types}
 
 Types are a @emph{mechanism} for enforcing data definitions and contracts.

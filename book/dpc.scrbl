@@ -23,11 +23,11 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 @include-section{chapter/universe.scrbl}
 @include-section{chapter/guess-my-number.scrbl}
 @section[#:style 'grouper]{Abstraction with Objects}
-@include-section{chapter/04.scrbl}
-@include-section{chapter/07.scrbl}
-@include-section{chapter/08.scrbl}
-@include-section{chapter/10.scrbl}
-@include-section{chapter/15.scrbl}
+@include-section{chapter/delegation.scrbl}
+@include-section{chapter/inheritance.scrbl}
+@include-section{chapter/function-objects.scrbl}
+@include-section{chapter/overriding.scrbl}
+@include-section{chapter/extensional.scrbl}
 @include-section{chapter/visitors.scrbl}
 @section[#:style 'grouper]{Invariants}
 @include-section{chapter/invariants.scrbl}
