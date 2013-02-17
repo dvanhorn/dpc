@@ -159,3 +159,135 @@ than it is to create Boolean values other than @racket[true] and
 future requirements.  If you think it's possible that there might be
 some other kind of zombie down the road, the union design will be less
 painful to extend and maintain.
+
+@section[#:tag "Exercises (Ch. Solidify)"]{Exercises}
+
+@subsection{JSON, Jr.}
+
+JSON (JavaScript Object Notation) is a lightweight data-interchange
+format. It is easy for humans to read and write; it is based on a
+subset of the JavaScript Programming Language.  There are a large
+number of huge corpora of data available on the internets.  In order
+to write programs that can make use of this data, you'll need to
+design a data representation of JSON values.
+
+A JSON value can take on the following forms:@note{This definition
+is drawn directly from @url{http://json.org/}}
+
+@itemlist[
+@item{An @emph{object} is an unordered set of name/value pairs.}
+
+@item{An @emph{array} is an ordered collection of values.}
+
+@item{A @emph{value} can be a string, or a number, or true or false or
+null, or an object or an array. These structures can be nested.}]
+
+This definition is written in the terminology of JSON, so don't
+confuse a JSON object with an object in the @tt{class} language.
+Likewise, don't confuse JSON strings with @tt{class} strings.
+
+To start things off simply, let's focus on a subset of JSON we'll call
+``JSON, Jr.'' which consists solely of strings and arrays.  Using the
+notation of JSON, the following are examples of JSON, Jr. values:
+
+@itemlist[
+@item{@tt{"this is JSON, Jr."}}
+@item{@tt{[ "this is JSON", "Jr." ]}}
+@item{@tt{[ [], [ "So", "is" ], "this" ]}}]
+
+The first example is just a string. The second is an array of two JSON
+elements, which are both strings. The third is another array, but of
+three elements: the first is an array of zero elements, the second is
+an array of two strings, and the third is a string.
+
+@itemlist[#:style 'ordered
+
+@item{Design an object-based data representation for JSON, Jr values.}
+
+@item{Design a method for counting the number of strings in a JSON,
+Jr. value.}
+
+@item{Suppose you have a large library of string predicates, which
+implement the @tt{StringPred} interface:
+
+@classblock{
+;; A StringPred implements
+;; - apply : String -> Boolean
+}
+
+These objects represent predicates on strings.
+
+Now that your JSON, Jr. library is in place, you can put these
+predicates to use in searching large collections of JSON data. To
+accomodate this, design the following method for JSON, Jr. objects:
+
+@classblock{
+;; Find the first string in this JSON, Jr. value satisfying
+;; given predicate, or #f if there's no such string.
+;; find : StringPred -> String or #f
+}}]
+
+@subsection{JSON}
+
+Revise the program you developed in the previous problem to handle all
+of JSON.
+
+Design the following methods for JSON values:
+
+@itemlist[
+@item{A method for counting the number of numbers in a JSON value.}
+
+@item{A method for summing all the numbers in a JSON value.}
+
+@item{A method for finding the length of the longest array in a JSON value.}
+
+@item{A method for computing the nesting depth of a JSON value.}
+]
+
+Design the following methods for JSON objects:
+
+@itemlist[
+@item{A method that works on JSON object values that takes a string
+and produces the JSON value associated with that string in the object,
+or @racket[false] if no such value exists.}
+
+@item{A method that counts the number of name/value pairs in an object.}
+
+@item{A method that extends an object by adding a given name/value pair to an object.}
+
+@item{A method that restricts an object by subtracting a given
+name/value pair from an object.}
+
+@item{A method for determining if a given JSON value is the same as an
+object.}
+
+]
+
+Design the following methods for JSON arrays:
+@itemlist[
+@item{A method of computing the length of the array.}
+@item{A method for indexing the @emph{i}th element of an array.}
+@item{A method for reversing an array.}
+]
+
+Design the following functions for randomly generating JSON values:
+@itemlist[
+
+@item{Given a nesting depth, compute a random JSON value of at most
+that nesting depth.  (It must be the case that if called repeatedly,
+eventual this function will produce a JSON value of @emph{exactly} the
+given nesting depth, but it may not always produce a value nested so
+deep.)}
+
+]
+
+Design an alternative data representation of JSON values that uses a
+subset of S-Expressions to model JSON values, which we'll call JSEN
+(JSON S-Expression Notation).
+
+Design a function for converting from a JSEN representation to the
+object representation of that value.  Design a method for JSON values
+that produces their JSEN representation.
+
+
+
