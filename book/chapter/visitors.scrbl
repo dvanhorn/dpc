@@ -40,7 +40,7 @@ same "view" of the data, everything will continue to work.
 
 So here is our data definition for ranges:
 
-@verbatim|{
+@classblock{
 ; A Range is one of
 ;; - (new lo-range% Number Number)
 ;; Interp: represents the range between `lo' and `hi'
@@ -61,14 +61,14 @@ So here is our data definition for ranges:
 
 (define-class union-range%
   (fields left right))
-}|
+}
 
 We will add a single method to the interface for ranges:
 
-@verbatim|{
+@classblock{
 ;; The IRange interface includes:
 ;; - visit : [IRangeVisitor X] -> X
-}|
+}
 
 We haven't said what is in the @tt{[IRangeVisitor X]} interface, but
 the key idea is that something that implements a @tt{[IRangeVisitor
@@ -86,12 +86,12 @@ result of recursively visiting the data.
 Under that guideline, the @tt{[IRangeVisitor X]} interface will
 contain 3 methods:
 
-@verbatim|{
+@classblock{
 ;; An [IRangeVisitor X] implements:
 ;; lo-range : Number Number -> X
 ;; hi-range : Number Number -> X
 ;; union-range : X X -> X
-}|
+}
 
 Notice that the contracts for lo and hi-range match the contracts on
 the constructors for each variant, but rather than constructing a
@@ -104,26 +104,26 @@ Now we need to implement the @tt{visit} method in each of the
 @tt{Range} classes, which will just invoke the appropriate method of
 the visitor on its data and recur where needed:
 
-@verbatim|{
+@classblock{
 (define-class lo-range%
   (fields lo hi)
  
   (define (visit v)
-    (v . lo-range (field lo) (field hi))))
+    (v . lo-range (this . lo) (this . hi))))
 
 (define-class hi-range%
   (fields lo hi)
 
   (define (visit v)
-    (v . hi-range (field lo) (field hi))))
+    (v . hi-range (this . lo) (this . hi))))
 
 (define-class union-range%
   (fields left right)
 
   (define (visit v)
-    (v . union-range ((field left) . visit v) 
-                     ((field right) . visit v))))
-}|
+    (v . union-range (this . left . visit v) 
+                     (this . right . visit v))))
+}
 
 We've now established the visitor pattern.  Let's actually construct a
 visitor that does something.
@@ -133,32 +133,32 @@ dont' need to edit our class definitions, we can just write a visitor
 that does the @tt{in-range?} computation, which is an implementation
 of @tt{[IRangeVisitor Boolean]}:
 
-@verbatim|{
+@classblock{
 ;; An InRange? is an (in-range?% Number) 
 ;; implements [IRangeVisitor Boolean].
 
 (define-class in-range%?
-  (field n)
+  (fields n)
 
   (define (lo-range lo hi)
-    (and (>= (field n) lo)
-         (<  (field n) hi)))
+    (and (>= (this . n) lo)
+         (<  (this . n) hi)))
 
   (define (hi-range lo hi)
-    (and (>  (field n) lo)
-         (<= (field n) hi)))
+    (and (>  (this . n) lo)
+         (<= (this . n) hi)))
     
   (define (union-range left right)
     (or left right)))
-}|
+}
 
 Now if we have our hands on a range and want to find out if a number
 is in the range, we just invoke the @tt{visit} method with an instance
 of the @tt{in-range?%} class:
 
-@verbatim|{
+@classblock{
 (some-range-value . visit (in-range?% 5))   ;; is 5 in some-range-value ?
-}|
+}
 
 
 
@@ -177,12 +177,12 @@ of the @tt{in-range?%} class:
   ;; to-draw : -> Scene
   (define (to-draw)
     (overlay
-     (text (number->string (field num)) 20 "black")
+     (text (number->string (this . num)) 20 "black")
      (empty-scene 500 500)))
   ;; on-key : Key -> World
   (define (on-key k)
-    (world% (field generator)
-            ((field generator) . pick))))
+    (world% (this . generator)
+            ((this . generator) . pick))))
 
 ;; A Generator is a (generator% [Listof Number])
 ;; and implements
@@ -192,7 +192,7 @@ of the @tt{in-range?%} class:
   (fields bad)
   (define (pick)
     (local [(define x (random 10))]
-      (cond [(member x (field bad)) (pick)]
+      (cond [(member x (this . bad)) (pick)]
             [else x]))))
 (check-expect (<= 0 ((generator% empty) . pick) 10) true)
 (check-expect (= ((generator% (list 4)) . pick) 4) false)
@@ -213,16 +213,16 @@ of the @tt{in-range?%} class:
   ;; to-draw : -> Scene
   (define (to-draw)
     (overlay
-     (text (number->string (field num)) 20 "black")
+     (text (number->string (this . num)) 20 "black")
      (empty-scene 500 500)))
   ;; on-key : Key -> World
   (define (on-key k)
     (cond [(key=? k "x")
-           (local [(define g ((field generator) . add-bad (field num)))]
+           (local [(define g (this . generator . add-bad (this . num)))]
              (world% g (g . pick)))]
           [else
-           (world% (field generator)
-                   ((field generator) . pick))])))
+           (world% (this . generator)
+                   (this . generator . pick))])))
 
 ;; A Generator is a (generator% [Listof Number])
 ;; and implements
@@ -233,10 +233,10 @@ of the @tt{in-range?%} class:
 (define-class generator%
   (fields bad)
   (define (add-bad n)
-    (generator% (cons n (field bad))))
+    (generator% (cons n (this . bad))))
   (define (pick)
     (local [(define x (random 10))]
-      (cond [(member x (field bad)) (pick)]
+      (cond [(member x (this . bad)) (pick)]
             [else x]))))
 (check-expect (<= 0 ((generator% empty) . pick) 10) true)
 (check-expect (= ((generator% (list 4)) . pick) 4) false)
@@ -258,17 +258,17 @@ of the @tt{in-range?%} class:
   ;; to-draw : -> Scene
   (define (to-draw)
     (overlay
-     (text (number->string (field num)) 20 "black")
+     (text (number->string (this . num)) 20 "black")
      (empty-scene 500 500)))
   ;; on-key : Key -> World
   (define (on-key k)
     (cond [(key=? "x" k)
-           (begin ((field generator) . tell-bad)
-                  (world% (field generator)
-                          ((field generator) . pick)))]
+           (begin (this . generator . tell-bad)
+                  (world% (this . generator)
+                          (this . generator . pick)))]
           [else
-           (world% (field generator)
-                   ((field generator) . pick))])))
+           (world% (this . generator)
+                   (this . generator . pick))])))
 
 ;; A Generator is a (generator% [Listof Number] Number)
 ;; interp: the list of bad numbers, and the last number picked
@@ -281,10 +281,10 @@ of the @tt{in-range?%} class:
 (define-class generator%
   (fields bad last)
   (define (tell-bad)
-    (set-field! bad (cons (field last) (field bad))))
+    (set-field! bad (cons (this . last) (this . bad))))
   (define (pick)
     (local [(define rnd (random 10))]
-      (cond [(member rnd (field bad)) (pick)]
+      (cond [(member rnd (this . bad)) (this . pick)]
             [else (begin
                     (set-field! last rnd)
                     rnd)]))))
@@ -317,17 +317,17 @@ of the @tt{in-range?%} class:
   ;; to-draw : -> Scene
   (define (to-draw)
     (overlay
-     (text (number->string (field num)) 20 "black")
+     (text (number->string (this . num)) 20 "black")
      (empty-scene 500 500)))
   ;; on-key : Key -> World
   (define (on-key k)
     (cond [(key=? k "x")
-           (world% (field generator)
-                   ((field generator) . pick-bad))]
+           (world% (this . generator)
+                   (this . generator . pick-bad))]
           [else
-           (world% (field generator)
-                   ((field generator) . pick))])))
-}
+           (world% (this . generator)
+                   (this . generator . pick))])))
+
 
 ;; A Generator is a (generator% [Listof Number] Number)
 ;; interp: numbers not to pick, last number picked
@@ -339,11 +339,11 @@ of the @tt{in-range?%} class:
 (define-class generator%
   (fields bad last)
   (define (pick-bad)
-    (begin (set-field! bad (cons (field last) (field bad)))
+    (begin (set-field! bad (cons (this . last) (this . bad)))
            (pick)))
   (define (pick)
     (local [(define x (random 10))]
-      (cond [(member x (field bad)) (pick)]
+      (cond [(member x (this . bad)) (this . pick)]
             [else (begin (set-field! last x)
                          x)]))))
 
@@ -351,4 +351,4 @@ of the @tt{in-range?%} class:
 (check-expect (= ((generator% (list 4) 0) . pick) 4) false)
 
 (big-bang (world% (generator% empty 0) 0))
-)
+}
