@@ -18,45 +18,6 @@
 
 @title{Visitors}
 
-Here is a high-level outline of what we covered in class today. Below is the
-code we wrote. These notes will be fleshed out soon---we're posting them in this
-unfinished form now so they can help you work on your assignment.
-
-@verbatim|{
-
-  Number generation game
-
-    Want to remember and avoid generating numbers rejected by player
-      Store in generator
-
-    Why does `pick' terminate?
-      You could stay unlucky forever...
-        We'll avoid the delicious subtleties of this issue and move on
-
-    sudo read xkcd
-
-    With mutation
-      Q: Is mutation bad design?
-        Functional design is easier to test
-        But mutation can sometimes simplify our programs
-
-    Testing randomness is hard
-    Testing mutation is hard
-
-    Question Dan's attitude
-    Question Dan's entropy
-
-    Change `tell-bad : Number ->' to `tell-bad : ->'
-
-    Property testing: as the number of inputs goes down, the amount of state
-    stored in the generator goes up, along with the complexity of the test
-
-    How do we apply the number generator game to the homework?
-      Telling the number generator ``bad'' is a simple model of how we could
-      tell our AI player not to repeat the last set of decisions it made.
-
-}|
-
 @section{The Visitor Pattern}
 
 The visitor pattern is a general design pattern that allows you to
