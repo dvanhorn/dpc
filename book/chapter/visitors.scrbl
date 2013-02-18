@@ -557,3 +557,9 @@ Finally, implement the class @racket[list-ref%]:
 
 Could you implement this using the @racket[ListFold] interface?  Which
 was more elegant for @racket[map%] and @racket[filter%]?
+
+@subsection{JSON visitor}
+
+Develop the visitor pattern for JSON values.
+
+Design an equality visitor for JSON values.
