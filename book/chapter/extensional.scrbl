@@ -377,6 +377,142 @@ extensible: to add new variants we have to modify the abstract class
 and the new variant; we don't have to edit the one hundred existing
 implementations.
 
+@section{Equality over interpretation}
+
+It is often the case that two peices of data are considered equal if
+and only if they are structurally equal, i.e. the data is comprised of
+the same thing.  However, that is not the case when there are multiple
+representations of the same information.  For example, consider the
+following data definition for a @deftech{set of numbers}, represented
+as a list of potentially non-unique elements:
+
+@classblock{
+;; A [SetNumber X] is one of:
+;; - (new mt-set%)
+;; - (new cons-set% Number SetNumber)
+;; Interp: as the unordered, unique elements of this list.
+}
+
+So for example, the following two sets represents the same information
+but are structurally different:
+@classblock{
+(new cons-set% 1 (new cons-set% 2 (new mt-set%)))
+(new cons-set% 2 (new cons-set% 1 (new mt-set%)))
+}
+
+So if we had instead used @racket[cons%] and @racket[mt%], the
+@racket[=?] method would produce @racket[false] for these objects.
+
+How can we define an equality method for sets that respects the
+interpretation of sets so that two sets are equal if and only if they
+represent the same information?
+
+Let's start by defining set equality the way a mathematician would,
+which is that two sets are equal if one is a subset of the other and
+@emph{vice versa}.  This definition can be lifted to an abstract class
+for sets:
+
+@classblock{
+(define-class aset%
+  (define (=? that)
+    (and (this . ⊆ that)
+         (that . ⊆ this))))
+}
+
+Now we need to define @racket[⊆]:
+
+@filebox[@racket[mt-set%]]{
+@classblock{
+;; ⊆ : SetNumber -> Boolean
+;; Is this empty set a subset of that?
+;; The empty set is a subset of all sets.
+(define (⊆ that) true)
+}}
+
+@filebox[@racket[cons-set%]]{
+@classblock{
+;; ⊆ : SetNumber -> Boolean
+;; Is this non-empty set a subset of that?
+;; A non-empty set is a subset if that contains the first element
+;; and the rest is a subset of that.
+(define (⊆ that)
+  (and (that . ∋ (this . first))
+       (this . rest . ⊆ that)))
+}}
+
+Finally, all that remains is @racket[∋], pronounced ``contains'':
+
+@filebox[@racket[mt-set%]]{
+@classblock{
+;; ∋ : Number -> Boolean
+;; Does this empty set contain given number?
+(define (∋ n) false)
+}}
+
+@filebox[@racket[cons-set%]]{
+@classblock{
+;; ∋ : Number -> Boolean
+;; Does this non-empty set contain given number?
+(define (∋ n)
+  (or (= n (this . first))
+      (this . rest . ∋ n)))
+}}
+
+@section{Detatching objects from interpretation}
+
+In the previous section, we defined a @racket[=?] method for sets that
+respected the set intpretation of objects.  Since the set and list
+interpretation of equality is different, we needed different classes
+of objects to represent lists and sets.  But fundamentally, we chose
+the same representation (namely lists) and our methods interpreted
+this representation differently.  Is it possible to instead have a
+single representation that could be interpreted both as a list or a
+set?  If we are to accomplish this, it cannot be through the use of
+@racket[=?] method, since there can only be one @racket[=?] method per
+object.  Instead what we would like to do is define, external to the
+list classes, a notion of equivalence:
+
+@classblock{
+;; An [Equiv X] implements
+;; - apply X X -> Boolean
+;;   Are given Xs equal?
+}
+
+Moreover, an @tt{[Equiv X]} needs to be reflexive, transitive, and
+symmetric, i.e. if @racket[≡] is an @tt{[Equiv X]}, it must be the
+case that:
+
+@itemlist[
+
+@item{@code[#:lang "class/1"]{(≡ . apply x x)} is
+@racket[true].}
+
+@item{@code[#:lang "class/1"]{(≡ . apply x y)} and @code[#:lang
+"class/1"]{(≡ . apply y z)} implies @code[#:lang "class/1"]{(≡ . apply
+x z)}}
+
+@item{@code[#:lang "class/1"]{(≡ . apply x y)} implies @code[#:lang "class/1"]{(≡ . apply y x)},}
+]
+
+For example, here is the implementation of the usual equivalence
+relation on numbers:
+
+@classblock{
+;; A (new eqv-number%) implements [Equiv Number].
+(define-class eqv-number%
+  (define (apply n m) (= n m)))
+}
+
+Here is another equivalence relation, but it equates @racket[5] with
+@racket[10]:
+
+@classblock{
+;; A (new eqv-number-mod-5%) implements [Equiv Number].
+(define-class eqv-number-mod-5%
+  (define (apply n m) (= (modulo n 5) (modulo m 5))))
+}
+
+
 
 @section{Multiple Representations}
 
