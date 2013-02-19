@@ -13,9 +13,9 @@ The book is also available in PDF form @link["dpc.pdf"]{here}.
 
 @include-section{chapter/00.scrbl}
 @section[#:style 'grouper]{Basic Design with Objects}
-@include-section{chapter/01.scrbl}
-@include-section{chapter/02.scrbl}
-@include-section{chapter/03.scrbl}
+@include-section{chapter/objects.scrbl}
+@include-section{chapter/data-defns.scrbl}
+@include-section{chapter/interface-defns.scrbl}
 @include-section{chapter/04a.scrbl}
 @include-section{chapter/solidify.scrbl}
 @section[#:style 'grouper]{Schemes of a Larger Design}
