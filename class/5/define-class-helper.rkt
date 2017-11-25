@@ -1,5 +1,5 @@
 #lang racket
-(require syntax/parse (for-template racket/base racket/class) unstable/syntax racket/syntax)
+(require syntax/parse (for-template racket/base racket/class) racket/syntax)
 (provide (all-defined-out))
 
 

@@ -10,7 +10,7 @@
 (require (only-in "../0/define-class.rkt" fields))
 (require racket/stxparam racket/splicing 
          (for-syntax syntax/parse racket/splicing racket/list
-                     unstable/syntax racket/syntax
+                     racket/syntax
                      "define-class-helper.rkt"))
 (require (prefix-in r: racket))
 
