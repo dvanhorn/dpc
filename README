@@ -1,3 +1,9 @@
 A work-in-progress book entitled "Designing Programs with Class", by David Van Horn and Sam Tobin-Hochstadt.
 
 Currently in use for CS 2510H at Northeastern University.
+
+Install the `class` language with:
+
+```
+raco pkg install class/
+```
