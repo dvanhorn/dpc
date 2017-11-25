@@ -8,8 +8,7 @@
                                    check-error check-member-of
                                    check-range)))
 (require (only-in "../0/define-class.rkt" fields))
-(require racket/stxparam racket/splicing 
-         (for-syntax syntax/parse racket/splicing racket/list
+(require (for-syntax syntax/parse racket/list
                      racket/syntax
                      "define-class-helper.rkt")
          "define-class-helper.rkt")
@@ -164,51 +163,51 @@
                             (r:inherit super-methods/inherit) ...
                             (r:override super-methods/over) ...              
                             (r:define/public (fld) field-internals) ...
-                            (splicing-let-syntax
-                             ([set-field!
-                               (λ (stx)
-                                 (syntax-parse stx
-                                   [(_ arg expr)
-                                    (let ([r (memf (λ (id) (eq? (syntax-e id) (syntax-e #'arg)))
-                                                   (syntax->list #'(all-flds ...)))])
-                                      (if r
-                                          (with-syntax ([rs (format-id #'arg "_~a" #'arg)])
-                                            (syntax/loc stx (set! rs expr)))
-                                          (raise-syntax-error #f 
-                                                              "no field by that name" 
-                                                              stx 
-                                                              #'arg)))]))]
-                              [field 
-                               (λ (stx)
-                                 (syntax-parse stx
-                                   [(_ arg) 
-                                    (let ([r (memf (λ (id) (eq? (syntax-e id) (syntax-e #'arg)))
-                                                   (syntax->list #'(all-flds ...)))])
-                                      (if r
-                                          (with-syntax ([rs (format-id #'arg "_~a" #'arg)])
-                                            (syntax/loc stx rs))
-                                          (raise-syntax-error #f 
-                                                              "no field by that name" 
-                                                              stx 
-                                                              #'arg)))]))])
-                             (void)
-                             (over (internal-write p)                                   
-                                   (for ([i (list field-internals ...)])
-                                     (fprintf p " ~v" i))
-                                   #,(if (free-identifier=? #'super% #'top-class)
-                                         #'(void)
-                                         #'(r:super internal-write p)))
-                             (over (custom-write p)
-                                   (fprintf p "(object:~a" (if 'nm 'nm 'class%))
-                                   (internal-write p)
-                                   (fprintf p ")"))
+                            (begin
+                              (define-syntax set-field!
+                                (λ (stx)
+                                  (syntax-parse stx
+                                    [(_ arg expr)
+                                     (let ([r (memf (λ (id) (eq? (syntax-e id) (syntax-e #'arg)))
+                                                    (syntax->list #'(all-flds ...)))])
+                                       (if r
+                                           (with-syntax ([rs (format-id #'arg "_~a" #'arg)])
+                                             (syntax/loc stx (set! rs expr)))
+                                           (raise-syntax-error #f
+                                                               "no field by that name"
+                                                               stx
+                                                               #'arg)))])))
+                              (define-syntax field
+                                (λ (stx)
+                                  (syntax-parse stx
+                                    [(_ arg)
+                                     (let ([r (memf (λ (id) (eq? (syntax-e id) (syntax-e #'arg)))
+                                                    (syntax->list #'(all-flds ...)))])
+                                       (if r
+                                           (with-syntax ([rs (format-id #'arg "_~a" #'arg)])
+                                             (syntax/loc stx rs))
+                                           (raise-syntax-error #f
+                                                               "no field by that name"
+                                                               stx
+                                                               #'arg)))])))
+                              (void)
+                              (over (internal-write p)
+                                    (for ([i (list field-internals ...)])
+                                      (fprintf p " ~v" i))
+                                    #,(if (free-identifier=? #'super% #'top-class)
+                                          #'(void)
+                                          #'(r:super internal-write p)))
+                              (over (custom-write p)
+                                    (fprintf p "(object:~a" (if 'nm 'nm 'class%))
+                                    (internal-write p)
+                                    (fprintf p ")"))
                              
-                             (over (custom-display p) (custom-write p))
+                              (over (custom-display p) (custom-write p))
                              
-                             (public meths/new) ...
-                             <definition>.def
-                             ...
-                             (begin cextra-body ...)))))))]))
+                              (public meths/new) ...
+                              <definition>.def
+                              ...
+                              (begin cextra-body ...)))))))]))
 
 (define-syntax (new stx)
   (syntax-parse stx

@@ -8,8 +8,7 @@
                                    check-error check-member-of
                                    check-range)))
 (require (only-in "../0/define-class.rkt" fields))
-(require racket/stxparam racket/splicing 
-         (for-syntax syntax/parse racket/splicing racket/list
+(require (for-syntax syntax/parse racket/list
                      racket/syntax
                      "define-class-helper.rkt"))
 (require (prefix-in r: racket))
@@ -152,9 +151,9 @@
               #;(r:super-new)
               (r:define/public (fld) the-fld)
               ...
-	      (splicing-let-syntax
-	       ([set-field!
-		 (λ (stx)
+              (begin
+                (define-syntax set-field!
+                  (λ (stx)
                     (syntax-parse stx
                       [(_ arg expr)
                        (let ([r (assf (λ (id) (eq? id (syntax-e #'arg)))
@@ -165,8 +164,8 @@
                              (raise-syntax-error #f 
                                                  "no field by that name" 
                                                  stx 
-                                                 #'arg)))]))]
-                [field 
+                                                 #'arg)))])))
+                (define-syntax field
                   (λ (stx)
                     (syntax-parse stx
                       [(_ arg) 
@@ -177,19 +176,19 @@
                              (raise-syntax-error #f 
                                                  "no field by that name" 
                                                  stx 
-                                                 #'arg)))]))])
-               (void)
-               (over (custom-write p) 
-                (fprintf p "(object:~a" 'class%)
-                (for ([i (list #,@(append (syntax->list #'(the-fld ...))
-                                          (map second (attribute super%.fields))))])
-                  (fprintf p " ~v" i))
-                (fprintf p ")"))
-               (over (custom-display p) (custom-write p))
+                                                 #'arg)))])))
+                (void)
+                (over (custom-write p)
+                      (fprintf p "(object:~a" 'class%)
+                      (for ([i (list #,@(append (syntax->list #'(the-fld ...))
+                                                (map second (attribute super%.fields))))])
+                        (fprintf p " ~v" i))
+                      (fprintf p ")"))
+                (over (custom-display p) (custom-write p))
 	       
-               <definition>.def
-               ...
-               (begin cextra-body ...)))))))]))
+                <definition>.def
+                ...
+                (begin cextra-body ...)))))))]))
 
 (define-syntax (new stx)
   (syntax-parse stx
