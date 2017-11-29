@@ -25,3 +25,15 @@ script:
  - raco setup class
  - cd book; make dpc.html; tar cvfz dpc-www.tgz dpc-www/
  - make dpc.pdf
+
+deploy:
+  provider: releases
+  api_key:
+    secure: L1N6EsOBes50BaIAdhj6fpLd2uLgUHwJQE4t/i6myQN3G+WVO3TpJVpjHQUv1htx9nmjP0tK9HIGzLDnQMN78GMRHOJj24tiEUqvtsDQJln2Hw7dDJtDNPWsVq51xu+rYI7cXwZYjIJV1fcgSoyAjfqstbSKASHl24v9SlArCsI=
+  file:
+    - book/dpc-www.tgz
+    - book/dpc.pdf
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: ci-play
