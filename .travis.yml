@@ -20,5 +20,4 @@ script:
  - raco link class/
  - raco link book/
  - raco setup class
- - cd book/figures; make all
- - cd ..; make dpc.html
+ - cd book; make dpc.html
