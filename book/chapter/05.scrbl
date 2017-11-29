@@ -629,7 +629,10 @@ single language.
 At this point we have a working but incomplete system and we can
 interact with it in the interactions window:
 
-@(the-eval
+<CODE REMOVED DUE TO SEG FAULT>
+
+@void{
+(the-eval
 '(begin
   (require 2htdp/image)
   (require class/universe)
@@ -818,7 +821,7 @@ interact with it in the interactions window:
     (cond [(empty? (rest ls)) empty]
           [else (cons (first ls)
                       (all-but-last (rest ls)))]))
-))
+))}
 
 @examples[#:eval the-eval
   (define w0 (new world% 
