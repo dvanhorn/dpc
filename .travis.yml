@@ -1,0 +1,24 @@
+language: racket
+sudo: required
+dist: trusty
+env:
+  global:
+    - RACKET_DIR=~/racket
+  matrix:
+    - RACKET_VERSION=5.3.5
+
+before_install:
+ - git clone https://github.com/greghendershott/travis-racket.git
+ - cat travis-racket/install-racket.sh | bash
+ - export PATH="${RACKET_DIR}/bin:${PATH}"
+
+install:
+
+before_script:
+
+script:
+ - raco link class/
+ - raco link book/
+ - raco setup class
+ - cd book/figures; make all
+ - cd ..; make dpc.html
