@@ -1,0 +1,39 @@
+language: racket
+sudo: required
+dist: trusty
+env:
+  global:
+    - RACKET_DIR=~/racket
+  matrix:
+    - RACKET_VERSION=5.3.5
+
+before_install:
+ - git clone https://github.com/greghendershott/travis-racket.git
+ - cat travis-racket/install-racket.sh | bash
+ - git clone https://github.com/scottkosty/install-tl-ubuntu.git
+ - sudo ./install-tl-ubuntu/install-tl-ubuntu
+ - source /etc/environment
+ - export PATH="${RACKET_DIR}/bin:${PATH}"
+
+install:
+
+before_script:
+
+script:
+ - raco link class/
+ - raco link book/
+ - raco setup class
+ - cd book; make dpc.html; tar cvfz dpc-www.tgz dpc-www/
+ - make dpc.pdf
+
+deploy:
+  provider: releases
+  api_key:
+    secure: L1N6EsOBes50BaIAdhj6fpLd2uLgUHwJQE4t/i6myQN3G+WVO3TpJVpjHQUv1htx9nmjP0tK9HIGzLDnQMN78GMRHOJj24tiEUqvtsDQJln2Hw7dDJtDNPWsVq51xu+rYI7cXwZYjIJV1fcgSoyAjfqstbSKASHl24v9SlArCsI=
+  file:
+    - dpc-www.tgz
+    - dpc.pdf
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master

@@ -203,4 +203,5 @@ Add accessor methods for extracting the @racket[real] and
   (send (new complex% 3 4) mag)
 )
 
-@include-section[(lib "assignments/assign01-rectangles.scrbl")]
+@; Removed dependencies on web page repository
+@;include-section[(lib "assignments/assign01-rectangles.scrbl")]

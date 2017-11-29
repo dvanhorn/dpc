@@ -118,4 +118,5 @@ mechanisms.  So there are at least two solutions to this problem:
 
 Revise your Zombie! program.
 
-@include-section[(lib "assignments/assign02-space-invaders.scrbl")]
+@; Removed dependencies on web page repository
+@;include-section[(lib "assignments/assign02-space-invaders.scrbl")]
