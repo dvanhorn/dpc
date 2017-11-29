@@ -10,6 +10,9 @@ env:
 before_install:
  - git clone https://github.com/greghendershott/travis-racket.git
  - cat travis-racket/install-racket.sh | bash
+ - git clone https://github.com/scottkosty/install-tl-ubuntu.git
+ - sudo ./install-tl-ubuntu/install-tl-ubuntu
+ - source /etc/environment
  - export PATH="${RACKET_DIR}/bin:${PATH}"
 
 install:
@@ -20,4 +23,5 @@ script:
  - raco link class/
  - raco link book/
  - raco setup class
- - cd book; make dpc.html
+ - cd book; make dpc.html; tar cvfz dpc-www.tgz dpc-www/
+ - make dpc.pdf

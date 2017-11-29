@@ -28,6 +28,8 @@ dpc-2up.pdf: dpc.pdf
 dpc.html: $(scrbls)
 	env STUDENTS=1 $(RACO) scribble --html \
 		++xref-in setup/xref load-collections-xref \
+	        --dest dpc-www/ \
+		--dest-name index \
 		dpc.scrbl
 
 clean:
