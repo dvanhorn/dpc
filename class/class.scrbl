@@ -7,11 +7,11 @@
 @table-of-contents[]
 
 @include-section["0/0.scrbl"]
-@include-section["1/1.scrbl"]
-@include-section["2/2.scrbl"]
-@include-section["3/3.scrbl"]
-@include-section["4/4.scrbl"]
-@include-section["5/5.scrbl"]
+@;include-section["1/1.scrbl"]
+@;include-section["2/2.scrbl"]
+@;include-section["3/3.scrbl"]
+@;include-section["4/4.scrbl"]
+@;include-section["5/5.scrbl"]
 @include-section["universe.scrbl"]
 
 @;{
