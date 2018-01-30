@@ -21,9 +21,7 @@ install:
 before_script:
 
 script:
- - raco link class/
- - raco link book/
- - raco setup class
+ - raco pkg install
 
 deploy:
   provider: releases
